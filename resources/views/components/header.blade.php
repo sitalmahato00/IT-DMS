@@ -11,7 +11,7 @@
                 <div class="bg-gradient-to-br from-red-600 to-red-700 text-white font-bold px-4 py-2 rounded-lg text-lg shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                     <span class="flex items-center gap-2">
                         <i class="bi bi-calendar-check"></i>
-                        {{ $logoText }}
+                        IT Department Management System (IT-DMS)
                     </span>
                 </div>
             </div>
