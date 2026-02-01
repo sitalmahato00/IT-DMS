@@ -10,8 +10,18 @@
             </div>
             <div class="flex items-center gap-3 flex-shrink-0">
                 <div class="relative hidden md:block">
-                    <input type="text" placeholder="Search..." class="px-3 py-2 pl-9 pr-4 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent w-56 bg-gray-50">
+                    <input type="text" placeholder="{{ __('Search') }}" class="px-3 py-2 pl-9 pr-4 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent w-56 bg-gray-50">
                     <i class="bi bi-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                </div>
+
+                <!-- Language switcher -->
+                <div class="hidden md:block">
+                    <label for="locale-select" class="sr-only">{{ __('Language') }}</label>
+                    <select id="locale-select" class="px-2 py-1 border rounded text-sm bg-white cursor-pointer">
+                        @foreach (config('locales.supported') as $code => $label)
+                            <option value="{{ $code }}" {{ app()->getLocale() === $code ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <button class="relative p-2 hover:bg-gray-100 rounded-lg transition">
@@ -35,14 +45,14 @@
                         </div>
                         <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                             <i class="bi bi-person text-gray-400"></i>
-                            Profile Settings
+                            {{ __('Profile') }}
                         </a>
                         <hr class="my-1 border-gray-100">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left">
                                 <i class="bi bi-box-arrow-right text-gray-400"></i>
-                                Logout
+                                {{ __('Log Out') }}
                             </button>
                         </form>
                     </div>
@@ -51,4 +61,16 @@
         </div>
     </div>
 </header>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const localeSelect = document.getElementById('locale-select');
+        if (localeSelect) {
+            localeSelect.addEventListener('change', function() {
+                const locale = this.value;
+                window.location.href = '{{ route("locale.change", ["locale" => "__LOCALE__"]) }}'.replace('__LOCALE__', locale);
+            });
+        }
+    });
+</script>
 

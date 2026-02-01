@@ -11,6 +11,15 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Language switcher: sets the locale in the session and redirects back
+Route::get('locale/{locale}', function ($locale) {
+    $supported = array_keys(config('locales.supported'));
+    if (in_array($locale, $supported)) {
+        session(['locale' => $locale]);
+    }
+    return back();
+})->name('locale.change');
+
 Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

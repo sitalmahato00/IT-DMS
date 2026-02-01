@@ -1,3 +1,4 @@
+
 @extends('admin.layouts.app')
 
 @section('title', 'Students')
@@ -163,6 +164,7 @@
 				</div>
 				<button type="button" onclick="closeAddStudentModal()" class="text-gray-500 hover:text-gray-900">✕</button>
 			</div>
+
 
 			<div class="p-6">
 				<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

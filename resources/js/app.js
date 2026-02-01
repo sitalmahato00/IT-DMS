@@ -65,4 +65,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Theme toggle removed — no JS behavior attached. If you want a theme toggle later, we can re-add it.
     console.info('[Theme] toggle removed by developer');
+
+    // Locale selector: attach JS handler to navigate to locale route (uses data-base-url)
+    try {
+        const localeSelect = document.getElementById('locale-select');
+        if (localeSelect) {
+            const base = localeSelect.getAttribute('data-base-url') || '/locale';
+            localeSelect.addEventListener('change', function () {
+                if (!this.value) return;
+                const url = base.replace(/\/$/, '') + '/' + encodeURIComponent(this.value);
+                console.log('[Locale] navigating to', url);
+                window.location.href = url;
+            });
+        }
+    } catch (e) {
+        console.warn('Locale select init failed', e);
+    }
 });
