@@ -33,6 +33,7 @@
                                peer-checked:before:shadow-[inset_15px_-4px_0px_15px_#fff000]"
                     ></span>
                 </label>
+                <span id="theme-status" class="ml-2 text-xs text-gray-500 hidden md:inline">—</span>
                 <button class="relative p-2 hover:bg-gray-100 rounded-lg transition">
                     <i class="bi bi-bell text-gray-600 text-lg"></i>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>

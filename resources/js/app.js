@@ -85,6 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update accessibility state if the toggle supports it
         if (togg) togg.setAttribute('aria-checked', theme === 'dark' ? 'true' : 'false');
+
+        // Update visible status indicator if present (for debugging/UX)
+        const statusEl = document.getElementById('theme-status');
+        if (statusEl) statusEl.textContent = theme === 'dark' ? 'Dark' : 'Light';
     }
 
     // Initialize theme from localStorage or prefers-color-scheme. If user sets a preference we respect it; else follow system and listen for changes.
@@ -112,12 +116,35 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Theme toggle not found in DOM');
     }
 
+    // Fallback: force toggle on label click (some CSS may prevent default toggling in certain cases)
+    const labelEl = document.querySelector('label[for="theme-toggle"]');
+    if (labelEl) {
+        labelEl.addEventListener('click', () => {
+            const t = getToggleElement();
+            if (t) {
+                // allow default label behavior to run (toggled) then sync theme
+                setTimeout(() => {
+                    console.log('Label click detected, syncing theme to checkbox:', t.checked);
+                    applyTheme(t.checked ? 'dark' : 'light', true);
+                }, 0);
+            } else {
+                const now = document.documentElement.classList.toggle('dark');
+                try { localStorage.setItem(THEME_KEY, now ? 'dark' : 'light'); } catch(e){}
+                console.log('Label click toggled theme directly to', now ? 'dark' : 'light');
+                const se = document.getElementById('theme-status');
+                if (se) se.textContent = now ? 'Dark' : 'Light';
+            }
+        });
+    }
+
     // Ensure checkbox reflects initial theme on load
     const initCheckbox = () => {
         const cb = getToggleElement();
         if (!cb) return;
         cb.checked = document.documentElement.classList.contains('dark');
         cb.setAttribute('aria-checked', cb.checked ? 'true' : 'false');
+        const se = document.getElementById('theme-status');
+        if (se) se.textContent = cb.checked ? 'Dark' : 'Light';
     };
 
     initCheckbox();
