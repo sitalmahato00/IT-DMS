@@ -1,92 +1,84 @@
-# Notice Portal & Gallery - Implementation Summary
+# Landing Page Notice Portal Connection - Implementation Progress
 
 ## Summary
-Successfully implemented Notice Portal and Photo Gallery sections on the landing page for displaying published notices and gallery images to public visitors.
+Successfully connected the landing page notice portal with the backend.
 
-## Files Created for Notice Portal
+## Changes Made
 
-### 1. Controller: `app/Http/Controllers/NoticePortalController.php`
-- `index()` - Fetches published notices and gallery items for the landing page
-- `fetch()` - AJAX endpoint for filtering notices
+### 1. NoticePortalController (Updated)
+- **File**: `app/Http/Controllers/NoticePortalController.php`
+- **Changes**:
+  - Added `show()` method to fetch individual notices for the public modal
+  - Enhanced the `index()` method to properly pass notices, audience, and counts to the view
+  - Maintained existing `fetch()` method for AJAX filtering
 
-### 2. Component: `resources/views/components/public-notices.blade.php`
-- Responsive notice card grid layout
-- Filter tabs (All Notices, Students, Faculty, Parents)
-- Color-coded indicators (red for important, blue for students, purple for faculty, green for parents)
-- Modal for viewing notice details
-- Load more pagination
-- Attachment indicator and download link
+### 2. Routes (Updated)
+- **File**: `routes/web.php`
+- **Changes**:
+  - Changed `/notices/{id}` route to use `NoticePortalController@show` instead of admin controller
+  - This ensures the public portal uses its own controller for showing individual notices
 
-## Files Created for Gallery
+### 3. Public Notices Component (Updated)
+- **File**: `resources/views/components/public-notices.blade.php`
+- **Changes**:
+  - Added notice counts to filter tabs
+  - Implemented AJAX-based audience filtering (All/Students/Faculty/Parents)
+  - Added loading indicator during AJAX requests
+  - Added `window.publicNoticesData` for modal functionality
+  - Implemented dynamic notice card rendering via JavaScript
+  - Added pagination with AJAX support
+  - Enhanced modal functionality with proper notice data display
+  - Added file attachment display in modal
+  - Added semester and subject information display
 
-### 1. Model: `app/Models/Gallery.php`
-- Gallery item model with title, description, image_path, category, order, is_active
-- Scopes for active, ordered, and category filtering
-- Accessor for image URL
+### 4. Hero Section Component (Updated)
+- **File**: `resources/views/components/hero-section.blade.php`
+- **Changes**:
+  - Added proper `@props()` declaration with default values
+  - Added `notices`, `audience`, and `counts` props
+  - Properly passes notices data to the public-notices component
 
-### 2. Migration: `database/migrations/2026_02_10_create_gallery_table.php`
-- Creates galleries table with id, title, description, image_path, image_name, category, order, is_active, timestamps
+### 5. Welcome View (Verified)
+- **File**: `resources/views/welcome.blade.php`
+- **Status**: Already correctly passing notices, audience, and noticeCounts to hero-section component
 
-### 3. Controller: `app/Http/Controllers/GalleryPortalController.php`
-- `index()` - Fetches gallery items for the public portal
-- `fetch()` - AJAX endpoint for filtering gallery items
+## Features Implemented
 
-### 4. Component: `resources/views/components/gallery-section.blade.php`
-- Responsive photo grid with hover effects
-- Filter tabs (All Photos, Campus, Events, Activities, Students, Faculty, Facilities)
-- Lightbox modal for viewing images
-- Keyboard navigation (arrow keys, escape)
-- Category badge display
+### AJAX Filtering
+- Users can filter notices by audience (All, Students, Faculty, Parents)
+- Filter changes update the grid without page reload
+- Loading indicator shown during AJAX requests
 
-## Files Modified
+### Modal View
+- Clicking "View" opens a detailed modal
+- Modal shows:
+  - Notice title
+  - Importance badge
+  - Course/Subject information
+  - Semester
+  - Audience
+  - Full message content
+  - Published date (BS)
+  - File attachments with download links
+  - Creator information
 
-### 1. Routes: `routes/web.php`
-- Updated root route `/` to use `NoticePortalController@index`
-- Added AJAX route `/notices/fetch` for notice filtering
-- Added AJAX route `/gallery/fetch` for gallery filtering
+### Pagination
+- AJAX-based pagination
+- Previous/Next buttons
+- Direct page number selection
+- Updates without page reload
 
-### 2. Landing Page: `resources/views/welcome.blade.php`
-- Added Notice Portal section between Features Grid and Personas Sections
-- Added Gallery Section between Notice Portal and Personas Sections
+## Testing Instructions
+1. Visit the landing page (`/`)
+2. Notice grid should display published notices
+3. Click on audience filter tabs to filter notices
+4. Click "View" button on any notice card to open the modal
+5. Test pagination by clicking page numbers
+6. Verify file downloads work for notices with attachments
 
-### 3. Translations: `resources/lang/en.json` & `resources/lang/ne.json`
-- Added translations for all Notice Portal UI text
-- Added translations for all Gallery UI text in both English and Nepali
-
-## Features
-
-### Notice Portal
-- Public access to published notices (no authentication required)
-- Filter notices by audience type (All/Students/Faculty/Parents)
-- Important notices highlighted with special styling
-- Attachment download support
-- Modal view for full notice details
-- Pagination with "Load More" button
-- Full English and Nepali language support
-- Responsive design for all devices
-
-### Photo Gallery
-- Responsive grid layout with 4 columns on desktop
-- Filter by category (Campus, Events, Activities, Students, Faculty, Facilities)
-- Hover effects with zoom and overlay
-- Lightbox modal for full-size image viewing
-- Navigation arrows and keyboard controls (← → ESC)
-- Image counter and caption display
-- Smooth animations and transitions
-- Full localization support
-
-## Routes Added
-- `GET /` → `home` - Landing page with notices and gallery
-- `GET /notices/fetch` → `notices.fetch` - AJAX endpoint for filtering notices
-- `GET /gallery/fetch` → `gallery.fetch` - AJAX endpoint for filtering gallery
-
-## To Use the Gallery Feature
-1. Run `php artisan migrate` to create the galleries table
-2. Add gallery images by inserting records into the galleries table
-3. Images should be stored in `storage/app/gallery/` directory
-4. Set `image_path` to the relative path (e.g., `gallery/image.jpg`)
-5. Set `is_active` to `true` to make images visible
-
-## Testing
-Run the application and visit the home page to see both the Notice Portal and Photo Gallery in action.
+## Backend Dependencies
+- `Notice::published()` scope
+- `Notice::forAudience()` scope
+- `Notice::with('creator', 'subject')` eager loading
+- Proper pagination with 6 items per page
 

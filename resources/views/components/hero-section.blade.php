@@ -1,3 +1,15 @@
+@props([
+    'description' => 'A comprehensive academic management solution designed to streamline administrative tasks, improve communication, and enhance the learning experience.',
+    'primaryBtnText' => 'Get Started',
+    'primaryBtnUrl' => '/register',
+    'secondaryBtnText' => 'Learn More',
+    'secondaryBtnUrl' => '#about',
+    'imageSrc' => '/images/hero-image.jpg',
+    'notices' => collect([]),
+    'audience' => 'all',
+    'counts' => []
+])
+
 <div class="min-h-screen bg-gradient-hero relative overflow-hidden">
     <!-- Decorative Elements -->
     <div class="absolute top-0 right-0 w-96 h-96 bg-red-100 rounded-full opacity-20 -mr-40 -mt-40 blur-3xl"></div>
@@ -87,3 +99,13 @@
         </div>
     </section>
 </div>
+
+<!-- Professional Notice Portal Section -->
+<div class="mt-0">
+    <x-public-notices 
+        :notices="$notices" 
+        :audience="$audience" 
+        :counts="$counts" 
+    />
+</div>
+

@@ -104,17 +104,31 @@ class NoticePortalController extends Controller
     }
     
     /**
-     * Get a single notice for the public modal.
+     * Get HTML for notices grid via AJAX.
      */
-    public function show($id)
+    public function fetchHtml(Request $request)
     {
-        $notice = Notice::with('creator', 'subject')->findOrFail($id);
+        $audience = $request->get('audience', 'all');
+        $page = $request->get('page', 1);
         
-        return response()->json([
-            'notice' => $notice,
-            'audience_text' => $notice->audience_text,
-            'formatted_date' => $notice->formatted_date,
-        ]);
+        $query = Notice::published()
+            ->with('creator', 'subject')
+            ->orderBy('is_important', 'desc')
+            ->orderBy('published_at_bs', 'desc')
+            ->orderBy('created_at', 'desc');
+        
+        if ($audience && $audience !== 'all') {
+            if ($audience === 'teacher') {
+                $audience = 'faculty';
+            }
+            $query->where(function($q) use ($audience) {
+                $q->where('audience', $audience)
+                  ->orWhere('audience', 'all');
+            });
+        }
+        
+        $notices = $query->paginate(6, ['*'], 'page', $page);
+        
+        return view('components.public-notices-grid', compact('notices'))->render();
     }
 }
-

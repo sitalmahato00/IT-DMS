@@ -27,22 +27,24 @@
         <!-- Header Navigation -->
         <x-header />
 
-        <!-- Hero Section -->
-        <x-hero-section />
+
+        <!-- Hero Section with Professional Notice Portal -->
+        <x-hero-section
+            :notices="$notices"
+            :audience="$audience"
+            :counts="$noticeCounts ?? []"
+        />
+
 
         <!-- Features Grid Section -->
         <section id="features">
             <x-features-grid />
         </section>
 
-        <!-- Notice Portal Section -->
-        @isset($notices)
-            <x-public-notices :notices="$notices" :audience="$audience ?? 'all'" :counts="$counts ?? []" />
-        @else
-            <section id="notices">
-                <x-public-notices :notices="collect([])" audience="all" :counts="[]" />
-            </section>
-        @endisset
+        <!-- Study Material Section -->
+        <x-study-material />
+
+        <!-- Notice Portal Section removed -->
 
         <!-- Gallery Section -->
         @isset($galleryItems)

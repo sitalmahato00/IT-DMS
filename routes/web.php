@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Schema;
 
 Route::get('/', [NoticePortalController::class, 'index'])->name('home');
 Route::get('/notices/fetch', [NoticePortalController::class, 'fetch'])->name('notices.fetch');
-Route::get('/notices/{id}', [App\Http\Controllers\Admin\NoticeController::class, 'show'])->name('notices.show');
+Route::get('/notices/{id}', [NoticePortalController::class, 'show'])->name('notices.show');
 Route::get('/gallery/fetch', [GalleryPortalController::class, 'fetch'])->name('gallery.fetch');
 
 // Language switcher: sets the locale in the session and redirects back
@@ -112,6 +112,13 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::delete('/gallery/{id}', [App\Http\Controllers\Admin\GalleryController::class, 'destroy'])->name('gallery.destroy');
     Route::post('/gallery/toggle-status', [App\Http\Controllers\Admin\GalleryController::class, 'toggleStatus'])->name('gallery.toggle');
     Route::get('/gallery/categories', [App\Http\Controllers\Admin\GalleryController::class, 'getCategories'])->name('gallery.categories');
+
+
+    // Study Material management
+    Route::get('/study-material', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'index'])->name('study-material');
+    Route::post('/study-material', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'store'])->name('study-material.store');
+    Route::get('/study-material/download/{id}', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'download'])->name('study-material.download');
+    Route::delete('/study-material/{id}', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'destroy'])->name('study-material.destroy');
 
     // Audit logs listing and detail
     Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
