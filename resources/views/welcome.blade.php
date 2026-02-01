@@ -20,6 +20,10 @@
         @endif
     </head>
     <body class="font-sans text-gray-900 antialiased">
+        <!-- Scroll Progress Bar -->
+        <div class="fixed top-0 left-0 w-full h-1 z-50 bg-transparent">
+            <div id="scrollProgressBar" class="h-1 bg-red-600 transition-all duration-200" style="width: 0%"></div>
+        </div>
         <!-- Header Navigation -->
         <x-header />
 
@@ -31,6 +35,24 @@
             <x-features-grid />
         </section>
 
+        <!-- Notice Portal Section -->
+        @isset($notices)
+            <x-public-notices :notices="$notices" :audience="$audience ?? 'all'" :counts="$counts ?? []" />
+        @else
+            <section id="notices">
+                <x-public-notices :notices="collect([])" audience="all" :counts="[]" />
+            </section>
+        @endisset
+
+        <!-- Gallery Section -->
+        @isset($galleryItems)
+            <x-gallery-section :galleryItems="$galleryItems" :category="$galleryCategory ?? 'all'" :counts="$galleryCounts ?? []" />
+        @else
+            <section id="gallery">
+                <x-gallery-section :galleryItems="collect([])" category="all" :counts="[]" />
+            </section>
+        @endisset
+
         <!-- Personas Section -->
         <section id="about">
             <x-personas-section />
@@ -40,6 +62,30 @@
         <section id="contact">
             <x-cta-section />
         </section>
+
+        <!-- Page Loading Progress Bar (top, animated) -->
+        <script>
+            // Scroll Progress Bar
+            window.addEventListener('scroll', function() {
+                const scrollBar = document.getElementById('scrollProgressBar');
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (scrollTop / docHeight) * 100;
+                scrollBar.style.width = scrolled + '%';
+            });
+
+            // Page Loading Progress Bar (optional, for initial load)
+            document.addEventListener('DOMContentLoaded', function() {
+                const scrollBar = document.getElementById('scrollProgressBar');
+                scrollBar.style.width = '0%';
+                setTimeout(() => {
+                    scrollBar.style.width = '100%';
+                    setTimeout(() => {
+                        if (window.scrollY === 0) scrollBar.style.width = '0%';
+                    }, 500);
+                }, 300);
+            });
+        </script>
 
         <!-- Footer -->
         <x-footer />

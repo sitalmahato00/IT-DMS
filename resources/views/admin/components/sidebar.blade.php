@@ -70,10 +70,16 @@
                     <span>Reports</span>
                 </a>
             </li>
-            <li>
+<li>
                 <a href="{{ route('admin.notice-board') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.notice-board') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-megaphone text-xs"></i>
                     <span>Notice Board</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.gallery') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.gallery') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
+                    <i class="bi bi-images text-xs"></i>
+                    <span>Gallery</span>
                 </a>
             </li>
             <li>
