@@ -39,7 +39,7 @@ class PersonasSection extends Component
                 'id' => 1,
                 'title' => 'Teachers',
                 'description' => 'Manage classes, track attendance, grade assignments, and communicate with students and parents efficiently.',
-                'icon' => '👨‍🏫',
+                'icon' => '🧑‍🏫', // improved teacher icon
                 'benefits' => [
                     'Attendance tracking',
                     'Grade management',
@@ -52,7 +52,7 @@ class PersonasSection extends Component
                 'id' => 2,
                 'title' => 'Students',
                 'description' => 'Access course materials, submit assignments, view grades, and stay updated with announcements.',
-                'icon' => '👨‍🎓',
+                'icon' => '🧑‍🎓', // improved student icon
                 'benefits' => [
                     'Access study materials',
                     'Submit assignments',
@@ -65,7 +65,7 @@ class PersonasSection extends Component
                 'id' => 3,
                 'title' => 'Parents',
                 'description' => 'Monitor your child\'s academic progress, attendance, and communicate with teachers.',
-                'icon' => '👨‍👩‍👧',
+                'icon' => '🧑‍🤝‍🧑', // improved parents/family icon
                 'benefits' => [
                     'Monitor progress',
                     'Check attendance',
@@ -78,7 +78,7 @@ class PersonasSection extends Component
                 'id' => 4,
                 'title' => 'Administrators',
                 'description' => 'Manage the entire institution, generate reports, and oversee all academic and administrative operations.',
-                'icon' => '👨‍💼',
+                'icon' => '🧑‍💼', // improved admin icon
                 'benefits' => [
                     'System management',
                     'Generate reports',

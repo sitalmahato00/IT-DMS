@@ -66,10 +66,10 @@
 
     <div class="flex items-center justify-between gap-3 flex-wrap">
         <h1 class="text-2xl font-bold text-gray-900">Study Materials</h1>
-        <button onclick="openAddMaterialModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 font-medium">
+        <a href="#addMaterialModal" onclick="event.preventDefault(); document.getElementById('addMaterialModal').style.display='flex'; document.body.style.overflow='hidden';" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 font-medium" style="text-decoration: none;">
             <i class="bi bi-plus-lg"></i>
             <span>Add Material</span>
-        </button>
+        </a>
     </div>
 
     <!-- Filters -->
@@ -154,9 +154,9 @@
                                 <i class="bi bi-download"></i>Download
                             </a>
                             <span class="mx-1 text-gray-300">|</span>
-                            <button onclick="deleteMaterial({{ $material->id }})" class="text-red-600 hover:text-red-800 transition font-medium inline-flex items-center gap-1">
+                            <a href="#" onclick="event.preventDefault(); document.getElementById('deleteModal').style.display='flex'; document.body.style.overflow='hidden'; document.getElementById('deleteForm').action='/admin/study-material/{{ $material->id }}';" class="text-red-600 hover:text-red-800 transition font-medium inline-flex items-center gap-1">
                                 <i class="bi bi-trash"></i>Delete
-                            </button>
+                            </a>
                         </td>
                     </tr>
                     @empty
@@ -183,44 +183,46 @@
     </div>
 </div>
 
-<!-- Add Material Modal -->
-<div id="addMaterialModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
-        <button onclick="closeAddMaterialModal()" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 text-xl font-bold">&times;</button>
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Add Study Material</h2>
-        <form method="POST" action="{{ route('admin.study-material.store') }}" enctype="multipart/form-data" class="grid grid-cols-1 gap-4">
+<!-- Add Material Modal - Using Inline Styles for Reliability -->
+<div id="addMaterialModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background-color: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative;">
+        <div style="padding: 20px 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0; font-size: 18px; font-weight: 600; color: #111827;">Add Study Material</h2>
+            <button onclick="closeAddMaterialModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #9ca3af;">&times;</button>
+        </div>
+        <form method="POST" action="{{ route('admin.study-material.store') }}" enctype="multipart/form-data" style="padding: 24px;">
             @csrf
-            <div>
-                <label class="block font-medium mb-1 text-gray-700">Title <span class="text-red-500">*</span></label>
-                <input type="text" name="title" value="{{ old('title') }}" class="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:ring-1 focus:ring-red-500 focus:outline-none" placeholder="Enter material title" required>
-                @error('title')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 4px;">Title <span style="color: #dc2626;">*</span></label>
+                <input type="text" name="title" value="{{ old('title') }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" placeholder="Enter material title" required>
+                @error('title')<p style="color: #dc2626; font-size: 12px; margin-top: 4px;">{{ $message }}</p>@enderror
             </div>
-            <div class="grid grid-cols-2 gap-3">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
                 <div>
-                    <label class="block font-medium mb-1 text-gray-700">Semester <span class="text-red-500">*</span></label>
-                    <select name="semester" class="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:ring-1 focus:ring-red-500 focus:outline-none" required>
+                    <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 4px;">Semester <span style="color: #dc2626;">*</span></label>
+                    <select name="semester" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" required>
                         <option value="">Select</option>
                         @for($i = 1; $i <= 6; $i++)
-                            <option value="{{ $i }}" {{ old('semester') == $i ? 'selected' : '' }}>{{ $i }}{{ $i == 1 ? 'st' : ($i == 2 ? 'nd' : ($i == 3 ? 'rd' : 'th')) }}</option>
+                            <option value="{{ $i }}" {{ old('semester') == $i ? 'selected' : '' }}>{{ $i }}{{ $i == 1 ? 'st' : ($i == 2 ? 'nd' : ($i == 3 ? 'rd' : 'th')) }} Semester</option>
                         @endfor
                     </select>
-                    @error('semester')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                    @error('semester')<p style="color: #dc2626; font-size: 12px; margin-top: 4px;">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="block font-medium mb-1 text-gray-700">Category <span class="text-red-500">*</span></label>
-                    <select name="category" class="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:ring-1 focus:ring-red-500 focus:outline-none" required>
+                    <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 4px;">Category <span style="color: #dc2626;">*</span></label>
+                    <select name="category" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" required>
                         <option value="">Select</option>
                         <option value="notes" {{ old('category') == 'notes' ? 'selected' : '' }}>Notes</option>
                         <option value="assignment" {{ old('category') == 'assignment' ? 'selected' : '' }}>Assignment</option>
                         <option value="paper" {{ old('category') == 'paper' ? 'selected' : '' }}>Previous Year Paper</option>
                         <option value="other" {{ old('category') == 'other' ? 'selected' : '' }}>Other</option>
                     </select>
-                    @error('category')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                    @error('category')<p style="color: #dc2626; font-size: 12px; margin-top: 4px;">{{ $message }}</p>@enderror
                 </div>
             </div>
-            <div>
-                <label class="block font-medium mb-1 text-gray-700">Course <span class="text-red-500">*</span></label>
-                <select name="course_id" class="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:ring-1 focus:ring-red-500 focus:outline-none" required>
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 4px;">Course <span style="color: #dc2626;">*</span></label>
+                <select name="course_id" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" required>
                     <option value="">Select Course</option>
                     @foreach($courses as $course)
                         <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
@@ -228,87 +230,74 @@
                         </option>
                     @endforeach
                 </select>
-                @error('course_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                @error('course_id')<p style="color: #dc2626; font-size: 12px; margin-top: 4px;">{{ $message }}</p>@enderror
             </div>
-            <div>
-                <label class="block font-medium mb-1 text-gray-700">Description</label>
-                <textarea name="description" class="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:ring-1 focus:ring-red-500 focus:outline-none" placeholder="Short description" rows="2">{{ old('description') }}</textarea>
-                @error('description')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 4px;">Description</label>
+                <textarea name="description" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" placeholder="Short description" rows="2">{{ old('description') }}</textarea>
+                @error('description')<p style="color: #dc2626; font-size: 12px; margin-top: 4px;">{{ $message }}</p>@enderror
             </div>
-            <div>
-                <label class="block font-medium mb-1 text-gray-700">File <span class="text-red-500">*</span></label>
-                <input type="file" name="file" class="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:ring-1 focus:ring-red-500 focus:outline-none" required>
-                <p class="text-xs text-gray-500 mt-1">Max size: 20MB. Supported: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, Images, ZIP, RAR</p>
-                @error('file')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 4px;">File <span style="color: #dc2626;">*</span></label>
+                <input type="file" name="file" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" required>
+                <p style="color: #6b7280; font-size: 12px; margin-top: 4px;">Max size: 20MB. Supported: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, Images, ZIP, RAR</p>
+                @error('file')<p style="color: #dc2626; font-size: 12px; margin-top: 4px;">{{ $message }}</p>@enderror
             </div>
-            <div class="flex justify-end gap-2 mt-4">
-                <button type="button" onclick="closeAddMaterialModal()" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 text-xs font-medium">Cancel</button>
-                <button type="submit" class="inline-flex items-center gap-2 px-5 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-xs font-semibold shadow-sm transition">
-                    <i class="bi bi-upload mr-1"></i>Upload Material
+            <div style="display: flex; justify-content: flex-end; gap: 8px;">
+                <button type="button" onclick="closeAddMaterialModal()" style="padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 6px; background-color: white; color: #374151; font-size: 14px; cursor: pointer;">Cancel</button>
+                <button type="submit" style="padding: 8px 20px; background-color: #dc2626; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                    <i class="bi bi-upload" style="margin-right: 4px;"></i>Upload Material
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirm Delete</h3>
-        <p class="text-gray-600 text-sm mb-4">Are you sure you want to delete this study material? This action cannot be undone.</p>
-        <form id="deleteForm" method="POST" class="flex justify-end gap-2">
+<!-- Delete Confirmation Modal - Using Inline Styles -->
+<div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background-color: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); width: 90%; max-width: 400px; padding: 24px; position: relative;">
+        <h3 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 600; color: #111827;">Confirm Delete</h3>
+        <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 14px;">Are you sure you want to delete this study material? This action cannot be undone.</p>
+        <form id="deleteForm" method="POST" style="display: flex; justify-content: flex-end; gap: 8px;">
             @csrf
             @method('DELETE')
-            <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-100 text-xs font-medium">Cancel</button>
-            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-xs font-medium">Delete</button>
+            <button type="button" onclick="closeDeleteModal()" style="padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 6px; background-color: white; color: #374151; font-size: 14px; cursor: pointer;">Cancel</button>
+            <button type="submit" style="padding: 8px 16px; background-color: #dc2626; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer;">Delete</button>
         </form>
     </div>
 </div>
 
-@push('scripts')
 <script>
-    function openAddMaterialModal() {
-        document.getElementById('addMaterialModal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+function closeAddMaterialModal() {
+    document.getElementById('addMaterialModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Close modals on Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeAddMaterialModal();
+        closeDeleteModal();
     }
-    
-    function closeAddMaterialModal() {
-        document.getElementById('addMaterialModal').classList.add('hidden');
-        document.body.style.overflow = 'auto';
+});
+
+// Close modals on background click
+document.getElementById('addMaterialModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+        closeAddMaterialModal();
     }
-    
-    function deleteMaterial(id) {
-        document.getElementById('deleteForm').action = '/admin/study-material/' + id;
-        document.getElementById('deleteModal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+});
+
+document.getElementById('deleteModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+        closeDeleteModal();
     }
-    
-    function closeDeleteModal() {
-        document.getElementById('deleteModal').classList.add('hidden');
-        document.body.style.overflow = 'auto';
-    }
-    
-    // Close modals on Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeAddMaterialModal();
-            closeDeleteModal();
-        }
-    });
-    
-    // Close modals on background click
-    document.getElementById('addMaterialModal').addEventListener('click', function(event) {
-        if (event.target === this) {
-            closeAddMaterialModal();
-        }
-    });
-    
-    document.getElementById('deleteModal').addEventListener('click', function(event) {
-        if (event.target === this) {
-            closeDeleteModal();
-        }
-    });
+});
 </script>
-@endpush
 @endsection
 

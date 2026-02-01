@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Department Management System</title>
+    <title>Register - IT Department Management System (IT-DMS)</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -180,7 +180,7 @@
 
             <!-- Footer -->
             <p class="text-center text-xs text-gray-500 w-full pb-6">
-                © 2024 Department Management System. All rights reserved.
+                © 2026 IT Department Management System (IT-DMS). All rights reserved.
             </p>
         </div>
     </div>

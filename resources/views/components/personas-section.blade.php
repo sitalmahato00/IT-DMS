@@ -1,5 +1,5 @@
-<section class="section-spacing px-4 sm:px-6 lg:px-8 bg-white">
-    <div class="max-w-7xl mx-auto">
+<section class="section-spacing bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Section Header with Animation -->
         <div class="text-center mb-20 animate-fade-up">
             <h2 class="heading-md text-gray-900 mb-6">
@@ -20,7 +20,11 @@
                     <!-- Image Header with gradient and animation -->
                     <div class="relative bg-gradient-to-br {{ $persona['color'] }} h-56 flex items-center justify-center text-7xl overflow-hidden group">
                         <div class="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                        <span class="transform group-hover:scale-125 transition-transform duration-300">{{ $persona['icon'] }}</span>
+                        @if(!empty($persona['image']))
+                            <img src="{{ $persona['image'] }}" alt="{{ $persona['title'] }}" class="w-full h-full object-cover rounded-none group-hover:scale-110 transition-transform duration-300" />
+                        @else
+                            <span class="transform group-hover:scale-125 transition-transform duration-300">{{ $persona['icon'] }}</span>
+                        @endif
                     </div>
 
                     <!-- Content -->

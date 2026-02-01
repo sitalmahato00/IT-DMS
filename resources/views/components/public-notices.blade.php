@@ -1,7 +1,7 @@
 @props(['notices' => collect([]), 'audience' => 'all', 'counts' => []])
 
 <section id="notices" class="py-16 bg-gray-50">
-    <div class="container mx-auto px-4 max-w-8xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Section Header -->
         <div class="text-center mb-12">
             <span class="inline-block px-3 py-1 bg-red-100 text-red-600 text-xs font-semibold rounded-full mb-3">
@@ -48,7 +48,7 @@
         </div> --}}
 
         <!-- Notices Grid -->
-        <div id="noticesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div id="noticesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @include('components.public-notices-grid', ['notices' => $notices])
         </div>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Department Management System</title>
+    <title>Login - IT Department Management System (IT-DMS)</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -157,7 +157,7 @@
 
             <!-- Footer -->
             <p class="absolute bottom-1 text-center text-xs text-gray-500 w-full">
-                © 2024 Department Management System. All rights reserved.
+                © 2026 IT Department Management System (IT-DMS). All rights reserved.
             </p>
         </div>
     </div>

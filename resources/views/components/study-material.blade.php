@@ -1,5 +1,5 @@
 <section id="study-material" class="py-16 bg-white">
-    <div class="container mx-auto px-4 max-w-6xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-10">
             <span class="inline-block px-3 py-1 bg-blue-100 text-blue-600 text-xs font-semibold rounded-full mb-3">
                 Study Material
@@ -9,7 +9,7 @@
                 Access curated notes, assignments, previous year papers, and reference materials for your courses.
             </p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <!-- Example static material cards, replace with dynamic data as needed -->
             <div class="bg-gray-50 rounded-xl shadow p-6 flex flex-col gap-3">
                 <h3 class="font-semibold text-lg text-blue-800">Mathematics - Notes</h3>

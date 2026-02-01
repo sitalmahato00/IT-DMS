@@ -29,17 +29,20 @@
                         Modern Academic Solutions
                     </div>
 
-                    <!-- Main Heading -->
-                    <h1 class="heading-lg leading-tight">
-                        Modern Academic<br>
-                        <span class="text-gradient">Management</span><br>
-                        Made Simple
-                    </h1>
 
-                    <!-- Description -->
-                    <p class="subheading leading-relaxed max-w-lg">
-                        {{ $description }}
+                    <!-- Main Heading -->
+                    <h1 class="heading-lg leading-tight text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+                        Welcome to the <span class="text-gradient">IT Department Management System</span> (IT-DMS)
+                    </h1>
+                    <p class="text-lg text-gray-700 mb-6 max-w-xl">
+                        A unified digital platform for managing academics, administration, communication, and resources in the IT Department. Empowering students, teachers, and staff with seamless access to notices, study materials, attendance, and more.
                     </p>
+                    <ul class="list-disc pl-6 text-gray-600 mb-8 space-y-1">
+                        <li>Centralized notice portal for all important updates</li>
+                        <li>Easy access to study materials and resources</li>
+                        <li>Modern attendance and academic tracking</li>
+                        <li>Secure, user-friendly, and mobile responsive</li>
+                    </ul>
 
                     <!-- Buttons -->
                     <div class="flex flex-col sm:flex-row gap-4 pt-4">
