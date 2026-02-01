@@ -1,3 +1,4 @@
+console.log('app.js loaded');
 import './bootstrap';
 
 import Alpine from 'alpinejs';
@@ -41,6 +42,7 @@ function initBsDatePicker(root = document) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded fired, initializing dark mode toggle');
     initBsDatePicker();
 
     // Watch for dynamically added inputs (modals, AJAX content)
@@ -62,51 +64,60 @@ document.addEventListener('DOMContentLoaded', () => {
     window.initBsDatePicker = initBsDatePicker;
 
     /* Dark mode toggle: persist and apply theme */
-    function applyTheme(theme) {
-        const checkbox = document.getElementById('darkModeCheckbox');
-        const label = document.getElementById('darkModeLabel');
+    const THEME_KEY = 'theme';
+    const getToggleElement = () => document.getElementById('theme-toggle') || document.getElementById('darkModeCheckbox');
+
+    function applyTheme(theme, save = true) {
+        const togg = getToggleElement();
 
         if (theme === 'dark') {
             document.documentElement.classList.add('dark');
-            if (checkbox) checkbox.checked = true;
-            if (label) label.textContent = 'ON';
+            if (togg) togg.checked = true;
         } else {
             document.documentElement.classList.remove('dark');
-            if (checkbox) checkbox.checked = false;
-            if (label) label.textContent = 'OFF';
+            if (togg) togg.checked = false;
         }
-        try { localStorage.setItem('theme', theme); } catch(e){}
+
+        if (save) {
+            try { localStorage.setItem(THEME_KEY, theme); } catch(e){}
+        }
         console.info('[Theme] applied:', theme);
+
+        // Update accessibility state if the toggle supports it
+        if (togg) togg.setAttribute('aria-checked', theme === 'dark' ? 'true' : 'false');
     }
 
     // Initialize theme from localStorage or prefers-color-scheme. If user sets a preference we respect it; else follow system and listen for changes.
-    const saved = (() => { try { return localStorage.getItem('theme'); } catch(e){return null;} })();
-    if (saved) applyTheme(saved);
+    const saved = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){return null;} })();
+    if (saved) applyTheme(saved, false);
     else {
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) applyTheme('dark');
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) applyTheme('dark', false);
         if (window.matchMedia) {
             const mq = window.matchMedia('(prefers-color-scheme: dark)');
             mq.addEventListener && mq.addEventListener('change', e => {
-                const savedNow = (() => { try { return localStorage.getItem('theme'); } catch(e){return null;} })();
-                if (!savedNow) applyTheme(e.matches ? 'dark' : 'light');
+                const savedNow = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){return null;} })();
+                if (!savedNow) applyTheme(e.matches ? 'dark' : 'light', false);
             });
         }
     }
 
-    // Checkbox-based toggle handler (peer checkbox)
-    const checkbox = document.getElementById('darkModeCheckbox');
-    if (checkbox) {
-        checkbox.addEventListener('change', function() {
-            applyTheme(this.checked ? 'dark' : 'light');
+    // Toggle handler (supports either id)
+    const toggle = getToggleElement();
+    if (toggle) {
+        console.log('Theme toggle found, attaching event listener');
+        toggle.addEventListener('change', function() {
+            applyTheme(this.checked ? 'dark' : 'light', true);
         });
+    } else {
+        console.warn('Theme toggle not found in DOM');
     }
 
-    // Ensure checkbox reflects initial theme
+    // Ensure checkbox reflects initial theme on load
     const initCheckbox = () => {
-        const cb = document.getElementById('darkModeCheckbox');
+        const cb = getToggleElement();
         if (!cb) return;
-        if (document.documentElement.classList.contains('dark')) cb.checked = true;
-        else cb.checked = false;
+        cb.checked = document.documentElement.classList.contains('dark');
+        cb.setAttribute('aria-checked', cb.checked ? 'true' : 'false');
     };
 
     initCheckbox();

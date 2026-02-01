@@ -13,31 +13,25 @@
                     <input type="text" placeholder="Search..." class="px-3 py-2 pl-9 pr-4 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent w-56 bg-gray-50">
                     <i class="bi bi-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
                 </div>
-                <label class="relative inline-flex items-center gap-4 cursor-pointer" title="Toggle dark mode">
-                    <input id="darkModeCheckbox" type="checkbox" class="sr-only peer" aria-label="Toggle dark mode">
-
-                    <div class="relative">
-                        <div
-                            class="w-20 h-10 bg-gray-300 rounded-full
-                                   peer-checked:bg-green-500
-                                   transition-colors duration-300">
-                        </div>
-
-                        <div
-                            class="absolute left-1 top-1 w-8 h-8 bg-white rounded-full
-                                   shadow-md
-                                   transition-transform duration-300
-                                   peer-checked:translate-x-10">
-                        </div>
-                    </div>
+                <label for="theme-toggle" class="relative inline-block w-14 h-8 cursor-pointer" title="Toggle theme">
+                    <input type="checkbox" id="theme-toggle" class="peer sr-only" aria-label="Toggle dark mode" />
 
                     <span
-                        id="darkModeLabel"
-                        class="text-sm font-semibold text-gray-400
-                               peer-checked:text-green-500
-                               transition-colors duration-300">
-                        ON
-                    </span>
+                        class="absolute inset-0 rounded-full
+                               bg-[#28096b] transition-all duration-500
+                               peer-checked:bg-[#522ba7]
+
+                               before:content-[''] before:absolute
+                               before:h-[1.4em] before:w-[1.4em]
+                               before:rounded-full
+                               before:left-[10%] before:bottom-[15%]
+                               before:bg-[#28096b]
+                               before:transition-all before:duration-500
+                               before:shadow-[inset_8px_-4px_0px_0px_#fff000]
+
+                               peer-checked:before:translate-x-full
+                               peer-checked:before:shadow-[inset_15px_-4px_0px_15px_#fff000]"
+                    ></span>
                 </label>
                 <button class="relative p-2 hover:bg-gray-100 rounded-lg transition">
                     <i class="bi bi-bell text-gray-600 text-lg"></i>
