@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name', 'DMS')) - Admin</title>
+    <title>@yield('title', 'IT Department Management System (IT-DMS)') - Admin</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('styles')
@@ -36,7 +36,7 @@
                 <i class="bi bi-calendar-check text-sm"></i>
             </div>
             <div>
-                <h1 class="font-bold text-sm text-gray-900">EduManage</h1>
+                <h1 class="font-bold text-sm text-gray-900">IT Department Management System (IT-DMS)</h1>
             </div>
         </div>
         <button id="sidebarToggle" class="p-2 hover:bg-gray-100 rounded transition">
