@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth scrolling for anchor links */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom Animations */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(220, 38, 38, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
+    }
+}
+
+/* Animation Classes */
+.animate-slide-down {
+    animation: slideDown 0.3s ease-out;
+}
+
+.animate-fade-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-fade-scale {
+    animation: fadeInScale 0.5s ease-out;
+}
+
+.animate-shimmer {
+    animation: shimmer 2s ease-in-out infinite;
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+    animation: glow 2s ease-in-out infinite;
+}
+
+/* Gradient Backgrounds */
+.bg-gradient-header {
+    background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
+}
+
+.bg-gradient-hero {
+    background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+}
+
+.bg-gradient-section {
+    background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
+}
+
+/* Custom Component Styles */
+.feature-card {
+    @apply p-6 bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2;
+}
+
+.persona-card {
+    @apply p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105;
+}
+
+.cta-button {
+    @apply px-8 py-3 font-semibold rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95;
+}
+
+.hero-badge {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-full font-semibold text-sm animate-fade-scale;
+}
+
+/* Text Effects */
+.text-gradient {
+    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Border Effects */
+.border-gradient {
+    border: 2px solid transparent;
+    background: linear-gradient(white, white) padding-box, linear-gradient(135deg, #DC2626, #991B1B) border-box;
+}
+
+/* Shadow Enhancements */
+.shadow-red-glow {
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.2);
+}
+
+.shadow-lg-red {
+    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.15);
+}
+
+/* Section Spacing */
+.section-spacing {
+    @apply py-16 md:py-24 lg:py-32;
+}
+
+/* Responsive Typography */
+.heading-lg {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold;
+}
+
+.heading-md {
+    @apply text-2xl md:text-3xl font-bold;
+}
+
+.subheading {
+    @apply text-lg md:text-xl text-gray-600;
+}
+
+/* Dark mode base overrides (minimal, broad coverage) */
+html.dark body {
+    background-color: #0b1220; /* dark page background */
+    color: #e5e7eb; /* light text */
+}
+
+html.dark .bg-white { background-color: #0b1220 !important; }
+html.dark .bg-gray-50 { background-color: #071224 !important; }
+html.dark .text-gray-900 { color: #e5e7eb !important; }
+html.dark .text-gray-500 { color: #9ca3af !important; }
+html.dark .border-gray-200 { border-color: #374151 !important; }
+html.dark .border-gray-100 { border-color: #1f2937 !important; }
+html.dark .hover\:bg-gray-100:hover { background-color: rgba(255,255,255,0.03) !important; }
+html.dark .bg-red-600 { background-color: #dc2626 !important; }
+html.dark .bg-gradient-header { background: linear-gradient(135deg, #071224 0%, #071a29 100%); }
+
+/* Inputs */
+html.dark input, html.dark textarea, html.dark select { background-color: #071224 !important; color: #e5e7eb !important; border-color: #374151 !important; }
+
+/* Sidebar */
+html.dark #sidebar { background-color: #071224 !important; }
+html.dark #sidebar a { color: #cbd5e1 !important; }
+html.dark #sidebar a:hover { color: #fff !important; }
+
+/* Header */
+html.dark header { background-color: #071224 !important; border-color: #1f2937 !important; }
+
+/* Small utility for the toggle button active state */
+#darkModeToggle.active { background-color: rgba(255,255,255,0.06); }
+
+/* Ensure the toggle handle is vertically centered */
+#darkModeToggle { display: inline-flex; align-items: center; justify-content: flex-start; }
+#darkModeToggle .translate-x-5 { transform: translateX(1.25rem); }
+
