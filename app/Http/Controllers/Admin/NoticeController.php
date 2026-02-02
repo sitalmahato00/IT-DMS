@@ -67,8 +67,11 @@ class NoticeController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:200',
+            'title_ne' => 'nullable|string|max:500',
             'message' => 'required|string',
+            'message_ne' => 'nullable|string',
             'audience' => 'nullable|in:all,students,faculty,parents,teacher',
+            'audience_ne' => 'nullable|string|max:50',
             'status' => 'required|in:draft,published,scheduled',
             'semester' => 'nullable|string',
             'subject_id' => 'nullable|exists:subjects,id',
@@ -82,13 +85,16 @@ class NoticeController extends Controller
 
             $notice = new Notice();
             $notice->title = $validated['title'];
+            $notice->title_ne = $validated['title_ne'] ?? null;
             $notice->message = $validated['message'];
+            $notice->message_ne = $validated['message_ne'] ?? null;
             // normalize audience aliases (accept 'teacher' as alias for 'faculty')
             $aud = $validated['audience'] ?? 'all';
             if ($aud === 'teacher') {
                 $aud = 'faculty';
             }
             $notice->audience = $aud;
+            $notice->audience_ne = $validated['audience_ne'] ?? null;
             $notice->status = $validated['status'];
             $notice->semester = $validated['semester'] ?? null;
             $notice->subject_id = $validated['subject_id'] ?? null;
@@ -124,7 +130,7 @@ class NoticeController extends Controller
         }
     }
 
-    /**
+/**
      * Update the specified notice in storage.
      */
     public function update(Request $request, $id)
@@ -133,8 +139,11 @@ class NoticeController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:200',
+            'title_ne' => 'nullable|string|max:500',
             'message' => 'required|string',
+            'message_ne' => 'nullable|string',
             'audience' => 'nullable|in:all,students,faculty,parents,teacher',
+            'audience_ne' => 'nullable|string|max:50',
             'status' => 'required|in:draft,published,scheduled',
             'semester' => 'nullable|string',
             'subject_id' => 'nullable|exists:subjects,id',
@@ -147,13 +156,16 @@ class NoticeController extends Controller
             DB::beginTransaction();
 
             $notice->title = $validated['title'];
+            $notice->title_ne = $validated['title_ne'] ?? null;
             $notice->message = $validated['message'];
+            $notice->message_ne = $validated['message_ne'] ?? null;
             // normalize audience aliases when updating as well
             $aud = $validated['audience'] ?? 'all';
             if ($aud === 'teacher') {
                 $aud = 'faculty';
             }
             $notice->audience = $aud;
+            $notice->audience_ne = $validated['audience_ne'] ?? null;
             $notice->status = $validated['status'];
             $notice->semester = $validated['semester'] ?? null;
             $notice->subject_id = $validated['subject_id'] ?? null;
