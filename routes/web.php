@@ -15,13 +15,14 @@ Route::get('/notices/{id}', [NoticePortalController::class, 'show'])->name('noti
 Route::get('/gallery/fetch', [GalleryPortalController::class, 'fetch'])->name('gallery.fetch');
 
 // Language switcher: sets the locale in the session and redirects back
-Route::get('locale/{locale}', function ($locale) {
+Route::post('locale', function (Illuminate\Http\Request $request) {
+    $locale = $request->input('locale');
     $supported = array_keys(config('locales.supported'));
     if (in_array($locale, $supported)) {
         session(['locale' => $locale]);
     }
     return back();
-})->name('locale.change');
+})->name('language.switch');
 
 Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 

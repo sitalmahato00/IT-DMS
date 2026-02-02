@@ -11,7 +11,7 @@
                 <div class="bg-gradient-to-br from-red-600 to-red-700 text-white font-bold px-4 py-2 rounded-lg text-lg shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                     <span class="flex items-center gap-2">
                         <i class="bi bi-calendar-check"></i>
-                         IT-DMS
+                         {{ __("IT-DMS") }}
                     </span>
                 </div>
             </div>
@@ -20,44 +20,52 @@
             <div class="hidden md:flex items-center gap-8">
                 @php $onLanding = request()->is('/') || request()->is('welcome'); @endphp
                 <a href="{{ url('/') }}" class="text-gray-900 font-medium hover:text-red-600 transition duration-300 relative group">
-                    {{ __('Home') }}
+                    {{ __("Home") }}
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
                 </a>
                 <a href="{{ $onLanding ? '#features' : url('/') . '#features' }}" class="text-gray-600 hover:text-red-600 transition duration-300 relative group">
-                    {{ __('Features') }}
+                    {{ __("Features") }}
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
                 </a>
                 <a href="{{ $onLanding ? '#notices' : url('/') . '#notices' }}" class="text-gray-600 hover:text-red-600 transition duration-300 relative group">
-                    {{ __('Notices') }}
+                    {{ __("Notices") }}
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
                 </a>
                 <a href="{{ $onLanding ? '#gallery' : url('/') . '#gallery' }}" class="text-gray-600 hover:text-red-600 transition duration-300 relative group">
-                    {{ __('Gallery') }}
+                    {{ __("Gallery") }}
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
                 </a>
                 <a href="{{ $onLanding ? '#study-materials' : url('/') . '#study-materials' }}" class="text-gray-600 hover:text-red-600 transition duration-300 relative group">
-                    {{ __('Study Materials') }}
+                    {{ __("Study Materials") }}
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
                 </a>
                 <a href="{{ $onLanding ? '#about' : url('/') . '#about' }}" class="text-gray-600 hover:text-red-600 transition duration-300 relative group">
-                    {{ __('Personas') }}
+                    {{ __("About") }}
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
                 </a>
                 <a href="{{ $onLanding ? '#contact' : url('/') . '#contact' }}" class="text-gray-600 hover:text-red-600 transition duration-300 relative group">
-                    {{ __('Contact') }}
+                    {{ __("Contact") }}
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
                 </a>
             </div>
 
             <!-- Right Side Buttons -->
             <div class="flex items-center gap-4">
+                <!-- Language Switcher -->
+                <form method="POST" action="{{ route('language.switch') }}" class="mr-2">
+                    @csrf
+                    <select name="locale" onchange="this.form.submit()" class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 w-28">
+                        <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>EN</option>
+                        <option value="ne" {{ app()->getLocale() == 'ne' ? 'selected' : '' }}>ने</option>
+                    </select>
+                </form>
                 @auth
                     <!-- Dashboard Button (for logged in users) -->
                     <a 
                         href="{{ route('admin.dashboard') }}" 
                         class="text-gray-900 font-medium hover:text-red-600 transition hidden sm:block relative group"
                     >
-                        {{ __('Dashboard') }}
+                        {{ __("Dashboard") }}
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
                     </a>
                 @else
@@ -66,7 +74,7 @@
                         href="{{ route('login') }}" 
                         class="text-gray-900 font-medium hover:text-red-600 transition hidden sm:block relative group"
                     >
-                        {{ __('Login') }}
+                        {{ __("Login") }}
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
                     </a>
                 @endauth
@@ -84,29 +92,29 @@
         <div id="mobileMenu" class="hidden md:hidden mt-4 pb-4 border-t border-gray-200 pt-4 animate-slide-down">
             @php $onLanding = request()->is('/') || request()->is('welcome'); @endphp
             <a href="{{ url('/') }}" class="block text-gray-900 font-medium py-2 hover:text-red-600 hover:pl-2 transition duration-300">
-                {{ __('Home') }}
+                {{ __("Home") }}
             </a>
             <a href="{{ $onLanding ? '#features' : url('/') . '#features' }}" class="block text-gray-600 py-2 hover:text-red-600 hover:pl-2 transition duration-300">
-                {{ __('Features') }}
+                {{ __("Features") }}
             </a>
             <a href="{{ $onLanding ? '#notice-section' : url('/') . '#notice-section' }}" class="block text-gray-600 py-2 hover:text-red-600 hover:pl-2 transition duration-300">
-                {{ __('Notices') }}
+                {{ __("Notices") }}
             </a>
             <a href="{{ $onLanding ? '#gallery' : url('/') . '#gallery' }}" class="block text-gray-600 py-2 hover:text-red-600 hover:pl-2 transition duration-300">
-                {{ __('Gallery') }}
+                {{ __("Gallery") }}
             </a>
             <a href="{{ $onLanding ? '#study-materials' : url('/') . '#study-materials' }}" class="block text-gray-600 py-2 hover:text-red-600 hover:pl-2 transition duration-300">
-                {{ __('Study Materials') }}
+                {{ __("Study Materials") }}
             </a>
             <a href="{{ $onLanding ? '#about' : url('/') . '#about' }}" class="block text-gray-600 py-2 hover:text-red-600 hover:pl-2 transition duration-300">
-                {{ __('Personas') }}
+                {{ __("About") }}
             </a>
             <a href="{{ $onLanding ? '#contact' : url('/') . '#contact' }}" class="block text-gray-600 py-2 hover:text-red-600 hover:pl-2 transition duration-300">
-                {{ __('Contact') }}
+                {{ __("Contact") }}
             </a>
             @auth
                 <a href="{{ route('admin.dashboard') }}" class="block text-gray-900 py-2 hover:text-red-600 hover:pl-2 transition duration-300">
-                    {{ __('Dashboard') }}
+                    {{ __("Dashboard") }}
                 </a>
             @else
                 <a href="{{ route('login') }}" class="block text-gray-900 py-2 hover:text-red-600 transition">

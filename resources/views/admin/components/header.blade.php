@@ -17,7 +17,7 @@
                 <!-- Language switcher -->
                 <div class="hidden md:block">
                     <label for="locale-select" class="sr-only">{{ __('Language') }}</label>
-                    <select id="locale-select" class="px-2 py-1 border rounded text-sm bg-white cursor-pointer w-28">
+                    <select id="locale-select" class="px-3 py-1.5 border rounded text-sm bg-white cursor-pointer w-36">
                         @foreach (config('locales.supported') as $code => $label)
                             <option value="{{ $code }}" {{ app()->getLocale() === $code ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
@@ -68,7 +68,28 @@
         if (localeSelect) {
             localeSelect.addEventListener('change', function() {
                 const locale = this.value;
-                window.location.href = '{{ route("locale.change", ["locale" => "__LOCALE__"]) }}'.replace('__LOCALE__', locale);
+                // Create a form and submit it
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ route("language.switch") }}';
+                
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (csrfToken) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = '_token';
+                    input.value = csrfToken.getAttribute('content');
+                    form.appendChild(input);
+                }
+                
+                const localeInput = document.createElement('input');
+                localeInput.type = 'hidden';
+                localeInput.name = 'locale';
+                localeInput.value = locale;
+                form.appendChild(localeInput);
+                
+                document.body.appendChild(form);
+                form.submit();
             });
         }
     });
