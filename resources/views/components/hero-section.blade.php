@@ -26,22 +26,22 @@
                     <!-- Badge -->
                     <div class="hero-badge">
                         <span class="text-red-600">✨</span>
-                        Modern Academic Solutions
+                        {{ __('Modern Academic Solutions') }}
                     </div>
 
 
                     <!-- Main Heading -->
                     <h1 class="heading-lg leading-tight text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
-                        Welcome to the <span class="text-gradient">IT Department Management System</span> (IT-DMS)
+                        {{ __('Welcome to the') }} <span class="text-gradient">{{ __('IT Department Management System') }}</span> ({{ __('IT-DMS') }})
                     </h1>
                     <p class="text-lg text-gray-700 mb-6 max-w-xl">
-                        A unified digital platform for managing academics, administration, communication, and resources in the IT Department. Empowering students, teachers, and staff with seamless access to notices, study materials, attendance, and more.
+                        {{ __('A unified digital platform for managing academics, administration, communication, and resources in the IT Department.') }}
                     </p>
                     <ul class="list-disc pl-6 text-gray-600 mb-8 space-y-1">
-                        <li>Centralized notice portal for all important updates</li>
-                        <li>Easy access to study materials and resources</li>
-                        <li>Modern attendance and academic tracking</li>
-                        <li>Secure, user-friendly, and mobile responsive</li>
+                        <li>{{ __('Centralized notice portal for all important updates') }}</li>
+                        <li>{{ __('Easy access to study materials and resources') }}</li>
+                        <li>{{ __('Modern attendance and academic tracking') }}</li>
+                        <li>{{ __('Secure, user-friendly, and mobile responsive') }}</li>
                     </ul>
 
                     <!-- Buttons -->
@@ -49,7 +49,7 @@
                         <!-- Primary Button -->
                         <a href="{{ $primaryBtnUrl }}" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 transform active:scale-95">
                             <span class="flex items-center gap-2">
-                                {{ $primaryBtnText }}
+                                {{ __($primaryBtnText) }}
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                 </svg>
@@ -58,7 +58,7 @@
 
                         <!-- Secondary Button -->
                         <a href="{{ $secondaryBtnUrl }}" class="inline-flex items-center justify-center px-8 py-4 border-2 border-gray-300 text-gray-900 font-semibold rounded-lg hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-all duration-300">
-                            {{ $secondaryBtnText }}
+                            {{ __($secondaryBtnText) }}
                         </a>
                     </div>
 
@@ -66,15 +66,15 @@
                     <div class="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
                         <div class="group cursor-pointer">
                             <p class="text-3xl font-bold text-gray-900 group-hover:text-red-600 transition">24/7</p>
-                            <p class="text-sm text-gray-600 group-hover:text-gray-900 transition">Support</p>
+                            <p class="text-sm text-gray-600 group-hover:text-gray-900 transition">{{ __('Support') }}</p>
                         </div>
                         <div class="group cursor-pointer">
                             <p class="text-3xl font-bold text-gray-900 group-hover:text-red-600 transition">100%</p>
-                            <p class="text-sm text-gray-600 group-hover:text-gray-900 transition">Secure</p>
+                            <p class="text-sm text-gray-600 group-hover:text-gray-900 transition">{{ __('Secure') }}</p>
                         </div>
                         <div class="group cursor-pointer">
-                            <p class="text-3xl font-bold text-gray-900 group-hover:text-red-600 transition">Free</p>
-                            <p class="text-sm text-gray-600 group-hover:text-gray-900 transition">Setup</p>
+                            <p class="text-3xl font-bold text-gray-900 group-hover:text-red-600 transition">{{ __('Free') }}</p>
+                            <p class="text-sm text-gray-600 group-hover:text-gray-900 transition">{{ __('Setup') }}</p>
                         </div>
                     </div>
                 </div>
@@ -94,7 +94,7 @@
                         <!-- Badge with Animation -->
                         <div class="absolute bottom-8 right-8 bg-white rounded-xl shadow-xl px-6 py-4 hover:shadow-2xl hover:scale-110 transition-all duration-300 transform">
                             <p class="text-3xl font-bold text-red-600">500+</p>
-                            <p class="text-sm text-gray-600 font-medium">Institutions Trust Us</p>
+                            <p class="text-sm text-gray-600 font-medium">{{ __('Institutions Trust Us') }}</p>
                         </div>
                     </div>
                 </div>
