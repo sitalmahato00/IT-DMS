@@ -2,6 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 
+ * Nepali Unicode Support - Devanagari Font Stack
+ * Following Nepal Government Website Standards
+ * Reference: https://language.gov.np, https://nepal.gov.np
+ */
+
+@font-face {
+    font-family: 'Noto Sans Devanagari';
+    src: url('https://fonts.gstatic.com/s/notosansdevanagari/v13/TuGfUVJ8WI5vyeDDKrMefD2iYjN3c.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0900-097F;
+}
+
+@font-face {
+    font-family: 'Noto Sans Devanagari';
+    src: url('https://fonts.gstatic.com/s/notosansdevanagari/v13/TuGfUVJ8WI5vyeDDKrMefD2iYjN3c.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0900-097F;
+}
+
+@font-face {
+    font-family: 'Noto Sans Devanagari';
+    src: url('https://fonts.gstatic.com/s/notosansdevanagari/v13/TuGfUVJ8WI5vyeDDKrMefD2iYjN3c.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+    unicode-range: U+0900-097F;
+}
+
+/* Nepali Language Specific Styles */
+[lang="ne"] {
+    font-family: 'Noto Sans Devanagari', 'Mangal', 'Preeti', 'Kantipur', '，字形', sans-serif;
+}
+
+/* Devanagari text styling for proper rendering */
+.devanagari-text {
+    font-family: 'Noto Sans Devanagari', 'Mangal', 'Preeti', 'Kantipur', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Ensure proper Nepali character spacing */
+.nepali-content {
+    letter-spacing: 0.02em;
+    word-spacing: 0.1em;
+    line-height: 1.6;
+}
+
+/* Prevent font fallback shifting */
+.nepali-font-stable {
+    font-size-adjust: one;
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures;
+    font-feature-settings: "kern" 1, "liga" 1;
+}
+
+/* Custom properties for Nepali typography */
+:root {
+    --font-nepali: 'Noto Sans Devanagari', 'Mangal', 'Preeti', 'Kantipur', sans-serif;
+    --font-nepali-bold: 700;
+    --font-nepali-medium: 500;
+}
+
+/* Apply Nepali font when locale is ne */
+.locale-ne {
+    font-family: var(--font-nepali) !important;
+}
+
 /* Smooth scrolling for anchor links */
 html {
     scroll-behavior: smooth;
