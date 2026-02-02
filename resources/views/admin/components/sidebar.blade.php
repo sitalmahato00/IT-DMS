@@ -49,13 +49,7 @@
             <li>
                 <a href="{{ route('admin.assessment') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.assessment') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-file-earmark text-xs"></i>
-                    <span>Assessment</span>
-                </a>
-            </li>
-            <li>
-                <a href="{{ route('admin.marks') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.marks') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
-                    <i class="bi bi-graph-up text-xs"></i>
-                    <span>Marks Management</span>
+                    <span>Exam</span>
                 </a>
             </li>
             <li>
