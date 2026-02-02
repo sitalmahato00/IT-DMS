@@ -17,7 +17,7 @@
                 <!-- Language switcher -->
                 <div class="hidden md:block">
                     <label for="locale-select" class="sr-only">{{ __('Language') }}</label>
-                    <select id="locale-select" class="px-2 py-1 border rounded text-sm bg-white cursor-pointer">
+                    <select id="locale-select" class="px-2 py-1 border rounded text-sm bg-white cursor-pointer w-28">
                         @foreach (config('locales.supported') as $code => $label)
                             <option value="{{ $code }}" {{ app()->getLocale() === $code ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach

@@ -1,6 +1,6 @@
 @props(['materials' => collect([]), 'counts' => [], 'subjects' => collect([]), 'selectedSemester' => '', 'selectedSubject' => '', 'searchQuery' => ''])
 
-<section id="study-materials" class="py-16 bg-white">
+<section id="study-materials" class="py-100  bg-white">
     <div class="container mx-auto px-4">
         <!-- Section Header -->
         <div class="text-center mb-12">
@@ -14,7 +14,7 @@
         </div>
 
         <!-- Search and Filters -->
-        <div class="bg-gray-50 rounded-xl p-4 mb-8">
+        <div class="bg-gray-50 rounded-xl p-4 mb-8 mx-20" >
             <form id="materialsFilterForm" class="flex flex-wrap gap-4 items-end">
                 <!-- Search Bar -->
                 <div class="flex-1 min-w-[250px]">
@@ -108,7 +108,7 @@
         </div>
 
         <!-- Materials Grid -->
-        <div id="materialsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div id="materialsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5  mx-20">
             @include('components.study-materials-grid', ['materials' => $materials])
         </div>
 
