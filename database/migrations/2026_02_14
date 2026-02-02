@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        // First make sure we have subject_id column
+        Schema::table('study_materials', function (Blueprint $table) {
+            $table->integer('subject_id')->nullable()->change();
+        });
+
+        // Now update any NULL values to have a default (use first subject)
+        \Illuminate\Support\Facades\DB::table('study_materials')
+            ->whereNull('subject_id')
+            ->update(['subject_id' => 1]);
+
+        // Then make it NOT NULL
+        Schema::table('study_materials', function (Blueprint $table) {
+            $table->integer('subject_id')->nullable(false)->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        // Cannot easily reverse this
+    }
+};

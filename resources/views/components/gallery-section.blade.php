@@ -59,7 +59,7 @@ foreach ($galleryItems as $item) {
         </div>
 
         <!-- Gallery Grid -->
-        <div id="gallery-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div id="gallery-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @forelse($galleryItems as $item)
                 <div class="gallery-item group relative aspect-square overflow-hidden rounded-xl bg-gray-100 cursor-pointer"
                      onclick="openGalleryModal({{ $loop->index }})"

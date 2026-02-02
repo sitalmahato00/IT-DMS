@@ -1,0 +1,47 @@
+{{-- Statistics Cards --}}
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-gray-500">Total Materials</p>
+                <p class="text-2xl font-bold text-gray-900">{{ $stats['total'] ?? 0 }}</p>
+            </div>
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="bi bi-file-earmark-text text-blue-600"></i>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-gray-500">Lecture Notes</p>
+                <p class="text-2xl font-bold text-gray-900">{{ $stats['notes'] ?? 0 }}</p>
+            </div>
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="bi bi-journal-text text-green-600"></i>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-gray-500">Assignments</p>
+                <p class="text-2xl font-bold text-gray-900">{{ $stats['assignments'] ?? 0 }}</p>
+            </div>
+            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                <i class="bi bi-pencil-square text-purple-600"></i>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-gray-500">Assessments/Papers</p>
+                <p class="text-2xl font-bold text-gray-900">{{ $stats['papers'] ?? 0 }}</p>
+            </div>
+            <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                <i class="bi bi-file-earmark-ruled text-orange-600"></i>
+            </div>
+        </div>
+    </div>
+</div>

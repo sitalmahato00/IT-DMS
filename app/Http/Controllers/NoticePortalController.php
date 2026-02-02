@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Notice;
 use App\Models\Gallery;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 
 class NoticePortalController extends Controller
@@ -63,9 +64,34 @@ class NoticePortalController extends Controller
             'facilities' => Gallery::active()->byCategory('facilities')->count(),
         ];
         
+        // Fetch latest study materials (visible to students only on landing page)
+        $materials = \App\Models\StudyMaterial::with('subject')
+            ->whereIn('visibility', ['all', 'students'])
+            ->orderBy('created_at', 'desc')
+            ->take(6)
+            ->get();
+
+        $materialCounts = [
+            'all' => \App\Models\StudyMaterial::whereIn('visibility', ['all', 'students'])->count(),
+            'lecture_notes' => \App\Models\StudyMaterial::whereIn('visibility', ['all', 'students'])->where('document_type', 'lecture_notes')->count(),
+            'assignment' => \App\Models\StudyMaterial::whereIn('visibility', ['all', 'students'])->where('document_type', 'assignment')->count(),
+            'assessment' => \App\Models\StudyMaterial::whereIn('visibility', ['all', 'students'])->where('document_type', 'assessment')->count(),
+            'lab_report' => \App\Models\StudyMaterial::whereIn('visibility', ['all', 'students'])->where('document_type', 'lab_report')->count(),
+            'study_guide' => \App\Models\StudyMaterial::whereIn('visibility', ['all', 'students'])->where('document_type', 'study_guide')->count(),
+            'syllabus' => \App\Models\StudyMaterial::whereIn('visibility', ['all', 'students'])->where('document_type', 'syllabus')->count(),
+            'project_material' => \App\Models\StudyMaterial::whereIn('visibility', ['all', 'students'])->where('document_type', 'project_material')->count(),
+        ];
+
+        // Fetch subjects for filter dropdown
+        $subjects = Subject::active()
+            ->orderBy('subject_name')
+            ->get();
+
         return view('welcome', compact(
             'notices', 'audience', 'noticeCounts',
-            'galleryItems', 'galleryCategory', 'galleryCounts'
+            'galleryItems', 'galleryCategory', 'galleryCounts',
+            'materials', 'materialCounts',
+            'subjects'
         ));
     }
     

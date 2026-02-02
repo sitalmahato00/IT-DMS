@@ -9,72 +9,91 @@ class StudyMaterial extends Model
 {
     use HasFactory;
 
+    protected $table = 'study_materials';
+
     protected $fillable = [
-        'title',
-        'description',
-        'semester',
         'subject_id',
-        'category',
+        'teacher_id',
+        'document_type',
+        'title',
         'file_name',
         'file_path',
         'file_size',
-        'file_type',
-        'uploaded_by',
+        'description',
+        'semester',
+        'visibility',
+        'is_published',
+        'uploaded_at',
     ];
 
     protected $casts = [
         'file_size' => 'integer',
+        'is_published' => 'boolean',
+        'uploaded_at' => 'datetime',
     ];
 
     /**
-     * Get the course (subject) for this material.
+     * Get the subject for this material.
      */
-    public function course()
+    public function subject()
     {
         return $this->belongsTo(Subject::class, 'subject_id');
     }
 
     /**
-     * Get the user who uploaded this material.
+     * Get the teacher who uploaded this material.
      */
-    public function uploader()
+    public function teacher()
     {
-        return $this->belongsTo(User::class, 'uploaded_by');
+        return $this->belongsTo(Teacher::class, 'teacher_id');
     }
 
     /**
-     * Scope for notes category.
+     * Scope for lecture notes.
      */
-    public function scopeNotes($query)
+    public function scopeLectureNotes($query)
     {
-        return $query->where('category', 'notes');
+        return $query->where('document_type', 'lecture_notes');
     }
 
     /**
-     * Scope for assignments category.
+     * Scope for assignments.
      */
     public function scopeAssignments($query)
     {
-        return $query->where('category', 'assignment');
+        return $query->where('document_type', 'assignment');
     }
 
     /**
-     * Scope for previous year papers category.
+     * Scope for assessments (papers).
      */
-    public function scopePapers($query)
+    public function scopeAssessments($query)
     {
-        return $query->where('category', 'paper');
+        return $query->where('document_type', 'assessment');
     }
 
     /**
-     * Scope for specific semester.
+     * Scope for lab reports.
      */
-    public function scopeForSemester($query, $semester)
+    public function scopeLabReports($query)
     {
-        if ($semester && $semester !== 'all') {
-            return $query->where('semester', $semester);
-        }
-        return $query;
+        return $query->where('document_type', 'lab_report');
+    }
+
+    /**
+     * Scope for published materials.
+     */
+    public function scopePublished($query)
+    {
+        return $query->where('is_published', true);
+    }
+
+    /**
+     * Scope for ordering by newest first.
+     */
+    public function scopeLatest($query)
+    {
+        return $query->orderBy('created_at', 'desc');
     }
 
     /**
@@ -104,31 +123,53 @@ class StudyMaterial extends Model
     }
 
     /**
-     * Get category badge class.
+     * Get document type badge class.
      */
-    public function getCategoryBadgeClassAttribute()
+    public function getDocumentTypeBadgeClassAttribute()
     {
-        return match($this->category) {
-            'notes' => 'bg-blue-100 text-blue-700',
+        return match($this->document_type) {
+            'lecture_notes' => 'bg-blue-100 text-blue-700',
             'assignment' => 'bg-green-100 text-green-700',
-            'paper' => 'bg-purple-100 text-purple-700',
-            'other' => 'bg-gray-100 text-gray-700',
+            'lab_report' => 'bg-purple-100 text-purple-700',
+            'assessment' => 'bg-orange-100 text-orange-700',
+            'study_guide' => 'bg-cyan-100 text-cyan-700',
+            'syllabus' => 'bg-pink-100 text-pink-700',
+            'project_material' => 'bg-indigo-100 text-indigo-700',
             default => 'bg-gray-100 text-gray-700',
         };
     }
 
     /**
-     * Get category display text.
+     * Get document type display text.
+     */
+    public function getDocumentTypeTextAttribute()
+    {
+        return match($this->document_type) {
+            'lecture_notes' => 'Lecture Notes',
+            'assignment' => 'Assignment',
+            'lab_report' => 'Lab Report',
+            'assessment' => 'Assessment/Paper',
+            'study_guide' => 'Study Guide',
+            'syllabus' => 'Syllabus',
+            'project_material' => 'Project Material',
+            default => 'Material',
+        };
+    }
+
+    /**
+     * Get category display text (alias for document_type).
      */
     public function getCategoryTextAttribute()
     {
-        return match($this->category) {
-            'notes' => 'Notes',
-            'assignment' => 'Assignment',
-            'paper' => 'Previous Year Paper',
-            'other' => 'Other',
-            default => 'Material',
-        };
+        return $this->document_type_text;
+    }
+
+    /**
+     * Get category badge class (alias for document_type).
+     */
+    public function getCategoryBadgeClassAttribute()
+    {
+        return $this->document_type_badge_class;
     }
 
     /**
@@ -160,10 +201,26 @@ class StudyMaterial extends Model
      */
     public function getFormattedSemesterAttribute()
     {
+        if (!$this->semester) return 'N/A';
         $map = [
             '1' => '1st', '2' => '2nd', '3' => '3rd', '4' => '4th', '5' => '5th', '6' => '6th',
         ];
         return $map[$this->semester] ?? $this->semester;
     }
-}
 
+    /**
+     * Backward compatibility accessor for category.
+     */
+    public function getCategoryAttribute()
+    {
+        return $this->document_type;
+    }
+
+    /**
+     * Backward compatibility accessor for uploaded_by.
+     */
+    public function getUploadedByAttribute()
+    {
+        return $this->teacher_id;
+    }
+}

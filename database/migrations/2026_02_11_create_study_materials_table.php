@@ -15,31 +15,21 @@ return new class extends Migration
             $table->id();
             $table->string('title', 200);
             $table->text('description')->nullable();
-            $table->string('semester', 10); // 1, 2, 3, etc. or "1st", "2nd", etc.
+            $table->string('semester', 10);
             $table->unsignedBigInteger('subject_id')->nullable();
-            $table->string('category', 50); // notes, assignment, paper, other
-            $table->string('file_name', 255)->nullable();
-            $table->string('file_path', 500)->nullable();
-            $table->bigInteger('file_size')->nullable();
-            $table->string('file_type', 100)->nullable();
-            $table->unsignedBigInteger('uploaded_by')->nullable();
+            $table->string('category', 50);
+            $table->string('file_name', 255);
+            $table->string('file_path', 500);
+            $table->bigInteger('file_size');
+            $table->string('file_type', 100);
+            $table->unsignedBigInteger('uploaded_by');
             $table->timestamps();
 
-            // Foreign key constraints
-            $table->foreign('subject_id')
-                  ->references('id')
-                  ->on('subjects')
-                  ->onDelete('set null');
-
-            $table->foreign('uploaded_by')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('set null');
-
-            // Indexes for better query performance
-            $table->index('category');
-            $table->index('semester');
-            $table->index(['subject_id', 'semester']);
+            $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('set null');
+            $table->foreign('uploaded_by')->references('id')->on('users')->onDelete('cascade');
+            
+            $table->index(['category', 'semester']);
+            $table->index(['uploaded_by']);
         });
     }
 

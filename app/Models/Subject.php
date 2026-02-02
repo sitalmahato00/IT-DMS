@@ -31,7 +31,7 @@ class Subject extends Model
         return $this->hasMany(Mark::class, 'subject_id');
     }
 
-    /**
+/**
      * Scope to get subjects for a specific semester
      */
     public function scopeForSemester($query, $semester)
@@ -40,11 +40,27 @@ class Subject extends Model
     }
 
     /**
+     * Scope to order subjects by semester and name
+     */
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('semester')->orderBy('subject_name');
+    }
+
+    /**
      * Get average marks for this subject
      */
     public function getAverageMarksAttribute()
     {
         return $this->marks()->avg('marks_obtained');
+    }
+
+    /**
+     * Scope to get active subjects only
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
     }
 }
 

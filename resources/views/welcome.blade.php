@@ -41,9 +41,6 @@
             <x-features-grid />
         </section>
 
-        <!-- Study Material Section -->
-        <x-study-material />
-
         <!-- Notice Portal Section removed -->
 
         <!-- Gallery Section -->
@@ -52,6 +49,15 @@
         @else
             <section id="gallery">
                 <x-gallery-section :galleryItems="collect([])" category="all" :counts="[]" />
+            </section>
+        @endisset
+
+<!-- Study Materials Section -->
+        @isset($materials)
+            <x-study-materials :materials="$materials" :counts="$materialCounts ?? []" :subjects="$subjects ?? collect([])" :selectedSemester="''" :selectedSubject="''" :searchQuery="''" />
+        @else
+            <section id="study-materials">
+                <x-study-materials :materials="collect([])" :counts="[]" :subjects="collect([])" :selectedSemester="''" :selectedSubject="''" :searchQuery="''" />
             </section>
         @endisset
 

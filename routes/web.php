@@ -117,6 +117,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     // Study Material management
     Route::get('/study-material', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'index'])->name('study-material');
     Route::post('/study-material', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'store'])->name('study-material.store');
+    Route::put('/study-material/{id}', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'update'])->name('study-material.update');
     Route::get('/study-material/download/{id}', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'download'])->name('study-material.download');
     Route::delete('/study-material/{id}', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'destroy'])->name('study-material.destroy');
 

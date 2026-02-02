@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\StudyMaterial;
 use App\Models\Subject;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,7 @@ class StudyMaterialController extends Controller
         }
 
         $materials = $query->latest()->paginate(10);
-        $courses = Subject::select('id', 'subject_name', 'subject_code', 'semester')->get();
+        $courses = Subject::active()->get();
 
         // Get statistics
         $stats = [
@@ -61,7 +62,6 @@ class StudyMaterialController extends Controller
             'description' => 'nullable|string',
             'semester' => 'required|string',
             'course' => 'required|string',
-            'visibility' => 'required|in:all,students,teachers,admins',
             'document_type' => 'required|in:lecture_notes,assignment,lab_report,assessment,study_guide,syllabus,project_material',
             'file' => 'required|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip,rar',
         ]);
@@ -73,14 +73,30 @@ class StudyMaterialController extends Controller
             $subject = Subject::where('subject_name', $validated['course'])->first();
             $subjectId = $subject ? $subject->id : 1;
 
+            // Get teacher_id from authenticated user's teacher relationship
+            $user = Auth::user();
+            $teacherId = null;
+            if ($user) {
+                // Try to get teacher's id from the teachers table via user_id
+                $teacherId = Teacher::where('user_id', $user->id)->value('id');
+                // If no teacher record, use user id as fallback
+                if (!$teacherId) {
+                    $teacherId = $user->id;
+                }
+            }
+            // Fallback to user id if no authenticated user
+            if (!$teacherId) {
+                $teacherId = $user ? $user->id : 1;
+            }
+
             $material = new StudyMaterial();
             $material->title = $validated['title'];
             $material->description = $validated['description'] ?? null;
             $material->semester = $validated['semester'];
             $material->subject_id = $subjectId;
-            $material->visibility = $validated['visibility'];
             $material->document_type = $validated['document_type'];
-            $material->teacher_id = Auth::id() ?? 1;
+            $material->teacher_id = $teacherId;
+            $material->visibility = 'students';
             $material->is_published = true;
             $material->uploaded_at = now();
             
@@ -125,7 +141,6 @@ class StudyMaterialController extends Controller
             'description' => 'nullable|string',
             'semester' => 'required|string',
             'course' => 'required|string',
-            'visibility' => 'required|in:all,students,teachers,admins',
             'document_type' => 'required|in:lecture_notes,assignment,lab_report,assessment,study_guide,syllabus,project_material',
             'file' => 'nullable|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip,rar',
         ]);
@@ -137,12 +152,25 @@ class StudyMaterialController extends Controller
             $subject = Subject::where('subject_name', $validated['course'])->first();
             $subjectId = $subject ? $subject->id : 1;
 
+            // Get teacher_id from authenticated user's teacher relationship
+            $user = Auth::user();
+            $teacherId = null;
+            if ($user) {
+                $teacherId = Teacher::where('user_id', $user->id)->value('id');
+                if (!$teacherId) {
+                    $teacherId = $user->id;
+                }
+            }
+            if (!$teacherId) {
+                $teacherId = $user ? $user->id : 1;
+            }
+
             $material->title = $validated['title'];
             $material->description = $validated['description'] ?? null;
             $material->semester = $validated['semester'];
             $material->subject_id = $subjectId;
-            $material->visibility = $validated['visibility'];
             $material->document_type = $validated['document_type'];
+            $material->teacher_id = $teacherId;
             
             // Handle file upload (optional update)
             if ($request->hasFile('file')) {
