@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Notice Board')
+@section('title', __('Notice Board'))
 
 @section('content')
 <div class="space-y-4">
@@ -23,7 +23,7 @@
         <div class="bg-white p-3 rounded shadow-sm border border-gray-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-xs font-medium">Total Notices</p>
+                    <p class="text-gray-600 text-xs font-medium">{{ __('Total Notices') }}</p>
                     <p class="text-xl font-bold text-gray-900 mt-0.5">{{ $stats['total'] ?? 0 }}</p>
                 </div>
                 <div class="bg-blue-100 p-2 rounded-lg">
@@ -36,7 +36,7 @@
         <div class="bg-white p-3 rounded shadow-sm border border-gray-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-xs font-medium">Published</p>
+                    <p class="text-gray-600 text-xs font-medium">{{ __('Published') }}</p>
                     <p class="text-xl font-bold text-green-600 mt-0.5">{{ $stats['published'] ?? 0 }}</p>
                 </div>
                 <div class="bg-green-100 p-2 rounded-lg">
@@ -49,7 +49,7 @@
         <div class="bg-white p-3 rounded shadow-sm border border-gray-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-xs font-medium">Draft</p>
+                    <p class="text-gray-600 text-xs font-medium">{{ __('Draft') }}</p>
                     <p class="text-xl font-bold text-orange-600 mt-0.5">{{ $stats['draft'] ?? 0 }}</p>
                 </div>
                 <div class="bg-orange-100 p-2 rounded-lg">
@@ -62,7 +62,7 @@
         <div class="bg-white p-3 rounded shadow-sm border border-gray-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-600 text-xs font-medium">Scheduled</p>
+                    <p class="text-gray-600 text-xs font-medium">{{ __('Scheduled') }}</p>
                     <p class="text-xl font-bold text-red-600 mt-0.5">{{ $stats['scheduled'] ?? 0 }}</p>
                 </div>
                 <div class="bg-red-100 p-2 rounded-lg">

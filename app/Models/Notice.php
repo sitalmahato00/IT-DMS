@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\NepaliContentHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,8 +12,11 @@ class Notice extends Model
 
     protected $fillable = [
         'title',
+        'title_ne',
         'message',
+        'message_ne',
         'audience',
+        'audience_ne',
         'status',
         'semester',
         'subject_id',
@@ -28,6 +32,95 @@ class Notice extends Model
         'is_important' => 'boolean',
         'published_at' => 'datetime',
     ];
+
+    /**
+     * Get the localized title based on current locale
+     */
+    public function getLocalizedTitleAttribute(): string
+    {
+        return NepaliContentHelper::getLocalizedContent(
+            $this->title_ne,
+            $this->title
+        ) ?? $this->title ?? '';
+    }
+
+    /**
+     * Get the localized message based on current locale
+     */
+    public function getLocalizedMessageAttribute(): string
+    {
+        return NepaliContentHelper::getLocalizedContent(
+            $this->message_ne,
+            $this->message
+        ) ?? $this->message ?? '';
+    }
+
+    /**
+     * Get the localized audience label based on current locale
+     */
+    public function getLocalizedAudienceLabelAttribute(): string
+    {
+        $locale = app()->getLocale();
+        
+        if ($locale === 'ne' && !empty($this->audience_ne)) {
+            return $this->audience_ne;
+        }
+        
+        return match($this->audience) {
+            'all' => $locale === 'ne' ? 'सबै' : 'All',
+            'students' => $locale === 'ne' ? 'विद्यार्थीहरू' : 'Students',
+            'faculty' => $locale === 'ne' ? 'शिक्षकहरू' : 'Faculty',
+            'parents' => $locale === 'ne' ? 'अभिभावकहरू' : 'Parents',
+            default => $locale === 'ne' ? 'सबै' : 'All',
+        };
+    }
+
+    /**
+     * Get the localized priority label based on current locale
+     */
+    public function getLocalizedPriorityLabelAttribute(): string
+    {
+        if ($this->is_important) {
+            return app()->getLocale() === 'ne' ? 'महत्वपूर्ण' : 'Important';
+        }
+        return app()->getLocale() === 'ne' ? 'सामान्य' : 'Normal';
+    }
+
+    /**
+     * Get formatted date in current locale
+     */
+    public function getFormattedDateAttribute(): string
+    {
+        $locale = app()->getLocale();
+        
+        if ($locale === 'ne' && !empty($this->published_at_bs)) {
+            return NepaliContentHelper::formatNumber($this->published_at_bs);
+        }
+        
+        return $this->published_at 
+            ? $this->published_at->format('d M Y') 
+            : $this->created_at->format('d M Y');
+    }
+
+    /**
+     * Get formatted semester in current locale
+     */
+    public function getFormattedSemesterAttribute(): string
+    {
+        if (!$this->semester) return '';
+        
+        $locale = app()->getLocale();
+        $semesterMap = [
+            '1' => ['ne' => 'प्रथम', 'en' => '1st'],
+            '2' => ['ne' => 'द्वितीय', 'en' => '2nd'],
+            '3' => ['ne' => 'तृतीय', 'en' => '3rd'],
+            '4' => ['ne' => 'चतुर्थ', 'en' => '4th'],
+            '5' => ['ne' => 'पंचम', 'en' => '5th'],
+            '6' => ['ne' => 'षष्ठ', 'en' => '6th'],
+        ];
+        
+        return $semesterMap[$this->semester][$locale] ?? $this->semester;
+    }
 
     /**
      * Get the user who created this notice
@@ -83,7 +176,6 @@ class Notice extends Model
     public function scopeForAudience($query, $audience)
     {
         if ($audience && $audience !== 'all') {
-            // accept 'teacher' as an alias for 'faculty'
             if ($audience === 'teacher') {
                 $audience = 'faculty';
             }
@@ -101,7 +193,6 @@ class Notice extends Model
     public function scopeForSemester($query, $semester)
     {
         if ($semester && $semester !== 'all') {
-            // Build candidate semester formats to match stored values (numeric, textual, ordinal)
             $map = [
                 'first' => '1', 'second' => '2', 'third' => '3', 'fourth' => '4', 'fifth' => '5', 'sixth' => '6',
                 '1st' => '1', '2nd' => '2', '3rd' => '3', '4th' => '4', '5th' => '5', '6th' => '6',
@@ -141,7 +232,7 @@ class Notice extends Model
     }
 
     /**
-     * Get audience display text
+     * Get audience display text (legacy - use localized_audience_label)
      */
     public function getAudienceTextAttribute()
     {
@@ -168,14 +259,6 @@ class Notice extends Model
             'parents' => 'bg-green-500',
             default => 'bg-yellow-500',
         };
-    }
-
-    /**
-     * Format date for display
-     */
-    public function getFormattedDateAttribute()
-    {
-        return $this->published_at_bs ? $this->published_at_bs : ($this->published_at ? $this->published_at->format('M d, Y') : $this->created_at->format('M d, Y'));
     }
 
     /**

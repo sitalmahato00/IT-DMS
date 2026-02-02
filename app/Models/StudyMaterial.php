@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\NepaliContentHelper;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,10 +17,12 @@ class StudyMaterial extends Model
         'teacher_id',
         'document_type',
         'title',
+        'title_ne',
         'file_name',
         'file_path',
         'file_size',
         'description',
+        'description_ne',
         'semester',
         'visibility',
         'is_published',
@@ -31,6 +34,81 @@ class StudyMaterial extends Model
         'is_published' => 'boolean',
         'uploaded_at' => 'datetime',
     ];
+
+    /**
+     * Get the localized title based on current locale
+     */
+    public function getLocalizedTitleAttribute(): string
+    {
+        return NepaliContentHelper::getLocalizedContent(
+            $this->title_ne,
+            $this->title
+        ) ?? $this->title ?? '';
+    }
+
+    /**
+     * Get the localized description based on current locale
+     */
+    public function getLocalizedDescriptionAttribute(): string
+    {
+        return NepaliContentHelper::getLocalizedContent(
+            $this->description_ne,
+            $this->description
+        ) ?? $this->description ?? '';
+    }
+
+    /**
+     * Get formatted semester in current locale
+     */
+    public function getFormattedSemesterAttribute(): string
+    {
+        if (!$this->semester) return '';
+        
+        $locale = app()->getLocale();
+        $semesterMap = [
+            '1' => ['ne' => 'प्रथम', 'en' => '1st'],
+            '2' => ['ne' => 'द्वितीय', 'en' => '2nd'],
+            '3' => ['ne' => 'तृतीय', 'en' => '3rd'],
+            '4' => ['ne' => 'चतुर्थ', 'en' => '4th'],
+            '5' => ['ne' => 'पंचम', 'en' => '5th'],
+            '6' => ['ne' => 'षष्ठ', 'en' => '6th'],
+        ];
+        
+        return $semesterMap[$this->semester][$locale] ?? $this->semester;
+    }
+
+    /**
+     * Get document type label in current locale
+     */
+    public function getLocalizedDocumentTypeLabelAttribute(): string
+    {
+        $locale = app()->getLocale();
+        $typeMap = [
+            'lecture_notes' => ['ne' => 'लेक्चर नोट्स', 'en' => 'Lecture Notes'],
+            'assignment' => ['ne' => 'एसाइनमेंट', 'en' => 'Assignment'],
+            'lab_report' => ['ne' => 'ल्याब रिपोर्ट', 'en' => 'Lab Report'],
+            'assessment' => ['ne' => 'मूल्यांकन', 'en' => 'Assessment'],
+            'study_guide' => ['ne' => 'अध्ययन गाइड', 'en' => 'Study Guide'],
+            'syllabus' => ['ne' => 'पाठ्यक्रम', 'en' => 'Syllabus'],
+            'project_material' => ['ne' => 'प्रोजेक्ट सामग्री', 'en' => 'Project Material'],
+        ];
+        
+        return $typeMap[$this->document_type][$locale] ?? $this->document_type;
+    }
+
+    /**
+     * Get visibility label in current locale
+     */
+    public function getLocalizedVisibilityLabelAttribute(): string
+    {
+        $locale = app()->getLocale();
+        return match($this->visibility) {
+            'all' => $locale === 'ne' ? 'सबै' : 'All',
+            'students' => $locale === 'ne' ? 'विद्यार्थीहरू' : 'Students',
+            'faculty' => $locale === 'ne' ? 'शिक्षकहरू' : 'Faculty',
+            default => $locale === 'ne' ? 'सबै' : 'All',
+        };
+    }
 
     /**
      * Get the subject for this material.
@@ -140,7 +218,7 @@ class StudyMaterial extends Model
     }
 
     /**
-     * Get document type display text.
+     * Get document type display text (legacy - use localized_document_type_label).
      */
     public function getDocumentTypeTextAttribute()
     {
@@ -194,18 +272,6 @@ class StudyMaterial extends Model
             'rar' => 'bi-file-earmark-zip-fill text-gray-600',
         ];
         return $icons[$ext] ?? 'bi-file-earmark-fill text-gray-600';
-    }
-
-    /**
-     * Format semester for display.
-     */
-    public function getFormattedSemesterAttribute()
-    {
-        if (!$this->semester) return 'N/A';
-        $map = [
-            '1' => '1st', '2' => '2nd', '3' => '3rd', '4' => '4th', '5' => '5th', '6' => '6th',
-        ];
-        return $map[$this->semester] ?? $this->semester;
     }
 
     /**
