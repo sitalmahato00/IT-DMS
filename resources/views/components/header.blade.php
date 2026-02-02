@@ -35,6 +35,10 @@
                     {{ __('Gallery') }}
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
                 </a>
+                <a href="{{ $onLanding ? '#study-materials' : url('/') . '#study-materials' }}" class="text-gray-600 hover:text-red-600 transition duration-300 relative group">
+                    {{ __('Study Materials') }}
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
+                </a>
                 <a href="{{ $onLanding ? '#about' : url('/') . '#about' }}" class="text-gray-600 hover:text-red-600 transition duration-300 relative group">
                     {{ __('Personas') }}
                     <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
@@ -90,6 +94,9 @@
             </a>
             <a href="{{ $onLanding ? '#gallery' : url('/') . '#gallery' }}" class="block text-gray-600 py-2 hover:text-red-600 hover:pl-2 transition duration-300">
                 {{ __('Gallery') }}
+            </a>
+            <a href="{{ $onLanding ? '#study-materials' : url('/') . '#study-materials' }}" class="block text-gray-600 py-2 hover:text-red-600 hover:pl-2 transition duration-300">
+                {{ __('Study Materials') }}
             </a>
             <a href="{{ $onLanding ? '#about' : url('/') . '#about' }}" class="block text-gray-600 py-2 hover:text-red-600 hover:pl-2 transition duration-300">
                 {{ __('Personas') }}
