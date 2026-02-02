@@ -5,11 +5,11 @@
         <!-- Section Header -->
         <div class="text-center mb-12">
             <span class="inline-block px-3 py-1 bg-green-100 text-green-600 text-xs font-semibold rounded-full mb-3">
-                Study Resources
+                {{ __('Study Resources') }}
             </span>
-            <h2 class="text-3xl font-bold text-gray-900 mb-3">Study Materials</h2>
+            <h2 class="text-3xl font-bold text-gray-900 mb-3">{{ __('Study Materials') }}</h2>
             <p class="text-gray-600 max-w-2xl mx-auto">
-                Access lecture notes, assignments, previous year papers, and other study resources to support your learning.
+                {{ __('Access lecture notes, assignments, previous year papers, and other study resources to support your learning.') }}
             </p>
         </div>
 
@@ -18,20 +18,20 @@
             <form id="materialsFilterForm" class="flex flex-wrap gap-4 items-end">
                 <!-- Search Bar -->
                 <div class="flex-1 min-w-[250px]">
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Search Materials</label>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">{{ __('Search Materials') }}</label>
                     <div class="relative">
                         <i class="bi bi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                         <input type="text" id="materialsSearch" name="search" value="{{ $searchQuery }}"
-                            placeholder="Search by title, description..."
+                            placeholder="{{ __('Type to search') }}"
                             class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500">
                     </div>
                 </div>
 
                 <!-- Semester Filter -->
                 <div class="w-40">
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Semester</label>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">{{ __('Semester') }}</label>
                     <select id="semesterFilter" name="semester" class="w-full py-2 px-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                        <option value="">All Semesters</option>
+                        <option value="">{{ __('All') }}</option>
                         @for($i = 1; $i <= 6; $i++)
                             <option value="{{ $i }}" {{ $selectedSemester == $i ? 'selected' : '' }}>
                                 {{ $i }}{{ $i == 1 ? 'st' : ($i == 2 ? 'nd' : ($i == 3 ? 'rd' : 'th')) }}
@@ -42,9 +42,9 @@
 
                 <!-- Subject Filter -->
                 <div class="flex-1 min-w-[200px]">
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Subject</label>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">{{ __('Subject Name') }}</label>
                     <select id="subjectFilter" name="subject" class="w-full py-2 px-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                        <option value="">All Subjects</option>
+                        <option value="">{{ __('All Subjects') }}</option>
                         @foreach($subjects as $subject)
                             <option value="{{ $subject->id }}" {{ $selectedSubject == $subject->id ? 'selected' : '' }}>
                                 {{ $subject->subject_name }} ({{ $subject->subject_code }})
@@ -55,16 +55,16 @@
 
                 <!-- Material Type Filter -->
                 <div class="w-40">
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Type</label>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">{{ __('Assessment Type') }}</label>
                     <select id="typeFilter" name="type" class="w-full py-2 px-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                        <option value="">All Types</option>
-                        <option value="lecture_notes">Notes</option>
-                        <option value="assignment">Assignments</option>
-                        <option value="assessment">Papers</option>
-                        <option value="lab_report">Lab Reports</option>
-                        <option value="study_guide">Study Guides</option>
-                        <option value="syllabus">Syllabus</option>
-                        <option value="project_material">Project Materials</option>
+                        <option value="">{{ __('All') }}</option>
+                        <option value="lecture_notes">{{ __('Lecture Notes') }}</option>
+                        <option value="assignment">{{ __('Assignments') }}</option>
+                        <option value="assessment">{{ __('Assessment') }}</option>
+                        <option value="lab_report">{{ __('Lab Reports') }}</option>
+                        <option value="study_guide">{{ __('Study Guide') }}</option>
+                        <option value="syllabus">{{ __('Syllabus') }}</option>
+                        <option value="project_material">{{ __('Project') }}</option>
                     </select>
                 </div>
 
@@ -72,7 +72,7 @@
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1"> </label>
                     <button type="button" id="resetMaterialsFilters" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300 transition">
-                        <i class="bi bi-arrow-clockwise mr-1"></i>Reset
+                        <i class="bi bi-arrow-clockwise mr-1"></i>{{ __('Reset') }}
                     </button>
                 </div>
             </form>
@@ -86,23 +86,23 @@
         <!-- Material Type Quick Filter Tabs -->
         <div class="flex flex-wrap justify-center gap-2 mb-8" id="materialTypeTabs">
             <button data-type="all" class="material-type-btn px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-green-600 text-white shadow-lg">
-                All
+                {{ __('All') }}
                 <span class="ml-1 text-xs opacity-75">({{ $counts['all'] ?? count($materials) }})</span>
             </button>
             <button data-type="lecture_notes" class="material-type-btn px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-white text-gray-600 hover:bg-gray-100">
-                <i class="bi bi-journal-text mr-1"></i>Notes
+                <i class="bi bi-journal-text mr-1"></i>{{ __('Lecture Notes') }}
                 <span class="ml-1 text-xs opacity-75">({{ $counts['lecture_notes'] ?? 0 }})</span>
             </button>
             <button data-type="assignment" class="material-type-btn px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-white text-gray-600 hover:bg-gray-100">
-                <i class="bi bi-pencil-square mr-1"></i>Assignments
+                <i class="bi bi-pencil-square mr-1"></i>{{ __('Assignments') }}
                 <span class="ml-1 text-xs opacity-75">({{ $counts['assignment'] ?? 0 }})</span>
             </button>
             <button data-type="assessment" class="material-type-btn px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-white text-gray-600 hover:bg-gray-100">
-                <i class="bi bi-file-earmark-ruled mr-1"></i>Papers
+                <i class="bi bi-file-earmark-ruled mr-1"></i>{{ __('Assessment') }}
                 <span class="ml-1 text-xs opacity-75">({{ $counts['assessment'] ?? 0 }})</span>
             </button>
             <button data-type="lab_report" class="material-type-btn px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 bg-white text-gray-600 hover:bg-gray-100">
-                <i class="bi bi-flask mr-1"></i>Lab Reports
+                <i class="bi bi-flask mr-1"></i>{{ __('Lab Reports') }}
                 <span class="ml-1 text-xs opacity-75">({{ $counts['lab_report'] ?? 0 }})</span>
             </button>
         </div>
@@ -115,7 +115,7 @@
         <!-- Loading Indicator -->
         <div id="materialsLoading" class="hidden text-center py-8">
             <div class="inline-flex items-center justify-center w-12 h-12 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
-            <p class="mt-3 text-gray-600">Loading materials...</p>
+            <p class="mt-3 text-gray-600">{{ __('Loading') }}...</p>
         </div>
 
         <!-- No Results Message -->
@@ -123,8 +123,8 @@
             <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
                 <i class="bi bi-search text-3xl text-gray-400"></i>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">No Materials Found</h3>
-            <p class="text-gray-600">Try adjusting your filters or search terms.</p>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('No Data Available') }}</h3>
+            <p class="text-gray-600">{{ __('Please try again') }}</p>
         </div>
 
         <!-- View All Link -->
@@ -132,7 +132,7 @@
         <div class="text-center mt-10">
             <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition shadow-lg hover:shadow-xl">
                 <i class="bi bi-arrow-right"></i>
-                View All Study Materials
+                {{ __('View All Study Materials') }}
             </a>
         </div>
         @endif
@@ -360,7 +360,7 @@
                         <div class="flex items-center justify-between mb-3">
                             <span class="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-xs font-medium text-gray-600">
                                 <i class="bi bi-calendar3"></i>
-                                ${material.semester || 'N/A'} Semester
+                                ${material.semester || 'N/A'} {{ __('Semester') }}
                             </span>
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-700">
                                 ${typeText}
@@ -381,7 +381,7 @@
                             ${material.file_path ? `
                                 <a href="/admin/study-material/download/${material.id}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors">
                                     <i class="bi bi-download"></i>
-                                    Download
+                                    {{ __('Download') }}
                                 </a>
                             ` : ''}
                         </div>
@@ -391,3 +391,4 @@
         }).join('');
     }
 </script>
+

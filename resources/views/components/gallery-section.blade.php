@@ -2,13 +2,13 @@
 
 @php
 $tabs = [
-    'all' => ['label' => 'All Photos', 'icon' => 'bi-images', 'color' => 'blue'],
-    'campus' => ['label' => 'Campus', 'icon' => 'bi-building', 'color' => 'green'],
-    'events' => ['label' => 'Events', 'icon' => 'bi-calendar-event', 'color' => 'purple'],
-    'activities' => ['label' => 'Activities', 'icon' => 'bi-activity', 'color' => 'red'],
-    'students' => ['label' => 'Students', 'icon' => 'bi-mortarboard', 'color' => 'cyan'],
-    'faculty' => ['label' => 'Faculty', 'icon' => 'bi-person-badge', 'color' => 'orange'],
-    'facilities' => ['label' => 'Facilities', 'icon' => 'bi-gear', 'color' => 'teal'],
+    'all' => ['label' => __('All Photos'), 'icon' => 'bi-images', 'color' => 'blue'],
+    'campus' => ['label' => __('Campus'), 'icon' => 'bi-building', 'color' => 'green'],
+    'events' => ['label' => __('Events'), 'icon' => 'bi-calendar-event', 'color' => 'purple'],
+    'activities' => ['label' => __('Activities'), 'icon' => 'bi-activity', 'color' => 'red'],
+    'students' => ['label' => __('Students'), 'icon' => 'bi-mortarboard', 'color' => 'cyan'],
+    'faculty' => ['label' => __('Faculty'), 'icon' => 'bi-person-badge', 'color' => 'orange'],
+    'facilities' => ['label' => __('Facilities'), 'icon' => 'bi-gear', 'color' => 'teal'],
 ];
 
 // Prepare gallery items JSON for JavaScript
