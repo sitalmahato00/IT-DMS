@@ -19,43 +19,43 @@
             <li>
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.dashboard') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm font-medium transition duration-300">
                     <i class="bi bi-speedometer2 text-xs"></i>
-                    <span>Dashboard</span>
+                    <span>{{ __("Dashboard") }}</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.students') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.students') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-mortarboard text-xs"></i>
-                    <span>Students</span>
+                    <span>{{ __("Students") }}</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.teachers') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.teachers') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-book text-xs"></i>
-                    <span>Teachers</span>
+                    <span>{{ __("Teachers") }}</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.parents') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.parents') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-people text-xs"></i>
-                    <span>Parents</span>
+                    <span>{{ __("Parents") }}</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.attendance') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.attendance') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-calendar-check text-xs"></i>
-                    <span>Attendance</span>
+                    <span>{{ __("Attendance") }}</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.assessment') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.assessment') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-file-earmark text-xs"></i>
-                    <span>Exam</span>
+                    <span>{{ __("Assessment") }}</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.courses') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.courses') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-book-half text-xs"></i>
-                    <span>Courses</span>
+                    <span>{{ __("Courses") }}</span>
                 </a>
             </li>
            
@@ -64,38 +64,38 @@
             <li>
                 <a href="{{ route('admin.study-material') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.study-material') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-journal-bookmark text-xs"></i>
-                    <span>Document</span>
+                    <span>{{ __("Marks") }}</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.gallery') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.gallery') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-images text-xs"></i>
-                    <span>Gallery</span>
+                    <span>{{ __("Gallery") }}</span>
                 </a>
             </li>
              <li>
                 <a href="{{ route('admin.reports') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.reports') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-bar-chart text-xs"></i>
-                    <span>Reports</span>
+                    <span>{{ __("Reports") }}</span>
                 </a>
             </li>
             
             <li>
                 <a href="{{ route('admin.notice-board') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.notice-board') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-megaphone text-xs"></i>
-                    <span>Notice Board</span>
+                    <span>{{ __("Notice Board") }}</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.audit-logs.index') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.audit-logs.*') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-list-columns text-xs"></i>
-                    <span>Audit Logs</span>
+                    <span>{{ __("Audit Logs") }}</span>
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.settings') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.settings') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-gear text-xs"></i>
-                    <span>Settings</span>
+                    <span>{{ __("Settings") }}</span>
                 </a>
             </li>
         </ul>
