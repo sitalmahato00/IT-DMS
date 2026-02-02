@@ -5,30 +5,30 @@
         <!-- Section Header -->
         <div class="text-center mb-12">
             <span class="inline-block px-3 py-1 bg-red-100 text-red-600 text-xs font-semibold rounded-full mb-3">
-                Stay Updated
+                {{ __('Stay Updated') }}
             </span>
-            <h2 class="text-3xl font-bold text-gray-900 mb-3">Latest Notices</h2>
+            <h2 class="text-3xl font-bold text-gray-900 mb-3">{{ __('Latest Notices') }}</h2>
             <p class="text-gray-600 max-w-2xl mx-auto">
-                Stay informed with the latest announcements, events, and important updates from the institution.
+                {{ __('Stay informed with the latest announcements, events, and important updates from the institution.') }}
             </p>
         </div>
 
         <!-- Audience Filter Tabs -->
         <div class="flex flex-wrap justify-center gap-2 mb-8" id="audienceTabs">
             <button data-audience="all" class="audience-btn px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {{ $audience === 'all' ? 'bg-red-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-100' }}">
-                All Notices
+                {{ __('All Notices') }}
                 <span class="ml-1 text-xs opacity-75">({{ $counts['all'] ?? 0 }})</span>
             </button>
             <button data-audience="students" class="audience-btn px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {{ $audience === 'students' ? 'bg-red-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-100' }}">
-                <i class="bi bi-graduation-cap mr-1"></i>Students
+                <i class="bi bi-graduation-cap mr-1"></i>{{ __('Students') }}
                 <span class="ml-1 text-xs opacity-75">({{ $counts['students'] ?? 0 }})</span>
             </button>
             <button data-audience="faculty" class="audience-btn px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {{ $audience === 'faculty' ? 'bg-red-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-100' }}">
-                <i class="bi bi-person-workspace mr-1"></i>Faculty
+                <i class="bi bi-person-workspace mr-1"></i>{{ __('Faculty') }}
                 <span class="ml-1 text-xs opacity-75">({{ $counts['faculty'] ?? 0 }})</span>
             </button>
             <button data-audience="parents" class="audience-btn px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 {{ $audience === 'parents' ? 'bg-red-600 text-white shadow-lg' : 'bg-white text-gray-600 hover:bg-gray-100' }}">
-                <i class="bi bi-people mr-1"></i>Parents
+                <i class="bi bi-people mr-1"></i>{{ __('Parents') }}
                 <span class="ml-1 text-xs opacity-75">({{ $counts['parents'] ?? 0 }})</span>
             </button>
         </div>
@@ -55,7 +55,7 @@
         <!-- Loading Indicator -->
         <div id="noticesLoading" class="hidden text-center py-8">
             <div class="inline-flex items-center justify-center w-12 h-12 border-4 border-red-200 border-t-red-600 rounded-full animate-spin"></div>
-            <p class="mt-3 text-gray-600">Loading notices...</p>
+            <p class="mt-3 text-gray-600">{{ __('Loading') }}...</p>
         </div>
 
         {{-- <!-- Pagination -->
@@ -74,7 +74,7 @@
         <div class="bg-gradient-to-r from-red-600 to-red-700 px-6 py-4 flex items-center justify-between flex-shrink-0">
             <div class="flex items-center gap-3">
                 <i class="bi bi-bell-fill text-white text-xl"></i>
-                <h2 class="text-white font-bold text-lg">Notice Details</h2>
+                <h2 class="text-white font-bold text-lg">{{ __('Notice Details') }}</h2>
             </div>
             <button onclick="closePublicNoticeModal()" class="text-white hover:text-gray-100 transition hover:scale-110">
                 <i class="bi bi-x-lg text-xl"></i>
@@ -86,7 +86,7 @@
             <!-- Content will be loaded dynamically -->
             <div class="text-center py-12">
                 <i class="bi bi-hourglass-split text-5xl text-gray-400 animate-spin mb-3"></i>
-                <p class="text-gray-500 text-sm">Loading notice details...</p>
+                <p class="text-gray-500 text-sm">{{ __('Loading') }}...</p>
             </div>
         </div>
 
@@ -97,11 +97,11 @@
             <div class="flex gap-2">
                 @if(Auth::check() && Auth::user()->role === 'admin')
                     <a href="{{ route('admin.notice-board') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition">
-                        <i class="bi bi-pencil mr-1"></i>Edit in Admin
+                        <i class="bi bi-pencil mr-1"></i>{{ __('Edit') }} {{ __('in') }} {{ __('Admin') }}
                     </a>
                 @endif
                 <button type="button" onclick="closePublicNoticeModal()" class="px-4 py-2 border border-gray-300 rounded text-xs font-medium text-gray-700 hover:bg-gray-100 transition">
-                    Close
+                    {{ __('Close') }}
                 </button>
             </div>
         </div>
@@ -171,9 +171,8 @@
                         <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
                             <i class="bi bi-exclamation-triangle text-2xl text-red-600"></i>
                         </div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Notices</h3>
-                        <p class="text-gray-600">Please try again later.</p>
-                {{ __("All Notices") }}
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('Error Loading Notices') }}</h3>
+                        <p class="text-gray-600">{{ __('Please try again') }}</p>
                     </div>
                 `;
             })
@@ -209,7 +208,7 @@
                         </span>
                         ${isImportant ? `
                             <span class="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-600 rounded text-xs font-semibold">
-                                <i class="bi bi-star-fill"></i>Important
+                                <i class="bi bi-star-fill"></i>{{ __('Important') }}
                             </span>
                         ` : ''}
                     </div>
@@ -232,7 +231,7 @@
                         <button onclick="openPublicNoticeModal(${notice.id})"
                             class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors">
                             <i class="bi bi-eye"></i>
-                            View
+                            {{ __('View') }}
                         </button>
                     </div>
                 </div>
@@ -250,7 +249,7 @@
             
             // Previous button
             if (data.current_page > 1) {
-                paginationHtml += `<button onclick="fetchNotices('${audience}', ${data.current_page - 1})" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Previous</button>`;
+                paginationHtml += `<button onclick="fetchNotices('${audience}', ${data.current_page - 1})" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">{{ __('Previous') }}</button>`;
             }
             
             // Page numbers
@@ -260,7 +259,7 @@
             
             // Next button
             if (data.has_more) {
-                paginationHtml += `<button onclick="fetchNotices('${audience}', ${data.current_page + 1})" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Next</button>`;
+                paginationHtml += `<button onclick="fetchNotices('${audience}', ${data.current_page + 1})" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">{{ __('Next') }}</button>`;
             }
             
             paginationHtml += '</div>';
@@ -291,8 +290,8 @@
                     content.innerHTML = `
                         <div class="text-center py-12">
                             <i class="bi bi-exclamation-triangle text-5xl text-red-400 mb-3"></i>
-                            <p class="text-red-600 font-semibold mb-1">Failed to Load Notice</p>
-                            <p class="text-gray-600 text-sm">There was an error loading the notice details. Please try again.</p>
+                            <p class="text-red-600 font-semibold mb-1">{{ __('Failed to Load Notice') }}</p>
+                            <p class="text-gray-600 text-sm">{{ __('There was an error loading the notice details. Please try again.') }}</p>
                         </div>
                     `;
                 });
@@ -310,25 +309,25 @@
         const footer = document.getElementById('publicNoticeMetaFooter');
         
         // Format semester text
-        let semesterText = notice.semester ? `${notice.semester}<sup>th</sup> Semester` : 'All Semesters';
+        let semesterText = notice.semester ? `${notice.semester}<sup>th</sup> {{ __('Semester') }}` : '{{ __('All Semesters') }}';
         
         // Get subject info
-        let subjectText = notice.subject ? notice.subject.subject_name : 'General Notice';
+        let subjectText = notice.subject ? notice.subject.subject_name : '{{ __('General') }}';
         let subjectCode = notice.subject ? notice.subject.subject_code : '';
         let subjectDisplay = subjectCode ? `<strong>${subjectText}</strong> <span class="text-gray-600">(${subjectCode})</span>` : `<strong>${subjectText}</strong>`;
         
         // Format importance flag
         let importanceDisplay = notice.is_important ? 
-            '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-red-100 text-red-700 font-semibold"><i class="bi bi-exclamation-circle-fill"></i> Important Notice</span>' :
-            '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700 font-medium"><i class="bi bi-info-circle"></i> Standard Notice</span>';
+            '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-red-100 text-red-700 font-semibold"><i class="bi bi-exclamation-circle-fill"></i> {{ __("Important") }}</span>' :
+            '<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs bg-gray-100 text-gray-700 font-medium"><i class="bi bi-info-circle"></i> {{ __("Standard") }}</span>';
         
         // Format audience text
         let audienceDisplay = '';
         const audienceText = {
-            'all': '<span class="inline-flex items-center gap-1"><i class="bi bi-people-fill"></i> All</span>',
-            'students': '<span class="inline-flex items-center gap-1 text-blue-600"><i class="bi bi-graduation-cap"></i> Students</span>',
-            'faculty': '<span class="inline-flex items-center gap-1 text-green-600"><i class="bi bi-person-workspace"></i> Faculty</span>',
-            'parents': '<span class="inline-flex items-center gap-1 text-orange-600"><i class="bi bi-people"></i> Parents</span>'
+            'all': '<span class="inline-flex items-center gap-1"><i class="bi bi-people-fill"></i> {{ __("All") }}</span>',
+            'students': '<span class="inline-flex items-center gap-1 text-blue-600"><i class="bi bi-graduation-cap"></i> {{ __("Students") }}</span>',
+            'faculty': '<span class="inline-flex items-center gap-1 text-green-600"><i class="bi bi-person-workspace"></i> {{ __("Faculty") }}</span>',
+            'parents': '<span class="inline-flex items-center gap-1 text-orange-600"><i class="bi bi-people"></i> {{ __("Parents") }}</span>'
         };
         audienceDisplay = audienceText[notice.audience] || notice.audience;
         
@@ -341,7 +340,7 @@
                 <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
                     <div class="flex items-center gap-2 mb-2">
                         <i class="bi ${fileIcon} text-blue-600 text-lg"></i>
-                        <p class="text-xs font-semibold text-blue-900 uppercase tracking-wide">Attachment</p>
+                        <p class="text-xs font-semibold text-blue-900 uppercase tracking-wide">{{ __('Attachment') }}</p>
                     </div>
                     <div class="flex items-center justify-between gap-3 p-3 bg-white rounded border border-blue-200">
                         <div class="flex items-center gap-2 flex-1 min-w-0">
@@ -350,7 +349,7 @@
                                 ${notice.file_name}
                             </a>
                         </div>
-                        <a href="${downloadUrl}" download class="text-blue-600 hover:text-blue-800 text-lg hover:scale-110 transition flex-shrink-0" title="Download">
+                        <a href="${downloadUrl}" download class="text-blue-600 hover:text-blue-800 text-lg hover:scale-110 transition flex-shrink-0" title="{{ __('Download') }}">
                             <i class="bi bi-download"></i>
                         </a>
                     </div>
@@ -366,8 +365,8 @@
         // Update footer meta
         footer.innerHTML = `
             <div class="space-y-1">
-                <p class="text-gray-600"><span class="font-medium">Published:</span> ${createdDateStr} at ${createdTimeStr}</p>
-                <p class="text-gray-600"><span class="font-medium">By:</span> ${notice.creator ? notice.creator.name : 'System Admin'}</p>
+                <p class="text-gray-600"><span class="font-medium">{{ __('Published') }}:</span> ${createdDateStr} at ${createdTimeStr}</p>
+                <p class="text-gray-600"><span class="font-medium">{{ __('By') }}:</span> ${notice.creator ? notice.creator.name : '{{ __('Admin') }}'}</p>
             </div>
         `;
         
@@ -375,39 +374,39 @@
             <div class="flex flex-wrap items-center gap-2">
                 ${importanceDisplay}
                 <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                    <i class="bi bi-check-circle-fill mr-1"></i>Published
+                    <i class="bi bi-check-circle-fill mr-1"></i>{{ __('Published') }}
                 </span>
             </div>
 
             <div>
-                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Title</p>
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ __('Title') }}</p>
                 <p class="text-xl font-bold text-gray-900 leading-snug">${notice.title}</p>
             </div>
 
             <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 grid grid-cols-2 gap-4">
                 <div>
-                    <p class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">Course</p>
+                    <p class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">{{ __('Course') }}</p>
                     <p class="text-sm text-gray-900">${subjectDisplay}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">Semester</p>
+                    <p class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">{{ __('Semester') }}</p>
                     <p class="text-sm text-gray-900">${semesterText}</p>
                 </div>
             </div>
 
             <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 grid grid-cols-2 gap-4">
                 <div>
-                    <p class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">Audience</p>
+                    <p class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">{{ __('Audience') }}</p>
                     <p class="text-sm text-gray-900 font-medium">${audienceDisplay}</p>
                 </div>
                 <div>
-                    <p class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">Published Date (BS)</p>
+                    <p class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-1">{{ __('Published') }} ({{ __('Date') }})</p>
                     <p class="text-sm text-gray-900 font-medium">${notice.published_at_bs || 'N/A'}</p>
                 </div>
             </div>
 
             <div class="bg-white border border-gray-200 rounded-lg p-4">
-                <p class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-3">Content</p>
+                <p class="text-xs font-bold text-gray-600 uppercase tracking-wide mb-3">{{ __('Content') }}</p>
                 <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">${notice.message}</p>
             </div>
 
@@ -417,7 +416,7 @@
                 <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                     <p class="text-red-700 text-sm font-medium">
                         <i class="bi bi-exclamation-triangle-fill mr-2"></i>
-                        This is an important notice. Please take note of the information provided above.
+                        {{ __('This is an important notice. Please take note of the information provided above.') }}
                     </p>
                 </div>
             ` : ''}
