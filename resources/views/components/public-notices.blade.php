@@ -92,7 +92,6 @@
 
         <!-- Modal Footer -->
         <div class="border-t border-gray-200 bg-gray-50 px-6 py-4 flex justify-between items-center gap-3 flex-shrink-0">
-            <div class="text-xs text-gray-600" id="publicNoticeMetaFooter">
                 <!-- Meta info will be populated -->
             </div>
             <div class="flex gap-2">
@@ -174,6 +173,7 @@
                         </div>
                         <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Notices</h3>
                         <p class="text-gray-600">Please try again later.</p>
+                {{ __("All Notices") }}
                     </div>
                 `;
             })

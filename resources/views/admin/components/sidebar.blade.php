@@ -7,8 +7,8 @@
                 <i class="bi bi-calendar-check text-sm"></i>
             </div>
             <div>
-                <h1 class="font-bold text-sm text-gray-900">IT-DMS </h1>
-                <p class="text-xs text-gray-500">Admin Portal</p>
+                <h1 class="font-bold text-sm text-gray-900">{{ __("IT-DMS") }}</h1>
+                <p class="text-xs text-gray-500">{{ __("Admin Portal") }}</p>
             </div>
         </div>
     </div>

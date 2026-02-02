@@ -33,6 +33,13 @@
             :notices="$notices"
             :audience="$audience"
             :counts="$noticeCounts ?? []"
+            home-label="{{ __('Home') }}"
+            notice-portal-label="{{ __('Notice Portal') }}"
+            photo-gallery-label="{{ __('Photo Gallery') }}"
+            all-notices-label="{{ __('All Notices') }}"
+            no-notices-label="{{ __('No Notices Found') }}"
+            loading-label="{{ __('Loading...') }}"
+            load-more-label="{{ __('Load More Notices') }}"
         />
 
 

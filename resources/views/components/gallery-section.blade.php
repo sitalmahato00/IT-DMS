@@ -32,8 +32,8 @@ foreach ($galleryItems as $item) {
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
                 <i class="bi bi-images text-2xl text-blue-600"></i>
             </div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-3">{{ __('Photo Gallery') }}</h2>
-            <p class="text-gray-600 max-w-2xl mx-auto">{{ __('Explore moments from our campus life through our photo gallery.') }}</p>
+            <h2 class="text-3xl font-bold text-gray-900 mb-3">{{ __("Photo Gallery") }}</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">{{ __("Explore moments from our campus life through our photo gallery.") }}</p>
         </div>
 
         <!-- Filter Tabs -->

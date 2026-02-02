@@ -339,10 +339,7 @@
                         <i class="bi bi-plus-circle text-xs"></i>
                         <span>Add New Exam</span>
                     </button>
-                    <button class="flex items-center gap-1 px-2 py-1 text-xs text-white bg-blue-600 hover:bg-blue-700 rounded transition" onclick="openMarkUploadModal()">
-                        <i class="bi bi-upload text-xs"></i>
-                        <span>Upload Marks</span>
-                    </button>
+                    <!-- Upload button removed here; use only the Upload button in the list to open the modal -->
                 </div>
             </div>
             

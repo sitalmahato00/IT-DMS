@@ -51,8 +51,8 @@
         <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
             <i class="bi bi-bell-slash text-2xl text-gray-400"></i>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">No Notices Found</h3>
-        <p class="text-gray-600">There are no notices to display at the moment.</p>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __("No Notices Found") }}</h3>
+        <p class="text-gray-600">{{ __("There are no notices to display at the moment.") }}</p>
     </div>
 @endif
 
