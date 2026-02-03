@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', __('Dashboard'))
 
 @section('content')
 <div class="space-y-6">
@@ -10,12 +10,12 @@
         <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 p-5 hover:shadow-lg transition-shadow">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
-                    <p class="text-xs text-blue-600 font-semibold uppercase tracking-wide">Total Students</p>
+                    <p class="text-xs text-blue-600 font-semibold uppercase tracking-wide">{{ __('Total Students') }}</p>
                     <p class="text-3xl font-bold text-blue-900 mt-2">{{ number_format($totalStudents ?? 0) }}</p>
                     <div class="mt-3 text-xs text-blue-700">
                         <span class="inline-flex items-center gap-1">
                             <i class="bi bi-arrow-up text-green-600"></i>
-                            <span class="text-green-600 font-semibold">+12%</span> from last month
+                            <span class="text-green-600 font-semibold">+12%</span> {{ __('from last month') }}
                         </span>
                     </div>
                 </div>
@@ -29,12 +29,12 @@
         <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200 p-5 hover:shadow-lg transition-shadow">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
-                    <p class="text-xs text-orange-600 font-semibold uppercase tracking-wide">Teachers</p>
+                    <p class="text-xs text-orange-600 font-semibold uppercase tracking-wide">{{ __('Teachers') }}</p>
                     <p class="text-3xl font-bold text-orange-900 mt-2">{{ number_format($teachers ?? 0) }}</p>
                     <div class="mt-3 text-xs text-orange-700">
                         <span class="inline-flex items-center gap-1">
                             <i class="bi bi-arrow-up text-green-600"></i>
-                            <span class="text-green-600 font-semibold">+3.4%</span> active teaching
+                            <span class="text-green-600 font-semibold">+3.4%</span> {{ __('active teaching') }}
                         </span>
                     </div>
                 </div>
@@ -48,12 +48,12 @@
         <div class="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl border border-pink-200 p-5 hover:shadow-lg transition-shadow">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
-                    <p class="text-xs text-pink-600 font-semibold uppercase tracking-wide">Parents</p>
+                    <p class="text-xs text-pink-600 font-semibold uppercase tracking-wide">{{ __('Parents') }}</p>
                     <p class="text-3xl font-bold text-pink-900 mt-2">{{ number_format($parents ?? 0) }}</p>
                     <div class="mt-3 text-xs text-pink-700">
                         <span class="inline-flex items-center gap-1">
                             <i class="bi bi-arrow-down text-red-600"></i>
-                            <span class="text-red-600 font-semibold">-2.8%</span> from last month
+                            <span class="text-red-600 font-semibold">-2.8%</span> {{ __('from last month') }}
                         </span>
                     </div>
                 </div>
@@ -67,12 +67,12 @@
         <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 p-5 hover:shadow-lg transition-shadow">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
-                    <p class="text-xs text-green-600 font-semibold uppercase tracking-wide">Attendance Rate</p>
+                    <p class="text-xs text-green-600 font-semibold uppercase tracking-wide">{{ __('Attendance Rate') }}</p>
                     <p class="text-3xl font-bold text-green-900 mt-2">{{ isset($avgAttendance) ? $avgAttendance.'%' : '—' }}</p>
                     <div class="mt-3 text-xs text-green-700">
                         <span class="inline-flex items-center gap-1">
                             <i class="bi bi-arrow-up text-green-600"></i>
-                            <span class="text-green-600 font-semibold">+6%</span> this semester
+                            <span class="text-green-600 font-semibold">+6%</span> {{ __('this semester') }}
                         </span>
                     </div>
                 </div>
@@ -88,7 +88,7 @@
         <!-- Attendance Overview Chart (Left) -->
         <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-gray-900">Attendance Trends</h3>
+                <h3 class="text-sm font-bold text-gray-900">{{ __('Attendance Trends') }}</h3>
                 <i class="bi bi-graph-up text-gray-400"></i>
             </div>
             <div class="h-48">
@@ -99,7 +99,7 @@
         <!-- Grade Distribution Pie Chart (Right) -->
         <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-gray-900">Grade Distribution</h3>
+                <h3 class="text-sm font-bold text-gray-900">{{ __('Grade Distribution') }}</h3>
                 <i class="bi bi-pie-chart text-gray-400"></i>
             </div>
             <div class="h-48 flex items-center justify-center">
@@ -113,7 +113,7 @@
         <!-- Recent Notices -->
         <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-gray-900">Recent Notices</h3>
+                <h3 class="text-sm font-bold text-gray-900">{{ __('Recent Notices') }}</h3>
                 <i class="bi bi-bell text-gray-400"></i>
             </div>
             <div class="space-y-3 max-h-64 overflow-y-auto">
@@ -135,7 +135,7 @@
                         </div>
                     @endforeach
                 @else
-                    <p class="text-xs text-gray-500 py-3">No recent notices</p>
+                    <p class="text-xs text-gray-500 py-3">{{ __('No Data Available') }}</p>
                 @endif
             </div>
         </div>
@@ -143,7 +143,7 @@
         <!-- Recent Activities -->
         <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-gray-900">Recent Activities</h3>
+                <h3 class="text-sm font-bold text-gray-900">{{ __('Recent Activities') }}</h3>
                 <i class="bi bi-activity text-gray-400"></i>
             </div>
             <div class="space-y-2 max-h-64 overflow-y-auto">
@@ -181,7 +181,7 @@
                 @else
                     <div class="text-center py-6">
                         <i class="bi bi-inbox text-2xl text-gray-300 mb-2"></i>
-                        <p class="text-xs text-gray-500">No recent activities</p>
+                        <p class="text-xs text-gray-500">{{ __('No Data Available') }}</p>
                     </div>
                 @endif
             </div>
@@ -190,7 +190,7 @@
         <!-- New Students -->
         <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-gray-900">New Students</h3>
+                <h3 class="text-sm font-bold text-gray-900">{{ __('New Students') }}</h3>
                 <i class="bi bi-person-plus text-gray-400"></i>
             </div>
             <div class="space-y-3 max-h-64 overflow-y-auto">
@@ -216,7 +216,7 @@
                 @else
                     <div class="text-center py-6">
                         <i class="bi bi-inbox text-2xl text-gray-300 mb-2"></i>
-                        <p class="text-xs text-gray-500">No new students this period</p>
+                        <p class="text-xs text-gray-500">{{ __('No Data Available') }}</p>
                     </div>
                 @endif
             </div>
@@ -226,20 +226,20 @@
     <!-- Bottom Section - Class Attendance Details -->
     <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-bold text-gray-900">Today's Classes - Attendance Marked</h3>
+            <h3 class="text-sm font-bold text-gray-900">{{ __("Today's Classes - Attendance Marked") }}</h3>
             <i class="bi bi-calendar-check text-gray-400"></i>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-xs">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="px-4 py-3 text-left font-semibold text-gray-900">Date</th>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-900">Course / Subject</th>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-900">Teacher Name</th>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-900">Semester</th>
-                        <th class="px-4 py-3 text-center font-semibold text-gray-900">Students Present</th>
-                        <th class="px-4 py-3 text-center font-semibold text-gray-900">Total Students</th>
-                        <th class="px-4 py-3 text-center font-semibold text-gray-900">Status</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-900">{{ __('Date') }}</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-900">{{ __('Course / Subject') }}</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-900">{{ __('Teacher Name') }}</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-900">{{ __('Semester') }}</th>
+                        <th class="px-4 py-3 text-center font-semibold text-gray-900">{{ __('Students Present') }}</th>
+                        <th class="px-4 py-3 text-center font-semibold text-gray-900">{{ __('Total Students') }}</th>
+                        <th class="px-4 py-3 text-center font-semibold text-gray-900">{{ __('Status') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -306,7 +306,7 @@
                             <td colspan="7" class="px-4 py-8 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <i class="bi bi-inbox text-3xl text-gray-300 mb-2"></i>
-                                    <p class="text-sm text-gray-500">No classes with attendance marked today</p>
+                                    <p class="text-sm text-gray-500">{{ __('No Data Available') }}</p>
                                 </div>
                             </td>
                         </tr>
@@ -322,4 +322,3 @@
 @section('scripts')
 @vite('resources/js/admin-dashboard.js')
 @endsection
-
