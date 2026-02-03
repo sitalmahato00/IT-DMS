@@ -248,4 +248,105 @@ class NepaliContentHelper
         // Use Laravel's slug helper
         return Str::slug($text);
     }
+
+    /**
+     * Convert Bikram Sambat (BS) date to Gregorian (AD) date
+     * 
+     * @param string $bsDate The BS date in YYYY-MM-DD format
+     * @return string|null The AD date in YYYY-MM-DD format, or null if conversion fails
+     */
+    public static function convertBsToAd(string $bsDate): ?string
+    {
+        if (empty($bsDate)) {
+            return null;
+        }
+
+        // Parse the BS date
+        $parts = explode('-', $bsDate);
+        if (count($parts) !== 3) {
+            return null;
+        }
+
+        $bsYear = (int) $parts[0];
+        $bsMonth = (int) $parts[1];
+        $bsDay = (int) $parts[2];
+
+        // Simple approximation for BS to AD conversion
+        // The difference between BS and AD is approximately 56 years and 8 months
+        // For a more accurate conversion, a proper BS calendar library should be used
+        
+        // Calculate approximate AD year (BS year - 56)
+        $adYear = $bsYear - 56;
+        
+        // Approximate month conversion
+        // BS starts around mid-April (month 1 = mid-April)
+        // So BS month 1-8 roughly corresponds to AD month (bs_month + 8) of previous year
+        // BS month 9-12 roughly corresponds to AD month (bs_month - 4) of ad_year
+        
+        if ($bsMonth <= 8) {
+            $adMonth = $bsMonth + 8;
+            $adYear = $adYear - 1; // Previous year
+        } else {
+            $adMonth = $bsMonth - 8;
+        }
+
+        // Adjust day if needed
+        $adDay = $bsDay;
+
+        // Validate the date
+        if ($adMonth < 1 || $adMonth > 12 || $adDay < 1 || $adDay > 31) {
+            return null;
+        }
+
+        return sprintf('%04d-%02d-%02d', $adYear, $adMonth, $adDay);
+    }
+
+    /**
+     * Convert Gregorian (AD) date to Bikram Sambat (BS) date
+     * 
+     * @param string $adDate The AD date in YYYY-MM-DD format
+     * @return string|null The BS date in YYYY-MM-DD format, or null if conversion fails
+     */
+    public static function convertAdToBs(string $adDate): ?string
+    {
+        if (empty($adDate)) {
+            return null;
+        }
+
+        // Parse the AD date
+        $parts = explode('-', $adDate);
+        if (count($parts) !== 3) {
+            return null;
+        }
+
+        $adYear = (int) $parts[0];
+        $adMonth = (int) $parts[1];
+        $adDay = (int) $parts[2];
+
+        // Simple approximation for AD to BS conversion
+        // The difference between BS and AD is approximately 56 years and 8 months
+        
+        // Calculate approximate BS year (AD year + 56)
+        $bsYear = $adYear + 56;
+        
+        // Approximate month conversion
+        if ($adMonth >= 1 && $adMonth <= 4) {
+            // January-April of AD year corresponds to previous BS year months 8-11
+            $bsMonth = $adMonth + 8;
+            $bsYear = $bsYear - 1;
+        } else {
+            // May-December of AD year corresponds to BS months 1-8
+            $bsMonth = $adMonth - 8;
+        }
+
+        // Adjust day if needed
+        $bsDay = $adDay;
+
+        // Validate the date
+        if ($bsMonth < 1 || $bsMonth > 12 || $bsDay < 1 || $bsDay > 31) {
+            return null;
+        }
+
+        return sprintf('%04d-%02d-%02d', $bsYear, $bsMonth, $bsDay);
+    }
 }

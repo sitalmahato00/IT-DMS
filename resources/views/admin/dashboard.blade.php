@@ -3,14 +3,14 @@
 @section('title', __('Dashboard'))
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif">
     <!-- Top Stats Cards - Row 1 -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Total Students -->
         <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 p-5 hover:shadow-lg transition-shadow">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
-                    <p class="text-xs text-blue-600 font-semibold uppercase tracking-wide">{{ __('Total Students') }}</p>
+                    <p class="text-xs text-blue-600 font-semibold uppercase tracking-wide devanagari-text">{{ __('Total Students') }}</p>
                     <p class="text-3xl font-bold text-blue-900 mt-2">{{ number_format($totalStudents ?? 0) }}</p>
                     <div class="mt-3 text-xs text-blue-700">
                         <span class="inline-flex items-center gap-1">
@@ -29,7 +29,7 @@
         <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200 p-5 hover:shadow-lg transition-shadow">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
-                    <p class="text-xs text-orange-600 font-semibold uppercase tracking-wide">{{ __('Teachers') }}</p>
+                    <p class="text-xs text-orange-600 font-semibold uppercase tracking-wide devanagari-text">{{ __('Teachers') }}</p>
                     <p class="text-3xl font-bold text-orange-900 mt-2">{{ number_format($teachers ?? 0) }}</p>
                     <div class="mt-3 text-xs text-orange-700">
                         <span class="inline-flex items-center gap-1">
@@ -48,7 +48,7 @@
         <div class="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl border border-pink-200 p-5 hover:shadow-lg transition-shadow">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
-                    <p class="text-xs text-pink-600 font-semibold uppercase tracking-wide">{{ __('Parents') }}</p>
+                    <p class="text-xs text-pink-600 font-semibold uppercase tracking-wide devanagari-text">{{ __('Parents') }}</p>
                     <p class="text-3xl font-bold text-pink-900 mt-2">{{ number_format($parents ?? 0) }}</p>
                     <div class="mt-3 text-xs text-pink-700">
                         <span class="inline-flex items-center gap-1">
@@ -67,7 +67,7 @@
         <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 p-5 hover:shadow-lg transition-shadow">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
-                    <p class="text-xs text-green-600 font-semibold uppercase tracking-wide">{{ __('Attendance Rate') }}</p>
+                    <p class="text-xs text-green-600 font-semibold uppercase tracking-wide devanagari-text">{{ __('Attendance Rate') }}</p>
                     <p class="text-3xl font-bold text-green-900 mt-2">{{ isset($avgAttendance) ? $avgAttendance.'%' : '—' }}</p>
                     <div class="mt-3 text-xs text-green-700">
                         <span class="inline-flex items-center gap-1">
@@ -88,7 +88,7 @@
         <!-- Attendance Overview Chart (Left) -->
         <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-gray-900">{{ __('Attendance Trends') }}</h3>
+                <h3 class="text-sm font-bold text-gray-900 devanagari-text">{{ __('Attendance Trends') }}</h3>
                 <i class="bi bi-graph-up text-gray-400"></i>
             </div>
             <div class="h-48">
@@ -99,7 +99,7 @@
         <!-- Grade Distribution Pie Chart (Right) -->
         <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-gray-900">{{ __('Grade Distribution') }}</h3>
+                <h3 class="text-sm font-bold text-gray-900 devanagari-text">{{ __('Grade Distribution') }}</h3>
                 <i class="bi bi-pie-chart text-gray-400"></i>
             </div>
             <div class="h-48 flex items-center justify-center">
@@ -113,7 +113,7 @@
         <!-- Recent Notices -->
         <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-gray-900">{{ __('Recent Notices') }}</h3>
+                <h3 class="text-sm font-bold text-gray-900 devanagari-text">{{ __('Recent Notices') }}</h3>
                 <i class="bi bi-bell text-gray-400"></i>
             </div>
             <div class="space-y-3 max-h-64 overflow-y-auto">
@@ -135,7 +135,7 @@
                         </div>
                     @endforeach
                 @else
-                    <p class="text-xs text-gray-500 py-3">{{ __('No Data Available') }}</p>
+                    <p class="text-xs text-gray-500 py-3 devanagari-text">{{ __('No Data Available') }}</p>
                 @endif
             </div>
         </div>
@@ -143,7 +143,7 @@
         <!-- Recent Activities -->
         <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-gray-900">{{ __('Recent Activities') }}</h3>
+                <h3 class="text-sm font-bold text-gray-900 devanagari-text">{{ __('Recent Activities') }}</h3>
                 <i class="bi bi-activity text-gray-400"></i>
             </div>
             <div class="space-y-2 max-h-64 overflow-y-auto">
@@ -181,7 +181,7 @@
                 @else
                     <div class="text-center py-6">
                         <i class="bi bi-inbox text-2xl text-gray-300 mb-2"></i>
-                        <p class="text-xs text-gray-500">{{ __('No Data Available') }}</p>
+                        <p class="text-xs text-gray-500 devanagari-text">{{ __('No Data Available') }}</p>
                     </div>
                 @endif
             </div>
@@ -190,7 +190,7 @@
         <!-- New Students -->
         <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-gray-900">{{ __('New Students') }}</h3>
+                <h3 class="text-sm font-bold text-gray-900 devanagari-text">{{ __('New Students') }}</h3>
                 <i class="bi bi-person-plus text-gray-400"></i>
             </div>
             <div class="space-y-3 max-h-64 overflow-y-auto">
@@ -216,7 +216,7 @@
                 @else
                     <div class="text-center py-6">
                         <i class="bi bi-inbox text-2xl text-gray-300 mb-2"></i>
-                        <p class="text-xs text-gray-500">{{ __('No Data Available') }}</p>
+                        <p class="text-xs text-gray-500 devanagari-text">{{ __('No Data Available') }}</p>
                     </div>
                 @endif
             </div>
@@ -226,27 +226,27 @@
     <!-- Bottom Section - Class Attendance Details -->
     <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-bold text-gray-900">{{ __("Today's Classes - Attendance Marked") }}</h3>
+            <h3 class="text-sm font-bold text-gray-900 devanagari-text">{{ __("Today's Classes - Attendance Marked") }}</h3>
             <i class="bi bi-calendar-check text-gray-400"></i>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-xs">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="px-4 py-3 text-left font-semibold text-gray-900">{{ __('Date') }}</th>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-900">{{ __('Course / Subject') }}</th>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-900">{{ __('Teacher Name') }}</th>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-900">{{ __('Semester') }}</th>
-                        <th class="px-4 py-3 text-center font-semibold text-gray-900">{{ __('Students Present') }}</th>
-                        <th class="px-4 py-3 text-center font-semibold text-gray-900">{{ __('Total Students') }}</th>
-                        <th class="px-4 py-3 text-center font-semibold text-gray-900">{{ __('Status') }}</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-900 devanagari-text">{{ __('Date') }}</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-900 devanagari-text">{{ __('Course / Subject') }}</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-900 devanagari-text">{{ __('Teacher Name') }}</th>
+                        <th class="px-4 py-3 text-left font-semibold text-gray-900 devanagari-text">{{ __('Semester') }}</th>
+                        <th class="px-4 py-3 text-center font-semibold text-gray-900 devanagari-text">{{ __('Students Present') }}</th>
+                        <th class="px-4 py-3 text-center font-semibold text-gray-900 devanagari-text">{{ __('Total Students') }}</th>
+                        <th class="px-4 py-3 text-center font-semibold text-gray-900 devanagari-text">{{ __('Status') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if(!empty($recentAttendance))
                         @foreach($recentAttendance as $att)
                             @php
-                                $date = is_array($att) ? ($att['date'] ?? date('Y-m-d')) : ($att->date ?? date('Y-m-d'));
+                                $date_bs = is_array($att) ? ($att['date_bs'] ?? date('Y-m-d')) : ($att->date_bs ?? date('Y-m-d'));
                                 $courseName = is_array($att) ? ($att['course_name'] ?? $att['subject_name'] ?? 'N/A') : ($att->course_name ?? $att->subject_name ?? 'N/A');
                                 $teacherName = is_array($att) ? ($att['teacher_name'] ?? 'Not Assigned') : ($att->teacher_name ?? 'Not Assigned');
                                 $semester = is_array($att) ? ($att['semester'] ?? 'N/A') : ($att->semester ?? 'N/A');
@@ -267,7 +267,7 @@
                                 }
                             @endphp
                             <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
-                                <td class="px-4 py-3 text-gray-900 font-medium">{{ is_string($date) ? $date : $date->format('M d, Y') }}</td>
+                                <td class="px-4 py-3 text-gray-900 font-medium">{{ $date_bs }}</td>
                                 <td class="px-4 py-3 text-gray-700">
                                     <span class="inline-flex items-center gap-2">
                                         <i class="bi bi-book text-blue-500"></i>
@@ -306,7 +306,7 @@
                             <td colspan="7" class="px-4 py-8 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <i class="bi bi-inbox text-3xl text-gray-300 mb-2"></i>
-                                    <p class="text-sm text-gray-500">{{ __('No Data Available') }}</p>
+                                    <p class="text-sm text-gray-500 devanagari-text">{{ __('No Data Available') }}</p>
                                 </div>
                             </td>
                         </tr>

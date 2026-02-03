@@ -17,6 +17,8 @@ class Attendance extends Model
         'subject_id',
         'status',
         'remarks',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

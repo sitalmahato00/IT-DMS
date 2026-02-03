@@ -232,7 +232,8 @@ class DashboardController extends Controller
         $recentAttendance = collect();
         if (Schema::hasTable('attendance')) {
             // Aggregate attendance by subject/teacher for today's date
-            $today = date('Y-m-d');
+            // Use date_bs (BS date) since that's what the frontend uses
+            $today_bs = date('Y-m-d');
 
             $recentAttendance = DB::table('attendance')
                 ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
@@ -242,12 +243,12 @@ class DashboardController extends Controller
                 // join teacher referenced on subject (fallback)
                 ->leftJoin('teachers as subject_teachers', 'subjects.teacher_id', '=', 'subject_teachers.id')
                 ->leftJoin('users as subject_users', 'subject_teachers.user_id', '=', 'subject_users.id')
-                ->whereDate('attendance.date', $today)
+                ->where('attendance.date_bs', $today_bs)
                 ->selectRaw(
-                    "attendance.date as date, attendance.subject_id as subject_id, subjects.subject_name as course_name, subjects.semester as semester, COALESCE(attendance.teacher_id, subjects.teacher_id) as teacher_id, COALESCE(attendance_users.name, subject_users.name) as teacher_name, COUNT(DISTINCT attendance.student_id) as total_students, SUM(CASE WHEN attendance.status = 'present' THEN 1 ELSE 0 END) as present_count"
+                    "attendance.date_bs as date_bs, attendance.date as date, attendance.subject_id as subject_id, subjects.subject_name as course_name, subjects.semester as semester, COALESCE(attendance.teacher_id, subjects.teacher_id) as teacher_id, COALESCE(attendance_users.name, subject_users.name) as teacher_name, COUNT(DISTINCT attendance.student_id) as total_students, SUM(CASE WHEN attendance.status = 'present' THEN 1 ELSE 0 END) as present_count"
                 )
-                ->groupBy('attendance.date', 'attendance.subject_id', DB::raw('COALESCE(attendance.teacher_id, subjects.teacher_id)'), 'subjects.subject_name', 'subjects.semester', DB::raw('COALESCE(attendance_users.name, subject_users.name)'))
-                ->orderBy('attendance.date', 'desc')
+                ->groupBy('attendance.date_bs', 'attendance.date', 'attendance.subject_id', DB::raw('COALESCE(attendance.teacher_id, subjects.teacher_id)'), 'subjects.subject_name', 'subjects.semester', DB::raw('COALESCE(attendance_users.name, subject_users.name)'))
+                ->orderBy('attendance.date_bs', 'desc')
                 ->get();
         }
 

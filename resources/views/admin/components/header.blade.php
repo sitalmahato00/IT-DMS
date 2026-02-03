@@ -5,7 +5,7 @@
             <div class="flex-1 min-w-0">
                 <div class="space-y-1">
                     <h2 class="text-2xl font-bold text-gray-900 truncate">{{ trim($__env->yieldContent('title', 'Dashboard')) }}</h2>
-                    <p class="text-sm text-gray-600 line-clamp-2">Department of Computer Science & Engineering</p>
+                    <p class="text-sm text-gray-600 line-clamp-2">{{ __('Department of Computer Science & Engineering') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-3 flex-shrink-0">
@@ -24,8 +24,13 @@
                     </select>
                 </div>
 
-                <button class="relative p-2 hover:bg-gray-100 rounded-lg transition">
-                    <i class="bi bi-bell text-gray-600 text-lg"></i>
+
+                    <i class="bi bi-moon-fill text-gray-600 dark:text-yellow-400 text-lg" id="darkModeIcon"></i>
+                </button>
+
+                <!-- Notifications -->
+                <button class="relative p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition">
+                    <i class="bi bi-bell text-gray-600 dark:text-gray-300 text-lg"></i>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
                 <div class="relative group">

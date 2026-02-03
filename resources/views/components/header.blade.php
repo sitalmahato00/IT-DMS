@@ -5,15 +5,20 @@
 <header class="bg-white shadow-lg sticky top-0 z-50 transition-all duration-300">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex items-center justify-between">
-            
+
             <!-- Logo with Gradient -->
-            <div class="flex items-center gap-2 group">
+            <div class="flex items-center gap-3 group">
                 <div class="bg-gradient-to-br from-red-600 to-red-700 text-white font-bold px-4 py-2 rounded-lg text-lg shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
                     <span class="flex items-center gap-2">
                         <i class="bi bi-calendar-check"></i>
                          {{ __("IT-DMS") }}
                     </span>
                 </div>
+
+
+
+                    <i class="bi bi-moon-fill text-xl" id="landingDarkModeIcon"></i>
+                </button>
             </div>
 
             <!-- Navigation Links -->
@@ -61,8 +66,8 @@
                 </form>
                 @auth
                     <!-- Dashboard Button (for logged in users) -->
-                    <a 
-                        href="{{ route('admin.dashboard') }}" 
+                    <a
+                        href="{{ route('admin.dashboard') }}"
                         class="text-gray-900 font-medium hover:text-red-600 transition hidden sm:block relative group"
                     >
                         {{ __("Dashboard") }}
@@ -70,8 +75,8 @@
                     </a>
                 @else
                     <!-- Login Button -->
-                    <a 
-                        href="{{ route('login') }}" 
+                    <a
+                        href="{{ route('login') }}"
                         class="text-gray-900 font-medium hover:text-red-600 transition hidden sm:block relative group"
                     >
                         {{ __("Login") }}
@@ -127,6 +132,46 @@
 
 
 <script>
+
+
+        const moonIcon = 'bi-moon-fill';
+        const sunIcon = 'bi-sun-fill';
+
+        function getThemePreference() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) return savedTheme;
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+            return 'light';
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                html.classList.add('dark');
+                if (darkModeIcon) {
+                    darkModeIcon.classList.remove(moonIcon);
+                    darkModeIcon.classList.add(sunIcon);
+                }
+            } else {
+                html.classList.remove('dark');
+                if (darkModeIcon) {
+                    darkModeIcon.classList.remove(sunIcon);
+                    darkModeIcon.classList.add(moonIcon);
+                }
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+            applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            applyTheme(getThemePreference());
+            if (toggleBtn) toggleBtn.addEventListener('click', toggleTheme);
+        });
+    })();
+
     // Mobile menu toggle
     document.getElementById('mobileMenuBtn').addEventListener('click', function() {
         document.getElementById('mobileMenu').classList.toggle('hidden');

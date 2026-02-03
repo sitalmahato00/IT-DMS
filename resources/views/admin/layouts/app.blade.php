@@ -67,6 +67,79 @@
 
     @yield('scripts')
 
+    <!-- Dark Mode Initialization Script -->
+    <script>
+        // Dark Mode Toggle Functionality
+        (function() {
+            const toggleBtn = document.getElementById('darkModeToggle');
+            const darkModeIcon = document.getElementById('darkModeIcon');
+            const html = document.documentElement;
+            
+            // Icons for light and dark mode
+            const moonIcon = 'bi-moon-fill';
+            const sunIcon = 'bi-sun-fill';
+            
+            // Check for saved theme preference or system preference
+            function getThemePreference() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme) {
+                    return savedTheme;
+                }
+                // Check system preference
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    return 'dark';
+                }
+                return 'light';
+            }
+            
+            // Apply theme
+            function applyTheme(theme) {
+                if (theme === 'dark') {
+                    html.classList.add('dark');
+                    if (darkModeIcon) {
+                        darkModeIcon.classList.remove(moonIcon);
+                        darkModeIcon.classList.add(sunIcon);
+                    }
+                } else {
+                    html.classList.remove('dark');
+                    if (darkModeIcon) {
+                        darkModeIcon.classList.remove(sunIcon);
+                        darkModeIcon.classList.add(moonIcon);
+                    }
+                }
+                localStorage.setItem('theme', theme);
+            }
+            
+            // Toggle theme
+            function toggleTheme() {
+                const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                applyTheme(newTheme);
+            }
+            
+            // Initialize on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                const theme = getThemePreference();
+                applyTheme(theme);
+                
+                // Add toggle event listener
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', toggleTheme);
+                }
+                
+                // Listen for system preference changes
+                if (window.matchMedia) {
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                        // Only auto-switch if user hasn't set a preference
+                        if (!localStorage.getItem('theme')) {
+                            applyTheme(e.matches ? 'dark' : 'light');
+                        }
+                    });
+                }
+            });
+        })();
+    </script>
+
     <script>
         // Toast notification system
         function showToast(message, type = 'info') {

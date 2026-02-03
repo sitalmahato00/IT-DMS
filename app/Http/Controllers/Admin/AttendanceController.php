@@ -299,12 +299,20 @@ class AttendanceController extends Controller
         $records = [];
         $now = now()->toDateTimeString();
         
+        // Convert date_bs (BS date like "2026-02-03") to English date for the date column
+        $date = \App\Helpers\NepaliContentHelper::convertBsToAd($date_bs);
+        if (empty($date)) {
+            // Fallback: if conversion fails, use date_bs as-is
+            $date = $date_bs;
+        }
+        
         foreach ($data['attendance'] as $item) {
             $remarks = $item['status'] === 'absent' ? 'Absent' : ($item['status'] === 'leave' ? 'Leave' : 'Present');
             
             $record = [
                 'student_id' => $item['student_id'],
                 'date_bs' => $date_bs,
+                'date' => $date, // Required NOT NULL field
                 'status' => $item['status'],
                 'remarks' => $remarks,
                 'teacher_id' => $teacherId,
