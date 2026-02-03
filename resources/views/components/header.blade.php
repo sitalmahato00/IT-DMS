@@ -16,8 +16,8 @@
                 </div>
 
                 <!-- Dark Mode Toggle -->
-                <button id="darkModeToggle" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition" title="{{ __('Toggle Dark Mode') }}">
-                    <i class="bi bi-moon-fill text-xl text-gray-700 dark:text-yellow-400" id="landingDarkModeIcon"></i>
+                <button id="darkModeToggle" class="p-2 bg-white hover:bg-gray-100 dark:bg-yellow-400 dark:hover:bg-yellow-500 rounded-lg transition" title="Toggle Dark Mode">
+                    <i class="bi bi-moon-fill text-xl text-gray-700 dark:text-white" id="landingDarkModeIcon"></i>
                 </button>
             </div>
 
@@ -129,11 +129,12 @@
         </div>
     </nav>
 </header>
-
-
 <script>
-
-
+    // Improved Dark Mode Toggle for Landing Header
+    (function() {
+        const toggleBtn = document.getElementById('darkModeToggle');
+        const darkModeIcon = document.getElementById('landingDarkModeIcon');
+        const html = document.documentElement;
         const moonIcon = 'bi-moon-fill';
         const sunIcon = 'bi-sun-fill';
 
@@ -143,32 +144,42 @@
             if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
             return 'light';
         }
-
         function applyTheme(theme) {
             if (theme === 'dark') {
                 html.classList.add('dark');
                 if (darkModeIcon) {
                     darkModeIcon.classList.remove(moonIcon);
                     darkModeIcon.classList.add(sunIcon);
+                    darkModeIcon.classList.add('text-white');
+                    darkModeIcon.classList.remove('text-gray-700');
                 }
             } else {
                 html.classList.remove('dark');
                 if (darkModeIcon) {
                     darkModeIcon.classList.remove(sunIcon);
                     darkModeIcon.classList.add(moonIcon);
+                    darkModeIcon.classList.remove('text-white');
+                    darkModeIcon.classList.add('text-gray-700');
                 }
             }
             localStorage.setItem('theme', theme);
         }
-
         function toggleTheme() {
             const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
-            applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
         }
-
         document.addEventListener('DOMContentLoaded', function() {
-            applyTheme(getThemePreference());
+            const theme = getThemePreference();
+            applyTheme(theme);
             if (toggleBtn) toggleBtn.addEventListener('click', toggleTheme);
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                    if (!localStorage.getItem('theme')) {
+                        applyTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+            }
         });
     })();
 
