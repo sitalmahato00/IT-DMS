@@ -15,9 +15,9 @@
                     </span>
                 </div>
 
-
-
-                    <i class="bi bi-moon-fill text-xl" id="landingDarkModeIcon"></i>
+                <!-- Dark Mode Toggle -->
+                <button id="darkModeToggle" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition" title="{{ __('Toggle Dark Mode') }}">
+                    <i class="bi bi-moon-fill text-xl text-gray-700 dark:text-yellow-400" id="landingDarkModeIcon"></i>
                 </button>
             </div>
 
