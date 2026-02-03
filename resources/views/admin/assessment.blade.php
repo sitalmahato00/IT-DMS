@@ -263,13 +263,8 @@
 
 @section('content')
 <div class="space-y-4">
-    <!-- Tabs for Exam and Mark Management -->
-    <div class="flex gap-2 mb-4">
-        <button id="tabExam" class="tab-button px-4 py-2 text-xs font-medium text-gray-900 border-b-2 border-red-600 hover:text-red-600 transition">Exam</button>
-        <button id="tabMarks" class="tab-button px-4 py-2 text-xs font-medium text-gray-900 border-b-2 border-transparent hover:text-red-600 transition">Mark Management</button>
-    </div>
-    
-    <div id="sectionExam">
+    <!-- Exam Page (Single View) -->
+    <div>
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <x-stats-card title="Total Exams" value="14" icon="bi-clipboard-check" color="blue" />
@@ -326,7 +321,41 @@
             </div>
         </x-card>
 
+        <!-- Exam Type Tabs -->
+        <div class="flex gap-2 mb-4">
+            <button class="exam-type-tab active px-4 py-2 text-xs font-medium text-gray-900 border-b-2 border-red-600 hover:text-red-600 transition" onclick="filterExamType('all', this)">All</button>
+            <button class="exam-type-tab px-4 py-2 text-xs font-medium text-gray-600 border-b-2 border-transparent hover:text-gray-900 transition" onclick="filterExamType('internal', this)">Internal</button>
+            <button class="exam-type-tab px-4 py-2 text-xs font-medium text-gray-600 border-b-2 border-transparent hover:text-gray-900 transition" onclick="filterExamType('practical', this)">Practical</button>
+            <button class="exam-type-tab px-4 py-2 text-xs font-medium text-gray-600 border-b-2 border-transparent hover:text-gray-900 transition" onclick="filterExamType('assessment', this)">Assessment</button>
+            <button class="exam-type-tab px-4 py-2 text-xs font-medium text-gray-600 border-b-2 border-transparent hover:text-gray-900 transition" onclick="filterExamType('viva', this)">Viva</button>
+        </div>
+
         <!-- Assessment List Table -->
+        <script>
+        function filterExamType(type, btn) {
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.exam-type-tab').forEach(function(tab) {
+                tab.classList.remove('active', 'text-gray-900', 'border-red-600');
+                tab.classList.add('text-gray-600', 'border-transparent');
+            });
+            // Add active class to clicked button
+            btn.classList.add('active', 'text-gray-900', 'border-red-600');
+            btn.classList.remove('text-gray-600', 'border-transparent');
+            // Filter table rows by exam type
+            document.querySelectorAll('table tbody tr').forEach(function(row) {
+                if (type === 'all') {
+                    row.style.display = '';
+                } else {
+                    var examType = row.querySelector('td:nth-child(5)');
+                    if (examType && examType.textContent.trim().toLowerCase().includes(type)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        }
+        </script>
         <div class="bg-white rounded shadow-sm border border-gray-200">
             <div class="p-3 border-b border-gray-200 flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-gray-900">Exam List</h3>

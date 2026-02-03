@@ -14,8 +14,7 @@
                     <p class="text-3xl font-bold text-blue-900 mt-2">{{ number_format($totalStudents ?? 0) }}</p>
                     <div class="mt-3 text-xs text-blue-700">
                         <span class="inline-flex items-center gap-1">
-                            <i class="bi bi-arrow-up text-green-600"></i>
-                            <span class="text-green-600 font-semibold">+12%</span> {{ __('from last month') }}
+                            <span class="text-green-600 font-semibold">Active students currently enrolled</span>
                         </span>
                     </div>
                 </div>
@@ -33,8 +32,7 @@
                     <p class="text-3xl font-bold text-orange-900 mt-2">{{ number_format($teachers ?? 0) }}</p>
                     <div class="mt-3 text-xs text-orange-700">
                         <span class="inline-flex items-center gap-1">
-                            <i class="bi bi-arrow-up text-green-600"></i>
-                            <span class="text-green-600 font-semibold">+3.4%</span> {{ __('active teaching') }}
+                            <span class="text-green-600 font-semibold">Total faculty members</span>
                         </span>
                     </div>
                 </div>
@@ -52,8 +50,7 @@
                     <p class="text-3xl font-bold text-pink-900 mt-2">{{ number_format($parents ?? 0) }}</p>
                     <div class="mt-3 text-xs text-pink-700">
                         <span class="inline-flex items-center gap-1">
-                            <i class="bi bi-arrow-down text-red-600"></i>
-                            <span class="text-red-600 font-semibold">-2.8%</span> {{ __('from last month') }}
+                            <span class="text-red-600 font-semibold">Registered guardians</span>
                         </span>
                     </div>
                 </div>
@@ -71,8 +68,7 @@
                     <p class="text-3xl font-bold text-green-900 mt-2">{{ isset($avgAttendance) ? $avgAttendance.'%' : '—' }}</p>
                     <div class="mt-3 text-xs text-green-700">
                         <span class="inline-flex items-center gap-1">
-                            <i class="bi bi-arrow-up text-green-600"></i>
-                            <span class="text-green-600 font-semibold">+6%</span> {{ __('this semester') }}
+                            <span class="text-green-600 font-semibold">Average attendance this semester</span>
                         </span>
                     </div>
                 </div>

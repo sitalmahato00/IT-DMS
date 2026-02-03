@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+{{-- @extends('admin.layouts.app')
 
 @section('title', 'Marks Management')
 
@@ -829,4 +829,4 @@
             closeEditMarksModal();
         }
     });
-</script>
+</script> --}}
