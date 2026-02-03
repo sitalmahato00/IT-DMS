@@ -45,6 +45,66 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('DOMContentLoaded fired, initializing dark mode toggle');
     initBsDatePicker();
 
+    // Dark Mode Toggle Functionality
+    const toggleBtn = document.getElementById('darkModeToggle');
+    const darkModeIcon = document.getElementById('darkModeIcon');
+    const html = document.documentElement;
+    
+    const moonIcon = 'bi-moon-fill';
+    const sunIcon = 'bi-sun-fill';
+    
+    function getThemePreference() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            return savedTheme;
+        }
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+        return 'light';
+    }
+    
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            html.classList.add('dark');
+            if (darkModeIcon) {
+                darkModeIcon.classList.remove(moonIcon);
+                darkModeIcon.classList.add(sunIcon);
+            }
+        } else {
+            html.classList.remove('dark');
+            if (darkModeIcon) {
+                darkModeIcon.classList.remove(sunIcon);
+                darkModeIcon.classList.add(moonIcon);
+            }
+        }
+        localStorage.setItem('theme', theme);
+    }
+    
+    function toggleTheme() {
+        const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(newTheme);
+    }
+    
+    // Initialize theme
+    const theme = getThemePreference();
+    applyTheme(theme);
+    
+    // Add toggle event listener
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', toggleTheme);
+    }
+    
+    // Listen for system preference changes
+    if (window.matchMedia) {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            if (!localStorage.getItem('theme')) {
+                applyTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+    }
+
     // Watch for dynamically added inputs (modals, AJAX content)
     const obs = new MutationObserver((mutations) => {
         mutations.forEach(m => {
@@ -62,9 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Expose manual initializer if needed
     window.initBsDatePicker = initBsDatePicker;
-
-    // Theme toggle removed — no JS behavior attached. If you want a theme toggle later, we can re-add it.
-    console.info('[Theme] toggle removed by developer');
 
     // Locale selector: attach JS handler to navigate to locale route (uses data-base-url)
     try {

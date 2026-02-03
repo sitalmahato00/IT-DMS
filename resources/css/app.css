@@ -782,12 +782,7 @@ html.dark .section-spacing {
     background-color: #0b1220 !important;
 }
 
-/* Scroll Progress Bar in Dark Mode */
-    background-color: #071224 !important;
-    border-color: #374151 !important;
-}
-
-html.dark .feature-card:hover {
+html.dark .feature-card {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -1369,6 +1364,148 @@ html.dark .absolute.right-0.mt-2 .text-gray-500 {
 
 html.dark .absolute.right-0.mt-2 .border-b {
     border-color: #374151 !important;
+}
+
+html.dark .absolute.right-0.mt-2 .hover\:bg-gray-50:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html.dark .absolute.right-0.mt-2 .text-gray-700 {
+    color: #d1d5db !important;
+}
+
+/* No Data Messages */
+html.dark .text-center.py-6 i,
+html.dark .text-center.py-8 i,
+html.dark .text-center.py-12 i {
+    color: #4b5563 !important;
+}
+
+html.dark .text-center .text-gray-500,
+html.dark .text-center .text-gray-600 {
+    color: #6b7280 !important;
+}
+
+/* Empty States */
+html.dark .inline-flex.items-center.justify-center.w-16.h-16.rounded-full.bg-gray-100,
+html.dark .inline-flex.items-center.justify-center.w-20.h-20.rounded-full.bg-gray-100 {
+    background-color: #1f2937 !important;
+}
+
+/* Loading Spinners */
+html.dark .border-4.border-gray-200,
+html.dark .border-4.border-red-200 {
+    border-color: #374151 !important;
+}
+
+html.dark .border-t-red-600,
+html.dark .border-t-green-600 {
+    border-top-color: #dc2626 !important;
+}
+
+html.dark .border-t-blue-600 {
+    border-top-color: #2563eb !important;
+}
+
+/* Range inputs */
+html.dark input[type="range"] {
+    background-color: #1f2937 !important;
+}
+
+/* File input styling */
+html.dark input[type="file"] {
+    background-color: #1f2937 !important;
+    color: #e5e7eb !important;
+}
+
+/* Checkbox styling */
+html.dark input[type="checkbox"] {
+    background-color: #071224 !important;
+    border-color: #4b5563 !important;
+}
+
+html.dark input[type="checkbox"]:checked {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+}
+
+/* Radio button styling */
+html.dark input[type="radio"] {
+    background-color: #071224 !important;
+    border-color: #4b5563 !important;
+}
+
+html.dark input[type="radio"]:checked {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+}
+
+/* Textarea styling */
+html.dark textarea {
+    background-color: #071224 !important;
+    color: #e5e7eb !important;
+    border-color: #374151 !important;
+}
+
+html.dark textarea::placeholder {
+    color: #6b7280 !important;
+}
+
+/* Badge styling for dark mode */
+html.dark .bg-blue-100 {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+html.dark .text-blue-700 {
+    color: #93c5fd !important;
+}
+
+html.dark .bg-indigo-100 {
+    background-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+html.dark .text-indigo-700 {
+    color: #a5b4fc !important;
+}
+
+html.dark .bg-yellow-100 {
+    background-color: rgba(234, 179, 8, 0.15) !important;
+}
+
+html.dark .text-yellow-700 {
+    color: #fde047 !important;
+}
+
+html.dark .bg-purple-100 {
+    background-color: rgba(168, 85, 247, 0.15) !important;
+}
+
+html.dark .text-purple-700 {
+    color: #c084fc !important;
+}
+
+html.dark .bg-orange-100 {
+    background-color: rgba(251, 146, 60, 0.15) !important;
+}
+
+html.dark .text-orange-700 {
+    color: #fb923c !important;
+}
+
+html.dark .bg-cyan-100 {
+    background-color: rgba(34, 211, 238, 0.15) !important;
+}
+
+html.dark .text-cyan-700 {
+    color: #22d3ee !important;
+}
+
+html.dark .bg-teal-100 {
+    background-color: rgba(20, 184, 166, 0.15) !important;
+}
+
+html.dark .text-teal-700 {
+    color: #2dd4bf !important;
 }
 html.dark #headerScrollProgressBar {
     background: linear-gradient(to right, #dc2626, #fb923c, #fde047) !important;

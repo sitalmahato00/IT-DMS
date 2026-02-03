@@ -191,8 +191,8 @@
 </head>
 <body class="bg-gray-100">
     <!-- Dark Mode Toggle -->
-    <button id="darkModeToggle" class="fixed top-4 right-4 z-50 p-3 bg-white rounded-full shadow-lg hover:bg-gray-100 dark-mode-toggle-animated transition" title="Toggle Dark Mode">
-        <i class="bi bi-moon-fill text-gray-600 text-xl" id="darkModeIcon"></i>
+    <button id="darkModeToggle" class="fixed top-4 right-4 z-50 p-2 bg-white rounded-lg shadow-md hover:bg-gray-100 transition" title="Toggle Dark Mode">
+        <i class="bi bi-moon-fill text-gray-600 text-lg" id="darkModeIcon"></i>
     </button>
 
     <div class="flex h-screen">
@@ -218,18 +218,17 @@
         </div>
 
         <!-- Right Side - Login Form -->
-        <div class="w-full md:w-1/2 bg-white login-bg flex flex-col justify-center items-center p-8 relative">
+        <div class="w-full md:w-1/2 bg-white flex flex-col justify-center items-center p-8 relative">
             <div class="w-full max-w-md relative">
                 <!-- Logo/Icon -->
                 <div class="flex justify-center mb-8">
-                    <div class="w-16 h-16 bg-red-600 rounded-lg flex items-center justify-center logo-animate shadow-lg">
-                        <i class="bi bi-calendar-check text-white" style="font-size: 2rem;"></i>
+                    <div class="w-16 h-16 bg-red-600 rounded-lg flex items-center justify-center">
+                        <i class="bi bi-calendar-check text-white" style="font-size: 1.75rem;"></i>
                     </div>
                 </div>
                 <!-- Heading -->
-                <h1 class="text-3xl font-extrabold text-center text-gray-900 mb-1 pt-6 tracking-tight">IT Department Login</h1>
-                <p class="text-center text-base text-gray-600 mb-6">Sign in to your account to continue</p>
-                <div class="motivational-quote">"Empowering minds, one login at a time."</div>
+                <h1 class="text-2xl font-bold text-center text-gray-900 mb-1 pt-6">Welcome Back</h1>
+                <p class="text-center text-sm text-gray-600 mb-6">Sign in to your account to continue</p>
 
                 <!-- Session Status -->
                 @if ($errors->any())
@@ -241,54 +240,55 @@
                 @endif
 
                 <!-- Form -->
-                <form method="POST" action="{{ route('login') }}" class="space-y-6" id="loginForm">
+                <form method="POST" action="{{ route('login') }}" class="space-y-6">
                     @csrf
 
                     <!-- Email Address -->
-                    <div class="floating-label">
-                        <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        <input 
-                            id="email" 
-                            type="email" 
-                            name="email" 
-                            value="{{ old('email') }}"
-                            placeholder=" "
-                            required 
-                            autofocus
-                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent transition"
-                            aria-label="Email Address"
-                        />
-                        <label for="email">Email Address</label>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <div class="relative">
+                            <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            <input 
+                                id="email" 
+                                type="email" 
+                                name="email" 
+                                value="{{ old('email') }}"
+                                placeholder="Enter your email address"
+                                required 
+                                autofocus
+                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent transition"
+                            />
+                        </div>
                     </div>
 
                     <!-- Password -->
-                    <div class="floating-label">
-                        <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                        </svg>
-                        <input 
-                            id="password" 
-                            type="password" 
-                            name="password" 
-                            placeholder=" "
-                            required
-                            class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent transition"
-                            aria-label="Password"
-                        />
-                        <label for="password">Password</label>
-                        <button 
-                            type="button" 
-                            onclick="togglePassword()"
-                            class="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                            aria-label="Show Password"
-                        >
-                            <svg class="w-5 h-5" id="eyeIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <div class="relative">
+                            <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                             </svg>
-                        </button>
+                            <input 
+                                id="password" 
+                                type="password" 
+                                name="password" 
+                                placeholder="Enter your password"
+                                required
+                                class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent transition"
+                            />
+                            <button 
+                                type="button" 
+                                onclick="togglePassword()"
+                                class="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                            >
+                                <svg class="w-5 h-5" id="eyeIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Remember Me & Forgot Password -->
@@ -312,22 +312,11 @@
                     <!-- Sign In Button -->
                     <button 
                         type="submit"
-                        class="w-full bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition duration-200 flex items-center justify-center"
-                        id="signInBtn"
+                        class="w-full bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition duration-200"
                     >
-                        <span id="signInText">Sign In</span>
-                        <span id="signInSpinner" class="spinner ml-2" style="display:none;"></span>
+                        Sign In
                     </button>
 
-                    <!-- Social Login Buttons (future extensibility) -->
-                    <div class="flex gap-2 my-2">
-                        <button type="button" class="flex-1 bg-white border border-gray-300 rounded-lg py-2 text-gray-700 font-semibold hover:bg-gray-50 transition flex items-center justify-center" aria-label="Sign in with Google">
-                            <i class="bi bi-google me-2 text-red-500"></i> Google
-                        </button>
-                        <button type="button" class="flex-1 bg-white border border-gray-300 rounded-lg py-2 text-gray-700 font-semibold hover:bg-gray-50 transition flex items-center justify-center" aria-label="Sign in with Microsoft">
-                            <i class="bi bi-microsoft me-2 text-blue-500"></i> Microsoft
-                        </button>
-                    </div>
                     <!-- Create Account Button -->
                     <a 
                         href="{{ route('register') }}"
@@ -363,6 +352,7 @@
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const eyeIcon = document.getElementById('eyeIcon');
+            
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-4.803m5.596-3.856a3.375 3.375 0 11-4.753 4.753m4.753-4.753L9.172 9.172m5.656 5.656l.94.94"></path>';
@@ -371,20 +361,6 @@
                 eyeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268-2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
             }
         }
-        // Show spinner on submit
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('loginForm');
-            const signInBtn = document.getElementById('signInBtn');
-            const signInText = document.getElementById('signInText');
-            const signInSpinner = document.getElementById('signInSpinner');
-            if (loginForm) {
-                loginForm.addEventListener('submit', function() {
-                    signInText.style.display = 'none';
-                    signInSpinner.style.display = 'inline-block';
-                    signInBtn.disabled = true;
-                });
-            }
-        });
 
         // Dark Mode Toggle Functionality
         (function() {

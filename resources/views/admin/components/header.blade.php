@@ -24,7 +24,8 @@
                     </select>
                 </div>
 
-
+                <!-- Dark Mode Toggle -->
+                <button id="darkModeToggle" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition" title="{{ __('Toggle Dark Mode') }}">
                     <i class="bi bi-moon-fill text-gray-600 dark:text-yellow-400 text-lg" id="darkModeIcon"></i>
                 </button>
 
