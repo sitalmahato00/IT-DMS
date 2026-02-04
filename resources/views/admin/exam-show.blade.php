@@ -162,8 +162,9 @@
 </div>
 
 <!-- Edit Exam Modal -->
-<div id="editExamModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+<div id="editExamModal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black bg-opacity-40" onclick="closeEditExamModal()"></div>
+    <div class="relative bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-auto mt-20">
         <div class="flex justify-between items-center px-5 py-3 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900">Edit Exam</h3>
             <button onclick="closeEditExamModal()" class="text-gray-400 hover:text-gray-600">
@@ -200,10 +201,10 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Course</label>
-                    <select name="course_id" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
-                        <option value="">Select Course</option>
+                    <select name="subject_id" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
+                        <option value="">Select Subject</option>
                         @foreach(\App\Models\Course::all() as $course)
-                            <option value="{{ $course->id }}" {{ $exam->course_id == $course->id ? 'selected' : '' }}>{{ $course->subject_name }}</option>
+                            <option value="{{ $course->id }}" {{ $exam->subject_id == $course->id ? 'selected' : '' }}>{{ $course->subject_name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -265,8 +266,9 @@
 </div>
 
 <!-- Mark Upload Modal -->
-<div id="markUploadModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+<div id="markUploadModal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black bg-opacity-40" onclick="closeMarkUploadModal()"></div>
+    <div class="relative bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-auto mt-20">
         <div class="flex justify-between items-center px-5 py-3 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900">Upload Marks - {{ $exam->localized_name }}</h3>
             <button onclick="closeMarkUploadModal()" class="text-gray-400 hover:text-gray-600">

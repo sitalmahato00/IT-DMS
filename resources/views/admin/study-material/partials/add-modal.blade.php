@@ -6,12 +6,12 @@
             <h3 class="text-lg font-semibold text-gray-900">Add Study Material</h3>
             <button onclick="closeAddMaterialModal()" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
         </div>
-        <form method="POST" action="{{ route('admin.study-material.store') }}" enctype="multipart/form-data" class="p-4">
+        <form id="addMaterialForm" method="POST" action="{{ route('admin.study-material.store-ajax') }}" enctype="multipart/form-data" class="p-4">
             @csrf
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Title <span class="text-red-600">*</span></label>
-                <input type="text" name="title" value="{{ old('title') }}" required
+                <input type="text" name="title" id="addMaterialTitle" required
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     placeholder="Enter material title">
                 @error('title')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
@@ -20,29 +20,27 @@
             <div class="grid grid-cols-2 gap-3 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Semester <span class="text-red-600">*</span></label>
-                    <select name="semester" required
+                    <select name="semester" id="addMaterialSemester" required
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500">
                         <option value="">Select</option>
                         @for($i = 1; $i <= 6; $i++)
-                            <option value="{{ $i }}" {{ old('semester') == $i ? 'selected' : '' }}>
-                                {{ $i }}{{ $i == 1 ? 'st' : ($i == 2 ? 'nd' : ($i == 3 ? 'rd' : 'th')) }}
-                            </option>
+                            <option value="{{ $i }}">{{ $i }}{{ $i == 1 ? 'st' : ($i == 2 ? 'nd' : ($i == 3 ? 'rd' : 'th')) }}</option>
                         @endfor
                     </select>
                     @error('semester')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Type <span class="text-red-600">*</span></label>
-                    <select name="document_type" required
+                    <select name="document_type" id="addMaterialType" required
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500">
                         <option value="">Select</option>
-                        <option value="lecture_notes" {{ old('document_type') == 'lecture_notes' ? 'selected' : '' }}>Notes</option>
-                        <option value="assignment" {{ old('document_type') == 'assignment' ? 'selected' : '' }}>Assignment</option>
-                        <option value="lab_report" {{ old('document_type') == 'lab_report' ? 'selected' : '' }}>Lab Report</option>
-                        <option value="assessment" {{ old('document_type') == 'assessment' ? 'selected' : '' }}>Paper</option>
-                        <option value="study_guide" {{ old('document_type') == 'study_guide' ? 'selected' : '' }}>Study Guide</option>
-                        <option value="syllabus" {{ old('document_type') == 'syllabus' ? 'selected' : '' }}>Syllabus</option>
-                        <option value="project_material" {{ old('document_type') == 'project_material' ? 'selected' : '' }}>Project</option>
+                        <option value="lecture_notes">Notes</option>
+                        <option value="assignment">Assignment</option>
+                        <option value="lab_report">Lab Report</option>
+                        <option value="assessment">Paper</option>
+                        <option value="study_guide">Study Guide</option>
+                        <option value="syllabus">Syllabus</option>
+                        <option value="project_material">Project</option>
                     </select>
                     @error('document_type')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
@@ -50,13 +48,11 @@
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Course <span class="text-red-600">*</span></label>
-                <select name="course" required
+                <select name="course" id="addMaterialCourse" required
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500">
                     <option value="">Select Course</option>
                     @forelse($courses as $course)
-                        <option value="{{ $course->subject_name }}" {{ old('course') == $course->subject_name ? 'selected' : '' }}>
-                            {{ $course->subject_name }} ({{ $course->subject_code }})
-                        </option>
+                        <option value="{{ $course->subject_name }}">{{ $course->subject_name }} ({{ $course->subject_code }})</option>
                     @empty
                         <option value="">No courses available</option>
                     @endforelse
@@ -66,38 +62,57 @@
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Visibility <span class="text-red-600">*</span></label>
-                <select name="visibility" required
+                <select name="visibility" id="addMaterialVisibility" required
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                    <option value="all" {{ old('visibility') == 'all' ? 'selected' : '' }}>Everyone (All)</option>
-                    <option value="students" {{ old('visibility') == 'students' ? 'selected' : '' }}>Students Only</option>
-                    <option value="teachers" {{ old('visibility') == 'teachers' ? 'selected' : '' }}>Teachers Only</option>
-                    <option value="admins" {{ old('visibility') == 'admins' ? 'selected' : '' }}>Admins Only</option>
+                    <option value="all">Everyone (All)</option>
+                    <option value="students">Students Only</option>
+                    <option value="teachers">Teachers Only</option>
+                    <option value="admins">Admins Only</option>
                 </select>
                 @error('visibility')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea name="description" rows="2"
+                <textarea name="description" id="addMaterialDescription" rows="2"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                    placeholder="Short description (optional)">{{ old('description') }}</textarea>
+                    placeholder="Short description (optional)"></textarea>
             </div>
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">File <span class="text-red-600">*</span></label>
-                <input type="file" name="file" required
+                <input type="file" name="file" id="addMaterialFile" required
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                 <p class="text-gray-500 text-xs mt-1">Max: 20MB (PDF, DOC, Images, ZIP)</p>
                 @error('file')<p class="text-red-600 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
             
+            <!-- Upload Progress -->
+            <div id="uploadProgress" class="mb-4 hidden">
+                <div class="flex items-center justify-between text-xs text-gray-600 mb-1">
+                    <span>Uploading...</span>
+                    <span id="uploadPercentage">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="uploadProgressBar" class="bg-red-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <!-- Error Message -->
+            <div id="uploadError" class="mb-4 hidden bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-xs"></div>
+            
+            <!-- Success Message -->
+            <div id="uploadSuccess" class="mb-4 hidden bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded text-xs"></div>
+            
             <div class="flex justify-end gap-3">
                 <button type="button" onclick="closeAddMaterialModal()"
-                    class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+                    id="addMaterialCancelBtn">
                     Cancel
                 </button>
                 <button type="submit"
-                    class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700"
+                    id="addMaterialSubmitBtn">
                     <i class="bi bi-upload mr-1"></i>Upload
                 </button>
             </div>
@@ -114,6 +129,19 @@ function openAddMaterialModal() {
 function closeAddMaterialModal() {
     document.getElementById('addMaterialModal').classList.add('hidden');
     document.body.style.overflow = 'auto';
+    resetAddForm();
+}
+
+// Reset form to initial state
+function resetAddForm() {
+    const form = document.getElementById('addMaterialForm');
+    form.reset();
+    form.classList.remove('hidden');
+    document.getElementById('uploadProgress').classList.add('hidden');
+    document.getElementById('uploadError').classList.add('hidden');
+    document.getElementById('uploadSuccess').classList.add('hidden');
+    document.getElementById('addMaterialSubmitBtn').disabled = false;
+    document.getElementById('addMaterialSubmitBtn').innerHTML = '<i class="bi bi-upload mr-1"></i>Upload';
 }
 
 // Close on Escape key press
@@ -125,4 +153,147 @@ document.addEventListener('keydown', function(e) {
 document.getElementById('addMaterialModal').addEventListener('click', function(e) {
     if (e.target === this) closeAddMaterialModal();
 });
+
+// AJAX Upload for Add Material Form
+document.getElementById('addMaterialForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const submitBtn = document.getElementById('addMaterialSubmitBtn');
+    const progressDiv = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('uploadProgressBar');
+    const percentageSpan = document.getElementById('uploadPercentage');
+    const errorDiv = document.getElementById('uploadError');
+    const successDiv = document.getElementById('uploadSuccess');
+    
+    // Reset states
+    errorDiv.classList.add('hidden');
+    successDiv.classList.add('hidden');
+    progressDiv.classList.remove('hidden');
+    progressBar.style.width = '0%';
+    percentageSpan.textContent = '0%';
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split mr-1"></i>Uploading...';
+    
+    const formData = new FormData(form);
+    const xhr = new XMLHttpRequest();
+    
+    xhr.upload.addEventListener('progress', function(e) {
+        if (e.lengthComputable) {
+            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percentComplete + '%';
+            percentageSpan.textContent = percentComplete + '%';
+        }
+    });
+    
+    xhr.addEventListener('load', function() {
+        try {
+            const response = JSON.parse(xhr.responseText);
+            
+            if (xhr.status === 200 && response.success) {
+                // Success!
+                successDiv.textContent = response.message;
+                successDiv.classList.remove('hidden');
+                
+                // Reset form and close modal after a short delay
+                setTimeout(function() {
+                    closeAddMaterialModal();
+                    
+                    // Add the new row to the table
+                    addMaterialRowToTable(response.row_html);
+                    
+                    // Update statistics
+                    updateStatistics(response.stats);
+                }, 1000);
+                
+            } else {
+                // Validation or server error
+                const errorMessage = response.message || 'Upload failed. Please try again.';
+                errorDiv.textContent = errorMessage;
+                errorDiv.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-upload mr-1"></i>Upload';
+            }
+        } catch (e) {
+            errorDiv.textContent = 'An error occurred. Please try again.';
+            errorDiv.classList.remove('hidden');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-upload mr-1"></i>Upload';
+        }
+    });
+    
+    xhr.addEventListener('error', function() {
+        errorDiv.textContent = 'Network error. Please check your connection and try again.';
+        errorDiv.classList.remove('hidden');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-upload mr-1"></i>Upload';
+    });
+    
+    xhr.open('POST', '{{ route("admin.study-material.store-ajax") }}');
+    xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]')?.content || '');
+    xhr.send(formData);
+});
+
+// Function to add material row to table dynamically
+function addMaterialRowToTable(rowHtml) {
+    const tableBody = document.querySelector('#materialsTable tbody');
+    const emptyRow = tableBody.querySelector('.empty-row');
+    
+    // Remove empty row if exists
+    if (emptyRow) {
+        emptyRow.remove();
+    }
+    
+    // Check if there's already a row for this material
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = rowHtml;
+    const newRow = tempDiv.firstElementChild;
+    const materialId = newRow.id.replace('material-row-', '');
+    
+    // Remove any existing row with the same ID
+    const existingRow = document.getElementById('material-row-' + materialId);
+    if (existingRow) {
+        existingRow.remove();
+    }
+    
+    // Prepend new row with animation
+    newRow.style.opacity = '0';
+    newRow.style.transform = 'translateY(-10px)';
+    tableBody.insertBefore(newRow, tableBody.firstChild);
+    
+    // Trigger animation
+    setTimeout(function() {
+        newRow.style.transition = 'all 0.3s ease';
+        newRow.style.opacity = '1';
+        newRow.style.transform = 'translateY(0)';
+    }, 50);
+}
+
+// Function to update statistics cards
+function updateStatistics(stats) {
+    // Update total count
+    const totalCard = document.querySelector('[data-stat="total"]');
+    if (totalCard) {
+        totalCard.textContent = stats.total;
+    }
+    
+    // Update type-specific counts
+    if (stats.notes !== undefined) {
+        const notesCard = document.querySelector('[data-stat="notes"]');
+        if (notesCard) notesCard.textContent = stats.notes;
+    }
+    if (stats.assignments !== undefined) {
+        const assignmentCard = document.querySelector('[data-stat="assignments"]');
+        if (assignmentCard) assignmentCard.textContent = stats.assignments;
+    }
+    if (stats.papers !== undefined) {
+        const papersCard = document.querySelector('[data-stat="papers"]');
+        if (papersCard) papersCard.textContent = stats.papers;
+    }
+    if (stats.lab_reports !== undefined) {
+        const labCard = document.querySelector('[data-stat="lab_reports"]');
+        if (labCard) labCard.textContent = stats.lab_reports;
+    }
+}
 </script>
+

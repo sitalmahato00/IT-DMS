@@ -32,8 +32,8 @@ class ExamController extends Controller
                 $query->forSemester($request->semester);
             }
 
-            if ($request->has('course_id') && $request->course_id) {
-                $query->where('course_id', $request->course_id);
+            if ($request->has('subject_id') && $request->subject_id) {
+                $query->where('subject_id', $request->subject_id);
             }
 
             if ($request->has('subject_id') && $request->subject_id) {
@@ -107,7 +107,7 @@ class ExamController extends Controller
                 'academic_year' => 'required|string',
                 'semester' => 'required|string',
                 'subject_id' => 'nullable|exists:subjects,id',
-                'course_id' => 'nullable|exists:courses,id',
+                
                 'exam_type' => 'required|string|in:internal,final,midterm,practical,viva,assignment,assessment',
                 'full_marks' => 'required|integer|min:0',
                 'passing_marks' => 'required|integer|min:0',
@@ -166,7 +166,7 @@ class ExamController extends Controller
                 'academic_year' => 'required|string',
                 'semester' => 'required|string',
                 'subject_id' => 'nullable|exists:subjects,id',
-                'course_id' => 'nullable|exists:courses,id',
+                
                 'exam_type' => 'required|string|in:internal,final,midterm,practical,viva,assignment,assessment',
                 'full_marks' => 'required|integer|min:0',
                 'passing_marks' => 'required|integer|min:0',
@@ -256,7 +256,7 @@ class ExamController extends Controller
                     'exam_name_ne' => $exam->exam_name_ne,
                     'academic_year' => $exam->academic_year,
                     'semester' => $exam->semester,
-                    'course_id' => $exam->course_id,
+                    
                     'subject_id' => $exam->subject_id,
                     'exam_type' => $exam->exam_type,
                     'full_marks' => $exam->full_marks,
@@ -302,7 +302,7 @@ class ExamController extends Controller
     }
 
     /**
-     * Upload marks for an exam.
+     * Upload marks for an exam (traditional form submission).
      */
     public function uploadMarks(Request $request, Exam $exam)
     {
@@ -315,17 +315,20 @@ class ExamController extends Controller
 
             DB::beginTransaction();
 
+            $createdCount = 0;
+            $updatedCount = 0;
+
             foreach ($request->marks as $markData) {
                 $fullMarks = $exam->full_marks;
                 $marksObtained = $markData['marks_obtained'];
                 $percentage = $fullMarks > 0 ? round(($marksObtained / $fullMarks) * 100, 2) : 0;
 
-                ExamMark::updateOrCreate(
-                    [
-                        'exam_id' => $exam->id,
-                        'student_id' => $markData['student_id']
-                    ],
-                    [
+                $existing = ExamMark::where('exam_id', $exam->id)
+                    ->where('student_id', $markData['student_id'])
+                    ->first();
+
+                if ($existing) {
+                    $existing->update([
                         'marks_obtained' => $marksObtained,
                         'full_marks' => $fullMarks,
                         'percentage' => $percentage,
@@ -333,14 +336,28 @@ class ExamController extends Controller
                         'graded_by' => auth()->id(),
                         'graded_at' => now(),
                         'remarks' => $markData['remarks'] ?? null,
-                    ]
-                );
+                    ]);
+                    $updatedCount++;
+                } else {
+                    ExamMark::create([
+                        'exam_id' => $exam->id,
+                        'student_id' => $markData['student_id'],
+                        'marks_obtained' => $marksObtained,
+                        'full_marks' => $fullMarks,
+                        'percentage' => $percentage,
+                        'grade' => $this->calculateGrade($percentage),
+                        'graded_by' => auth()->id(),
+                        'graded_at' => now(),
+                        'remarks' => $markData['remarks'] ?? null,
+                    ]);
+                    $createdCount++;
+                }
             }
 
             DB::commit();
 
-            return redirect()->route('admin.assessment')
-                ->with('success', 'Marks uploaded successfully!');
+            return redirect()->back()
+                ->with('success', "Marks uploaded successfully! Created: {$createdCount}, Updated: {$updatedCount}");
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error uploading marks: ' . $e->getMessage());
@@ -351,13 +368,100 @@ class ExamController extends Controller
     }
 
     /**
+     * Upload marks for an exam (AJAX).
+     */
+    public function uploadMarksAjax(Request $request, Exam $exam)
+    {
+        try {
+            $request->validate([
+                'marks' => 'required|array',
+                'marks.*.student_id' => 'required|exists:students,id',
+                'marks.*.marks_obtained' => 'required|numeric|min:0',
+            ]);
+
+            DB::beginTransaction();
+
+            $createdCount = 0;
+            $updatedCount = 0;
+
+            foreach ($request->marks as $markData) {
+                $fullMarks = $exam->full_marks;
+                $marksObtained = $markData['marks_obtained'];
+                $percentage = $fullMarks > 0 ? round(($marksObtained / $fullMarks) * 100, 2) : 0;
+
+                $existing = ExamMark::where('exam_id', $exam->id)
+                    ->where('student_id', $markData['student_id'])
+                    ->first();
+
+                if ($existing) {
+                    $existing->update([
+                        'marks_obtained' => $marksObtained,
+                        'full_marks' => $fullMarks,
+                        'percentage' => $percentage,
+                        'grade' => $this->calculateGrade($percentage),
+                        'graded_by' => auth()->id(),
+                        'graded_at' => now(),
+                        'remarks' => $markData['remarks'] ?? null,
+                    ]);
+                    $updatedCount++;
+                } else {
+                    ExamMark::create([
+                        'exam_id' => $exam->id,
+                        'student_id' => $markData['student_id'],
+                        'marks_obtained' => $marksObtained,
+                        'full_marks' => $fullMarks,
+                        'percentage' => $percentage,
+                        'grade' => $this->calculateGrade($percentage),
+                        'graded_by' => auth()->id(),
+                        'graded_at' => now(),
+                        'remarks' => $markData['remarks'] ?? null,
+                    ]);
+                    $createdCount++;
+                }
+            }
+
+            DB::commit();
+
+            // Reload exam with marks
+            $exam->load(['subject', 'course', 'marks.student.user']);
+
+            // Get updated statistics
+            $totalStudents = $exam->marks()->count();
+            $averageMarks = $exam->marks()->avg('marks_obtained');
+            $passCount = $exam->marks()->where('percentage', '>=', 35)->count();
+            $passRate = $totalStudents > 0 ? round(($passCount / $totalStudents) * 100, 2) : 0;
+
+            // Get updated marks rows HTML
+            $marksRowsHtml = view('admin.exam-show-partials.marks-rows', ['exam' => $exam])->render();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Marks uploaded successfully! Created: {$createdCount}, Updated: {$updatedCount}",
+                'stats' => [
+                    'total_students' => $totalStudents,
+                    'average_marks' => round($averageMarks, 2),
+                    'pass_rate' => $passRate,
+                ],
+                'marks_html' => $marksRowsHtml,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error uploading marks (AJAX): ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload marks: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Get students for a specific exam.
      */
     public function getStudentsForExam(Request $request, Exam $exam)
     {
         try {
             $request->validate([
-                'course_id' => 'nullable|exists:courses,id',
+                
                 'semester' => 'nullable|string',
                 'batch' => 'nullable|string',
                 'subject_id' => 'nullable|exists:subjects,id',
@@ -365,8 +469,8 @@ class ExamController extends Controller
 
             $query = Student::with(['user']);
 
-            if ($request->course_id) {
-                $query->where('course_id', $request->course_id);
+            if ($request->subject_id) {
+                $query->where('subject_id', $request->subject_id);
             }
 
             if ($request->semester) {
@@ -408,13 +512,13 @@ class ExamController extends Controller
         try {
             $request->validate([
                 'semester' => 'required|string',
-                'course_id' => 'nullable|exists:courses,id',
+                
             ]);
 
             $query = Subject::where('semester', $request->semester);
 
-            if ($request->course_id) {
-                $query->where('course_id', $request->course_id);
+            if ($request->subject_id) {
+                $query->where('subject_id', $request->subject_id);
             }
 
             $subjects = $query->orderBy('subject_name')->get();

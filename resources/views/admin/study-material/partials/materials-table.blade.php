@@ -1,7 +1,7 @@
 {{-- Materials Table --}}
 <div class="bg-white rounded shadow-sm border border-gray-200 overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-xs">
+        <table class="w-full text-xs" id="materialsTable">
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
                     <th class="px-3 py-2 text-left font-semibold text-gray-900">Title</th>
@@ -60,7 +60,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr>
+                <tr class="empty-row">
                     <td colspan="8" class="px-3 py-8 text-center text-gray-500">
                         <div class="flex flex-col items-center justify-center">
                             <i class="bi bi-folder2-open text-4xl text-gray-300 mb-2"></i>
@@ -73,16 +73,10 @@
             </tbody>
         </table>
     </div>
-    
-    {{-- Pagination --}}
-    @if(method_exists($materials, 'hasPages') && $materials->hasPages())
-    <div class="px-4 py-3 border-t border-gray-200">
+    @if($materials->hasPages())
+    <div class="px-3 py-3 border-t border-gray-200 bg-gray-50">
         {{ $materials->links() }}
     </div>
     @endif
 </div>
 
-{{-- Pass materials data to JavaScript --}}
-<script>
-    window.studyMaterialsData = @json($materials->items());
-</script>

@@ -52,6 +52,113 @@ class StudyMaterialController extends Controller
     }
 
     /**
+     * Store a newly created study material (AJAX).
+     */
+    public function storeAjax(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:200',
+            'description' => 'nullable|string',
+            'semester' => 'required|string',
+            'course' => 'required|string',
+            'visibility' => 'required|in:all,students,teachers,admins',
+            'document_type' => 'required|in:lecture_notes,assignment,lab_report,assessment,study_guide,syllabus,project_material',
+            'file' => 'required|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip,rar',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Look up subject_id from subject_name (course)
+            $subject = Subject::where('subject_name', $validated['course'])->first();
+            $subjectId = $subject ? $subject->id : 1;
+
+            $material = new StudyMaterial();
+            $material->title = $validated['title'];
+            $material->description = $validated['description'] ?? null;
+            $material->semester = $validated['semester'];
+            $material->subject_id = $subjectId;
+            $material->visibility = $validated['visibility'];
+            $material->document_type = $validated['document_type'];
+            $material->teacher_id = Auth::id() ?? 1;
+            $material->is_published = true;
+            $material->uploaded_at = now();
+            
+            // Handle file upload
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                $filePath = $file->storeAs('study-materials', $fileName, 'public');
+                
+                $material->file_name = $file->getClientOriginalName();
+                $material->file_path = $filePath;
+                $material->file_size = $file->getSize();
+            } else {
+                $material->file_name = null;
+                $material->file_path = null;
+                $material->file_size = null;
+            }
+
+            $material->save();
+
+            // Load relationships for the row view
+            $material->load('subject');
+
+            // Get the row HTML
+            $rowHtml = view('admin.study-material.partials.material-row', ['material' => $material])->render();
+            
+            // Get updated statistics
+            $stats = [
+                'total' => StudyMaterial::count(),
+                'notes' => StudyMaterial::where('document_type', 'lecture_notes')->count(),
+                'assignments' => StudyMaterial::where('document_type', 'assignment')->count(),
+                'papers' => StudyMaterial::where('document_type', 'assessment')->count(),
+                'lab_reports' => StudyMaterial::where('document_type', 'lab_report')->count(),
+            ];
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Study material uploaded successfully.',
+                'material' => [
+                    'id' => $material->id,
+                    'title' => $material->title,
+                ],
+                'row_html' => $rowHtml,
+                'stats' => $stats,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload study material. Please try again. Error: ' . $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Get HTML for a single material row.
+     */
+    public function getMaterialRow($id)
+    {
+        try {
+            $material = StudyMaterial::with('subject')->findOrFail($id);
+            $rowHtml = view('admin.study-material.partials.material-row', ['material' => $material])->render();
+            
+            return response()->json([
+                'success' => true,
+                'row_html' => $rowHtml,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Material not found.',
+            ], 404);
+        }
+    }
+    
+    /**
      * Store a newly created study material.
      */
     public function store(Request $request)
@@ -214,3 +321,4 @@ class StudyMaterialController extends Controller
         }
     }
 }
+

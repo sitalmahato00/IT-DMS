@@ -455,7 +455,6 @@ document.querySelectorAll('.status-toggle').forEach(function(el) {
             container.style.backgroundColor = newChecked ? '#16a34a' : '#ef4444';
         }
         
-        // Make API call
         const csrfToken = document.querySelector('meta[name="csrf-token"]');
         if (!csrfToken) {
             console.error('CSRF token not found');
@@ -476,7 +475,7 @@ document.querySelectorAll('.status-toggle').forEach(function(el) {
         })
         .then(function(data) {
             console.log('Response data:', data);
-            if (data.status) {
+            if (data.success) {
                 showToast('Status updated successfully', 'success');
             } else {
                 showToast(data.message || 'Failed to update status', 'error');
@@ -534,7 +533,7 @@ document.querySelectorAll('.alumni-toggle').forEach(function(el) {
         })
         .then(function(data) {
             console.log('Response data:', data);
-            if (data.is_alumni !== undefined) {
+            if (data.success) {
                 showToast(newChecked ? 'Student marked as alumni' : 'Student removed from alumni', 'success');
             } else {
                 showToast(data.message || 'Failed to update alumni status', 'error');

@@ -162,7 +162,7 @@ public function index(Request $request)
             
             $data = $request->validate([
                 'student_id' => 'required',
-                'date_bs' => 'required|string|max:30',
+                'date' => 'required|date',
                 'status' => 'required|in:present,absent,leave',
                 'remarks' => 'nullable|string|max:255',
                 'subject_id' => 'nullable'
@@ -175,7 +175,7 @@ public function index(Request $request)
             $updateData = [
                 'status' => $data['status'],
                 'remarks' => $remarks,
-                'date_bs' => $data['date_bs'] ?? null,
+                'date' => $data['date'],
             ];
 
             // Add subject_id if provided and not empty
@@ -194,7 +194,7 @@ public function index(Request $request)
             $attendance = Attendance::updateOrCreate(
                 [
                     'student_id' => $data['student_id'],
-                    'date_bs' => $data['date_bs'],
+                    'date' => $data['date'],
                 ],
                 $updateData
             );
@@ -279,11 +279,11 @@ public function index(Request $request)
             'attendance' => 'required|array',
             'attendance.*.student_id' => 'required|exists:students,id',
             'attendance.*.status' => 'required|in:present,absent,leave',
-            'date_bs' => 'required|string|max:30',
+            'date' => 'required|date',
             'subject_id' => 'nullable|exists:subjects,id'
         ]);
 
-        $date_bs = $data['date_bs'];
+        $date = $data['date'];
         $subjectId = $data['subject_id'] ?? null;
 
         // Get teacher ID from current user
@@ -299,33 +299,21 @@ public function index(Request $request)
         // Build records array for upsert (atomic operation)
         $records = [];
         $now = now()->toDateTimeString();
-        
-        // Convert date_bs (BS date like "2026-02-03") to English date for the date column
-        $date = \App\Helpers\NepaliContentHelper::convertBsToAd($date_bs);
-        if (empty($date)) {
-            // Fallback: if conversion fails, use date_bs as-is
-            $date = $date_bs;
-        }
-        
+        // Use AD date directly
         foreach ($data['attendance'] as $item) {
             $remarks = $item['status'] === 'absent' ? 'Absent' : ($item['status'] === 'leave' ? 'Leave' : 'Present');
-            
             $record = [
                 'student_id' => $item['student_id'],
-                'date_bs' => $date_bs,
-                'date' => $date, // Required NOT NULL field
+                'date' => $date,
+                'teacher_id' => $teacherId,
                 'status' => $item['status'],
                 'remarks' => $remarks,
-                'teacher_id' => $teacherId,
                 'updated_at' => $now,
-                'created_at' => $now,
+                'created_at' => $now
             ];
-
-            // Add subject_id if provided
             if (!empty($subjectId)) {
                 $record['subject_id'] = $subjectId;
             }
-
             $records[] = $record;
         }
 
@@ -334,20 +322,15 @@ public function index(Request $request)
         // This prevents duplicates while allowing updates
         $studentIds = array_column($records, 'student_id');
         
-        DB::transaction(function () use ($date_bs, $records, $studentIds, $subjectId) {
-            // Delete all existing attendance records for this BS date and these students
+        DB::transaction(function () use ($records, $studentIds, $subjectId) {
+            // Build query to delete existing attendance records for these students and date
             $query = DB::table('attendance')
-                ->where('date_bs', $date_bs)
-                ->whereIn('student_id', $studentIds);
-
-            // Also filter by subject_id if provided
+                ->whereIn('student_id', $studentIds)
+                ->where('date', $records[0]['date']);
             if (!empty($subjectId)) {
                 $query->where('subject_id', $subjectId);
             }
-
             $query->delete();
-            
-            // Insert all records fresh
             DB::table('attendance')->insert($records);
         });
 

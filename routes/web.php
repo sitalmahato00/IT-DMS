@@ -83,6 +83,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::delete('/assessment/{exam}', [App\Http\Controllers\Admin\ExamController::class, 'destroy'])->name('assessment.destroy');
     Route::post('/assessment/{exam}/toggle-status', [App\Http\Controllers\Admin\ExamController::class, 'toggleStatus'])->name('assessment.toggle');
     Route::post('/assessment/{exam}/upload-marks', [App\Http\Controllers\Admin\ExamController::class, 'uploadMarks'])->name('assessment.upload-marks');
+    Route::post('/assessment/{exam}/upload-marks-ajax', [App\Http\Controllers\Admin\ExamController::class, 'uploadMarksAjax'])->name('assessment.upload-marks-ajax');
     Route::get('/assessment/{exam}/students', [App\Http\Controllers\Admin\ExamController::class, 'getStudentsForExam'])->name('assessment.students');
     Route::get('/assessment/subjects/by-semester', [App\Http\Controllers\Admin\ExamController::class, 'getSubjectsBySemester'])->name('assessment.subjects');
 
@@ -126,6 +127,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     // Study Material management
     Route::get('/study-material', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'index'])->name('study-material');
     Route::post('/study-material', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'store'])->name('study-material.store');
+    Route::post('/study-material/store-ajax', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'storeAjax'])->name('study-material.store-ajax');
+    Route::get('/study-material/{id}/row', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'getMaterialRow'])->name('study-material.row');
     Route::put('/study-material/{id}', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'update'])->name('study-material.update');
     Route::get('/study-material/download/{id}', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'download'])->name('study-material.download');
     Route::delete('/study-material/{id}', [\App\Http\Controllers\Admin\StudyMaterialController::class, 'destroy'])->name('study-material.destroy');

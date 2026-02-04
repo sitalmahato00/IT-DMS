@@ -736,7 +736,8 @@ async function saveAllAttendance() {
         }
 
         try {
-            const payload = { attendance, date: date };
+            // Only send AD date, not BS
+            const payload = { attendance, date };
             if (courseId) {
                 payload.subject_id = courseId;
             }
