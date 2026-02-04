@@ -192,14 +192,12 @@ class StudentController extends Controller
         $user = User::findOrFail($id);
         $user->status = $user->status === 'active' ? 'inactive' : 'active';
         $user->save();
-        if (request()->wantsJson() || request()->ajax()) {
-            return response()->json([
-                'status' => $user->status,
-                'message' => 'Student status updated.'
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Student status updated.');
+        // Always return JSON for AJAX calls
+        return response()->json([
+            'status' => $user->status,
+            'success' => true,
+            'message' => 'Student status updated.'
+        ]);
     }
 
     // Toggle alumni flag
@@ -208,14 +206,12 @@ class StudentController extends Controller
         $user = User::findOrFail($id);
         $user->is_alumni = $user->is_alumni ? 0 : 1;
         $user->save();
-        if (request()->wantsJson() || request()->ajax()) {
-            return response()->json([
-                'is_alumni' => $user->is_alumni,
-                'message' => 'Alumni status updated.'
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Alumni status updated.');
+        // Always return JSON for AJAX calls
+        return response()->json([
+            'is_alumni' => $user->is_alumni,
+            'success' => true,
+            'message' => 'Alumni status updated.'
+        ]);
     }
 
     public function update(Request $request, $id)
@@ -288,3 +284,4 @@ class StudentController extends Controller
         return view('admin.partials.student-print', compact('student'));
     }
 }
+
