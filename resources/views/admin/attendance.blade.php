@@ -15,7 +15,7 @@
     <!-- Filters & Search - Row 2 -->
     <div class="flex items-center justify-between gap-3 flex-wrap">
         <form method="GET" action="{{ route('admin.attendance') }}" class="flex items-center gap-2">
-            <input type="text" name="date_bs" id="filter_date_bs" value="{{ $date_bs ?? '' }}" placeholder="YYYY-MM-DD (BS)" class="w-40 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-red-500 bs-date">
+<input type="date" name="date" id="filter_date" value="{{ $date ?? '' }}" class="w-40 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-red-500">
             <input type="text" name="q" value="{{ $search }}" placeholder="Search student..." class="w-48 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-red-500">
             <select name="semester" id="filter_semester" class="w-40 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-red-500">
                 <option value="">All Semesters</option>
@@ -216,9 +216,9 @@
 
         <div class="p-4">
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Date (BS) <span class="text-red-500">*</span></label>
-                    <input type="text" id="mark_date_bs" value="{{ $date_bs ?? '' }}" placeholder="YYYY-MM-DD (BS)" class="w-full px-3 py-2 border border-gray-200 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+<div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date (AD) <span class="text-red-500">*</span></label>
+                    <input type="date" id="mark_date" value="{{ $date ?? '' }}" class="w-full px-3 py-2 border border-gray-200 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Semester <span class="text-red-500">*</span></label>
@@ -423,15 +423,15 @@
             let url = '{{ route("admin.attendance.store") }}';
             let method = 'POST';
 
-            // If we have a record ID, use the PUT endpoint for update
+// If we have a record ID, use the PUT endpoint for update
             if (recordId && recordId !== '') {
                 url = '{{ route("admin.attendance.update", ["id" => "__ID__"]) }}'.replace('__ID__', recordId);
                 method = 'PUT';
             }
 
-            // For POST requests date is required
+// For POST requests date is required
             if (method === 'POST' && !fallbackDate) {
-                showToast('Date (BS) is required to save attendance', 'error');
+                showToast('Date (AD) is required to save attendance', 'error');
                 return;
             }
 
@@ -442,7 +442,7 @@
                 remarks: remarks
             };
 
-            if (method === 'POST') payload.date_bs = fallbackDate;
+            if (method === 'POST') payload.date = fallbackDate;
 
             const response = await fetch(url, {
                 method: method,
@@ -511,13 +511,13 @@
         document.getElementById('attendanceSummary').classList.add('hidden');
     }
 
-    // Check if attendance already exists for selected date and semester
+// Check if attendance already exists for selected date and semester
     async function checkExistingAttendance(date, semester) {
         if (!date || !semester) return;
 
         try {
             const url = new URL('{{ route("admin.attendance.students") }}', window.location.origin);
-            url.searchParams.set('date_bs', date);
+            url.searchParams.set('date', date);
             url.searchParams.set('semester', semester);
 
             const res = await fetch(url.toString(), {
@@ -536,8 +536,8 @@
         }
     }
 
-    // Add event listener for date selection in modal
-    document.getElementById('mark_date_bs')?.addEventListener('change', function() {
+// Add event listener for date selection in modal
+    document.getElementById('mark_date')?.addEventListener('change', function() {
         const date = this.value;
         const semester = document.getElementById('mark_semester').value;
         if (date && semester) {
@@ -545,17 +545,17 @@
         }
     });
 
-    // Add event listener for semester selection in modal
+// Add event listener for semester selection in modal
     document.getElementById('mark_semester')?.addEventListener('change', function() {
         const semester = this.value;
-        const date = document.getElementById('mark_date_bs').value;
+        const date = document.getElementById('mark_date').value;
         if (date && semester) {
             checkExistingAttendance(date, semester);
         }
     });
 
-    async function loadAttendanceStudents() {
-        const date = document.getElementById('mark_date_bs').value;
+async function loadAttendanceStudents() {
+        const date = document.getElementById('mark_date').value;
         const semester = document.getElementById('mark_semester').value;
 
         if (!date || !semester) {
@@ -569,7 +569,7 @@
 
         try {
             const url = new URL('{{ route("admin.attendance.students") }}', window.location.origin);
-            url.searchParams.set('date_bs', date);
+            url.searchParams.set('date', date);
             url.searchParams.set('semester', semester);
 
             const res = await fetch(url.toString(), {
@@ -630,9 +630,9 @@
             semTd.className = 'px-4 py-3 text-xs text-center text-gray-700';
             semTd.textContent = s.semester || '-';
 
-            const dateTd = document.createElement('td');
+const dateTd = document.createElement('td');
             dateTd.className = 'px-4 py-3 text-xs text-center text-gray-700';
-            dateTd.textContent = document.getElementById('mark_date_bs').value ? document.getElementById('mark_date_bs').value : '-';
+            dateTd.textContent = document.getElementById('mark_date').value ? document.getElementById('mark_date').value : '-';
 
             const isPresent = (s.status || 'present') === 'present';
             const presentTd = document.createElement('td');
@@ -720,9 +720,9 @@
         });
     }
 
-    async function saveAllAttendance() {
+async function saveAllAttendance() {
         const attendance = Object.values(attendanceState).map(s => ({ student_id: s.student.student_id || s.student.id, status: s.status }));
-const date = document.getElementById('mark_date_bs').value;
+        const date = document.getElementById('mark_date').value;
         const courseId = document.getElementById('mark_course').value;
 
         if (attendance.length === 0) {
@@ -736,7 +736,7 @@ const date = document.getElementById('mark_date_bs').value;
         }
 
         try {
-            const payload = { attendance, date_bs: date };
+            const payload = { attendance, date: date };
             if (courseId) {
                 payload.subject_id = courseId;
             }

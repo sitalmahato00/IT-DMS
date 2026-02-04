@@ -16,10 +16,10 @@ class AttendanceController extends Controller
     /**
      * Display attendance records from database (read-only view)
      */
-    public function index(Request $request)
+public function index(Request $request)
     {
         $user = auth()->user();
-        $date_bs = $request->get('date_bs', '');
+        $date = $request->get('date', '');
         $search = $request->get('q', '');
         $semester = $request->get('semester', '');
         $course = $request->get('course', '');
@@ -37,6 +37,7 @@ class AttendanceController extends Controller
                     'attendance.subject_id',
                     'attendance.status',
                     'attendance.remarks',
+                    'attendance.date',
                     'attendance.date_bs',
                     'users.name',
                     'users.email',
@@ -47,9 +48,9 @@ class AttendanceController extends Controller
                     'subjects.category'
                 );
             
-            // Filter by BS date if provided
-            if ($date_bs !== '' && $date_bs !== null) {
-                $attendanceQuery->where('attendance.date_bs', '=', $date_bs);
+            // Filter by AD date if provided
+            if ($date !== '' && $date !== null) {
+                $attendanceQuery->where('attendance.date', '=', $date);
             }
             
             // Filter by semester if selected
@@ -73,7 +74,7 @@ class AttendanceController extends Controller
             
             // Get attendance records with student info
             $attendanceRecords = $attendanceQuery
-                ->orderBy('attendance.date_bs', 'desc')
+                ->orderBy('attendance.date', 'desc')
                 ->orderBy('users.name')
                 ->get()
                 ->map(function ($record) {
@@ -84,8 +85,8 @@ class AttendanceController extends Controller
                         'subject_id' => (string) ($record->subject_id ?? ''),
                         'status' => (string) ($record->status ?? ''),
                         'remarks' => (string) ($record->remarks ?? ''),
+                        'date' => (string) ($record->date ?? ''),
                         'date_bs' => (string) ($record->date_bs ?? ''),
-                        'date' => (string) ($record->date_bs ?? $record->date ?? ''),
                         'name' => (string) ($record->name ?? ''),
                         'email' => (string) ($record->email ?? ''),
                         'roll_no' => (string) ($record->roll_no ?? ''),
@@ -132,7 +133,7 @@ class AttendanceController extends Controller
             
             // Type hint for static analysis
             /** @var \Illuminate\Support\Collection $attendanceRecords */
-            return view('admin.attendance', compact('attendanceRecords', 'date_bs', 'search', 'semester', 'course', 'stats', 'semesters', 'courses'));
+            return view('admin.attendance', compact('attendanceRecords', 'date', 'search', 'semester', 'course', 'stats', 'semesters', 'courses'));
             
         } catch (\Exception $e) {
             Log::error('Attendance error: ' . $e->getMessage());
@@ -140,7 +141,7 @@ class AttendanceController extends Controller
             // Return view with empty data on error
             return view('admin.attendance', [
                 'attendanceRecords' => collect([]),
-                'date_bs' => $date_bs,
+                'date' => $date,
                 'search' => $search,
                 'semester' => $semester,
                 'course' => $course,

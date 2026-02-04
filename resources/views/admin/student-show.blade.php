@@ -90,7 +90,7 @@
             <button type="button" onclick="event.preventDefault(); closeViewStudentModal(); return false;" class="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50">Close</button>
         </div>
     </div>
-</div>    
+</div>
 
 <!-- Edit Student Modal -->
 <div id="editStudentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4" onclick="if(event.target===this) closeEditStudentModal()">
@@ -98,80 +98,7 @@
         <form id="editStudentForm" action="{{ route('admin.students.update', $student->id) }}" method="POST" enctype="multipart/form-data" class="flex flex-col">
             @csrf
             @method('PUT')
-            
-            <div class="px-6 py-4 border-b flex items-center justify-between sticky top-0 bg-white">
-                <div>
-                    <h3 class="text-lg font-semibold">Edit Student</h3>
-                    <p class="text-sm text-gray-500">Update student information</p>
-                </div>
-                <button type="button" onclick="event.preventDefault(); closeEditStudentModal(); return false;" class="text-gray-500 hover:text-gray-900 text-2xl leading-none">✕</button>
-            </div>
 
-            <div class="p-6">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Avatar -->
-                    <div class="col-span-1 flex flex-col items-center">
-                        <div class="w-36 h-36 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center border">
-                            @if($student->profile_photo_path)
-                                <img id="edit_profile_preview" src="{{ asset('storage/'.$student->profile_photo_path) }}" alt="Profile" class="w-full h-full object-cover">
-                            @else
-                                <div id="edit_profile_placeholder" class="text-gray-400"><i class="bi bi-person-fill text-4xl"></i></div>
-                            @endif
-                        </div>
-                        <label for="edit_profile_photo_input" class="mt-3 inline-flex items-center px-3 py-1.5 bg-white border rounded text-sm cursor-pointer hover:bg-gray-50">
-                            <i class="bi bi-upload mr-2"></i>Choose photo
-                        </label>
-                        <input id="edit_profile_photo_input" type="file" name="profile_photo" accept="image/*" class="sr-only" />
-                        <p class="mt-3 text-xs text-gray-500 text-center">Recommended 400×400px. Max 4MB.</p>
-                    </div>
-
-                    <!-- Fields -->
-                    <div class="col-span-1 lg:col-span-2">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Full name</label>
-                                <input name="name" value="{{ old('name', $student->name) }}" class="mt-1 block w-full px-3 py-2 border rounded-md text-sm shadow-sm focus:ring-1 focus:ring-red-500" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Email</label>
-                                <input type="email" name="email" value="{{ old('email', $student->email) }}" class="mt-1 block w-full px-3 py-2 border rounded-md text-sm shadow-sm" />
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Phone</label>
-                                <input name="phone" value="{{ old('phone', $student->phone) }}" class="mt-1 block w-full px-3 py-2 border rounded-md text-sm shadow-sm" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Department</label>
-                                <input name="department" value="{{ old('department', $student->department ?? ($student->student->department ?? '')) }}" class="mt-1 block w-full px-3 py-2 border rounded-md text-sm shadow-sm" />
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Semester</label>
-                                <select name="semester" class="mt-1 block w-full px-3 py-2 border rounded-md text-sm shadow-sm">
-                                    @for($s=1;$s<=6;$s++)
-                                        <option value="{{ $s }}" {{ old('semester', $student->student->semester ?? '') == $s ? 'selected' : '' }}>Semester {{ $s }}</option>
-                                    @endfor
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Status</label>
-                                <select name="status" class="mt-1 block w-full px-3 py-2 border rounded-md text-sm shadow-sm">
-                                    <option value="active" {{ old('status', $student->status) == 'active' ? 'selected' : '' }}>Active</option>
-                                    <option value="pending" {{ old('status', $student->status) == 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="inactive" {{ old('status', $student->status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                </select>
-                            </div>
-                        </div>
-
-<!-- Edit Student Modal -->
-<div id="editStudentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4" onclick="if(event.target===this) closeEditStudentModal()">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl overflow-auto max-h-[90vh]">
-        <form id="editStudentForm" action="{{ route('admin.students.update', $student->id) }}" method="POST" enctype="multipart/form-data" class="flex flex-col">
-            @csrf
-            @method('PUT')
-            
             <div class="px-6 py-4 border-b flex items-center justify-between sticky top-0 bg-white">
                 <div>
                     <h3 class="text-lg font-semibold">Edit Student</h3>
@@ -250,8 +177,8 @@
 
                         <div class="mt-4 grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-medium text-gray-700">Date of birth <span class="text-red-500 text-base">*</span></label>
-                                <input type="text" name="date_of_birth_bs" required value="{{ old('date_of_birth_bs', $student->student->date_of_birth_bs ?? '') }}" placeholder="YYYY-MM-DD (BS)" class="mt-1 block w-full px-3 py-2 border rounded-md text-sm shadow-sm bs-date" />
+                                <label class="block text-xs font-medium text-gray-700">Date of birth (AD) <span class="text-red-500 text-base">*</span></label>
+                                <input type="date" name="date_of_birth" required value="{{ old('date_of_birth', $student->student->date_of_birth ?? '') }}" class="mt-1 block w-full px-3 py-2 border rounded-md text-sm shadow-sm focus:ring-1 focus:ring-red-500" />
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-gray-700">Batch Year <span class="text-red-500 text-base">*</span></label>
@@ -352,7 +279,7 @@
         document.getElementById('editStudentModal').classList.remove('hidden');
         document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
     }
-    
+
     function closeEditStudentModal() {
         const modal = document.getElementById('editStudentModal');
         modal.classList.add('hidden');
@@ -417,3 +344,4 @@
 }
 </style>
 @endsection
+

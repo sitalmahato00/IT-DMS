@@ -91,20 +91,94 @@ class Notice extends Model
      */
     public function getFormattedDateAttribute(): string
     {
-        $locale = app()->getLocale();
-        
-        if ($locale === 'ne' && !empty($this->published_at_bs)) {
-            return NepaliContentHelper::formatNumber($this->published_at_bs);
+        // Prefer BS date everywhere when available; show month name in Nepali but numbers in English
+        if (!empty($this->published_at_bs)) {
+            return NepaliContentHelper::formatBsPretty($this->published_at_bs, false);
         }
-        
-        return $this->published_at 
-            ? $this->published_at->format('d M Y') 
-            : $this->created_at->format('d M Y');
+
+        // If we have AD date but no BS, attempt conversion
+        if ($this->published_at) {
+            $bs = NepaliContentHelper::convertAdToBs($this->published_at->format('Y-m-d'));
+            if ($bs) return NepaliContentHelper::formatBsPretty($bs, false);
+            return $this->published_at->format('d M Y');
+        }
+
+        // Fallback: try converting created_at
+        $bs = NepaliContentHelper::convertAdToBs($this->created_at->format('Y-m-d'));
+        if ($bs) return NepaliContentHelper::formatBsPretty($bs, false);
+
+        return $this->created_at->format('d M Y');
     }
 
     /**
      * Get formatted semester in current locale
      */
+    public function getPublishedAtBsPrettyAttribute(): ?string
+    {
+        // Return pretty BS for published_at if available, else derive from published_at AD
+        if (!empty($this->published_at_bs)) {
+            return NepaliContentHelper::formatBsPretty($this->published_at_bs, false);
+        }
+
+        if ($this->published_at) {
+            $bs = NepaliContentHelper::convertAdToBs($this->published_at->format('Y-m-d'));
+            if ($bs) return NepaliContentHelper::formatBsPretty($bs, false);
+        }
+
+        return null;
+    }
+
+    public function getCreatedAtBsPrettyAttribute(): ?string
+    {
+        if ($this->created_at) {
+            $bs = NepaliContentHelper::convertAdToBs($this->created_at->format('Y-m-d'));
+            if ($bs) return NepaliContentHelper::formatBsPretty($bs, false);
+        }
+        return null;
+    }
+
+    public function getUpdatedAtBsPrettyAttribute(): ?string
+    {
+        if ($this->updated_at) {
+            $bs = NepaliContentHelper::convertAdToBs($this->updated_at->format('Y-m-d'));
+            if ($bs) return NepaliContentHelper::formatBsPretty($bs, false);
+        }
+        return null;
+    }
+
+    // Latin transliterated BS (e.g., "baisakh 01, 2080")
+    public function getPublishedAtBsLatinAttribute(): ?string
+    {
+        if (!empty($this->published_at_bs)) {
+            return NepaliContentHelper::formatBsPrettyLatin($this->published_at_bs, true);
+        }
+
+        if ($this->published_at) {
+            $bs = NepaliContentHelper::convertAdToBs($this->published_at->format('Y-m-d'));
+            if ($bs) return NepaliContentHelper::formatBsPrettyLatin($bs, true);
+        }
+
+        return null;
+    }
+
+    public function getCreatedAtBsLatinAttribute(): ?string
+    {
+        if ($this->created_at) {
+            $bs = NepaliContentHelper::convertAdToBs($this->created_at->format('Y-m-d'));
+            if ($bs) return NepaliContentHelper::formatBsPrettyLatin($bs, true);
+        }
+        return null;
+    }
+
+    public function getUpdatedAtBsLatinAttribute(): ?string
+    {
+        if ($this->updated_at) {
+            $bs = NepaliContentHelper::convertAdToBs($this->updated_at->format('Y-m-d'));
+            if ($bs) return NepaliContentHelper::formatBsPrettyLatin($bs, true);
+        }
+        return null;
+    }
+
     public function getFormattedSemesterAttribute(): string
     {
         if (!$this->semester) return '';

@@ -159,6 +159,72 @@ class NepaliContentHelper
     }
 
     /**
+     * Format a BS date into a human friendly string like "बैशाख 1, 2079"
+     * 
+     * @param string $bsDate BS date in YYYY-MM-DD format
+     * @param bool $nepaliNumbers Whether to render numbers as Nepali glyphs (default true)
+     * @return string|null
+     */
+    public static function formatBsPretty(string $bsDate, bool $nepaliNumbers = true): ?string
+    {
+        if (empty($bsDate)) return null;
+
+        $parts = explode('-', $bsDate);
+        if (count($parts) !== 3) return $bsDate;
+
+        $year = (int) $parts[0];
+        $month = (int) $parts[1];
+        $day = (int) $parts[2];
+
+        $monthName = self::getMonthName($month);
+        $dayStr = $nepaliNumbers ? self::toNepaliNumber($day) : (string) $day;
+        $yearStr = $nepaliNumbers ? self::toNepaliNumber($year) : (string) $year;
+
+        return sprintf('%s %s, %s', $monthName, $dayStr, $yearStr);
+    }
+
+    /**
+     * Format a BS date into latin transliteration with zero-padded day
+     * Example: "baisakh 01, 2080"
+     * 
+     * @param string $bsDate BS date in YYYY-MM-DD format
+     * @param bool $padDay Whether to zero-pad day to 2 digits
+     * @return string|null
+     */
+    public static function formatBsPrettyLatin(string $bsDate, bool $padDay = true): ?string
+    {
+        if (empty($bsDate)) return null;
+
+        $parts = explode('-', $bsDate);
+        if (count($parts) !== 3) return $bsDate;
+
+        $year = (int) $parts[0];
+        $month = (int) $parts[1];
+        $day = (int) $parts[2];
+
+        $monthsLatin = [
+            1 => 'baisakh',
+            2 => 'jestha',
+            3 => 'ashar',
+            4 => 'shrawan',
+            5 => 'bhadra',
+            6 => 'ashwin',
+            7 => 'kartik',
+            8 => 'mangsir',
+            9 => 'poush',
+            10 => 'magh',
+            11 => 'falgun',
+            12 => 'chaitra'
+        ];
+
+        $monthName = $monthsLatin[$month] ?? '';
+        $dayStr = $padDay ? str_pad($day, 2, '0', STR_PAD_LEFT) : (string) $day;
+        $yearStr = (string) $year;
+
+        return sprintf('%s %s, %s', $monthName, $dayStr, $yearStr);
+    }
+
+    /**
      * Get day name in Nepali
      * 
      * @param int $day Day of week (0-6, Sunday = 0)

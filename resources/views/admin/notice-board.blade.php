@@ -101,9 +101,9 @@
                 <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
                 <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
             </select>
-            <input type="text" name="date_bs" id="filterDateBs" value="{{ request('date_bs') }}" placeholder="YYYY-MM-DD (BS)" class="w-40 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-red-500 bs-date">
+<input type="date" name="date" id="filterDate" value="{{ request('date') }}" class="w-40 px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-red-500" onchange="this.form.submit()">
             <button type="button" id="applyFiltersBtn" class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-medium">Filter</button>
-            @if(request('search') || request('semester') || request('status') || request('audience') || request('date_bs'))
+@if(request('search') || request('semester') || request('status') || request('audience') || request('date'))
             <a href="{{ route('admin.notice-board') }}" class="px-3 py-2 border border-gray-300 rounded text-xs hover:bg-gray-50 font-medium">Clear</a>
             @endif
         </form>
@@ -279,10 +279,10 @@
 
             <!-- Publish Date and Status Row -->
             <div class="grid grid-cols-2 gap-3">
-                <!-- Publish Date -->
+<!-- Publish Date -->
                 <div>
                     <label class="block text-xs font-medium text-gray-900 mb-1">Publish Date</label>
-                    <input type="text" name="published_at_bs" placeholder="YYYY-MM-DD (BS)" class="w-full px-3 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-red-500 bs-date">
+                    <input type="date" name="published_at" class="w-full px-3 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-red-500">
                 </div>
 
                 <!-- Status -->
@@ -420,7 +420,7 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
                     <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide">Publish Date</label>
-                    <input type="text" name="published_at_bs" id="editPublishedAtBs" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition bs-date" placeholder="YYYY-MM-DD (BS)">
+<input type="date" name="published_at" id="editPublishedAt" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition">
                 </div>
                 <div class="space-y-2">
                     <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide">Status *</label>
@@ -574,11 +574,14 @@
                 }
 
                 // Get formatted dates
+                // Prefer BS dates for display when available
                 const createdDate = new Date(notice.created_at);
                 const updatedDate = new Date(notice.updated_at);
-                const createdDateStr = createdDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const createdDateBsLatin = notice.created_at_bs_latin || notice.created_at_bs_pretty || notice.created_at_bs || null;
+                const updatedDateBsLatin = notice.updated_at_bs_latin || notice.updated_at_bs_pretty || notice.updated_at_bs || null;
+                const createdDateStr = createdDateBsLatin ? createdDateBsLatin : createdDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 const createdTimeStr = createdDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                const updatedDateStr = updatedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const updatedDateStr = updatedDateBsLatin ? updatedDateBsLatin : updatedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 const updatedTimeStr = updatedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                 
                 // Update footer meta
@@ -638,11 +641,11 @@
                     ${fileDisplay}
 
                     <!-- Published Date Info (if applicable) -->
-                    ${notice.published_at_bs ? `
+                    ${(notice.published_at_bs_latin || notice.published_at_bs_pretty || notice.published_at_bs) ? `
                         <div class="bg-green-50 border border-green-200 rounded-lg p-3">
                             <p class="text-xs text-green-700 font-medium">
                                 <i class="bi bi-check-circle-fill mr-1"></i>
-                                Published on ${notice.published_at_bs}
+                                Published on ${notice.published_at_bs_latin || notice.published_at_bs_pretty || notice.published_at_bs}
                             </p>
                         </div>
                     ` : ''}
@@ -673,7 +676,7 @@
             .then(data => {
                 const notice = data.notice;
                 
-                // Populate form fields
+// Populate form fields
                 document.getElementById('editTitle').value = notice.title;
                 document.getElementById('editMessage').value = notice.message;
                 document.getElementById('editAudience').value = notice.audience;
@@ -681,8 +684,13 @@
                 document.getElementById('editStatus').value = notice.status;
                 document.getElementById('editImportantNotice').checked = notice.is_important;
 
-                if (notice.published_at_bs) {
-                    document.getElementById('editPublishedAtBs').value = notice.published_at_bs ?? '';
+                // Populate publish date (AD format)
+                if (notice.published_at) {
+                    const dateObj = new Date(notice.published_at);
+                    const year = dateObj.getFullYear();
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    document.getElementById('editPublishedAt').value = `${year}-${month}-${day}`;
                 }
 
                 // Display existing file attachment if present

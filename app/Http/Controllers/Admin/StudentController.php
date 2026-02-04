@@ -119,7 +119,7 @@ class StudentController extends Controller
             'student_id' => 'required|string|max:50|unique:students,roll_no',
             'bio' => 'nullable|string',
             'profile_photo' => 'nullable|image|max:4096',
-            'date_of_birth_bs' => 'required|string|max:30',
+            'date_of_birth' => 'required|date',
             'address' => 'required|string',
             'batch_year' => 'required|string|max:10',
         ]);
@@ -149,7 +149,7 @@ class StudentController extends Controller
             'semester' => $data['semester'] ?? null,
             'department' => $data['department'] ?? null,
             'parent_id' => null,
-            'date_of_birth_bs' => $data['date_of_birth_bs'] ?? null,
+            'date_of_birth' => $data['date_of_birth'] ?? null,
             'address' => $data['address'] ?? null,
             'batch_year' => $data['batch_year'] ?? null,
         ]);

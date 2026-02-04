@@ -16,7 +16,7 @@
                 </div>
 
                 <!-- Dark Mode Toggle -->
-                <button id="darkModeToggle" class="p-2 bg-white hover:bg-gray-100 dark:bg-yellow-400 dark:hover:bg-yellow-500 rounded-lg transition" title="Toggle Dark Mode">
+                <button id="darkModeToggle" class="p-2 bg-yellow-400 hover:bg-yellow-500 dark:bg-yellow-600 dark:hover:bg-yellow-700 rounded-lg transition" title="Toggle Dark Mode">
                     <i class="bi bi-moon-fill text-xl text-gray-700 dark:text-white" id="landingDarkModeIcon"></i>
                 </button>
             </div>

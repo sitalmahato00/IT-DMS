@@ -231,28 +231,52 @@ class DashboardController extends Controller
         // Recent Attendance: Get from attendance table for bottom section
         $recentAttendance = collect();
         if (Schema::hasTable('attendance')) {
-            // Aggregate attendance by subject/teacher for today's date
-            // Use date_bs (BS date) since that's what the frontend uses
-            $today_bs = date('Y-m-d');
+                // Determine today's AD date using app timezone and prefer matching AD date first.
+                $todayAd = now()->format('Y-m-d');
 
-            $recentAttendance = DB::table('attendance')
-                ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
-                // join teacher referenced on attendance
-                ->leftJoin('teachers as attendance_teachers', 'attendance.teacher_id', '=', 'attendance_teachers.id')
-                ->leftJoin('users as attendance_users', 'attendance_teachers.user_id', '=', 'attendance_users.id')
-                // join teacher referenced on subject (fallback)
-                ->leftJoin('teachers as subject_teachers', 'subjects.teacher_id', '=', 'subject_teachers.id')
-                ->leftJoin('users as subject_users', 'subject_teachers.user_id', '=', 'subject_users.id')
-                ->where('attendance.date_bs', $today_bs)
-                ->selectRaw(
-                    "attendance.date_bs as date_bs, attendance.date as date, attendance.subject_id as subject_id, subjects.subject_name as course_name, subjects.semester as semester, COALESCE(attendance.teacher_id, subjects.teacher_id) as teacher_id, COALESCE(attendance_users.name, subject_users.name) as teacher_name, COUNT(DISTINCT attendance.student_id) as total_students, SUM(CASE WHEN attendance.status = 'present' THEN 1 ELSE 0 END) as present_count"
-                )
-                ->groupBy('attendance.date_bs', 'attendance.date', 'attendance.subject_id', DB::raw('COALESCE(attendance.teacher_id, subjects.teacher_id)'), 'subjects.subject_name', 'subjects.semester', DB::raw('COALESCE(attendance_users.name, subject_users.name)'))
-                ->orderBy('attendance.date_bs', 'desc')
-                ->get();
-        }
+                // Build base joins for reuse
+                $baseJoins = function($query) {
+                    return $query
+                        ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
+                        // join teacher referenced on attendance
+                        ->leftJoin('teachers as attendance_teachers', 'attendance.teacher_id', '=', 'attendance_teachers.id')
+                        ->leftJoin('users as attendance_users', 'attendance_teachers.user_id', '=', 'attendance_users.id')
+                        // join teacher referenced on subject (fallback)
+                        ->leftJoin('teachers as subject_teachers', 'subjects.teacher_id', '=', 'subject_teachers.id')
+                        ->leftJoin('users as subject_users', 'subject_teachers.user_id', '=', 'subject_users.id');
+                };
 
-        // New Students: Get recently added students
+                // Helper for the select/group string
+                $selectRaw = "attendance.date_bs as date_bs, attendance.date as date, attendance.subject_id as subject_id, subjects.subject_name as course_name, subjects.semester as semester, COALESCE(attendance.teacher_id, subjects.teacher_id) as teacher_id, COALESCE(attendance_users.name, subject_users.name) as teacher_name, COUNT(DISTINCT attendance.student_id) as total_students, SUM(CASE WHEN attendance.status = 'present' THEN 1 ELSE 0 END) as present_count";
+                $groupByCols = ['attendance.date_bs', 'attendance.date', 'attendance.subject_id', DB::raw('COALESCE(attendance.teacher_id, subjects.teacher_id)'), 'subjects.subject_name', 'subjects.semester', DB::raw('COALESCE(attendance_users.name, subject_users.name)')];
+
+                // First try matching by AD date (preferred - uses actual stored date column)
+                $queryAd = $baseJoins(DB::table('attendance'));
+                $queryAd->whereDate('attendance.date', $todayAd);
+
+                $recentAttendance = $queryAd->selectRaw($selectRaw)
+                    ->groupBy(...$groupByCols)
+                    ->orderBy('attendance.date', 'desc')
+                    ->get();
+
+                // If no records found by AD, try matching by converted BS date
+                if ($recentAttendance->isEmpty()) {
+                    $today_bs = null;
+                    if (class_exists(\App\Helpers\NepaliContentHelper::class)) {
+                        $today_bs = \App\Helpers\NepaliContentHelper::convertAdToBs($todayAd);
+                    }
+
+                    if ($today_bs) {
+                        $queryBs = $baseJoins(DB::table('attendance'));
+                        $queryBs->where('attendance.date_bs', $today_bs);
+
+                        $recentAttendance = $queryBs->selectRaw($selectRaw)
+                            ->groupBy(...$groupByCols)
+                            ->orderBy('attendance.date_bs', 'desc')
+                            ->get();
+                    }
+                }
+            }
         $newStudents = collect();
         if (Schema::hasTable('users')) {
             $newStudents = DB::table('users')
@@ -347,19 +371,19 @@ class DashboardController extends Controller
             if (Schema::hasTable('attendance')) {
                 // Total records in this month
                 $total = DB::table('attendance')
-                    ->whereRaw("STRFTIME('%Y-%m', date) = '$period'")
+                    ->whereRaw("DATE_FORMAT('%Y-%m', date) = '$period'")
                     ->count();
 
                 // Present records in this month
                 $present = DB::table('attendance')
                     ->where('status', 'present')
-                    ->whereRaw("STRFTIME('%Y-%m', date) = '$period'")
+                    ->whereRaw("DATE_FORMAT('%Y-%m', date) = '$period'")
                     ->count();
 
                 // Absent records in this month
                 $absent = DB::table('attendance')
                     ->where('status', 'absent')
-                    ->whereRaw("STRFTIME('%Y-%m', date) = '$period'")
+                    ->whereRaw("DATE_FORMAT('%Y-%m', date) = '$period'")
                     ->count();
 
                 // Formula: present records / total records * 100

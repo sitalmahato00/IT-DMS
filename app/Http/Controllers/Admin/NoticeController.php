@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notice;
+use App\Helpers\NepaliContentHelper;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -34,19 +36,19 @@ class NoticeController extends Controller
             $query->forAudience($request->audience);
         }
 
-        // Filter by published BS date if provided
-        if ($request->has('date_bs') && $request->date_bs) {
-            $query->where('published_at_bs', $request->date_bs);
+// Filter by published AD date if provided
+        if ($request->has('date') && $request->date) {
+            $query->whereDate('published_at', $request->date);
         }
 
         if ($request->has('status') && $request->status) {
             $query->where('status', $request->status);
         }
 
-        // Get notices ordered by important first, then by BS date
+        // Get notices ordered by important first, then by AD date (perform operations using AD)
         $notices = $query->with('subject') // Eager load subject relationship for course display
                         ->orderBy('is_important', 'desc')
-                        ->orderBy('published_at_bs', 'desc')
+                        ->orderBy('published_at', 'desc')
                         ->paginate(10);
 
         // Get statistics
@@ -65,7 +67,7 @@ class NoticeController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+$validated = $request->validate([
             'title' => 'required|string|max:200',
             'title_ne' => 'nullable|string|max:500',
             'message' => 'required|string',
@@ -76,7 +78,7 @@ class NoticeController extends Controller
             'semester' => 'nullable|string',
             'subject_id' => 'nullable|exists:subjects,id',
             'is_important' => 'nullable|boolean',
-            'published_at_bs' => 'nullable|string|max:50',
+            'published_at' => 'nullable|date',
             'file' => 'nullable|file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,gif,zip,rar',
         ]);
 
@@ -101,7 +103,7 @@ class NoticeController extends Controller
             $notice->is_important = $validated['is_important'] ?? false;
             $notice->created_by = Auth::id();
             
-            // Handle file upload
+// Handle file upload
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
                 $fileName = time() . '_' . $file->getClientOriginalName();
@@ -111,11 +113,13 @@ class NoticeController extends Controller
                 $notice->file_path = $filePath;
             }
             
-            // Save BS published date if provided
-            if (isset($validated['published_at_bs'])) {
-                $notice->published_at_bs = $validated['published_at_bs'];
+            // Save AD published date if provided
+            if (!empty($validated['published_at'])) {
+                $notice->published_at = $validated['published_at'];
+                // Convert to BS for display purposes
+                $notice->published_at_bs = NepaliContentHelper::convertAdToBs($validated['published_at']);
             }
-            
+
             $notice->save();
 
             DB::commit();
@@ -180,11 +184,19 @@ class NoticeController extends Controller
                 $notice->file_path = $filePath;
             }
             
-            // Save BS published date if provided
+            // Save BS published date if provided, convert and set AD published_at for operations
             if (isset($validated['published_at_bs'])) {
                 $notice->published_at_bs = $validated['published_at_bs'];
+                $adDate = NepaliContentHelper::convertBsToAd($validated['published_at_bs']);
+                if ($adDate) {
+                    try {
+                        $notice->published_at = Carbon::createFromFormat('Y-m-d', $adDate);
+                    } catch (\Exception $e) {
+                        $notice->published_at = $adDate;
+                    }
+                }
             }
-            
+
             $notice->save();
 
             DB::commit();
@@ -253,6 +265,15 @@ class NoticeController extends Controller
             'status_badge_class' => $notice->status_badge_class,
             'audience_text' => $notice->audience_text,
             'formatted_date' => $notice->formatted_date,
+            // provide BS conversions for created/updated for client-side display
+            'created_at_bs' => $notice->created_at ? NepaliContentHelper::convertAdToBs($notice->created_at->format('Y-m-d')) : null,
+            'updated_at_bs' => $notice->updated_at ? NepaliContentHelper::convertAdToBs($notice->updated_at->format('Y-m-d')) : null,
+            'created_at_bs_pretty' => $notice->created_at_bs_pretty,
+            'updated_at_bs_pretty' => $notice->updated_at_bs_pretty,
+            'published_at_bs_pretty' => $notice->published_at_bs_pretty,
+            'created_at_bs_latin' => $notice->created_at_bs_latin,
+            'updated_at_bs_latin' => $notice->updated_at_bs_latin,
+            'published_at_bs_latin' => $notice->published_at_bs_latin,
         ]);
     }
 

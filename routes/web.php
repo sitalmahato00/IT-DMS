@@ -74,9 +74,17 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('/attendance/student/{id}/report', [\App\Http\Controllers\Admin\AttendanceController::class, 'studentReport'])->name('attendance.student');
     Route::get('/attendance/export', [\App\Http\Controllers\Admin\AttendanceController::class, 'export'])->name('attendance.export');
 
-    Route::get('/assessment', function () {
-        return view('admin.assessment');
-    })->name('assessment');
+    Route::get('/assessment', [App\Http\Controllers\Admin\ExamController::class, 'index'])->name('assessment');
+    Route::post('/assessment', [App\Http\Controllers\Admin\ExamController::class, 'store'])->name('assessment.store');
+    Route::get('/assessment/data', [App\Http\Controllers\Admin\ExamController::class, 'index'])->name('assessment.data');
+    Route::get('/assessment/{exam}', [App\Http\Controllers\Admin\ExamController::class, 'show'])->name('assessment.show');
+    Route::get('/assessment/{exam}/edit-data', [App\Http\Controllers\Admin\ExamController::class, 'getExamData'])->name('assessment.edit-data');
+    Route::put('/assessment/{exam}', [App\Http\Controllers\Admin\ExamController::class, 'update'])->name('assessment.update');
+    Route::delete('/assessment/{exam}', [App\Http\Controllers\Admin\ExamController::class, 'destroy'])->name('assessment.destroy');
+    Route::post('/assessment/{exam}/toggle-status', [App\Http\Controllers\Admin\ExamController::class, 'toggleStatus'])->name('assessment.toggle');
+    Route::post('/assessment/{exam}/upload-marks', [App\Http\Controllers\Admin\ExamController::class, 'uploadMarks'])->name('assessment.upload-marks');
+    Route::get('/assessment/{exam}/students', [App\Http\Controllers\Admin\ExamController::class, 'getStudentsForExam'])->name('assessment.students');
+    Route::get('/assessment/subjects/by-semester', [App\Http\Controllers\Admin\ExamController::class, 'getSubjectsBySemester'])->name('assessment.subjects');
 
     Route::get('/courses', [App\Http\Controllers\Admin\CourseController::class, 'index'])->name('courses');
     Route::post('/courses', [App\Http\Controllers\Admin\CourseController::class, 'store'])->name('courses.store');

@@ -65,9 +65,9 @@
                     </div>
 
                     <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700">Date of birth <span class="text-red-500 text-base">*</span></label>
-                            <input type="text" name="date_of_birth_bs" required value="{{ old('date_of_birth_bs', $student->student->date_of_birth_bs ?? '') }}" placeholder="YYYY-MM-DD (BS)" class="mt-1 block w-full px-3 py-2 border rounded-md text-sm shadow-sm bs-date" />
+<div>
+                            <label class="block text-xs font-medium text-gray-700">Date of birth (AD) <span class="text-red-500 text-base">*</span></label>
+                            <input type="date" name="date_of_birth" required value="{{ old('date_of_birth', $student->student->date_of_birth ?? '') }}" class="mt-1 block w-full px-3 py-2 border rounded-md text-sm shadow-sm focus:ring-1 focus:ring-red-500" />
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-700">Batch Year <span class="text-red-500 text-base">*</span></label>
