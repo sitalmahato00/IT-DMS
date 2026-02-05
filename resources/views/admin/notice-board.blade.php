@@ -4,6 +4,41 @@
 
 @section('content')
 <div class="space-y-4">
+    <!-- AD / Promotional Banner -->
+    <div class="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 rounded-lg shadow-md overflow-hidden relative">
+        <!-- Pattern overlay -->
+        <div class="absolute inset-0 opacity-10">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <defs>
+                    <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                        <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5"/>
+                    </pattern>
+                </defs>
+                <rect width="100" height="100" fill="url(#grid)"/>
+            </svg>
+        </div>
+        
+        <div class="relative px-6 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
+                    <i class="bi bi-megaphone-fill text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h3 class="text-white font-bold text-lg">Announce Something Important!</h3>
+                    <p class="text-blue-100 text-sm">Create and publish notices to keep everyone informed</p>
+                </div>
+            </div>
+            <button onclick="openCreateNoticeModal()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 rounded-md text-sm font-semibold hover:bg-blue-50 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                <i class="bi bi-plus-circle"></i>
+                <span>Create Notice</span>
+            </button>
+        </div>
+        
+        <!-- Decorative elements -->
+        <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-tr-full"></div>
+        <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-bl-full"></div>
+    </div>
+
     <!-- Success/Error Messages -->
     @if(session('success'))
     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-xs">

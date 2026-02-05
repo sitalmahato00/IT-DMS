@@ -82,10 +82,6 @@ class DashboardController extends Controller
                     'Course' => 'bi-book-half',
                     'Notice' => 'bi-megaphone',
                     'Report' => 'bi-file-earmark-pdf',
-                    'Exam' => 'bi-pencil-square',
-                    'Marks' => 'bi-graph-up',
-                    'Gallery' => 'bi-image',
-                    'Document' => 'bi-file-earmark-text',
                     default => 'bi-activity'
                 };
                 
@@ -97,10 +93,6 @@ class DashboardController extends Controller
                     'Course' => 'bg-blue-100',
                     'Notice' => 'bg-amber-100',
                     'Report' => 'bg-indigo-100',
-                    'Exam' => 'bg-purple-100',
-                    'Marks' => 'bg-green-100',
-                    'Gallery' => 'bg-pink-100',
-                    'Document' => 'bg-orange-100',
                     default => 'bg-gray-100'
                 };
                 
@@ -112,10 +104,6 @@ class DashboardController extends Controller
                     'Course' => 'text-blue-600',
                     'Notice' => 'text-amber-600',
                     'Report' => 'text-indigo-600',
-                    'Exam' => 'text-purple-600',
-                    'Marks' => 'text-green-600',
-                    'Gallery' => 'text-pink-600',
-                    'Document' => 'text-orange-600',
                     default => 'text-gray-600'
                 };
                 
@@ -201,80 +189,10 @@ class DashboardController extends Controller
                     ];
                 }
             }
-            
-            // Activity 4: Recent exam/assessment activities
-            if (Schema::hasTable('exams')) {
-                $recentExams = DB::table('exams')
-                    ->leftJoin('subjects', 'exams.subject_id', '=', 'subjects.id')
-                    ->select('exams.*', 'subjects.subject_name')
-                    ->whereNotNull('exams.created_at')
-                    ->orderBy('exams.created_at', 'desc')
-                    ->limit(2)
-                    ->get();
-                foreach ($recentExams as $exam) {
-                    $recentActivities[] = [
-                        'title' => 'Exam created: ' . ($exam->exam_name ?? 'Exam'),
-                        'subtitle' => 'Subject: ' . ($exam->subject_name ?? 'N/A') . ' (' . ucfirst($exam->exam_type) . ')',
-                        'time_raw' => $exam->created_at,
-                        'time' => $formatTime($exam->created_at),
-                        'icon' => 'bi-pencil-square',
-                        'icon_bg' => 'bg-purple-100',
-                        'icon_color' => 'text-purple-600',
-                        'module' => 'Exam'
-                    ];
-                }
-            }
-            
-            // Activity 5: Recent exam marks uploaded
-            if (Schema::hasTable('exam_marks')) {
-                $recentMarks = DB::table('exam_marks')
-                    ->leftJoin('exams', 'exam_marks.exam_id', '=', 'exams.id')
-                    ->select('exam_marks.*', 'exams.exam_name')
-                    ->whereNotNull('exam_marks.created_at')
-                    ->orderBy('exam_marks.created_at', 'desc')
-                    ->limit(1)
-                    ->get();
-                foreach ($recentMarks as $mark) {
-                    $recentActivities[] = [
-                        'title' => 'Marks uploaded',
-                        'subtitle' => 'Exam: ' . ($mark->exam_name ?? 'Exam') . ' - Student ID: ' . $mark->student_id,
-                        'time_raw' => $mark->created_at,
-                        'time' => $formatTime($mark->created_at),
-                        'icon' => 'bi-graph-up',
-                        'icon_bg' => 'bg-green-100',
-                        'icon_color' => 'text-green-600',
-                        'module' => 'Marks'
-                    ];
-                }
-            }
         }
 
-        // Sort, deduplicate and filter activities: remove placeholders/unknowns
-        $recentActivities = collect($recentActivities)
-            ->filter(function($a) {
-                // require a non-empty action and either a known user or a description
-                $action = isset($a['action']) ? trim((string)$a['action']) : '';
-                $user = isset($a['user_name']) ? trim((string)$a['user_name']) : '';
-                $description = isset($a['description']) ? trim((string)$a['description']) : '';
-
-                if ($action === '' || strcasecmp($action, 'action') === 0) return false;
-                // allow System entries, but drop 'Unknown' with no description
-                if (strcasecmp($user, 'unknown') === 0 && $description === '') return false;
-
-                return true;
-            })
-            // dedupe similar activities (module + action + description + time)
-            ->unique(function($a) {
-                $module = $a['module'] ?? '';
-                $action = $a['action'] ?? '';
-                $desc = $a['description'] ?? '';
-                $time = $a['time_raw'] ?? '';
-                return md5("{$module}|{$action}|{$desc}|{$time}");
-            })
-            ->sortByDesc('time_raw')
-            ->take(10)
-            ->values()
-            ->toArray();
+        // Sort activities by time (most recent first) using time_raw for proper sorting
+        $recentActivities = collect($recentActivities)->sortByDesc('time_raw')->take(5)->values()->toArray();
 
         // Notices: Get from notices table
         $notices = collect();
@@ -313,52 +231,28 @@ class DashboardController extends Controller
         // Recent Attendance: Get from attendance table for bottom section
         $recentAttendance = collect();
         if (Schema::hasTable('attendance')) {
-                // Determine today's AD date using app timezone and prefer matching AD date first.
-                $todayAd = now()->format('Y-m-d');
+            // Aggregate attendance by subject/teacher for today's date
+            // Use date_bs (BS date) since that's what the frontend uses
+            $today_bs = date('Y-m-d');
 
-                // Build base joins for reuse
-                $baseJoins = function($query) {
-                    return $query
-                        ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
-                        // join teacher referenced on attendance
-                        ->leftJoin('teachers as attendance_teachers', 'attendance.teacher_id', '=', 'attendance_teachers.id')
-                        ->leftJoin('users as attendance_users', 'attendance_teachers.user_id', '=', 'attendance_users.id')
-                        // join teacher referenced on subject (fallback)
-                        ->leftJoin('teachers as subject_teachers', 'subjects.teacher_id', '=', 'subject_teachers.id')
-                        ->leftJoin('users as subject_users', 'subject_teachers.user_id', '=', 'subject_users.id');
-                };
+            $recentAttendance = DB::table('attendance')
+                ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
+                // join teacher referenced on attendance
+                ->leftJoin('teachers as attendance_teachers', 'attendance.teacher_id', '=', 'attendance_teachers.id')
+                ->leftJoin('users as attendance_users', 'attendance_teachers.user_id', '=', 'attendance_users.id')
+                // join teacher referenced on subject (fallback)
+                ->leftJoin('teachers as subject_teachers', 'subjects.teacher_id', '=', 'subject_teachers.id')
+                ->leftJoin('users as subject_users', 'subject_teachers.user_id', '=', 'subject_users.id')
+                ->where('attendance.date_bs', $today_bs)
+                ->selectRaw(
+                    "attendance.date_bs as date_bs, attendance.date as date, attendance.subject_id as subject_id, subjects.subject_name as course_name, subjects.semester as semester, COALESCE(attendance.teacher_id, subjects.teacher_id) as teacher_id, COALESCE(attendance_users.name, subject_users.name) as teacher_name, COUNT(DISTINCT attendance.student_id) as total_students, SUM(CASE WHEN attendance.status = 'present' THEN 1 ELSE 0 END) as present_count"
+                )
+                ->groupBy('attendance.date_bs', 'attendance.date', 'attendance.subject_id', DB::raw('COALESCE(attendance.teacher_id, subjects.teacher_id)'), 'subjects.subject_name', 'subjects.semester', DB::raw('COALESCE(attendance_users.name, subject_users.name)'))
+                ->orderBy('attendance.date_bs', 'desc')
+                ->get();
+        }
 
-                // Helper for the select/group string
-                $selectRaw = "attendance.date_bs as date_bs, attendance.date as date, attendance.subject_id as subject_id, subjects.subject_name as course_name, subjects.semester as semester, COALESCE(attendance.teacher_id, subjects.teacher_id) as teacher_id, COALESCE(attendance_users.name, subject_users.name) as teacher_name, COUNT(DISTINCT attendance.student_id) as total_students, SUM(CASE WHEN attendance.status = 'present' THEN 1 ELSE 0 END) as present_count";
-                $groupByCols = ['attendance.date_bs', 'attendance.date', 'attendance.subject_id', DB::raw('COALESCE(attendance.teacher_id, subjects.teacher_id)'), 'subjects.subject_name', 'subjects.semester', DB::raw('COALESCE(attendance_users.name, subject_users.name)')];
-
-                // First try matching by AD date (preferred - uses actual stored date column)
-                $queryAd = $baseJoins(DB::table('attendance'));
-                $queryAd->whereDate('attendance.date', $todayAd);
-
-                $recentAttendance = $queryAd->selectRaw($selectRaw)
-                    ->groupBy(...$groupByCols)
-                    ->orderBy('attendance.date', 'desc')
-                    ->get();
-
-                // If no records found by AD, try matching by converted BS date
-                if ($recentAttendance->isEmpty()) {
-                    $today_bs = null;
-                    if (class_exists(\App\Helpers\NepaliContentHelper::class)) {
-                        $today_bs = \App\Helpers\NepaliContentHelper::convertAdToBs($todayAd);
-                    }
-
-                    if ($today_bs) {
-                        $queryBs = $baseJoins(DB::table('attendance'));
-                        $queryBs->where('attendance.date_bs', $today_bs);
-
-                        $recentAttendance = $queryBs->selectRaw($selectRaw)
-                            ->groupBy(...$groupByCols)
-                            ->orderBy('attendance.date_bs', 'desc')
-                            ->get();
-                    }
-                }
-            }
+        // New Students: Get recently added students
         $newStudents = collect();
         if (Schema::hasTable('users')) {
             $newStudents = DB::table('users')
@@ -369,40 +263,10 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        // Get notifications data for header and dashboard
-        $unreadNoticeCount = 0;
-        $headerNotices = [];
-        
-        if (Schema::hasTable('notices')) {
-            // Get unread notices count (published notices that haven't been marked as read)
-            $unreadNoticeCount = DB::table('notices')
-                ->where('status', 'published')
-                ->whereNull('read_at')
-                ->count();
-            
-            // Get recent notices for header dropdown (max 5)
-            $headerNotices = DB::table('notices')
-                ->where('status', 'published')
-                ->orderBy('published_at', 'desc')
-                ->limit(5)
-                ->get()
-                ->map(function($notice) {
-                    return [
-                        'id' => $notice->id ?? null,
-                        'title' => $notice->title ?? 'Notice',
-                        'message' => $notice->message ?? '',
-                        'time' => isset($notice->published_at) ? \Carbon\Carbon::parse($notice->published_at)->diffForHumans() : 'Recently',
-                        'is_important' => $notice->is_important ?? false,
-                    ];
-                })
-                ->toArray();
-        }
-
         return view('admin.dashboard', compact(
             'totalStudents','teachers','parents','courses','avgAttendance',
             'recentActivities','notices','roleLabels','roleValues',
-            'attendancePercentage','recentNotices','recentAttendance','newStudents',
-            'unreadNoticeCount','headerNotices'
+            'attendancePercentage','recentNotices','recentAttendance','newStudents'
         ));
     }
 
@@ -483,19 +347,19 @@ class DashboardController extends Controller
             if (Schema::hasTable('attendance')) {
                 // Total records in this month
                 $total = DB::table('attendance')
-                    ->whereRaw("DATE_FORMAT('%Y-%m', date) = '$period'")
+                    ->whereRaw("DATE_FORMAT(date, '%Y-%m') = '$period'")
                     ->count();
 
                 // Present records in this month
                 $present = DB::table('attendance')
                     ->where('status', 'present')
-                    ->whereRaw("DATE_FORMAT('%Y-%m', date) = '$period'")
+                    ->whereRaw("DATE_FORMAT(date, '%Y-%m') = '$period'")
                     ->count();
 
                 // Absent records in this month
                 $absent = DB::table('attendance')
                     ->where('status', 'absent')
-                    ->whereRaw("DATE_FORMAT('%Y-%m', date) = '$period'")
+                    ->whereRaw("DATE_FORMAT(date, '%Y-%m') = '$period'")
                     ->count();
 
                 // Formula: present records / total records * 100

@@ -3,11 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Exam;
-use App\Models\ExamMark;
-use App\Models\Subject;
-use App\Models\Student;
-use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -25,20 +20,17 @@ class ReportController extends Controller
             $subject = $request->get('subject', '');
             $reportType = $request->get('report_type', '');
 
-            // Check if export is requested
-            if ($request->get('export') === 'csv') {
-                return $this->exportReportCSV($semester, $subject, $reportType);
-            }
-
-            // Get available semesters
-            $semesters = Student::distinct()
+            // Get available semesters from students table
+            $semesters = DB::table('students')
+                ->distinct()
                 ->pluck('semester')
                 ->filter()
                 ->sort()
                 ->values();
 
             // Get available subjects
-            $subjects = Subject::select('id', 'subject_name', 'subject_code', 'semester')
+            $subjects = DB::table('subjects')
+                ->select('id', 'subject_name', 'subject_code', 'semester')
                 ->orderBy('subject_name')
                 ->get();
 
@@ -85,9 +77,9 @@ class ReportController extends Controller
             return view('admin.reports', [
                 'semesters' => collect([]),
                 'subjects' => collect([]),
-                'attendanceStats' => ['avg' => 0, 'total' => 0, 'present' => 0, 'absent' => 0, 'change' => 0],
-                'marksStats' => ['avg' => 0, 'total' => 0, 'change' => 0],
-                'progressStats' => ['completion' => 0, 'change' => 0],
+                'attendanceStats' => ['avg' => 0, 'total' => 0, 'present' => 0, 'absent' => 0],
+                'marksStats' => ['avg' => 0, 'total' => 0],
+                'progressStats' => ['completion' => 0],
                 'monthlyAttendance' => collect([]),
                 'gradeDistribution' => [],
                 'topStudents' => collect([]),
@@ -100,95 +92,12 @@ class ReportController extends Controller
     }
 
     /**
-     * Export report as CSV
+     * Get attendance statistics
      */
-    private function exportReportCSV($semester, $subject, $reportType)
+    private function getAttendanceStats($semester)
     {
-        try {
-            $filename = 'report_' . date('Y-m-d_H-i-s') . '.csv';
-            
-            // Create CSV response
-            $headers = array(
-                'Content-Type' => 'text/csv; charset=utf-8',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            );
-
-            $callback = function() use ($semester, $subject, $reportType) {
-                $file = fopen('php://output', 'w');
-                
-                // Add BOM for UTF-8
-                fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-
-                if ($reportType === 'attendance' || $reportType === 'all') {
-                    // Export attendance data
-                    fputcsv($file, ['ATTENDANCE REPORT', '', '', '', '']);
-                    fputcsv($file, ['Date', 'Student Name', 'Roll No', 'Semester', 'Status']);
-                    
-                    $query = Attendance::leftJoin('students', 'attendance.student_id', '=', 'students.id')
-                        ->leftJoin('users', 'students.user_id', '=', 'users.id');
-                    
-                    if ($semester) {
-                        $query->where('students.semester', $semester);
-                    }
-                    
-                    $records = $query->select('attendance.date', 'users.name', 'students.roll_no', 'students.semester', 'attendance.status')
-                        ->get();
-                    
-                    foreach ($records as $record) {
-                        fputcsv($file, [
-                            $record->date,
-                            $record->name,
-                            $record->roll_no,
-                            $record->semester,
-                            ucfirst($record->status)
-                        ]);
-                    }
-                    
-                    fputcsv($file, ['']);
-                }
-
-                if ($reportType === 'marks' || $reportType === 'all') {
-                    // Export marks data
-                    fputcsv($file, ['MARKS REPORT', '', '', '', '']);
-                    fputcsv($file, ['Student Name', 'Roll No', 'Exam Name', 'Marks Obtained', 'Full Marks', 'Percentage', 'Grade']);
-                    
-                    $query = ExamMark::leftJoin('students', 'exam_marks.student_id', '=', 'students.id')
-                        ->leftJoin('users', 'students.user_id', '=', 'users.id')
-                        ->leftJoin('exams', 'exam_marks.exam_id', '=', 'exams.id');
-                    
-                    if ($semester) {
-                        $query->where('exams.semester', $semester);
-                    }
-                    
-                    if ($subject) {
-                        $query->where('exams.subject_id', $subject);
-                    }
-                    
-                    $marks = $query->select('users.name', 'students.roll_no', 'exams.exam_name', 'exam_marks.marks_obtained', 'exam_marks.full_marks', 'exam_marks.percentage', 'exam_marks.grade')
-                        ->get();
-                    
-                    foreach ($marks as $mark) {
-                        fputcsv($file, [
-                            $mark->name,
-                            $mark->roll_no,
-                            $mark->exam_name,
-                            $mark->marks_obtained,
-                            $mark->full_marks,
-                            $mark->percentage . '%',
-                            $mark->grade
-                        ]);
-                    }
-                }
-
-                fclose($file);
-            };
-
-            return response()->stream($callback, 200, $headers);
-        } catch (\Exception $e) {
-            Log::error('Error exporting report: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to export report');
-        }
-    }
+        $query = DB::table('attendance')
+            ->leftJoin('students', 'attendance.student_id', '=', 'students.id');
 
         if (!empty($semester)) {
             $query->where('students.semester', $semester);

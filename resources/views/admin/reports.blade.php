@@ -116,23 +116,16 @@
         <!-- Monthly Attendance Trends Chart -->
         <div class="bg-white p-4 rounded shadow-sm border border-gray-200">
             <h3 class="text-sm font-semibold text-gray-900 mb-3">Monthly Attendance Trends</h3>
-            <div class="h-48 bg-gradient-to-b from-blue-50 to-transparent rounded flex items-end justify-around p-3 gap-1">
-                @if(isset($monthlyAttendance['months']) && count($monthlyAttendance['months']) > 0)
-                    @foreach($monthlyAttendance['months'] as $index => $month)
-                        <div class="flex flex-col items-center justify-end gap-1">
-                            <div class="w-6 bg-blue-400 rounded" style="height: {{ $monthlyAttendance['data'][$index] ?? 100 }}px;"></div>
-                            <span class="text-xs text-gray-600">{{ $month }}</span>
-                        </div>
-                    @endforeach
-                @else
-                    @php $months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; @endphp
-                    @foreach($months as $m)
-                        <div class="flex flex-col items-center justify-end gap-1">
-                            <div class="w-6 bg-blue-400 rounded" style="height: {{ rand(100, 145) }}px;"></div>
-                            <span class="text-xs text-gray-600">{{ $m }}</span>
-                        </div>
-                    @endforeach
-                @endif
+            <div class="h-48">
+                @php
+                    $chartData = [
+                        "labels" => $monthlyAttendance["months"] ?? [],
+                        "present" => $monthlyAttendance["present"] ?? [],
+                        "absent" => $monthlyAttendance["absent"] ?? [],
+                        "leave" => $monthlyAttendance["leave"] ?? []
+                    ];
+                @endphp
+                <canvas id="attendanceChart" data-chart='@json($chartData)'></canvas>
             </div>
         </div>
 
@@ -141,22 +134,32 @@
             <h3 class="text-sm font-semibold text-gray-900 mb-3">Grade Distribution</h3>
             <div class="flex items-center justify-center h-48">
                 <div class="relative w-40 h-40">
+                    @php
+                        $aGrade = isset($gradeDistribution['A']) ? $gradeDistribution['A'] : 28;
+                        $bGrade = isset($gradeDistribution['B']) ? $gradeDistribution['B'] : 35;
+                        $cGrade = isset($gradeDistribution['C']) ? $gradeDistribution['C'] : 22;
+                        $dGrade = isset($gradeDistribution['D']) ? $gradeDistribution['D'] : 10;
+                        $fGrade = isset($gradeDistribution['F']) ? $gradeDistribution['F'] : 5;
+                        
+                        // Ensure values are numeric and add up properly
+                        $total = $aGrade + $bGrade + $cGrade + $dGrade + $fGrade;
+                        if ($total != 100 && $total > 0) {
+                            $aGrade = round(($aGrade / $total) * 100);
+                            $bGrade = round(($bGrade / $total) * 100);
+                            $cGrade = round(($cGrade / $total) * 100);
+                            $dGrade = round(($dGrade / $total) * 100);
+                            $fGrade = 100 - $aGrade - $bGrade - $cGrade - $dGrade; // Ensure total is 100
+                        }
+                        
+                        // Calculate stroke-dasharray values (circumference = 251.2 for r=40)
+                        $circumference = 251.2;
+                        $aPercent = ($aGrade / 100) * $circumference;
+                        $bPercent = ($bGrade / 100) * $circumference;
+                        $cPercent = ($cGrade / 100) * $circumference;
+                        $dPercent = ($dGrade / 100) * $circumference;
+                        $fPercent = ($fGrade / 100) * $circumference;
+                    @endphp
                     <svg viewBox="0 0 100 100" class="w-full h-full">
-                        @php
-                            $aGrade = $gradeDistribution['A'] ?? 28;
-                            $bGrade = $gradeDistribution['B'] ?? 35;
-                            $cGrade = $gradeDistribution['C'] ?? 22;
-                            $dGrade = $gradeDistribution['D'] ?? 10;
-                            $fGrade = $gradeDistribution['F'] ?? 5;
-                            
-                            // Calculate stroke-dasharray values (circumference = 251.2 for r=40)
-                            $circumference = 251.2;
-                            $aPercent = ($aGrade / 100) * $circumference;
-                            $bPercent = ($bGrade / 100) * $circumference;
-                            $cPercent = ($cGrade / 100) * $circumference;
-                            $dPercent = ($dGrade / 100) * $circumference;
-                            $fPercent = ($fGrade / 100) * $circumference;
-                        @endphp
                         <!-- A Grade (Green) -->
                         <circle cx="50" cy="50" r="40" fill="none" stroke="#10b981" stroke-width="8" stroke-dasharray="{{ $aPercent }} {{ $circumference }}" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
                         <!-- B Grade (Blue) -->
@@ -357,8 +360,163 @@
 
 @section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Report filter form
+    // Dynamically load Chart.js
+    const scriptLoad = document.createElement('script');
+    scriptLoad.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+    scriptLoad.onload = function() {
+        initializeCharts();
+    };
+    document.head.appendChild(scriptLoad);
+
+    function initializeCharts() {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Report filter form
+            const filterForm = document.getElementById('reportFilterForm');
+            const resetBtn = document.getElementById('resetFilterBtn');
+
+            // Reset button - clears all filters and reloads with default data
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function() {
+                    // Clear all select inputs
+                    const selects = filterForm.querySelectorAll('select');
+                    selects.forEach(select => {
+                        select.value = '';
+                    });
+                    
+                    // Submit the form to reload with default (unfiltered) data
+                    filterForm.submit();
+                });
+            }
+
+            // Export PDF button
+            const exportPdfBtn = document.getElementById('exportPdfBtn');
+            if (exportPdfBtn) {
+                exportPdfBtn.addEventListener('click', function() {
+                    alert('PDF Export functionality - Integrate with PDF library like dompdf or tcpdf');
+                });
+            }
+
+            // Export Excel button
+            const exportExcelBtn = document.getElementById('exportExcelBtn');
+            if (exportExcelBtn) {
+                exportExcelBtn.addEventListener('click', function() {
+                    alert('Excel Export functionality - Integrate with Maatwebsite Excel package');
+                });
+            }
+
+            // Export Report button - exports current report data
+            const exportReportBtn = document.getElementById('exportReportBtn');
+            if (exportReportBtn) {
+                exportReportBtn.addEventListener('click', function() {
+                    const semester = document.querySelector('select[name="semester"]').value;
+                    const subject = document.querySelector('select[name="subject"]').value;
+                    const reportType = document.querySelector('select[name="report_type"]').value;
+                    
+                    // Create export URL with current filters
+                    const params = new URLSearchParams();
+                    if (semester) params.append('semester', semester);
+                    if (subject) params.append('subject', subject);
+                    if (reportType) params.append('report_type', reportType);
+                    params.append('export', 'csv');
+                    
+                    // Redirect to export endpoint
+                    window.location.href = '{{ route("admin.reports") }}?' + params.toString();
+                });
+            }
+
+            // Initialize attendance chart
+            setTimeout(function() {
+                const attendanceCanvas = document.getElementById('attendanceChart');
+                if (attendanceCanvas && typeof Chart !== 'undefined') {
+                    try {
+                        const chartData = JSON.parse(attendanceCanvas.dataset.chart || '{}');
+                        console.log('Chart data:', chartData); // Debug log
+                        
+                        if (chartData.labels && chartData.labels.length > 0) {
+                            const ctx = attendanceCanvas.getContext('2d');
+                            new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: chartData.labels,
+                                    datasets: [
+                                        {
+                                            label: 'Present',
+                                            data: chartData.present,
+                                            backgroundColor: 'rgba(34, 197, 94, 0.85)',
+                                            borderColor: '#16a34a',
+                                            borderWidth: 0,
+                                            stack: 'Stack 0'
+                                        },
+                                        {
+                                            label: 'Absent',
+                                            data: chartData.absent,
+                                            backgroundColor: 'rgba(239, 68, 68, 0.85)',
+                                            borderColor: '#dc2626',
+                                            borderWidth: 0,
+                                            stack: 'Stack 0'
+                                        },
+                                        {
+                                            label: 'Leave',
+                                            data: chartData.leave,
+                                            backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                                            borderColor: '#d97706',
+                                            borderWidth: 0,
+                                            stack: 'Stack 0'
+                                        }
+                                    ]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            position: 'bottom',
+                                            labels: {
+                                                boxWidth: 12,
+                                                padding: 16,
+                                                font: { size: 12 }
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        x: {
+                                            stacked: true,
+                                            grid: {
+                                                color: 'rgba(15, 23, 42, 0.06)',
+                                                drawBorder: false
+                                            },
+                                            ticks: {
+                                                color: '#6b7280',
+                                                font: { size: 11 }
+                                            }
+                                        },
+                                        y: {
+                                            stacked: true,
+                                            grid: {
+                                                display: false
+                                            },
+                                            ticks: {
+                                                color: '#374151',
+                                                font: { size: 12 }
+                                            }
+                                        }
+                                    }
+                                }
+                            });
+                        } else {
+                            console.warn('No chart data available');
+                        }
+                    } catch (e) {
+                        console.error('Failed to initialize attendance chart:', e);
+                    }
+                } else {
+                    console.warn('Chart.js not loaded or canvas not found');
+                }
+            }, 100);
+        });
+    }
+</script>
+@endsection
         const filterForm = document.getElementById('reportFilterForm');
         const resetBtn = document.getElementById('resetFilterBtn');
 
@@ -411,6 +569,88 @@
                 window.location.href = '{{ route("admin.reports") }}?' + params.toString();
             });
         }
-    });
-</script>
 
+        // Initialize attendance chart
+        const attendanceCanvas = document.getElementById('attendanceChart');
+        if (attendanceCanvas) {
+            try {
+                const chartData = JSON.parse(attendanceCanvas.dataset.chart || '{}');
+                if (chartData.labels && chartData.labels.length > 0) {
+                    const ctx = attendanceCanvas.getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: chartData.labels,
+                            datasets: [
+                                {
+                                    label: 'Present',
+                                    data: chartData.present,
+                                    backgroundColor: 'rgba(34, 197, 94, 0.85)',
+                                    borderColor: '#16a34a',
+                                    borderWidth: 0,
+                                    stack: 'Stack 0'
+                                },
+                                {
+                                    label: 'Absent',
+                                    data: chartData.absent,
+                                    backgroundColor: 'rgba(239, 68, 68, 0.85)',
+                                    borderColor: '#dc2626',
+                                    borderWidth: 0,
+                                    stack: 'Stack 0'
+                                },
+                                {
+                                    label: 'Leave',
+                                    data: chartData.leave,
+                                    backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                                    borderColor: '#d97706',
+                                    borderWidth: 0,
+                                    stack: 'Stack 0'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        boxWidth: 12,
+                                        padding: 16,
+                                        font: { size: 12 }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    stacked: true,
+                                    grid: {
+                                        color: 'rgba(15, 23, 42, 0.06)',
+                                        drawBorder: false
+                                    },
+                                    ticks: {
+                                        color: '#6b7280',
+                                        font: { size: 11 }
+                                    }
+                                },
+                                y: {
+                                    stacked: true,
+                                    grid: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        color: '#374151',
+                                        font: { size: 12 }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to initialize attendance chart:', e);
+            }
+        });
+    }
+</script>
+@endsection

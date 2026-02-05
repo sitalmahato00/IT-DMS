@@ -81,6 +81,13 @@
             </li>
             
             <li>
+                <a href="{{ route('admin.notifications') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.notifications') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
+                    <i class="bi bi-bell text-xs"></i>
+                    <span>{{ __("Notifications") }}</span>
+                </a>
+            </li>
+            
+            <li>
                 <a href="{{ route('admin.notice-board') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('admin.notice-board') ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-red-50 hover:text-red-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-megaphone text-xs"></i>
                     <span>{{ __("Notice Board") }}</span>

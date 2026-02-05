@@ -79,32 +79,6 @@
         </div>
     </div>
 
-    <!-- Notifications Section -->
-    @if(isset($unreadNoticeCount) && $unreadNoticeCount > 0)
-    <div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200 p-4 md:p-6">
-        <div class="flex items-start justify-between gap-4">
-            <div class="flex items-start gap-3 flex-1">
-                <div class="bg-red-100 p-2.5 rounded-lg flex-shrink-0">
-                    <i class="bi bi-megaphone text-red-600 text-lg"></i>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-gray-900 text-sm devanagari-text">{{ __('You have ') }}{{ $unreadNoticeCount }} {{ __('new notification') }}{{ $unreadNoticeCount > 1 ? 's' : '' }}</h3>
-                    <p class="text-xs text-gray-600 mt-1 devanagari-text">{{ __('Important updates have been published. Review them in the Notice Board.') }}</p>
-                    <div class="mt-3 flex gap-2">
-                        <a href="{{ route('admin.notice-board') }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded text-xs font-medium hover:bg-red-700 transition">
-                            <i class="bi bi-megaphone"></i>
-                            {{ __('View All Notifications') }}
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <button onclick="this.closest('div').style.display='none'" class="flex-shrink-0 text-gray-400 hover:text-gray-600">
-                <i class="bi bi-x text-lg"></i>
-            </button>
-        </div>
-    </div>
-    @endif
-
     <!-- Middle Section - Charts Row (2 columns) -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Attendance Overview Chart (Left) -->
@@ -174,31 +148,30 @@
                         @php
                             $action = is_array($act) ? ($act['action'] ?? $act['activity'] ?? 'Action') : ($act->action ?? $act->activity ?? 'Action');
                             $userName = is_array($act) ? ($act['user_name'] ?? 'Unknown') : ($act->user_name ?? 'Unknown');
-                            $timeDisplay = is_array($act) ? ($act['time'] ?? 'Recently') : ($act->time ?? 'Recently');
-                            $icon = is_array($act) ? ($act['icon'] ?? 'bi-activity') : 'bi-activity';
-                            $iconBg = is_array($act) ? ($act['icon_bg'] ?? 'bg-gray-100') : 'bg-gray-100';
-                            $iconColor = is_array($act) ? ($act['icon_color'] ?? 'text-gray-600') : 'text-gray-600';
-                            $description = is_array($act) ? ($act['description'] ?? '') : '';
+                            $timestamp = is_array($act) ? ($act['timestamp'] ?? null) : ($act->timestamp ?? null);
+                            $timeDisplay = $timestamp ? (is_string($timestamp) ? $timestamp : $timestamp->diffForHumans()) : 'Recently';
                         @endphp
                         @php $logId = is_array($act) ? ($act['id'] ?? null) : ($act->id ?? null); @endphp
                         @if($logId)
-                        <a href="{{ route('admin.audit-logs.show', $logId) }}" class="block hover:bg-gray-50 rounded-md transition">
-                        @endif
-                        <div class="flex items-start gap-2 pb-2 border-b border-gray-100 last:border-0 p-2">
-                            <div class="flex-shrink-0 w-8 h-8 rounded-lg {{ $iconBg }} flex items-center justify-center">
-                                <i class="bi {{ $icon }} text-sm {{ $iconColor }}"></i>
-                            </div>
+                        <a href="{{ route('admin.audit-logs.show', $logId) }}" class="block hover:bg-gray-50 rounded-md">
+                        <div class="flex items-start gap-2 pb-2 border-b border-gray-100 last:border-0 p-3">
+                            <div class="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-xs font-medium text-gray-900">{{ $action }}</p>
                                 <p class="text-xs text-gray-600 truncate">{{ $userName }}</p>
-                                @if($description)
-                                    <p class="text-xs text-gray-500 line-clamp-2">{{ $description }}</p>
-                                @endif
-                                <p class="text-xs text-gray-400 mt-0.5">{{ $timeDisplay }}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">{{ $timeDisplay }}</p>
                             </div>
                         </div>
-                        @if($logId)
                         </a>
+                        @else
+                        <div class="flex items-start gap-2 pb-2 border-b border-gray-100 last:border-0">
+                            <div class="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-medium text-gray-900">{{ $action }}</p>
+                                <p class="text-xs text-gray-600 truncate">{{ $userName }}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">{{ $timeDisplay }}</p>
+                            </div>
+                        </div>
                         @endif
                     @endforeach
                 @else

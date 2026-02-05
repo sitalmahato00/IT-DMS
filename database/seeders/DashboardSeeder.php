@@ -31,9 +31,6 @@ class DashboardSeeder extends Seeder
         // Create sample notices
         $this->createNotices();
         
-        // Create audit logs for recent activities
-        $this->createAuditLogs();
-        
         $this->command->info('Dashboard seeders completed successfully!');
     }
     
@@ -277,103 +274,6 @@ class DashboardSeeder extends Seeder
         }
         
         $this->command->info('Created 5 notices');
-    }
-    
-    protected function createAuditLogs(): void
-    {
-        if (!Schema::hasTable('audit_logs')) {
-            $this->command->warn('Audit logs table does not exist. Skipping audit log creation.');
-            return;
-        }
-        
-        $existingLogs = DB::table('audit_logs')->count();
-        if ($existingLogs > 5) {
-            $this->command->info('Audit logs already exist. Skipping audit log creation.');
-            return;
-        }
-        
-        // Get admin user ID
-        $adminId = DB::table('users')->where('role', 'admin')->value('id');
-        if (!$adminId) {
-            $this->command->warn('No admin user found. Skipping audit log creation.');
-            return;
-        }
-        
-        // Get teacher IDs
-        $teacherIds = DB::table('users')->where('role', 'teacher')->pluck('id')->toArray();
-        
-        // Sample audit log activities
-        $auditLogs = [
-            [
-                'action' => 'Published new notice: Mid-Semester Examinations Schedule',
-                'module' => 'Notice',
-                'created_at' => Carbon::now()->subHours(2),
-            ],
-            [
-                'action' => 'Recorded attendance for 25 students in CS101',
-                'module' => 'Attendance',
-                'created_at' => Carbon::now()->subHours(5),
-            ],
-            [
-                'action' => 'Created new exam: Mid-Term Examination',
-                'module' => 'Exam',
-                'created_at' => Carbon::now()->subHours(8),
-            ],
-            [
-                'action' => 'Uploaded marks for Data Structures Exam',
-                'module' => 'Marks',
-                'created_at' => Carbon::now()->subHours(12),
-            ],
-            [
-                'action' => 'Enrolled 5 new students for Spring Semester',
-                'module' => 'Student',
-                'created_at' => Carbon::now()->subDays(1),
-            ],
-            [
-                'action' => 'Updated student records for Class 6A',
-                'module' => 'Student',
-                'created_at' => Carbon::now()->subDays(2),
-            ],
-            [
-                'action' => 'Published notice: Guest Lecture on AI',
-                'module' => 'Notice',
-                'created_at' => Carbon::now()->subDays(3),
-            ],
-            [
-                'action' => 'Recorded attendance for 30 students in CS301',
-                'module' => 'Attendance',
-                'created_at' => Carbon::now()->subDays(4),
-            ],
-            [
-                'action' => 'Created new exam: Quiz 1 - Programming Fundamentals',
-                'module' => 'Exam',
-                'created_at' => Carbon::now()->subDays(5),
-            ],
-            [
-                'action' => 'Uploaded marks for Web Development Exam',
-                'module' => 'Marks',
-                'created_at' => Carbon::now()->subDays(6),
-            ],
-        ];
-        
-        foreach ($auditLogs as $index => $log) {
-            // Use admin or randomly select a teacher
-            $userId = ($index % 2 === 0) ? $adminId : ($teacherIds[array_rand($teacherIds)] ?? $adminId);
-            $timestamp = Carbon::parse($log['created_at']);
-            
-            DB::table('audit_logs')->insert([
-                'user_id' => $userId,
-                'action' => $log['action'],
-                'module' => $log['module'],
-                'timestamp' => $log['created_at'],
-                'created_at' => $log['created_at'],
-                'updated_at' => $log['created_at'],
-                'ip_address' => '192.168.1.' . rand(1, 255),
-                'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            ]);
-        }
-        
-        $this->command->info('Created ' . count($auditLogs) . ' audit logs for dashboard recent activities');
     }
 }
 

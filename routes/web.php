@@ -108,7 +108,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     })->name('marks');
 
     Route::get('/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports');
-    Route::post('/reports/generate', [App\Http\Controllers\Admin\ReportController::class, 'generateReport'])->name('reports.generate');
+
+    Route::get('/notifications', [App\Http\Controllers\Admin\DashboardController::class, 'notifications'])->name('notifications');
 
     Route::get('/notice-board', [App\Http\Controllers\Admin\NoticeController::class, 'index'])->name('notice-board');
     Route::post('/notice-board', [App\Http\Controllers\Admin\NoticeController::class, 'store'])->name('notice-board.store');
