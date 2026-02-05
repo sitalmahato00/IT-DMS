@@ -103,6 +103,10 @@
                     <i class="bi bi-arrow-clockwise text-xs"></i>
                     <span>Reset</span>
                 </button>
+                <button type="button" id="exportReportBtn" class="flex-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-medium flex items-center justify-center gap-1.5 transition">
+                    <i class="bi bi-download text-xs"></i>
+                    <span>Export</span>
+                </button>
             </div>
         </div>
     </form>
@@ -385,6 +389,26 @@
         if (exportExcelBtn) {
             exportExcelBtn.addEventListener('click', function() {
                 alert('Excel Export functionality - Integrate with Maatwebsite Excel package');
+            });
+        }
+
+        // Export Report button - exports current report data
+        const exportReportBtn = document.getElementById('exportReportBtn');
+        if (exportReportBtn) {
+            exportReportBtn.addEventListener('click', function() {
+                const semester = document.querySelector('select[name="semester"]').value;
+                const subject = document.querySelector('select[name="subject"]').value;
+                const reportType = document.querySelector('select[name="report_type"]').value;
+                
+                // Create export URL with current filters
+                const params = new URLSearchParams();
+                if (semester) params.append('semester', semester);
+                if (subject) params.append('subject', subject);
+                if (reportType) params.append('report_type', reportType);
+                params.append('export', 'csv');
+                
+                // Redirect to export endpoint
+                window.location.href = '{{ route("admin.reports") }}?' + params.toString();
             });
         }
     });

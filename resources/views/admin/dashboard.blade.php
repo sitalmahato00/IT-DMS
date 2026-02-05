@@ -79,6 +79,32 @@
         </div>
     </div>
 
+    <!-- Notifications Section -->
+    @if(isset($unreadNoticeCount) && $unreadNoticeCount > 0)
+    <div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200 p-4 md:p-6">
+        <div class="flex items-start justify-between gap-4">
+            <div class="flex items-start gap-3 flex-1">
+                <div class="bg-red-100 p-2.5 rounded-lg flex-shrink-0">
+                    <i class="bi bi-megaphone text-red-600 text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900 text-sm devanagari-text">{{ __('You have ') }}{{ $unreadNoticeCount }} {{ __('new notification') }}{{ $unreadNoticeCount > 1 ? 's' : '' }}</h3>
+                    <p class="text-xs text-gray-600 mt-1 devanagari-text">{{ __('Important updates have been published. Review them in the Notice Board.') }}</p>
+                    <div class="mt-3 flex gap-2">
+                        <a href="{{ route('admin.notice-board') }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded text-xs font-medium hover:bg-red-700 transition">
+                            <i class="bi bi-megaphone"></i>
+                            {{ __('View All Notifications') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <button onclick="this.closest('div').style.display='none'" class="flex-shrink-0 text-gray-400 hover:text-gray-600">
+                <i class="bi bi-x text-lg"></i>
+            </button>
+        </div>
+    </div>
+    @endif
+
     <!-- Middle Section - Charts Row (2 columns) -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Attendance Overview Chart (Left) -->

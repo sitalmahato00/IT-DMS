@@ -369,10 +369,40 @@ class DashboardController extends Controller
                 ->get();
         }
 
+        // Get notifications data for header and dashboard
+        $unreadNoticeCount = 0;
+        $headerNotices = [];
+        
+        if (Schema::hasTable('notices')) {
+            // Get unread notices count (published notices that haven't been marked as read)
+            $unreadNoticeCount = DB::table('notices')
+                ->where('status', 'published')
+                ->whereNull('read_at')
+                ->count();
+            
+            // Get recent notices for header dropdown (max 5)
+            $headerNotices = DB::table('notices')
+                ->where('status', 'published')
+                ->orderBy('published_at', 'desc')
+                ->limit(5)
+                ->get()
+                ->map(function($notice) {
+                    return [
+                        'id' => $notice->id ?? null,
+                        'title' => $notice->title ?? 'Notice',
+                        'message' => $notice->message ?? '',
+                        'time' => isset($notice->published_at) ? \Carbon\Carbon::parse($notice->published_at)->diffForHumans() : 'Recently',
+                        'is_important' => $notice->is_important ?? false,
+                    ];
+                })
+                ->toArray();
+        }
+
         return view('admin.dashboard', compact(
             'totalStudents','teachers','parents','courses','avgAttendance',
             'recentActivities','notices','roleLabels','roleValues',
-            'attendancePercentage','recentNotices','recentAttendance','newStudents'
+            'attendancePercentage','recentNotices','recentAttendance','newStudents',
+            'unreadNoticeCount','headerNotices'
         ));
     }
 
