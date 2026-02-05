@@ -1,7 +1,0 @@
-/**
- * Dual Calendar Date Picker JavaScript
- * Supports both Bikram Sambat (BS) and Gregorian (AD) calendars
- * Features: Full BS calendar data, BS-AD conversion, Nepali numbers
- */
-
-const BSCalendarData = {
