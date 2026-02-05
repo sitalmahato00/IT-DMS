@@ -70,7 +70,7 @@
                     @foreach($attendanceRecords as $record)
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 text-xs text-gray-700">
-                            {{ $record['date_bs'] ?? ($record['date'] ?? '') }}
+                            {{ $record['date'] ?? '' }}
                         </td>
                         <td class="px-4 py-3 text-xs">
                             <div class="flex items-center gap-2">
