@@ -3,7 +3,7 @@
     <td class="px-3 py-2 font-medium text-gray-900">{{ $exam->localized_name }}</td>
     <td class="px-3 py-2 text-gray-700">{{ $exam->academic_year }}</td>
     <td class="px-3 py-2 text-gray-700">{{ ucwords($exam->semester) }}</td>
-    <td class="px-3 py-2 text-gray-700">{{ $exam->course ? $exam->course->subject_name : '-' }}</td>
+    <td class="px-3 py-2 text-gray-700">{{ $exam->subject ? $exam->subject->subject_name : '-' }}</td>
     <td class="px-3 py-2 text-gray-700">{{ $exam->formatted_type }}</td>
     <td class="px-3 py-2 text-gray-700">{{ $exam->full_marks }}</td>
     <td class="px-3 py-2">

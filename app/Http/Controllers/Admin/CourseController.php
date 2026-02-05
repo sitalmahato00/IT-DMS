@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\LogsActivity;
 
 class CourseController extends Controller
 {
+    use LogsActivity;
     public function index(Request $request)
     {
         try {
@@ -119,6 +121,9 @@ class CourseController extends Controller
                 "updated_at" => now()
             ]);
 
+            // Log activity
+            $this->logActivity('Course', 'Created Course', "Course '{$data['subject_name']}' created");
+
             return response()->json(["success" => true, "message" => "Course created successfully", "course_id" => $courseId]);
         } catch (\Exception $e) {
             return response()->json(["success" => false, "message" => "Error: " . $e->getMessage()], 500);
@@ -171,15 +176,29 @@ class CourseController extends Controller
     public function destroy($id)
     {
         try {
+            $course = DB::table("subjects")->find($id);
+            if (!$course) {
+                return response()->json(["success" => false, "message" => "Course not found"], 404);
+            }
+
             $hasMarks = DB::table("marks")->where("subject_id", $id)->exists();
             $hasAttendance = DB::table("attendance")->where("subject", $id)->exists();
+            $courseName = $course->subject_name;
 
             if ($hasMarks || $hasAttendance) {
                 DB::table("subjects")->where("id", $id)->update(["status" => "archived", "updated_at" => now()]);
+                
+                // Log activity
+                $this->logActivity('Course', 'Archived Course', "Course '{$courseName}' was archived");
+                
                 return response()->json(["success" => true, "message" => "Course archived"]);
             }
 
             DB::table("subjects")->where("id", $id)->delete();
+            
+            // Log activity
+            $this->logActivity('Course', 'Deleted Course', "Course '{$courseName}' was deleted");
+            
             return response()->json(["success" => true, "message" => "Course deleted successfully"]);
         } catch (\Exception $e) {
             return response()->json(["success" => false, "message" => "Error: " . $e->getMessage()], 500);

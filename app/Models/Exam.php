@@ -17,7 +17,6 @@ class Exam extends Model
         'academic_year',
         'semester',
         'subject_id',
-        'course_id',
         'exam_type',
         'full_marks',
         'passing_marks',

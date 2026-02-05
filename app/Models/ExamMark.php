@@ -84,11 +84,11 @@ class ExamMark extends Model
     }
 
     /**
-     * Check if student passed
+     * Check if student passed (threshold: 40%)
      */
     public function isPassed(): bool
     {
-        return $this->percentage >= 35;
+        return $this->percentage >= 40;
     }
 
     /**
@@ -116,11 +116,11 @@ class ExamMark extends Model
     }
 
     /**
-     * Scope to get failed marks only
+     * Scope to get failed marks only (threshold: 40%)
      */
     public function scopeFailed($query)
     {
-        return $query->where('percentage', '<', 35);
+        return $query->where('percentage', '<', 40);
     }
 }
 

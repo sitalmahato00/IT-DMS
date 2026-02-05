@@ -9,9 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\LogsActivity;
 
 class StudyMaterialController extends Controller
 {
+    use LogsActivity;
     /**
      * Display a listing of study materials.
      */
@@ -210,6 +212,9 @@ class StudyMaterialController extends Controller
 
             DB::commit();
 
+            // Log activity
+            $this->logActivity('Document', 'Uploaded Material', "Study material '{$validated['title']}' uploaded");
+
             return redirect()->route('admin.study-material')
                 ->with('success', 'Study material uploaded successfully.');
         } catch (\Exception $e) {
@@ -306,12 +311,17 @@ class StudyMaterialController extends Controller
         $material = StudyMaterial::findOrFail($id);
 
         try {
+            $materialTitle = $material->title;
+            
             // Delete file if exists
             if ($material->file_path && Storage::disk('public')->exists($material->file_path)) {
                 Storage::disk('public')->delete($material->file_path);
             }
 
             $material->delete();
+
+            // Log activity
+            $this->logActivity('Document', 'Deleted Material', "Study material '{$materialTitle}' was deleted");
 
             return redirect()->route('admin.study-material')
                 ->with('success', 'Study material deleted successfully.');

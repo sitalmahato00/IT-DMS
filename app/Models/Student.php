@@ -22,9 +22,6 @@ class Student extends Model
         'batch_year',
     ];
 
-    /**
-     * Casts
-     */
     protected $casts = [
         'date_of_birth' => 'date',
     ];
@@ -32,5 +29,10 @@ class Student extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'subject_students')->withTimestamps();
     }
 }

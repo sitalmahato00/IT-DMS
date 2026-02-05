@@ -219,6 +219,17 @@ document.addEventListener('DOMContentLoaded', function() {
         addExamBtn.addEventListener('click', function() { openAddExamModal(); });
     }
 
+    // Add Exam Modal - Close on backdrop/ESC
+    const addExamModal = document.getElementById('addExamModal');
+    if (addExamModal) {
+        addExamModal.addEventListener('click', function(e) {
+            if (e.target.id === 'addExamModal') closeAddExamModal();
+        });
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeAddExamModal();
+    });
+
     const addExamForm = document.getElementById('addExamForm');
     if (addExamForm) {
         addExamForm.addEventListener('submit', async function(e) {
@@ -307,15 +318,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <select name="semester" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs" required>
                         @foreach($semesters as $key => $label)
                             <option value="{{ $key }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Course</label>
-                    <select name="course_id" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
-                        <option value="">Select Course</option>
-                        @foreach($courses as $course)
-                            <option value="{{ $course->id }}">{{ $course->subject_name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -415,15 +417,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Course</label>
-                    <select name="course_id" id="editCourseId" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
-                        <option value="">Select Course</option>
-                        @foreach($courses as $course)
-                            <option value="{{ $course->id }}">{{ $course->subject_name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
                     <label class="block text-xs font-medium text-gray-700 mb-1">Subject</label>
                     <select name="subject_id" id="editSubjectId" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
                         <option value="">Select Subject</option>
@@ -496,7 +489,6 @@ async function openEditExamModal(examId) {
             document.getElementById('editExamNameNe').value = exam.exam_name_ne || '';
             document.getElementById('editAcademicYear').value = exam.academic_year;
             document.getElementById('editSemester').value = exam.semester;
-            document.getElementById('editCourseId').value = exam.course_id || '';
             document.getElementById('editSubjectId').value = exam.subject_id || '';
             document.getElementById('editExamType').value = exam.exam_type;
             document.getElementById('editFullMarks').value = exam.full_marks;
@@ -519,8 +511,14 @@ function closeEditExamModal() {
 }
 
 // Close modal on outside click
-document.getElementById('editExamModal')?.addEventListener('click', function(e) {
-    if (e.target === this) closeEditExamModal();
+const editExamModal = document.getElementById('editExamModal');
+if (editExamModal) {
+    editExamModal.addEventListener('click', function(e) {
+        if (e.target.id === 'editExamModal') closeEditExamModal();
+    });
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeEditExamModal();
 });
 
 // Handle Edit Exam Form submission

@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Gallery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\LogsActivity;
 
 class GalleryController extends Controller
 {
+    use LogsActivity;
     /**
      * Display a listing of the gallery items.
      */
@@ -85,6 +87,9 @@ class GalleryController extends Controller
             $gallery->is_active = $validated['is_active'] ?? true;
             $gallery->save();
 
+            // Log activity
+            $this->logActivity('Gallery', 'Uploaded Image', "Gallery item '{$validated['title']}' uploaded - Category: {$validated['category']}");
+
             return redirect()->route('admin.gallery')
                 ->with('success', 'Gallery item added successfully.');
         } catch (\Exception $e) {
@@ -149,12 +154,17 @@ class GalleryController extends Controller
         $gallery = Gallery::findOrFail($id);
 
         try {
+            $galleryTitle = $gallery->title;
+            
             // Delete image file if exists
             if ($gallery->image_path && Storage::disk('public')->exists($gallery->image_path)) {
                 Storage::disk('public')->delete($gallery->image_path);
             }
 
             $gallery->delete();
+
+            // Log activity
+            $this->logActivity('Gallery', 'Deleted Image', "Gallery item '{$galleryTitle}' was deleted");
 
             return redirect()->route('admin.gallery')
                 ->with('success', 'Gallery item deleted successfully.');

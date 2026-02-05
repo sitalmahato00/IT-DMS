@@ -86,6 +86,10 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::post('/assessment/{exam}/upload-marks-ajax', [App\Http\Controllers\Admin\ExamController::class, 'uploadMarksAjax'])->name('assessment.upload-marks-ajax');
     Route::get('/assessment/{exam}/students', [App\Http\Controllers\Admin\ExamController::class, 'getStudentsForExam'])->name('assessment.students');
     Route::get('/assessment/subjects/by-semester', [App\Http\Controllers\Admin\ExamController::class, 'getSubjectsBySemester'])->name('assessment.subjects');
+    
+    // Mark edit routes
+    Route::get('/assessment/marks/{mark}/edit', [App\Http\Controllers\Admin\ExamController::class, 'getMarkData'])->name('assessment.marks.edit');
+    Route::put('/assessment/marks/{mark}', [App\Http\Controllers\Admin\ExamController::class, 'updateMark'])->name('assessment.marks.update');
 
     Route::get('/courses', [App\Http\Controllers\Admin\CourseController::class, 'index'])->name('courses');
     Route::post('/courses', [App\Http\Controllers\Admin\CourseController::class, 'store'])->name('courses.store');

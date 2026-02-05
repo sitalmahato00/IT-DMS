@@ -82,6 +82,10 @@ class DashboardController extends Controller
                     'Course' => 'bi-book-half',
                     'Notice' => 'bi-megaphone',
                     'Report' => 'bi-file-earmark-pdf',
+                    'Exam' => 'bi-pencil-square',
+                    'Marks' => 'bi-graph-up',
+                    'Gallery' => 'bi-image',
+                    'Document' => 'bi-file-earmark-text',
                     default => 'bi-activity'
                 };
                 
@@ -93,6 +97,10 @@ class DashboardController extends Controller
                     'Course' => 'bg-blue-100',
                     'Notice' => 'bg-amber-100',
                     'Report' => 'bg-indigo-100',
+                    'Exam' => 'bg-purple-100',
+                    'Marks' => 'bg-green-100',
+                    'Gallery' => 'bg-pink-100',
+                    'Document' => 'bg-orange-100',
                     default => 'bg-gray-100'
                 };
                 
@@ -104,6 +112,10 @@ class DashboardController extends Controller
                     'Course' => 'text-blue-600',
                     'Notice' => 'text-amber-600',
                     'Report' => 'text-indigo-600',
+                    'Exam' => 'text-purple-600',
+                    'Marks' => 'text-green-600',
+                    'Gallery' => 'text-pink-600',
+                    'Document' => 'text-orange-600',
                     default => 'text-gray-600'
                 };
                 
@@ -189,10 +201,80 @@ class DashboardController extends Controller
                     ];
                 }
             }
+            
+            // Activity 4: Recent exam/assessment activities
+            if (Schema::hasTable('exams')) {
+                $recentExams = DB::table('exams')
+                    ->leftJoin('subjects', 'exams.subject_id', '=', 'subjects.id')
+                    ->select('exams.*', 'subjects.subject_name')
+                    ->whereNotNull('exams.created_at')
+                    ->orderBy('exams.created_at', 'desc')
+                    ->limit(2)
+                    ->get();
+                foreach ($recentExams as $exam) {
+                    $recentActivities[] = [
+                        'title' => 'Exam created: ' . ($exam->exam_name ?? 'Exam'),
+                        'subtitle' => 'Subject: ' . ($exam->subject_name ?? 'N/A') . ' (' . ucfirst($exam->exam_type) . ')',
+                        'time_raw' => $exam->created_at,
+                        'time' => $formatTime($exam->created_at),
+                        'icon' => 'bi-pencil-square',
+                        'icon_bg' => 'bg-purple-100',
+                        'icon_color' => 'text-purple-600',
+                        'module' => 'Exam'
+                    ];
+                }
+            }
+            
+            // Activity 5: Recent exam marks uploaded
+            if (Schema::hasTable('exam_marks')) {
+                $recentMarks = DB::table('exam_marks')
+                    ->leftJoin('exams', 'exam_marks.exam_id', '=', 'exams.id')
+                    ->select('exam_marks.*', 'exams.exam_name')
+                    ->whereNotNull('exam_marks.created_at')
+                    ->orderBy('exam_marks.created_at', 'desc')
+                    ->limit(1)
+                    ->get();
+                foreach ($recentMarks as $mark) {
+                    $recentActivities[] = [
+                        'title' => 'Marks uploaded',
+                        'subtitle' => 'Exam: ' . ($mark->exam_name ?? 'Exam') . ' - Student ID: ' . $mark->student_id,
+                        'time_raw' => $mark->created_at,
+                        'time' => $formatTime($mark->created_at),
+                        'icon' => 'bi-graph-up',
+                        'icon_bg' => 'bg-green-100',
+                        'icon_color' => 'text-green-600',
+                        'module' => 'Marks'
+                    ];
+                }
+            }
         }
 
-        // Sort activities by time (most recent first) using time_raw for proper sorting
-        $recentActivities = collect($recentActivities)->sortByDesc('time_raw')->take(5)->values()->toArray();
+        // Sort, deduplicate and filter activities: remove placeholders/unknowns
+        $recentActivities = collect($recentActivities)
+            ->filter(function($a) {
+                // require a non-empty action and either a known user or a description
+                $action = isset($a['action']) ? trim((string)$a['action']) : '';
+                $user = isset($a['user_name']) ? trim((string)$a['user_name']) : '';
+                $description = isset($a['description']) ? trim((string)$a['description']) : '';
+
+                if ($action === '' || strcasecmp($action, 'action') === 0) return false;
+                // allow System entries, but drop 'Unknown' with no description
+                if (strcasecmp($user, 'unknown') === 0 && $description === '') return false;
+
+                return true;
+            })
+            // dedupe similar activities (module + action + description + time)
+            ->unique(function($a) {
+                $module = $a['module'] ?? '';
+                $action = $a['action'] ?? '';
+                $desc = $a['description'] ?? '';
+                $time = $a['time_raw'] ?? '';
+                return md5("{$module}|{$action}|{$desc}|{$time}");
+            })
+            ->sortByDesc('time_raw')
+            ->take(10)
+            ->values()
+            ->toArray();
 
         // Notices: Get from notices table
         $notices = collect();

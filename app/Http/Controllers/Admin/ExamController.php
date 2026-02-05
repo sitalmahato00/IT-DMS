@@ -12,9 +12,13 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use App\Traits\LogsActivity;
 
 class ExamController extends Controller
 {
+    use LogsActivity;
     /**
      * Display a listing of exams.
      */
@@ -127,6 +131,9 @@ class ExamController extends Controller
 
             DB::commit();
 
+            // Log activity
+            $this->logActivity('Exam', 'Created Exam', "Exam '{$exam->exam_name}' created for {$exam->semester} semester");
+
             if ($request->ajax()) {
                 return response()->json([
                     'success' => true,
@@ -184,6 +191,9 @@ class ExamController extends Controller
 
             DB::commit();
 
+            // Log activity
+            $this->logActivity('Exam', 'Updated Exam', "Exam '{$exam->exam_name}' was updated");
+
             return redirect()->route('admin.assessment')
                 ->with('success', 'Exam updated successfully!');
         } catch (\Exception $e) {
@@ -206,9 +216,13 @@ class ExamController extends Controller
             // Delete associated marks first
             ExamMark::where('exam_id', $exam->id)->delete();
 
+            $examName = $exam->exam_name;
             $exam->delete();
 
             DB::commit();
+
+            // Log activity
+            $this->logActivity('Exam', 'Deleted Exam', "Exam '{$examName}' was deleted");
 
             return redirect()->route('admin.assessment')
                 ->with('success', 'Exam deleted successfully!');
@@ -256,7 +270,6 @@ class ExamController extends Controller
                     'exam_name_ne' => $exam->exam_name_ne,
                     'academic_year' => $exam->academic_year,
                     'semester' => $exam->semester,
-                    
                     'subject_id' => $exam->subject_id,
                     'exam_type' => $exam->exam_type,
                     'full_marks' => $exam->full_marks,
@@ -355,6 +368,9 @@ class ExamController extends Controller
             }
 
             DB::commit();
+
+            // Log activity
+            $this->logActivity('Marks', 'Uploaded Marks', "Marks uploaded for exam '{$exam->exam_name}': Created {$createdCount}, Updated {$updatedCount}");
 
             return redirect()->back()
                 ->with('success', "Marks uploaded successfully! Created: {$createdCount}, Updated: {$updatedCount}");
@@ -590,6 +606,104 @@ class ExamController extends Controller
             'draft_exams' => Exam::where('status', 'draft')->count(),
             'total_marks_entries' => ExamMark::count(),
         ];
+    }
+
+    /**
+     * Get mark data for editing via AJAX.
+     */
+    public function getMarkData(ExamMark $mark)
+    {
+        try {
+            $mark->load(['student.user', 'exam']);
+            
+            return response()->json([
+                'success' => true,
+                'mark' => [
+                    'id' => $mark->id,
+                    'student_id' => $mark->student_id,
+                    'student_name' => $mark->student->user->name ?? 'N/A',
+                    'roll_no' => $mark->student->roll_no ?? '-',
+                    'exam_id' => $mark->exam_id,
+                    'exam_name' => $mark->exam->localized_name ?? 'N/A',
+                    'marks_obtained' => $mark->marks_obtained,
+                    'full_marks' => $mark->full_marks,
+                    'percentage' => $mark->percentage,
+                    'grade' => $mark->grade,
+                    'remarks' => $mark->remarks,
+                    'passing_marks' => $mark->exam->passing_marks ?? 0,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting mark data: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load mark data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update a single mark via AJAX.
+     */
+    public function updateMark(Request $request, ExamMark $mark)
+    {
+        try {
+            $request->validate([
+                'marks_obtained' => 'required|numeric|min:0',
+                'remarks' => 'nullable|string|max:500',
+            ]);
+
+            $fullMarks = $mark->full_marks;
+            $marksObtained = $request->marks_obtained;
+            $percentage = $fullMarks > 0 ? round(($marksObtained / $fullMarks) * 100, 2) : 0;
+
+            DB::beginTransaction();
+
+            $mark->update([
+                'marks_obtained' => $marksObtained,
+                'percentage' => $percentage,
+                'grade' => $this->calculateGrade($percentage),
+                'graded_by' => Auth::id(),
+                'graded_at' => now(),
+                'remarks' => $request->remarks,
+            ]);
+
+            DB::commit();
+
+            // Reload mark with relationships
+            $mark->load(['student.user', 'exam']);
+
+            // Determine new pass/fail status based on 40% threshold
+            $isPassed = $percentage >= 40;
+            $statusBadgeClass = $isPassed 
+                ? 'bg-green-100 text-green-700' 
+                : 'bg-red-100 text-red-700';
+            $statusText = $isPassed 
+                ? '<span class="text-green-600 text-xs"><i class="bi bi-check-circle"></i> Passed</span>' 
+                : '<span class="text-red-600 text-xs"><i class="bi bi-x-circle"></i> Failed</span>';
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Mark updated successfully!',
+                'mark' => [
+                    'id' => $mark->id,
+                    'marks_obtained' => $mark->marks_obtained,
+                    'percentage' => $mark->percentage,
+                    'grade' => $mark->grade,
+                    'is_passed' => $isPassed,
+                    'status_badge_class' => $statusBadgeClass,
+                    'status_text' => $statusText,
+                    'student_name' => $mark->student->user->name ?? 'N/A',
+                ]
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating mark: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update mark: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
 

@@ -148,30 +148,31 @@
                         @php
                             $action = is_array($act) ? ($act['action'] ?? $act['activity'] ?? 'Action') : ($act->action ?? $act->activity ?? 'Action');
                             $userName = is_array($act) ? ($act['user_name'] ?? 'Unknown') : ($act->user_name ?? 'Unknown');
-                            $timestamp = is_array($act) ? ($act['timestamp'] ?? null) : ($act->timestamp ?? null);
-                            $timeDisplay = $timestamp ? (is_string($timestamp) ? $timestamp : $timestamp->diffForHumans()) : 'Recently';
+                            $timeDisplay = is_array($act) ? ($act['time'] ?? 'Recently') : ($act->time ?? 'Recently');
+                            $icon = is_array($act) ? ($act['icon'] ?? 'bi-activity') : 'bi-activity';
+                            $iconBg = is_array($act) ? ($act['icon_bg'] ?? 'bg-gray-100') : 'bg-gray-100';
+                            $iconColor = is_array($act) ? ($act['icon_color'] ?? 'text-gray-600') : 'text-gray-600';
+                            $description = is_array($act) ? ($act['description'] ?? '') : '';
                         @endphp
                         @php $logId = is_array($act) ? ($act['id'] ?? null) : ($act->id ?? null); @endphp
                         @if($logId)
-                        <a href="{{ route('admin.audit-logs.show', $logId) }}" class="block hover:bg-gray-50 rounded-md">
-                        <div class="flex items-start gap-2 pb-2 border-b border-gray-100 last:border-0 p-3">
-                            <div class="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                        <a href="{{ route('admin.audit-logs.show', $logId) }}" class="block hover:bg-gray-50 rounded-md transition">
+                        @endif
+                        <div class="flex items-start gap-2 pb-2 border-b border-gray-100 last:border-0 p-2">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-lg {{ $iconBg }} flex items-center justify-center">
+                                <i class="bi {{ $icon }} text-sm {{ $iconColor }}"></i>
+                            </div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-xs font-medium text-gray-900">{{ $action }}</p>
                                 <p class="text-xs text-gray-600 truncate">{{ $userName }}</p>
-                                <p class="text-xs text-gray-500 mt-0.5">{{ $timeDisplay }}</p>
+                                @if($description)
+                                    <p class="text-xs text-gray-500 line-clamp-2">{{ $description }}</p>
+                                @endif
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $timeDisplay }}</p>
                             </div>
                         </div>
+                        @if($logId)
                         </a>
-                        @else
-                        <div class="flex items-start gap-2 pb-2 border-b border-gray-100 last:border-0">
-                            <div class="w-2 h-2 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-xs font-medium text-gray-900">{{ $action }}</p>
-                                <p class="text-xs text-gray-600 truncate">{{ $userName }}</p>
-                                <p class="text-xs text-gray-500 mt-0.5">{{ $timeDisplay }}</p>
-                            </div>
-                        </div>
                         @endif
                     @endforeach
                 @else

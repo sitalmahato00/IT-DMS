@@ -88,8 +88,8 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <x-stats-card title="Total Students" :value="$totalStudents" icon="bi bi-people-fill" color="blue" />
         <x-stats-card title="Avg Marks" :value="number_format($averageMarks, 2) . '%'" icon="bi bi-percent" color="green" />
-        <x-stats-card title="Passed" :value="$exam->marks()->where('percentage', '>=', 35)->count()" icon="bi bi-check-circle" color="green" />
-        <x-stats-card title="Failed" :value="$exam->marks()->where('percentage', '<', 35)->count()" icon="bi bi-x-circle" color="red" />
+        <x-stats-card title="Passed (≥40%)" :value="$exam->marks()->where('percentage', '>=', 40)->count()" icon="bi bi-check-circle" color="green" />
+        <x-stats-card title="Failed (<40%)" :value="$exam->marks()->where('percentage', '<', 40)->count()" icon="bi bi-x-circle" color="red" />
     </div>
 
     <!-- Marks Table -->
@@ -116,11 +116,12 @@
                         <th class="px-3 py-2 text-xs font-semibold text-gray-700 text-center">Percentage</th>
                         <th class="px-3 py-2 text-xs font-semibold text-gray-700 text-center">Grade</th>
                         <th class="px-3 py-2 text-xs font-semibold text-gray-700 text-center">Status</th>
+                        <th class="px-3 py-2 text-xs font-semibold text-gray-700 text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($exam->marks as $mark)
-                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    <tr class="border-b border-gray-200 hover:bg-gray-50" id="mark-row-{{ $mark->id }}">
                         <td class="px-3 py-2 text-xs text-gray-700">{{ $mark->student->id ?? '-' }}</td>
                         <td class="px-3 py-2 text-xs font-medium text-gray-900">{{ $mark->student->user->name ?? 'N/A' }}</td>
                         <td class="px-3 py-2 text-xs text-gray-700">{{ $mark->student->roll_no ?? '-' }}</td>
@@ -130,27 +131,32 @@
                         <td class="px-3 py-2 text-center text-xs text-gray-700">{{ $exam->full_marks }}</td>
                         <td class="px-3 py-2 text-center text-xs text-gray-700">{{ $exam->passing_marks }}</td>
                         <td class="px-3 py-2 text-center">
-                            <span class="font-semibold {{ $mark->percentage >= 35 ? 'text-green-600' : 'text-red-600' }}">
+                            <span class="font-semibold {{ $mark->percentage >= 40 ? 'text-green-600' : 'text-red-600' }}">
                                 {{ $mark->marks_obtained }}
                             </span>
                         </td>
                         <td class="px-3 py-2 text-center text-xs text-gray-700">{{ number_format($mark->percentage, 2) }}%</td>
                         <td class="px-3 py-2 text-center">
-                            <span class="inline-block px-2 py-0.5 rounded text-xs font-medium {{ $mark->percentage >= 35 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                            <span class="inline-block px-2 py-0.5 rounded text-xs font-medium {{ $mark->percentage >= 40 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                                 {{ $mark->grade }}
                             </span>
                         </td>
                         <td class="px-3 py-2 text-center">
-                            @if($mark->percentage >= 35)
+                            @if($mark->percentage >= 40)
                                 <span class="text-green-600 text-xs"><i class="bi bi-check-circle"></i> Passed</span>
                             @else
                                 <span class="text-red-600 text-xs"><i class="bi bi-x-circle"></i> Failed</span>
                             @endif
                         </td>
+                        <td class="px-3 py-2 text-center">
+                            <button onclick="openEditMarkModal({{ $mark->id }})" class="text-blue-600 hover:text-blue-800 text-xs" title="Edit Mark">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="10" class="px-3 py-4 text-center text-gray-500 text-xs">
+                        <td colspan="11" class="px-3 py-4 text-center text-gray-500 text-xs">
                             No marks have been uploaded yet. Click "Upload Marks" to add marks.
                         </td>
                     </tr>
@@ -196,15 +202,6 @@
                     <select name="semester" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs" required>
                         @foreach(['first', 'second', 'third', 'fourth', 'fifth', 'sixth'] as $s)
                             <option value="{{ $s }}" {{ $exam->semester == $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Course</label>
-                    <select name="subject_id" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
-                        <option value="">Select Subject</option>
-                        @foreach(\App\Models\Course::all() as $course)
-                            <option value="{{ $course->id }}" {{ $exam->subject_id == $course->id ? 'selected' : '' }}>{{ $course->subject_name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -357,7 +354,87 @@
     </div>
 </div>
 
+<!-- Edit Mark Modal -->
+<div id="editMarkModal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black bg-opacity-40" onclick="closeEditMarkModal()"></div>
+    <div class="relative bg-white rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto mx-auto mt-20">
+        <div class="flex justify-between items-center px-5 py-3 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Edit Mark</h3>
+            <button onclick="closeEditMarkModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <form id="editMarkForm" class="px-5 py-4 space-y-4">
+            @csrf
+            @method('PUT')
+            <input type="hidden" id="editMarkId" name="mark_id">
+            
+            <!-- Student Info (Read-only) -->
+            <div class="bg-gray-50 p-3 rounded">
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                        <span class="text-gray-500">Student:</span>
+                        <span id="editStudentName" class="font-medium text-gray-900 ml-1">-</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Roll No:</span>
+                        <span id="editRollNo" class="font-medium text-gray-900 ml-1">-</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Full Marks:</span>
+                        <span id="editFullMarks" class="font-medium text-gray-900 ml-1">-</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Pass Marks:</span>
+                        <span id="editPassMarks" class="font-medium text-gray-900 ml-1">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Marks Info -->
+            <div class="grid grid-cols-3 gap-2">
+                <div class="text-center">
+                    <p class="text-xs text-gray-500">Current</p>
+                    <p id="editCurrentMarks" class="text-lg font-bold text-gray-900">-</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-gray-500">Percentage</p>
+                    <p id="editCurrentPercentage" class="text-lg font-bold text-gray-900">-</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-gray-500">Grade</p>
+                    <p id="editCurrentGrade" class="text-lg font-bold text-gray-900">-</p>
+                </div>
+            </div>
+
+            <!-- Edit Fields -->
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Obtained Marks *</label>
+                <input type="number" id="editMarksObtained" name="marks_obtained" min="0" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <p class="text-xs text-gray-500 mt-1">Maximum: <span id="editMaxMarks">-</span> marks</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Remarks</label>
+                <textarea id="editRemarks" name="remarks" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Optional remarks..."></textarea>
+            </div>
+
+            <div id="editMarkErrors" class="text-sm text-red-600 hidden"></div>
+            
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" onclick="closeEditMarkModal()" class="px-4 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200">Cancel</button>
+                <button type="submit" class="px-4 py-2 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
+                    <i class="bi bi-check-lg mr-1"></i>Update Mark
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+// CSRF Token
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
 // Edit Exam Modal Functions
 function openEditExamModal() {
     document.getElementById('editExamModal').classList.remove('hidden');
@@ -374,6 +451,53 @@ function openMarkUploadModal() {
 
 function closeMarkUploadModal() {
     document.getElementById('markUploadModal').classList.add('hidden');
+}
+
+// Edit Mark Modal Functions
+function openEditMarkModal(markId) {
+    // Fetch mark data
+    fetch(`/admin/assessment/marks/${markId}/edit`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const mark = data.mark;
+            
+            // Populate form fields
+            document.getElementById('editMarkId').value = mark.id;
+            document.getElementById('editStudentName').textContent = mark.student_name;
+            document.getElementById('editRollNo').textContent = mark.roll_no;
+            document.getElementById('editFullMarks').textContent = mark.full_marks;
+            document.getElementById('editPassMarks').textContent = mark.passing_marks;
+            document.getElementById('editCurrentMarks').textContent = mark.marks_obtained;
+            document.getElementById('editCurrentPercentage').textContent = mark.percentage + '%';
+            document.getElementById('editCurrentGrade').textContent = mark.grade;
+            document.getElementById('editMarksObtained').value = mark.marks_obtained;
+            document.getElementById('editMarksObtained').max = mark.full_marks;
+            document.getElementById('editMaxMarks').textContent = mark.full_marks;
+            document.getElementById('editRemarks').value = mark.remarks || '';
+            
+            // Clear errors
+            document.getElementById('editMarkErrors').classList.add('hidden');
+            document.getElementById('editMarkErrors').textContent = '';
+            
+            // Show modal
+            document.getElementById('editMarkModal').classList.remove('hidden');
+        } else {
+            alert('Failed to load mark data: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching mark data:', error);
+        alert('Error loading mark data. Please try again.');
+    });
+}
+
+function closeEditMarkModal() {
+    document.getElementById('editMarkModal').classList.add('hidden');
 }
 
 // Load students for mark upload
@@ -407,8 +531,13 @@ function renderStudentMarks(students, existingMarks, fullMarks, passingMarks) {
     }
     
     let html = '';
+    const examSubjectName = '{{ $exam->subject ? addslashes($exam->subject->subject_name) : "N/A" }}';
     students.forEach(student => {
         const existingMark = existingMarks[student.id] !== undefined ? existingMarks[student.id] : '';
+        // Get student's enrolled subjects (comma-separated list)
+        let studentSubjects = student.subjects && student.subjects.length > 0 
+            ? student.subjects.map(s => s.subject_name).join(', ')
+            : '-';
         html += `
             <tr class="border-b border-gray-200 hover:bg-gray-50">
                 <td class="px-3 py-2 text-gray-700">${student.id}</td>
@@ -417,8 +546,9 @@ function renderStudentMarks(students, existingMarks, fullMarks, passingMarks) {
                 <td class="px-3 py-2 text-center">
                     <span class="inline-block px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs">Present</span>
                 </td>
-                <td class="px-3 py-2 text-center text-gray-700">{{ $exam->subject ? $exam->subject->subject_name : '-' }}</td>
+                <td class="px-3 py-2 text-center text-gray-700">${examSubjectName}</td>
                 <td class="px-3 py-2 text-center">
+                    <input type="hidden" name="marks[${student.id}][student_id]" value="${student.id}">
                     <input type="number" name="marks[${student.id}][full_marks]" value="${fullMarks}" class="w-16 px-2 py-1 border border-gray-300 rounded text-xs text-center" readonly>
                 </td>
                 <td class="px-3 py-2 text-center">
@@ -440,11 +570,109 @@ function exportMarks() {
 
 // Close modals on outside click
 document.getElementById('editExamModal').addEventListener('click', function(e) {
-    if (e.target === this) closeEditExamModal();
+    if (e.target.id === 'editExamModal' || e.target.closest('.fixed.inset-0.bg-black')) {
+        closeEditExamModal();
+    }
 });
 
 document.getElementById('markUploadModal').addEventListener('click', function(e) {
-    if (e.target === this) closeMarkUploadModal();
+    if (e.target.id === 'markUploadModal' || e.target.closest('.fixed.inset-0.bg-black')) {
+        closeMarkUploadModal();
+    }
+});
+
+// Also allow ESC key to close modals
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeEditExamModal();
+        closeMarkUploadModal();
+        closeEditMarkModal();
+    }
+});
+
+// Handle Edit Mark Form submission
+document.getElementById('editMarkForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const markId = document.getElementById('editMarkId').value;
+    const marksObtained = document.getElementById('editMarksObtained').value;
+    const remarks = document.getElementById('editRemarks').value;
+    const errorsDiv = document.getElementById('editMarkErrors');
+    
+    const formData = {
+        _token: csrfToken,
+        _method: 'PUT',
+        marks_obtained: marksObtained,
+        remarks: remarks
+    };
+    
+    try {
+        const res = await fetch(`/admin/assessment/marks/${markId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            closeEditMarkModal();
+            
+            // Update the row in the table
+            const row = document.getElementById(`mark-row-${data.mark.id}`);
+            if (row) {
+                // Update obtained marks with new color based on 40% threshold
+                const obtainedCell = row.querySelector('td:nth-child(7) span');
+                if (obtainedCell) {
+                    obtainedCell.textContent = data.mark.marks_obtained;
+                    obtainedCell.className = `font-semibold ${data.mark.is_passed ? 'text-green-600' : 'text-red-600'}`;
+                }
+                
+                // Update percentage
+                const percentageCell = row.querySelector('td:nth-child(8)');
+                if (percentageCell) {
+                    percentageCell.textContent = data.mark.percentage.toFixed(2) + '%';
+                }
+                
+                // Update grade
+                const gradeCell = row.querySelector('td:nth-child(9) span');
+                if (gradeCell) {
+                    gradeCell.textContent = data.mark.grade;
+                    gradeCell.className = `inline-block px-2 py-0.5 rounded text-xs font-medium ${data.mark.is_passed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+                }
+                
+                // Update status
+                const statusCell = row.querySelector('td:nth-child(10)');
+                if (statusCell) {
+                    statusCell.innerHTML = data.mark.status_text;
+                }
+            }
+            
+            // Show success message
+            alert(data.message);
+            
+            // Reload page to update statistics
+            // setTimeout(() => window.location.reload(), 1000);
+        } else {
+            errorsDiv.textContent = data.message || 'Error updating mark';
+            errorsDiv.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error updating mark:', error);
+        errorsDiv.textContent = 'An error occurred. Please try again.';
+        errorsDiv.classList.remove('hidden');
+    }
+});
+
+// Close edit mark modal on outside click
+document.getElementById('editMarkModal').addEventListener('click', function(e) {
+    if (e.target.id === 'editMarkModal' || e.target.closest('.fixed.inset-0.bg-black')) {
+        closeEditMarkModal();
+    }
 });
 
 // Handle Edit Exam Form submission

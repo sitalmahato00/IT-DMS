@@ -10,9 +10,11 @@ use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Traits\LogsActivity;
 
 class AttendanceController extends Controller
 {
+    use LogsActivity;
     /**
      * Display attendance records from database (read-only view)
      */
@@ -198,6 +200,11 @@ public function index(Request $request)
                 ],
                 $updateData
             );
+
+            // Log activity
+            $student = Student::find($data['student_id']);
+            $studentName = $student ? ($student->user ? $student->user->name : 'Student #' . $data['student_id']) : 'Unknown';
+            $this->logActivity('Attendance', 'Recorded Attendance', "Attendance marked for {$studentName} - Status: {$data['status']}");
 
             return response()->json([
                 'success' => true,
