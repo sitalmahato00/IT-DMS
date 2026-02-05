@@ -174,10 +174,14 @@ public function index(Request $request)
 
             $remarks = $data['remarks'] ?? ($data['status'] === 'absent' ? 'Absent' : ($data['status'] === 'leave' ? 'Leave' : 'Present'));
 
+            // Convert AD date to BS date
+            $dateBs = \App\Helpers\NepaliContentHelper::convertAdToBs($data['date']);
+
             $updateData = [
                 'status' => $data['status'],
                 'remarks' => $remarks,
                 'date' => $data['date'],
+                'date_bs' => $dateBs,
             ];
 
             // Add subject_id if provided and not empty
@@ -293,6 +297,9 @@ public function index(Request $request)
         $date = $data['date'];
         $subjectId = $data['subject_id'] ?? null;
 
+        // Convert AD date to BS date
+        $dateBs = \App\Helpers\NepaliContentHelper::convertAdToBs($date);
+
         // Get teacher ID from current user
         $teacherId = null;
         $user = auth()->user();
@@ -306,12 +313,13 @@ public function index(Request $request)
         // Build records array for upsert (atomic operation)
         $records = [];
         $now = now()->toDateTimeString();
-        // Use AD date directly
+        // Use AD date directly with BS conversion
         foreach ($data['attendance'] as $item) {
             $remarks = $item['status'] === 'absent' ? 'Absent' : ($item['status'] === 'leave' ? 'Leave' : 'Present');
             $record = [
                 'student_id' => $item['student_id'],
                 'date' => $date,
+                'date_bs' => $dateBs,
                 'teacher_id' => $teacherId,
                 'status' => $item['status'],
                 'remarks' => $remarks,

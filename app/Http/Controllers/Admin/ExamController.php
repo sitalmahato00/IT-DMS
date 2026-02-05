@@ -476,24 +476,30 @@ class ExamController extends Controller
     public function getStudentsForExam(Request $request, Exam $exam)
     {
         try {
+            // Validate - allow empty values for "All" selection
             $request->validate([
-                
                 'semester' => 'nullable|string',
                 'batch' => 'nullable|string',
-                'subject_id' => 'nullable|exists:subjects,id',
+                'subject_id' => 'nullable|string',
             ]);
 
-            $query = Student::with(['user']);
+            $query = Student::with(['user', 'subjects']);
 
-            if ($request->subject_id) {
-                $query->where('subject_id', $request->subject_id);
+            // Filter by subject if selected (not "All")
+            if ($request->subject_id && $request->subject_id !== '') {
+                // Filter through the many-to-many relationship
+                $query->whereHas('subjects', function ($q) use ($request) {
+                    $q->where('subjects.id', $request->subject_id);
+                });
             }
 
-            if ($request->semester) {
+            // Filter by semester if selected (not "All")
+            if ($request->semester && $request->semester !== '') {
                 $query->where('semester', $request->semester);
             }
 
-            if ($request->batch) {
+            // Filter by batch if selected (not "All")
+            if ($request->batch && $request->batch !== '') {
                 $query->where('batch_year', $request->batch);
             }
 

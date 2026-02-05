@@ -219,11 +219,13 @@ document.addEventListener('DOMContentLoaded', function() {
         addExamBtn.addEventListener('click', function() { openAddExamModal(); });
     }
 
-    // Add Exam Modal - Close on backdrop/ESC
+// Add Exam Modal - Close on backdrop/ESC
     const addExamModal = document.getElementById('addExamModal');
     if (addExamModal) {
         addExamModal.addEventListener('click', function(e) {
-            if (e.target.id === 'addExamModal') closeAddExamModal();
+            if (e.target === this || e.target.closest('.fixed.inset-0')) {
+                closeAddExamModal();
+            }
         });
     }
     document.addEventListener('keydown', function(e) {
@@ -285,6 +287,101 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<!-- Add Exam Modal -->
+<div id="addExamModal" class="fixed inset-0 z-50 hidden">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-black bg-opacity-40" onclick="closeAddExamModal()"></div>
+    <!-- Modal Content -->
+    <div class="relative bg-white rounded-lg shadow-lg w-full max-w-2xl mx-auto mt-20">
+        <div class="flex justify-between items-center px-5 py-3 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Add New Exam</h3>
+            <button onclick="closeAddExamModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <form id="addExamForm" method="POST" action="{{ route('admin.assessment.store') }}" class="px-5 py-4 space-y-4">
+            @csrf
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Exam Name *</label>
+                    <input name="exam_name" type="text" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Exam Name (Nepali)</label>
+                    <input name="exam_name_ne" type="text" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Academic Year *</label>
+                    <select name="academic_year" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs" required>
+                        @foreach($academicYears as $year)
+                            <option value="{{ $year }}">{{ $year }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Semester *</label>
+                    <select name="semester" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs" required>
+                        @foreach($semesters as $key => $label)
+                            <option value="{{ $key }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Subject</label>
+                    <select name="subject_id" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
+                        <option value="">Select Subject</option>
+                        @foreach($subjects as $subject)
+                            <option value="{{ $subject->id }}">{{ $subject->subject_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Exam Type *</label>
+                    <select name="exam_type" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs" required>
+                        <option value="internal">Internal</option>
+                        <option value="final">Final</option>
+                        <option value="midterm">Midterm</option>
+                        <option value="practical">Practical</option>
+                        <option value="viva">Viva</option>
+                        <option value="assignment">Assignment</option>
+                        <option value="assessment">Assessment</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Total Marks *</label>
+                    <input name="full_marks" type="number" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Passing Marks *</label>
+                    <input name="passing_marks" type="number" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Exam Date (AD) *</label>
+                    <input name="exam_date" type="date" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Status *</label>
+                    <select name="status" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs" required>
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                <textarea name="description" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs h-20"></textarea>
+            </div>
+            <div id="addExamErrors" class="text-sm text-red-600"></div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" onclick="closeAddExamModal()" class="px-4 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200">Cancel</button>
+                <button type="submit" class="px-4 py-2 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">Create Exam</button>
+            </div>
+        </form>
+    </div>
+</div>
 <!-- Add Exam Modal -->
 <div id="addExamModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl">
@@ -568,15 +665,6 @@ document.getElementById('editExamForm')?.addEventListener('submit', async functi
                 document.getElementById('addExamModal').classList.remove('hidden');
             });
         }
-        
-        var addExamModal = document.getElementById('addExamModal');
-        if (addExamModal) {
-            addExamModal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeAddExamModal();
-                }
-            });
-        }
     });
     
     function openAddAssessmentModal() {
@@ -616,6 +704,5 @@ document.getElementById('editExamForm')?.addEventListener('submit', async functi
     function resetAssessmentFilters() {
         // TODO: Implement filter reset
     }
-</script>
-@endsection
+</script@endsection
 

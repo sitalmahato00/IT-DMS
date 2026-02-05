@@ -34,10 +34,6 @@
                 <p class="text-sm font-semibold text-gray-900">{{ ucwords($exam->semester) }}</p>
             </div>
             <div>
-                <p class="text-xs font-medium text-gray-500">Course</p>
-                <p class="text-sm font-semibold text-gray-900">{{ $exam->course ? $exam->course->subject_name : 'N/A' }}</p>
-            </div>
-            <div>
                 <p class="text-xs font-medium text-gray-500">Subject</p>
                 <p class="text-sm font-semibold text-gray-900">{{ $exam->subject ? $exam->subject->subject_name : 'N/A' }}</p>
             </div>
@@ -508,7 +504,7 @@ async function loadStudents() {
     const examId = {{ $exam->id }};
     
     try {
-        const url = `/admin/assessment/${examId}/students?batch=${batch}&semester=${semester}&subject_id=${subject}`;
+        const url = `/admin/assessment/${examId}/students?batch=${encodeURIComponent(batch)}&semester=${encodeURIComponent(semester)}&subject_id=${encodeURIComponent(subject)}`;
         const response = await fetch(url, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         });
@@ -516,9 +512,12 @@ async function loadStudents() {
         
         if (data.success) {
             renderStudentMarks(data.students, data.existing_marks, data.full_marks, data.passing_marks);
+        } else {
+            document.getElementById('studentsMarksBody').innerHTML = '<tr><td colspan="8" class="px-3 py-4 text-center text-gray-500">Error loading students: ' + (data.message || 'Unknown error') + '</td></tr>';
         }
     } catch (error) {
         console.error('Error loading students:', error);
+        document.getElementById('studentsMarksBody').innerHTML = '<tr><td colspan="8" class="px-3 py-4 text-center text-gray-500">Error loading students. Please try again.</td></tr>';
     }
 }
 
