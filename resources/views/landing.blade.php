@@ -89,12 +89,18 @@
         ? (($locale === 'ne' && !empty($department->programs_content_nepali)) ? $department->programs_content_nepali : $department->programs_content)
         : null;
 
-    $programsImageUrl = null;
+    $defaultProgramsImage = asset('images/hero-image.jpg');
+    $programsImageUrl = $defaultProgramsImage;
     if (!empty($department?->programs_image_path)) {
+        $programImagePath = ltrim($department->programs_image_path, '/');
         try {
-            $programsImageUrl = Storage::disk('public')->url($department->programs_image_path);
+            if (Storage::disk('public')->exists($programImagePath)) {
+                $programsImageUrl = Storage::disk('public')->url($programImagePath);
+            } else {
+                $programsImageUrl = asset('storage/' . $programImagePath);
+            }
         } catch (\Throwable $e) {
-            $programsImageUrl = asset('storage/' . ltrim($department->programs_image_path, '/'));
+            $programsImageUrl = asset('storage/' . $programImagePath);
         }
     }
 
@@ -172,7 +178,7 @@
         </a>
 
         <header class="sticky top-0 z-50 border-b border-white/10 bg-gradient-to-r from-red-700 via-red-600 to-red-700 backdrop-blur">
-            <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+            <div class="mx-auto flex w-full max-w-none items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
                 <a href="{{ route('home') }}" class="flex items-center gap-3">
                     <img src="{{ $departmentLogoUrl }}" alt="{{ $departmentName }} logo" class="h-10 w-10 rounded-lg bg-white/10 object-contain ring-1 ring-white/20">
                     <div class="leading-tight">
@@ -237,7 +243,7 @@
                     </div>
                 </div>
 
-                <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+                <div class="mx-auto w-full max-w-none px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
                     <div class="max-w-3xl">
                         <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold tracking-wide text-white ring-1 ring-white/15">
                             <span class="h-2 w-2 rounded-full bg-red-500"></span>
@@ -252,14 +258,23 @@
                         </p>
 
                         <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                            <a href="#programs" class="inline-flex items-center justify-center rounded-lg bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
-                                {{ $locale === 'ne' ? 'कार्यक्रम हेर्नुहोस्' : 'Explore Programs' }}
+                            <a href="#programs" class="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
+                                <span>{{ $locale === 'ne' ? 'कार्यक्रम हेर्नुहोस्' : 'Explore Programs' }}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                    <path fill-rule="evenodd" d="M12.72 6.72a.75.75 0 0 0-1.06 1.06L14.94 12l-3.28 4.22a.75.75 0 1 0 1.14.98l3.75-4.83a.75.75 0 0 0 0-.98l-3.75-4.83z" clip-rule="evenodd" />
+                                </svg>
                             </a>
-                            <a href="#curriculum" class="inline-flex items-center justify-center rounded-lg bg-white/10 px-6 py-3 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/40">
-                                {{ $locale === 'ne' ? 'विषयहरू ब्राउज' : 'Browse Subjects' }}
+                            <a href="#curriculum" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/40">
+                                <span>{{ $locale === 'ne' ? 'विषयहरू ब्राउज' : 'Browse Subjects' }}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                    <path fill-rule="evenodd" d="M12.72 6.72a.75.75 0 0 0-1.06 1.06L14.94 12l-3.28 4.22a.75.75 0 1 0 1.14.98l3.75-4.83a.75.75 0 0 0 0-.98l-3.75-4.83z" clip-rule="evenodd" />
+                                </svg>
                             </a>
-                            <a href="#contact" class="inline-flex items-center justify-center rounded-lg bg-white px-6 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-white/60">
-                                {{ $locale === 'ne' ? 'सम्पर्क गर्नुहोस्' : 'Contact Us' }}
+                            <a href="#contact" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-white/60">
+                                <span>{{ $locale === 'ne' ? 'सम्पर्क गर्नुहोस्' : 'Contact Us' }}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                    <path fill-rule="evenodd" d="M12.72 6.72a.75.75 0 0 0-1.06 1.06L14.94 12l-3.28 4.22a.75.75 0 1 0 1.14.98l3.75-4.83a.75.75 0 0 0 0-.98l-3.75-4.83z" clip-rule="evenodd" />
+                                </svg>
                             </a>
                         </div>
 
@@ -316,8 +331,11 @@
                 </div>
             </section>
 
-            <section id="about" class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-                <div class="grid gap-10 lg:grid-cols-12 lg:items-start">
+
+    
+
+            <section id="about" class="w-full px-4 py-14 sm:px-6 lg:px-8">
+                <div class="mx-auto grid w-full max-w-none gap-10 lg:grid-cols-12 lg:items-start">
                     <div class="lg:col-span-7">
                         <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
                             {{ $locale === 'ne' ? 'विभागको परिचय' : 'About the Department' }}
@@ -422,33 +440,17 @@
                                     </div>
                                 </div>
                             @endif
-
-                            @if (!empty($mapEmbedUrl))
-                                <div class="mt-6 border-t border-gray-200 pt-5">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $mapLabel }}</div>
-                                        @if (!empty($mapOpenUrl))
-                                            <a href="{{ $mapOpenUrl }}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-red-700 hover:underline dark:text-red-400">
-                                                {{ $locale === 'ne' ? 'नक्सामा खोल्नुहोस्' : 'Open map' }}
-                                            </a>
-                                        @endif
-                                    </div>
-                                    <div class="mt-3 overflow-hidden rounded-2xl ring-1 ring-gray-200 dark:ring-gray-800">
-                                        <iframe title="Map" src="{{ $mapEmbedUrl }}" class="h-44 w-full border-0" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                                    </div>
-                                </div>
-                            @endif
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section id="programs" class="py-14">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <section id="programs" class="w-full px-4 py-14 sm:px-6 lg:px-8">
+                <div class="mx-auto w-full max-w-none">
                     <div class="grid gap-10 lg:grid-cols-12 lg:items-center">
                         <div class="lg:col-span-5">
                             <div class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                                <img src="{{ $programsImageUrl ?: asset('images/hero-image.jpg') }}" alt="" class="h-72 w-full object-cover sm:h-80" />
+                                <img src="{{ $programsImageUrl ?: asset('images/hero-image.jpg') }}" alt="{{ $programsTitle ?: ($locale === 'ne' ? 'कार्यक्रम तस्वीर' : 'Program image') }}" class="h-72 w-full object-cover sm:h-80" onerror="this.onerror=null;this.src='{{ asset('images/hero-image.jpg') }}';" />
                             </div>
                         </div>
                         <div class="lg:col-span-7">
@@ -476,18 +478,19 @@
                 </div>
             </section>
 
-            <section id="curriculum" class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8" x-data="subjectCatalog({
+            <section id="curriculum" class="w-full px-4 py-14 sm:px-6 lg:px-8" x-data="subjectCatalog({
                 initialSemester: @js($defaultSemester),
                 maxItems: @js($subjectPreviewMax),
                 indexUrl: @js(route('subjects.index')),
                 subjects: @js($subjectPayload),
                 locale: @js($locale),
             })">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                        <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
-                            {{ $locale === 'ne' ? 'हाम्रा पाठ्यक्रम' : 'Our Courses' }}
-                        </h2>
+                <div class="mx-auto w-full max-w-none">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
+                                {{ $locale === 'ne' ? 'हाम्रा पाठ्यक्रम' : 'Our Courses' }}
+                            </h2>
                         <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
                             {{ $locale === 'ne' ? 'सेमेस्टर अनुसार विषयहरू हेर्नुहोस्।' : 'Browse semester-wise course highlights.' }}
                         </p>
@@ -508,46 +511,64 @@
 
                 <div class="mt-8 grid gap-6 md:grid-cols-3">
                     <template x-for="s in visibleSubjects" :key="s.id">
-                        <div class="flex flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                            <div class="text-base font-bold text-gray-900 dark:text-gray-100" x-text="s.title"></div>
-                            <div class="mt-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
-                                <span x-text="((s.teachers || [])[0]) ? s.teachers[0] : (locale === 'ne' ? 'शिक्षक तोकिएको छैन' : 'Instructor TBA')"></span>
-                                <span class="mx-2 text-gray-300 dark:text-gray-700">|</span>
-                                <span x-text="(s.has_lab || String(s.type || '').toLowerCase().includes('lab')) ? (locale === 'ne' ? 'प्रयोगशाला' : 'Lab') : (locale === 'ne' ? 'सिद्धान्त' : 'Theory')"></span>
+                        <div class="flex flex-col overflow-hidden rounded-2xl border-l-4 border-r border-t border-b border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-gray-950" 
+                             :class="[
+                                 s.has_lab ? 'border-l-emerald-500 dark:border-l-emerald-400' : 'border-l-blue-500 dark:border-l-blue-400'
+                             ]">
+                            <div class="flex items-center justify-between border-b border-gray-100 bg-gradient-to-r px-6 py-3 dark:border-gray-900"
+                                 :class="s.has_lab ? 'from-emerald-50 to-emerald-50/50 dark:from-emerald-950/20 dark:to-emerald-950/10' : 'from-blue-50 to-blue-50/50 dark:from-blue-950/20 dark:to-blue-950/10'">
+                                <div class="text-base font-bold text-gray-900 dark:text-gray-100" x-text="s.title"></div>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" :class="s.has_lab ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
                             </div>
-                            <div class="mt-3 line-clamp-3 text-sm text-gray-700 dark:text-gray-300" x-text="s.description || fallbackDescription"></div>
+                            <div class="p-6">
+                                <div class="mt-2 text-xs font-semibold uppercase tracking-wide" :class="s.has_lab ? 'text-emerald-700 dark:text-emerald-300' : 'text-blue-700 dark:text-blue-300'">
+                                    <span x-text="((s.teachers || [])[0]) ? s.teachers[0] : (locale === 'ne' ? 'शिक्षक तोकिएको छैन' : 'Instructor TBA')"></span>
+                                    <span class="mx-2 inline">•</span>
+                                    <span x-text="(s.has_lab || String(s.type || '').toLowerCase().includes('lab')) ? (locale === 'ne' ? 'प्रयोगशाला' : 'Lab') : (locale === 'ne' ? 'सिद्धान्त' : 'Theory')"></span>
+                                </div>
+                                <div class="mt-3 line-clamp-3 text-sm text-gray-700 dark:text-gray-300" x-text="s.description || fallbackDescription"></div>
 
-                            <div x-show="openId === s.id" x-cloak class="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 dark:border-gray-800 dark:bg-gray-900/40 dark:text-gray-200">
-                                <div class="flex flex-wrap gap-2 text-xs font-semibold">
-                                    <template x-if="s.code">
-                                        <span class="rounded-full bg-white px-3 py-1 text-gray-700 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-200 dark:ring-gray-800" x-text="s.code"></span>
-                                    </template>
-                                    <template x-if="s.credits !== null && s.credits !== undefined">
-                                        <span class="rounded-full bg-gray-100 px-3 py-1 text-gray-700 dark:bg-gray-900 dark:text-gray-200" x-text="creditText(s.credits)"></span>
-                                    </template>
-                                    <template x-if="s.category">
-                                        <span class="rounded-full bg-red-50 px-3 py-1 text-red-700 dark:bg-red-950/40 dark:text-red-300" x-text="s.category"></span>
+                                <div x-show="openId === s.id" x-cloak class="mt-4 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-50/50 p-4 text-sm text-gray-700 dark:border-gray-800 dark:from-gray-900/40 dark:to-gray-900/20 dark:text-gray-200">
+                                    <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                                        <template x-if="s.code">
+                                            <span class="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300" x-text="s.code"></span>
+                                        </template>
+                                        <template x-if="s.credits !== null && s.credits !== undefined">
+                                            <span class="rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-purple-700 dark:border-purple-900 dark:bg-purple-950/40 dark:text-purple-300" x-text="creditText(s.credits)"></span>
+                                        </template>
+                                        <template x-if="s.category">
+                                            <span class="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300" x-text="s.category"></span>
+                                        </template>
+                                    </div>
+                                    <template x-if="s.prerequisite">
+                                        <div class="mt-3 text-sm">
+                                            <span class="font-semibold">{{ $locale === 'ne' ? 'पूर्व-आवश्यकता' : 'Prerequisite' }}:</span>
+                                            <span x-text="s.prerequisite"></span>
+                                        </div>
                                     </template>
                                 </div>
-                                <template x-if="s.prerequisite">
-                                    <div class="mt-3 text-sm">
-                                        <span class="font-semibold">{{ $locale === 'ne' ? 'पूर्व-आवश्यकता' : 'Prerequisite' }}:</span>
-                                        <span x-text="s.prerequisite"></span>
-                                    </div>
-                                </template>
-                            </div>
 
-                            <div class="mt-5 flex items-center justify-center">
-                                <button type="button"
-                                    class="inline-flex w-28 items-center justify-center rounded-lg bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
-                                    @click="toggle(s.id)">
-                                    {{ $locale === 'ne' ? 'जानकारी' : 'Info' }}
-                                </button>
+                                <div class="mt-5 flex items-center justify-center">
+                                    <button type="button"
+                                        class="inline-flex w-28 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition duration-200"
+                                        :class="openId === s.id 
+                                            ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800'"
+                                        focus:outline-none focus:ring-2 focus:ring-red-500
+                                        @click="toggle(s.id)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                            <path fill-rule="evenodd" d="M2.25 12c0-6.215 5.785-11.25 12-11.25s12 5.035 12 11.25S19.215 23.25 12 23.25 2.25 18.215 2.25 12zm8.695-1.275a.75.75 0 00-1.19.53v.003c0 .141.048.274.135.38l4.147 5.411a.75.75 0 001.219-.06l6.144-7.7a.75.75 0 10-1.176-.936L12.75 16.8 10.945 10.755z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span x-text="openId === s.id ? (locale === 'ne' ? 'बन्द' : 'Close') : (locale === 'ne' ? 'जानकारी' : 'Info')"></span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </template>
 
-                    <div x-show="visibleSubjects.length === 0" class="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300 md:col-span-3">
+                    <div x-show="visibleSubjects.length === 0" class="rounded-2xl border-l-4 border-l-gray-300 border-r border-t border-b border-gray-200 bg-gradient-to-br from-gray-50 to-white p-10 text-center text-sm text-gray-600 dark:border-gray-800 dark:from-gray-950 dark:to-gray-900/50 dark:text-gray-300 md:col-span-3">
                         {{ $locale === 'ne' ? 'हाल कुनै विषय उपलब्ध छैन।' : 'No courses available yet.' }}
                     </div>
                 </div>
@@ -695,8 +716,8 @@
                 --}}
             </section>
 
-            <section id="faculty" class="py-14">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <section id="faculty" class="w-full px-4 py-14 sm:px-6 lg:px-8">
+                <div class="mx-auto w-full max-w-none">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                             <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
@@ -797,7 +818,8 @@
                 </div>
             </section>
 
-            <section id="notices" class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8" x-data="{ open: false, notice: null }">
+            <section id="notices" class="w-full px-4 py-14 sm:px-6 lg:px-8" x-data="{ open: false, notice: null }">
+                <div class="mx-auto w-full max-w-none">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
@@ -875,8 +897,8 @@
                 </div>
             </section>
 
-            <section id="resources" class="py-14" x-data="documentRepo({ documents: @js($documentPayload), locale: @js($locale) })">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <section id="resources" class="w-full px-4 py-14 sm:px-6 lg:px-8" x-data="documentRepo({ documents: @js($documentPayload), locale: @js($locale) })">
+                <div class="mx-auto w-full max-w-none">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                             <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
@@ -904,19 +926,45 @@
 
                     <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         <template x-for="d in filtered" :key="d.id">
-                            <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-950">
-                                <div class="flex h-48 items-center justify-center bg-gray-100 dark:bg-gray-900">
-                                    <div class="flex items-center justify-center text-gray-400 dark:text-gray-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-16 w-16">
+                            <div class="overflow-hidden rounded-2xl border-l-4 border-r border-t border-b border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-gray-950"
+                                 :class="[
+                                     d.type === 'syllabus' ? 'border-l-red-500 dark:border-l-red-400' : 
+                                     d.type === 'notes' ? 'border-l-blue-500 dark:border-l-blue-400' : 
+                                     d.type === 'guide' ? 'border-l-green-500 dark:border-l-green-400' : 
+                                     'border-l-purple-500 dark:border-l-purple-400'
+                                 ]">
+                                <div class="flex h-48 items-center justify-center transition duration-300" 
+                                     :class="[
+                                         d.type === 'syllabus' ? 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20' : 
+                                         d.type === 'notes' ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20' : 
+                                         d.type === 'guide' ? 'bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20' : 
+                                         'bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20'
+                                     ]">
+                                    <div class="flex flex-col items-center justify-center gap-3"
+                                         :class="[
+                                             d.type === 'syllabus' ? 'text-red-400 dark:text-red-500' : 
+                                             d.type === 'notes' ? 'text-blue-400 dark:text-blue-500' : 
+                                             d.type === 'guide' ? 'text-green-400 dark:text-green-500' : 
+                                             'text-purple-400 dark:text-purple-500'
+                                         ]">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-20 w-20">
                                             <path d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 .621-.504 1.125-1.125 1.125H1.5V5.25a3.75 3.75 0 0 1 4.125-3.75Z" />
                                             <path fill-rule="evenodd" d="M23.25 7.5a.75.75 0 0 1-.75.75H.75a.75.75 0 0 1-.75-.75v-8a.75.75 0 0 1 .75-.75h22.5a.75.75 0 0 1 .75.75v8Zm-3-5.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" clip-rule="evenodd" />
                                             <path fill-rule="evenodd" d="M.75 14.25a.75.75 0 0 0 .75.75h22.5a.75.75 0 0 0 .75-.75v-6a.75.75 0 0 0-.75-.75H1.5a.75.75 0 0 0-.75.75v6Zm22.5 6a.75.75 0 0 0 .75-.75v-2a.75.75 0 0 0-.75-.75H1.5a.75.75 0 0 0-.75.75v2a.75.75 0 0 0 .75.75h22.5Z" clip-rule="evenodd" />
                                         </svg>
+                                        <span class="text-xs font-semibold uppercase tracking-wide" x-text="d.type_label"></span>
                                     </div>
                                 </div>
                                 <div class="p-5">
                                     <div class="flex flex-wrap items-center gap-2">
-                                        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-900 dark:text-gray-200" x-text="d.type_label"></span>
+                                        <span class="rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide transition duration-200"
+                                              :class="[
+                                                  d.type === 'syllabus' ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300' : 
+                                                  d.type === 'notes' ? 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300' : 
+                                                  d.type === 'guide' ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950/40 dark:text-green-300' : 
+                                                  'border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-900 dark:bg-purple-950/40 dark:text-purple-300'
+                                              ]"
+                                              x-text="d.type_label"></span>
                                         <template x-if="d.size">
                                             <span class="text-xs font-medium text-gray-500 dark:text-gray-400" x-text="d.size"></span>
                                         </template>
@@ -930,23 +978,29 @@
                                     <div class="mt-2 text-xs text-gray-500 dark:text-gray-400" x-text="uploadedText(d.uploaded_at)"></div>
                                     <div class="mt-4 flex items-center gap-2">
                                         <template x-if="d.url">
-                                            <a :href="d.url" target="_blank" rel="noopener" class="flex-1 inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                            <a :href="d.url" target="_blank" rel="noopener" class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition duration-200 hover:bg-red-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5">
+                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+                                                </svg>
                                                 {{ $locale === 'ne' ? 'हेर्नुहोस्' : 'View' }}
                                             </a>
                                         </template>
                                         <template x-if="!d.url">
-                                            <span class="flex-1 inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-400 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-500">
+                                            <span class="flex-1 inline-flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-500">
                                                 {{ $locale === 'ne' ? 'उपलब्ध छैन' : 'N/A' }}
                                             </span>
                                         </template>
 
                                         <template x-if="d.download_url">
-                                            <a :href="d.download_url" class="flex-1 inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900">
+                                            <a :href="d.download_url" class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm transition duration-200 hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5">
+                                                    <path fill-rule="evenodd" d="M12 2a.75.75 0 0 1 .75.75v6.69l1.97-1.97a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L7.97 8.53a.75.75 0 0 1 1.06-1.06l1.97 1.97V2.75A.75.75 0 0 1 12 2zM3 14.25a2.25 2.25 0 0 0 2.25 2.25h13.5A2.25 2.25 0 0 0 21 14.25v-3.5a.75.75 0 0 0-1.5 0v3.5a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75v-3.5a.75.75 0 0 0-1.5 0v3.5z" clip-rule="evenodd" />
+                                                </svg>
                                                 {{ $locale === 'ne' ? 'डाउनलोड' : 'Download' }}
                                             </a>
                                         </template>
                                         <template x-if="!d.download_url">
-                                            <span class="flex-1 inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-400 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-500">
+                                            <span class="flex-1 inline-flex items-center justify-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-500">
                                                 {{ $locale === 'ne' ? 'डाउनलोड छैन' : 'No download' }}
                                             </span>
                                         </template>
@@ -955,7 +1009,7 @@
                             </div>
                         </template>
                         <template x-if="filtered.length === 0">
-                            <div class="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300 sm:col-span-2 lg:col-span-3">
+                            <div class="rounded-2xl border-l-4 border-l-gray-300 border-r border-t border-b border-gray-200 bg-gradient-to-br from-gray-50 to-white p-10 text-center text-sm text-gray-600 dark:border-gray-800 dark:from-gray-950 dark:to-gray-900/50 dark:text-gray-300 sm:col-span-2 lg:col-span-3">
                                 {{ $locale === 'ne' ? 'कुनै सामग्री भेटिएन।' : 'No materials found.' }}
                             </div>
                         </template>
@@ -963,12 +1017,13 @@
                 </div>
             </section>
 
-            <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                        <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
-                            {{ $locale === 'ne' ? 'ग्यालरी' : 'Gallery' }}
-                        </h2>
+            <section class="w-full px-4 py-14 sm:px-6 lg:px-8">
+                <div class="mx-auto w-full max-w-none">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
+                                {{ $locale === 'ne' ? 'ग्यालरी' : 'Gallery' }}
+                            </h2>
                         <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
                             {{ $locale === 'ne' ? 'विभागका गतिविधि र सुविधाका झलकहरू।' : 'Highlights from department events and facilities.' }}
                         </p>
@@ -1018,8 +1073,8 @@
                 </div>
             </section>
 
-            <section id="contact" class="py-14">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <section id="contact" class="w-full px-4 py-14 sm:px-6 lg:px-8">
+                <div class="mx-auto w-full max-w-none">
                     <div>
                         <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
                             {{ $locale === 'ne' ? 'सम्पर्क तथा सहयोग' : 'Contact & Support' }}
@@ -1040,9 +1095,9 @@
                                         data-name="{{ e($departmentName) }}"
                                         data-label="{{ e($mapLabel) }}"></div>
 
-                                    <div class="absolute left-3 top-3 z-[500] flex flex-wrap gap-2">
+                                    <div class="absolute left-3 bottom-3 z-[500] flex flex-wrap gap-2 bg-white/80 p-2 rounded-xl shadow-sm dark:bg-gray-950/80">
                                         <button type="button" data-map-action="locate"
-                                            class="inline-flex items-center justify-center rounded-lg bg-white/95 px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-950/95 dark:text-gray-100 dark:ring-gray-800">
+                                            class="inline-flex items-center justify-center rounded-lg bg-white px-3 py-2 text-xs font-semibold text-gray-900 ring-1 ring-gray-200 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-800">
                                             {{ $locale === 'ne' ? 'मेरो स्थान' : 'My Location' }}
                                         </button>
                                         <button type="button" data-map-action="layers"
@@ -1106,7 +1161,7 @@
             </section>
 
             <footer class="border-t border-white/10 bg-gradient-to-b from-gray-950 via-slate-950 to-black py-12 text-white">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto w-full max-w-none px-4 sm:px-6 lg:px-8">
                     <div class="grid gap-8 md:grid-cols-12">
                         <div class="md:col-span-5">
                             <div class="flex items-center gap-3">
@@ -1435,7 +1490,11 @@
                     }
 
                     if (action === 'locate') {
-                        if (!navigator.geolocation) return;
+                        if (!navigator.geolocation) {
+                            alert('{{ $locale === 'ne' ? 'जियोलोकेसन समर्थित छैन' : 'Geolocation not supported' }}');
+                            return;
+                        }
+
                         navigator.geolocation.getCurrentPosition(
                             (pos) => {
                                 const userLat = pos.coords.latitude;
@@ -1457,9 +1516,12 @@
                                     [userLat, userLng],
                                 ]), { padding: [24, 24] });
                             },
-                            () => {},
+                            (err) => {
+                                console.warn('Geolocation error:', err);
+                            },
                             { enableHighAccuracy: true, timeout: 8000 }
                         );
+
                         return;
                     }
 
@@ -1491,6 +1553,11 @@
 
             // Enable scroll zoom only when user focuses the map.
             map.on('focus', () => map.scrollWheelZoom.enable());
+
+            // Leaflet can sometimes draw blank if container is not fully painted yet; force sizing.
+            map.invalidateSize();
+            setTimeout(() => map.invalidateSize(), 300);
+            window.addEventListener('resize', () => map.invalidateSize());
             map.on('blur', () => map.scrollWheelZoom.disable());
         });
     </script>
