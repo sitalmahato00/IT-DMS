@@ -1,0 +1,453 @@
+/* Admin Components & Utilities - Standardized Styling */
+
+/* ===== BUTTONS ===== */
+
+/* Primary Red Button */
+.btn-primary {
+    @apply px-4 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all duration-150 active:scale-95 shadow-md hover:shadow-lg;
+}
+
+.btn-primary:disabled {
+    @apply bg-red-400 cursor-not-allowed opacity-60;
+}
+
+/* Secondary Button */
+.btn-secondary {
+    @apply px-4 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-150 active:scale-95;
+}
+
+.btn-secondary:disabled {
+    @apply border-gray-200 text-gray-400 cursor-not-allowed;
+}
+
+/* Danger Button */
+.btn-danger {
+    @apply px-4 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all duration-150 active:scale-95 shadow-md hover:shadow-lg;
+}
+
+/* Success Button */
+.btn-success {
+    @apply px-4 py-2.5 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all duration-150 active:scale-95 shadow-md hover:shadow-lg;
+}
+
+/* Small Button */
+.btn-sm {
+    @apply px-2 py-1 text-xs rounded font-medium;
+}
+
+/* Icon Button */
+.btn-icon {
+    @apply inline-flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 transition-colors;
+}
+
+/* Button Group - Organized toolbar */
+.btn-group {
+    @apply flex flex-wrap items-center gap-2 p-4 bg-gray-50 border-b border-gray-200;
+}
+
+.btn-group-divider {
+    @apply h-8 w-px bg-gray-300;
+}
+
+/* Button Toolbar - For larger groupings */
+.btn-toolbar {
+    @apply flex flex-wrap items-center gap-3 p-4 bg-gray-50 border-b border-gray-200;
+}
+
+/* Primary Action Group */
+.action-group-primary {
+    @apply flex items-center gap-2;
+}
+
+/* Secondary Action Group */
+.action-group-secondary {
+    @apply flex items-center gap-2;
+}
+
+/* ===== CARDS ===== */
+
+/* Standard Card */
+.card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+}
+
+.card:hover {
+    @apply shadow-md transition-shadow;
+}
+
+/* Stat Card - Enhanced with colored backgrounds */
+.stat-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md transition-all duration-200;
+}
+
+.stat-card.red {
+    @apply border-l-4 border-l-red-600 bg-gradient-to-br from-red-50 to-white;
+}
+
+.stat-card.blue {
+    @apply border-l-4 border-l-blue-600 bg-gradient-to-br from-blue-50 to-white;
+}
+
+.stat-card.green {
+    @apply border-l-4 border-l-green-600 bg-gradient-to-br from-green-50 to-white;
+}
+
+.stat-card.orange {
+    @apply border-l-4 border-l-orange-600 bg-gradient-to-br from-orange-50 to-white;
+}
+
+.stat-card.purple {
+    @apply border-l-4 border-l-purple-600 bg-gradient-to-br from-purple-50 to-white;
+}
+
+/* Stat Card - Solid background variant */
+.stat-card-solid.red {
+    @apply bg-red-500 text-white border-0;
+}
+
+.stat-card-solid.blue {
+    @apply bg-blue-500 text-white border-0;
+}
+
+.stat-card-solid.green {
+    @apply bg-green-500 text-white border-0;
+}
+
+.stat-card-solid.orange {
+    @apply bg-orange-500 text-white border-0;
+}
+
+.stat-card-solid.purple {
+    @apply bg-purple-500 text-white border-0;
+}
+
+/* Section Card with Red Header */
+.section-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+}
+
+.section-card-header {
+    @apply bg-red-600 text-white px-6 py-4 flex items-center justify-between;
+}
+
+.section-card-header i {
+    @apply text-xl;
+}
+
+.section-card-body {
+    @apply p-6;
+}
+
+/* Stat Card Content Styling */
+.stat-content {
+    @apply flex items-start justify-between;
+}
+
+.stat-info {
+    @apply flex-1;
+}
+
+.stat-label {
+    @apply text-sm text-gray-600 font-medium mb-2;
+}
+
+.stat-value {
+    @apply text-2xl font-bold text-gray-900;
+}
+
+.stat-value.light {
+    @apply text-white;
+}
+
+.stat-trend {
+    @apply inline-flex items-center gap-1 mt-2 text-xs font-semibold;
+}
+
+.stat-trend.up {
+    @apply text-green-600;
+}
+
+.stat-trend.down {
+    @apply text-red-600;
+}
+
+.stat-icon {
+    @apply flex-shrink-0;
+}
+
+/* ===== TABLES ===== */
+
+/* Table Header */
+.table-header {
+    @apply text-left text-sm font-semibold text-gray-700 bg-gray-50;
+}
+
+.table-header th {
+    @apply px-4 py-3 text-left font-semibold text-gray-900;
+}
+
+/* Table Row */
+.table-row {
+    @apply hover:bg-gray-50 transition;
+}
+
+.table-row td {
+    @apply px-4 py-4 text-sm;
+}
+
+/* ===== BADGES & LABELS ===== */
+
+/* Badge */
+.badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-success {
+    @apply bg-green-100 text-green-700;
+}
+
+.badge-danger {
+    @apply bg-red-100 text-red-700;
+}
+
+.badge-warning {
+    @apply bg-yellow-100 text-yellow-700;
+}
+
+.badge-info {
+    @apply bg-blue-100 text-blue-700;
+}
+
+.badge-primary {
+    @apply bg-red-100 text-red-700;
+}
+
+/* Icon Containers with colored backgrounds */
+.icon-container {
+    @apply inline-flex items-center justify-center rounded-lg p-3 text-white;
+}
+
+.icon-container.red {
+    @apply bg-red-600;
+}
+
+.icon-container.blue {
+    @apply bg-blue-600;
+}
+
+.icon-container.green {
+    @apply bg-green-600;
+}
+
+.icon-container.orange {
+    @apply bg-orange-600;
+}
+
+.icon-container.purple {
+    @apply bg-purple-600;
+}
+
+/* Icon Badge (smaller) */
+.icon-badge {
+    @apply inline-flex items-center justify-center rounded-full p-2 text-sm;
+}
+
+.icon-badge.red {
+    @apply bg-red-100 text-red-600;
+}
+
+.icon-badge.blue {
+    @apply bg-blue-100 text-blue-600;
+}
+
+.icon-badge.green {
+    @apply bg-green-100 text-green-600;
+}
+
+.icon-badge.orange {
+    @apply bg-orange-100 text-orange-600;
+}
+
+.icon-badge.purple {
+    @apply bg-purple-100 text-purple-600;
+}
+
+/* Input Field */
+.form-control {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white transition;
+}
+
+.form-control:disabled {
+    @apply bg-gray-50 text-gray-500 cursor-not-allowed;
+}
+
+/* Form Label */
+.form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+/* Select Dropdown */
+.form-select {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white cursor-pointer transition;
+}
+
+/* Text Area */
+.form-textarea {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white transition resize-vertical;
+}
+
+/* ===== MODALS ===== */
+
+/* Modal Header */
+.modal-header {
+    @apply px-6 py-4 border-b-2 border-red-600 flex items-center justify-between sticky top-0 bg-red-600 text-white;
+}
+
+.modal-header h3 {
+    @apply text-lg font-semibold;
+}
+
+.modal-header p {
+    @apply text-sm text-red-100;
+}
+
+/* Modal Body */
+.modal-body {
+    @apply p-6;
+}
+
+/* Modal Footer */
+.modal-footer {
+    @apply px-6 py-4 border-t flex justify-between gap-3;
+}
+
+/* ===== TEXT & TYPOGRAPHY ===== */
+
+/* Page Title */
+.page-title {
+    @apply text-3xl font-bold text-gray-900 mb-2;
+}
+
+/* Section Title */
+.section-title {
+    @apply text-lg font-bold text-gray-900 mb-4;
+}
+
+/* Subtitle */
+.subtitle {
+    @apply text-sm text-gray-600;
+}
+
+/* ===== ALERTS ===== */
+
+.alert {
+    @apply px-4 py-3 rounded-lg text-sm font-medium border;
+}
+
+.alert-success {
+    @apply bg-green-50 border-green-200 text-green-700;
+}
+
+.alert-danger {
+    @apply bg-red-50 border-red-200 text-red-700;
+}
+
+.alert-warning {
+    @apply bg-yellow-50 border-yellow-200 text-yellow-700;
+}
+
+.alert-info {
+    @apply bg-blue-50 border-blue-200 text-blue-700;
+}
+
+/* ===== UTILITIES ===== */
+
+/* Divider */
+.divider {
+    @apply border-t border-gray-200 my-4;
+}
+
+/* Grid */
+.grid-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+}
+
+.grid-3 {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+.grid-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4;
+}
+
+/* Professional Grid Layouts */
+.grid-stat-cards {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5;
+}
+
+.grid-compact {
+    @apply grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3;
+}
+
+/* Section Layout */
+.section-layout {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-6;
+}
+
+.section-layout-header {
+    @apply bg-red-600 text-white px-6 py-4 flex items-center justify-between sticky top-0 z-10;
+}
+
+.section-layout-body {
+    @apply p-6;
+}
+
+.section-layout-footer {
+    @apply px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between;
+}
+
+/* Spacing */
+.space-between {
+    @apply flex items-center justify-between;
+}
+
+.flex-center {
+    @apply flex items-center justify-center;
+}
+
+/* Shadows */
+.elevated {
+    @apply shadow-lg;
+}
+
+.card-shadow {
+    @apply shadow-sm;
+}
+
+/* Focus States */
+.focus-ring {
+    @apply ring-2 ring-red-500 ring-offset-2;
+}
+
+/* Loading Animation */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading {
+    animation: spin 1s linear infinite;
+}
+
+/* ===== RESPONSIVE UTILITIES ===== */
+
+@media (max-width: 768px) {
+    .mobile-hidden {
+        @apply hidden;
+    }
+}
+
+@media (min-width: 769px) {
+    .desktop-only {
+        @apply block;
+    }
+}
