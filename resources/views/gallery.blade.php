@@ -79,6 +79,21 @@
                                 {{ $locale === 'ne' ? 'तस्विर छैन' : 'No image' }}
                             </div>
                         @endif
+                        @if ($g->image_url)
+                            <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100">
+                                <div class="absolute inset-0 bg-gradient-to-t from-gray-950/65 via-gray-950/10 to-transparent"></div>
+                                <div class="pointer-events-auto absolute right-3 top-3 flex gap-2">
+                                    <a href="{{ $g->image_url }}" target="_blank" rel="noopener"
+                                       class="inline-flex items-center justify-center rounded-lg bg-white/90 px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-white/20 hover:bg-white">
+                                        {{ $locale === 'ne' ? 'हेर्नुहोस्' : 'View' }}
+                                    </a>
+                                    <a href="{{ route('gallery.download', ['id' => $g->id]) }}"
+                                       class="inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                        {{ $locale === 'ne' ? 'डाउनलोड' : 'Download' }}
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
                         <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-gray-950/70 via-gray-950/35 to-transparent p-4">
                             <div class="truncate text-sm font-semibold text-white">{{ $g->title }}</div>
                             <div class="mt-1 text-xs font-medium text-white/80">{{ $g->category_text }}</div>
@@ -93,4 +108,3 @@
         </main>
     </div>
 @endsection
-

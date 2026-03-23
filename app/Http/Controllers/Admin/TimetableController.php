@@ -382,7 +382,7 @@ class TimetableController extends Controller
         $days = TimetableSlot::getDaysOfWeek();
 
         // Get college info
-        $college = \App\Models\College::first();
+        $college = \App\Models\Department::first();
 
         return view('admin.print.timetable', compact('slots', 'slotsByDay', 'days', 'semester', 'section', 'college'));
     }

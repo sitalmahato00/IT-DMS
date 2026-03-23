@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('colleges', function (Blueprint $table) {
+        Schema::create('departments', function (Blueprint $table) {
             $table->id();
             
             // Basic Info
@@ -21,6 +21,9 @@ return new class extends Migration
             
             // Logo
             $table->string('logo_path')->nullable();
+
+            // Landing page media
+            $table->json('hero_images')->nullable();
             
             // Contact Info
             $table->string('phone')->nullable();
@@ -33,6 +36,12 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->string('district')->nullable();
             $table->string('province')->nullable();
+
+            // Location / map
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+            $table->text('map_embed_url')->nullable();
+            $table->string('map_label')->nullable();
             
             // Principal Info
             $table->string('principal_name')->nullable();
@@ -44,6 +53,13 @@ return new class extends Migration
             $table->string('registration_number')->nullable();
             $table->text('description')->nullable();
             $table->text('description_nepali')->nullable();
+
+            // Landing: programs section content
+            $table->string('programs_title')->nullable();
+            $table->string('programs_title_nepali')->nullable();
+            $table->text('programs_content')->nullable();
+            $table->text('programs_content_nepali')->nullable();
+            $table->string('programs_image_path')->nullable();
             
             $table->timestamps();
         });
@@ -54,6 +70,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('colleges');
+        Schema::dropIfExists('departments');
     }
 };

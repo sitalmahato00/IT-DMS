@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Student;
-use App\Models\College;
+use App\Models\Department;
 use App\Models\AuditLog;
 use App\Notifications\StudentAccountNotification;
 use Illuminate\Support\Facades\Hash;
@@ -644,7 +644,7 @@ class StudentController extends Controller
             ->orderBy('name');
 
         $students = $studentsQuery->get();
-        $college = \App\Models\College::first();
+        $college = \App\Models\Department::first();
 
         return view('admin.print.students-list', compact('students', 'college', 'semester', 'status', 'academicYear'));
     }
@@ -655,7 +655,7 @@ class StudentController extends Controller
             ->whereHas('student', function($q) { $q->where('is_alumni', 1); })
             ->with('student')
             ->get();
-        $college = College::first();
+        $college = Department::first();
         $academicYear = $request->academic_year ?? date('Y');
         return view('admin.print.alumni-list', compact('students', 'college', 'academicYear'));
     }
@@ -675,7 +675,7 @@ class StudentController extends Controller
         $student = User::where('role','student')->with('student')->findOrFail($id);
         // Convert image to base64 for PDF
         $student->photo_base64 = $this->getImageBase64($student);
-        $college = College::first();
+        $college = Department::first();
         return view('admin.print.student-detail', compact('student', 'college'));
     }
     
@@ -1042,7 +1042,7 @@ class StudentController extends Controller
                     'address' => $student->address,
                 ],
                 'college' => [
-                    'name' => $college->name ?? 'College',
+                    'name' => $college->name ?? 'Department',
                     'address' => $college->address ?? '',
                     'phone' => $college->phone ?? '',
                     'email' => $college->email ?? '',

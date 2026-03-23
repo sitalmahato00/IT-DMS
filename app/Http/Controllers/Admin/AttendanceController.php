@@ -13,7 +13,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
-use App\Models\College;
+use App\Models\Department;
 use App\Traits\LogsActivity;
 
 class AttendanceController extends Controller
@@ -1142,13 +1142,13 @@ class AttendanceController extends Controller
         $subjectCode = $subject->subject_code ?? '';
         $subjectSemester = $subject->semester ?? '';
 
-        // College details for print header with safe fallbacks
-        $collegeName = 'College';
+        // Department details for print header with safe fallbacks
+        $collegeName = 'Department';
         $collegeAddress = '';
         $collegeLogo = asset('images/default-logo.png');
         try {
-            if (Schema::hasTable('colleges')) {
-                $college = College::orderBy('id', 'desc')->first();
+            if (Schema::hasTable('departments')) {
+                $college = Department::orderBy('id', 'desc')->first();
                 if ($college) {
                     $collegeName = $college->name ?? $collegeName;
                     $collegeAddress = $college->address ?? $collegeAddress;
@@ -1208,8 +1208,8 @@ class AttendanceController extends Controller
         $semester = $request->get('semester', '');
         $course = $request->get('course', '');
 
-        // Get college info
-        $college = DB::table('colleges')->first();
+        // Get department info
+        $college = DB::table('departments')->first();
 
         // Build grouped query - Attendance by Subject
         $attendanceQuery = DB::table('attendance')

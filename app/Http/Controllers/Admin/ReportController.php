@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\College;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -1227,7 +1227,7 @@ class ReportController extends Controller
             $marksPerSubject = $this->getMarksPerSubject($semester);
 
             // Get college info for header
-            $college = College::first();
+            $college = Department::first();
 
             // Get top performing students
             $topStudents = $this->getTopStudents($semester, 10);
@@ -1376,4 +1376,3 @@ class ReportController extends Controller
         }
     }
 }
-

@@ -23,14 +23,16 @@ return new class extends Migration
             // Category flag for component-based marking
             $table->enum('exam_category', ['assessment', 'ctevt', 'general'])->default('general');
             $table->unsignedInteger('assessment_number')->nullable()->comment('Sequential number for assessments: 1,2,3... per subject/semester/year');
-            $table->unsignedInteger('theory_internal_max_marks')->default(0)->after('passing_marks');
-            $table->unsignedInteger('theory_external_max_marks')->default(0)->after('theory_internal_max_marks');
-            $table->unsignedInteger('practical_internal_max_marks')->default(0)->after('theory_external_max_marks');
-            $table->unsignedInteger('practical_external_max_marks')->default(0)->after('practical_internal_max_marks');
-            $table->unsignedInteger('theory_internal_pass_marks')->default(0)->after('practical_external_max_marks');
-            $table->unsignedInteger('theory_external_pass_marks')->default(0)->after('theory_internal_pass_marks');
-            $table->unsignedInteger('practical_internal_pass_marks')->default(0)->after('theory_external_pass_marks');
-            $table->unsignedInteger('practical_external_pass_marks')->default(0)->after('practical_internal_pass_marks');
+            $table->decimal('full_marks', 5, 2)->default(100);
+            $table->decimal('passing_marks', 5, 2)->default(40);
+            $table->unsignedInteger('theory_internal_max_marks')->default(0);
+            $table->unsignedInteger('theory_external_max_marks')->default(0);
+            $table->unsignedInteger('practical_internal_max_marks')->default(0);
+            $table->unsignedInteger('practical_external_max_marks')->default(0);
+            $table->unsignedInteger('theory_internal_pass_marks')->default(0);
+            $table->unsignedInteger('theory_external_pass_marks')->default(0);
+            $table->unsignedInteger('practical_internal_pass_marks')->default(0);
+            $table->unsignedInteger('practical_external_pass_marks')->default(0);
 
             $table->date('exam_date')->nullable();
             $table->string('exam_date_bs', 20)->nullable();
@@ -58,4 +60,3 @@ return new class extends Migration
         Schema::dropIfExists('exams');
     }
 };
-

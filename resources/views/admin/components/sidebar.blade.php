@@ -15,7 +15,7 @@
             'academic-activities': ['admin.attendance', 'admin.exam', 'admin.marks', 'admin.marksheet'],
             'scheduling': ['admin.timetable'],
             'resources': ['admin.study-material', 'admin.notice-board', 'admin.notifications', 'admin.gallery'],
-            'system': ['admin.reports', 'admin.audit-logs', 'admin.settings'],
+            'system': ['admin.reports', 'admin.audit-logs', 'admin.department', 'admin.settings'],
         };
 
         for (const [group, patterns] of Object.entries(groups)) {
@@ -33,14 +33,14 @@
 }" class="hidden lg:flex lg:w-60 bg-white text-slate-900 flex-col fixed lg:static w-64 left-0 z-30 overflow-y-auto transition-all duration-300 shadow-xl border-r border-[#D90033]/40">
     <!-- Brand Header -->
     <div class="hidden lg:flex flex-col items-center justify-center px-4 py-2 min-h-[88px] bg-[#FF0037] text-white border-b border-[#D90033]">
-        @if($college && $college->logo_path)
-            <img src="{{ $collegeLogoUrl }}" alt="{{ $college->name ?? 'College Logo' }}" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg bg-white p-1">
+        @if($department && $department->logo_path)
+            <img src="{{ $departmentLogoUrl }}" alt="{{ $department->name ?? 'Department Logo' }}" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg bg-white p-1">
         @else
             <img src="{{ asset('images/default-logo.svg') }}" alt="Default Logo" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg bg-white p-1">
         @endif
         <div class="mt-3 text-center">
             <h1 class="font-semibold text-xl sm:text-2xl leading-7 text-white block tracking-tight">
-                {{ $college?->short_name ?? ($college?->name ?? __('IT-DMS')) }}
+                {{ $department?->short_name ?? ($department?->name ?? __('IT-DMS')) }}
             </h1>
             <p class="text-sm sm:text-[13px] leading-5 text-white/80">IT Admin Portal</p>
         </div>
@@ -198,6 +198,10 @@
                         <i class="bi bi-journal-text text-base flex-shrink-0"></i>
                         <span class="sidebar-label">Audit Logs</span>
                     </a>
+                    <a href="{{ Route::has('admin.department.edit') ? route('admin.department.edit') : '#' }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ request()->routeIs('admin.department*') ? 'bg-red-600 text-white' : 'text-slate-600 hover:text-[#FF0037] hover:bg-[#FF0037]/10' }}">
+                        <i class="bi bi-building text-base flex-shrink-0"></i>
+                        <span class="sidebar-label">Department</span>
+                    </a>
                     <a href="{{ Route::has('admin.settings') ? route('admin.settings') : '#' }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ request()->routeIs('admin.settings*') ? 'bg-red-600 text-white' : 'text-slate-600 hover:text-[#FF0037] hover:bg-[#FF0037]/10' }}">
                         <i class="bi bi-sliders text-base flex-shrink-0"></i>
                         <span class="sidebar-label">Settings</span>
@@ -220,5 +224,4 @@
         </form>
     </div>
 </aside>
-
 

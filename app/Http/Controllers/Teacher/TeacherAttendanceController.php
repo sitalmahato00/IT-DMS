@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Schema;
-use App\Models\College;
+use App\Models\Department;
 use App\Traits\LogsActivity;
 
 class TeacherAttendanceController extends Controller
@@ -652,13 +652,13 @@ class TeacherAttendanceController extends Controller
         $subjectName = $subject->subject_name ?? 'Subject';
         $subjectCode = $subject->subject_code ?? '';
 
-        // College details for print header with safe fallbacks
-        $collegeName = 'College';
+        // Department details for print header with safe fallbacks
+        $collegeName = 'Department';
         $collegeAddress = '';
         $collegeLogo = asset('images/default-logo.png');
         try {
-            if (\Illuminate\Support\Facades\Schema::hasTable('colleges')) {
-                $college = College::orderBy('id', 'desc')->first();
+            if (\Illuminate\Support\Facades\Schema::hasTable('departments')) {
+                $college = Department::orderBy('id', 'desc')->first();
                 if ($college) {
                     $collegeName = $college->name ?? $collegeName;
                     $collegeAddress = $college->address ?? $collegeAddress;

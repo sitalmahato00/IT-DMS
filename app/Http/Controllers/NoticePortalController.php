@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Notice;
 use App\Models\Gallery;
 use App\Models\Subject;
-use App\Models\College;
+use App\Models\Department;
 use Illuminate\Http\Request;
 
 class NoticePortalController extends Controller
@@ -89,7 +89,7 @@ class NoticePortalController extends Controller
             ->get();
             
         // Fetch departments for the highlights section
-        $departments = College::all();
+        $departments = Department::all();
         
         return view('welcome', compact(
             'notices', 'audience', 'noticeCounts',
@@ -147,4 +147,3 @@ class NoticePortalController extends Controller
         ]);
     }
 }
-

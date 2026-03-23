@@ -4,6 +4,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\FacultyController;
+use App\Http\Controllers\PublicStudyMaterialController;
+use App\Http\Controllers\PublicGalleryController;
 use App\Http\Controllers\NoticePortalController;
 use App\Http\Controllers\GalleryPortalController;
 use Illuminate\Support\Facades\Route;
@@ -11,11 +15,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 Route::get('/', [\App\Http\Controllers\LandingController::class, 'index'])->name('home');
+Route::get('/department/about/{id?}', [\App\Http\Controllers\LandingController::class, 'about'])->name('department.about');
+Route::get('/subjects', [\App\Http\Controllers\SubjectsController::class, 'index'])->name('subjects.index');
+Route::get('/faculty', [FacultyController::class, 'index'])->name('faculty.index');
+Route::get('/resources/download/{id}', [PublicStudyMaterialController::class, 'download'])->name('materials.download');
 Route::get('/notices/fetch', [NoticePortalController::class, 'fetch'])->name('notices.fetch');
 Route::get('/notices/{id}', [NoticePortalController::class, 'show'])->name('notices.show');
 Route::get('/gallery/fetch', [GalleryPortalController::class, 'fetch'])->name('gallery.fetch');
 
 Route::get('/gallery', [GalleryPortalController::class, 'index'])->name('gallery.index');
+Route::get('/gallery/download/{id}', [PublicGalleryController::class, 'download'])->name('gallery.download');
 
 // Language switcher: sets the locale in the session and redirects back
 Route::post('locale', function (Illuminate\Http\Request $request) {
@@ -405,8 +414,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Settings management
     Route::get('/settings', [SettingController::class, 'index'])->name('settings');
-    Route::post('/settings/college', [SettingController::class, 'updateCollege'])->name('settings.college.update');
-    Route::delete('/settings/college/logo', [SettingController::class, 'deleteLogo'])->name('settings.college.logo.delete');
+
+    // Department details (renamed from "college" settings)
+    Route::get('/department', [DepartmentController::class, 'edit'])->name('department.edit');
+    Route::post('/department', [DepartmentController::class, 'update'])->name('department.update');
+    Route::delete('/department/logo', [DepartmentController::class, 'deleteLogo'])->name('department.logo.delete');
 });
 
 require __DIR__ . '/auth.php';

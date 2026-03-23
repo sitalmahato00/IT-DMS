@@ -2,8 +2,8 @@
 <aside id="sidebar" class="hidden lg:flex lg:w-56 bg-white dark:bg-gray-800 shadow-lg flex-col fixed lg:static w-64 lg:w-56 left-0 z-30 overflow-y-auto">
     <div class="hidden lg:flex px-4 py-2 min-h-[76px] border-b border-amber-600 bg-amber-600 dark:bg-amber-800 text-white items-center">
         <div class="flex items-center gap-3 w-full min-w-0">
-            @if($college && $college->logo_path)
-                <img src="{{ $collegeLogoUrl }}" alt="{{ $college->name ?? 'College Logo' }}" class="h-12 w-12 object-contain bg-white rounded p-1 flex-shrink-0">
+            @if($department && $department->logo_path)
+                <img src="{{ $departmentLogoUrl }}" alt="{{ $department->name ?? 'Department Logo' }}" class="h-12 w-12 object-contain bg-white rounded p-1 flex-shrink-0">
             @else
                 <div class="h-12 w-12 bg-white text-amber-600 p-1.5 rounded shadow-sm flex items-center justify-center flex-shrink-0">
                     <i class="bi bi-people text-sm"></i>
@@ -11,7 +11,7 @@
             @endif
             <div class="min-w-0">
                 <h1 class="font-semibold text-xs leading-4 text-white line-clamp-2 break-words">
-                    {{ $college?->short_name ?? ($college?->name ?? __('IT-DMS')) }}
+                    {{ $department?->short_name ?? ($department?->name ?? __('IT-DMS')) }}
                 </h1>
                 <p class="text-[11px] leading-4 text-amber-100">{{ __("Parent Portal") }}</p>
             </div>
@@ -103,4 +103,3 @@
         }
     });
 </script>
-

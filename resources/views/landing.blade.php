@@ -11,6 +11,24 @@
     $departmentShort = $department?->short_name ?: ($locale === 'ne' ? 'आईटी' : 'IT');
     $departmentLogoUrl = $department?->getLogoUrl() ?? asset('images/default-logo.svg');
 
+    $heroSlides = collect($department?->hero_images ?? [])
+        ->filter()
+        ->map(function ($path) {
+            try {
+                if (Storage::disk('public')->exists($path)) {
+                    return Storage::url($path);
+                }
+            } catch (\Throwable $e) {
+            }
+
+            return asset('storage/' . ltrim((string) $path, '/'));
+        })
+        ->values();
+
+    if ($heroSlides->isEmpty()) {
+        $heroSlides = collect([asset('images/hero-image.jpg')]);
+    }
+
     $tagline = $locale === 'ne'
         ? 'सीप, नवप्रवर्तन र उत्कृष्टताका लागि एकीकृत शैक्षिक प्लेटफर्म'
         : 'A unified academic platform for skills, innovation, and excellence.';
@@ -23,6 +41,32 @@
         ? (($locale === 'ne' && !empty($department->address_nepali)) ? $department->address_nepali : $department->address)
         : null;
 
+    $mapLabel = $department?->map_label ?: ($locale === 'ne' ? 'स्थान' : 'Location');
+    $mapEmbedUrl = null;
+    $mapOpenUrl = null;
+
+    $lat = $department?->latitude;
+    $lng = $department?->longitude;
+
+    if (!empty($department?->map_embed_url)) {
+        $mapEmbedUrl = $department->map_embed_url;
+    } elseif (!empty($lat) && !empty($lng)) {
+        $latF = (float) $lat;
+        $lngF = (float) $lng;
+        $d = 0.01;
+        $bbox = implode(',', [
+            $lngF - $d,
+            $latF - $d,
+            $lngF + $d,
+            $latF + $d,
+        ]);
+        $mapEmbedUrl = 'https://www.openstreetmap.org/export/embed.html?bbox=' . rawurlencode($bbox) . '&layer=mapnik&marker=' . rawurlencode($latF . ',' . $lngF);
+    }
+
+    if (!empty($lat) && !empty($lng)) {
+        $mapOpenUrl = 'https://www.google.com/maps?q=' . rawurlencode((float) $lat . ',' . (float) $lng);
+    }
+
     $semesterSummary = ($subjects ?? collect())
         ->groupBy(fn ($s) => (string) ($s->semester ?? ''))
         ->map(function ($group) {
@@ -32,6 +76,27 @@
             ];
         })
         ->sortKeys();
+
+    $defaultSemester = $selectedSemester ?: ($semesterSummary->keys()->filter()->first() ?: 'all');
+
+    $subjectPreviewMax = 3;
+
+    $programsTitle = $department
+        ? (($locale === 'ne' && !empty($department->programs_title_nepali)) ? $department->programs_title_nepali : $department->programs_title)
+        : null;
+
+    $programsContent = $department
+        ? (($locale === 'ne' && !empty($department->programs_content_nepali)) ? $department->programs_content_nepali : $department->programs_content)
+        : null;
+
+    $programsImageUrl = null;
+    if (!empty($department?->programs_image_path)) {
+        try {
+            $programsImageUrl = Storage::disk('public')->url($department->programs_image_path);
+        } catch (\Throwable $e) {
+            $programsImageUrl = asset('storage/' . ltrim($department->programs_image_path, '/'));
+        }
+    }
 
     $subjectPayload = ($subjects ?? collect())->map(function ($s) {
         $teachers = collect($s->teachers ?? [])
@@ -58,12 +123,15 @@
 
     $documentPayload = ($documents ?? collect())->map(function ($d) {
         $url = null;
+        $downloadUrl = null;
         if (!empty($d->file_path)) {
             try {
                 $url = Storage::disk('public')->url($d->file_path);
             } catch (\Throwable $e) {
                 $url = asset('storage/' . ltrim($d->file_path, '/'));
             }
+
+            $downloadUrl = route('materials.download', ['id' => $d->id]);
         }
 
         return [
@@ -76,69 +144,65 @@
             'semester' => (string) ($d->semester ?? ''),
             'size' => $d->formatted_size,
             'url' => $url,
+            'download_url' => $downloadUrl,
             'uploaded_at' => optional($d->uploaded_at ?? $d->created_at)?->format('Y-m-d'),
         ];
     })->values();
 
-    $programs = collect([
-        [
-            'level' => 'ug',
-            'title' => $locale === 'ne' ? 'स्नातक कार्यक्रम' : 'Undergraduate Programs',
-            'subtitle' => $locale === 'ne' ? 'आईटी/कम्प्युटर सम्बन्धित स्नातक' : 'IT / Computer related bachelor degrees',
-        ],
-        [
-            'level' => 'pg',
-            'title' => $locale === 'ne' ? 'स्नातकोत्तर कार्यक्रम' : 'Postgraduate Programs',
-            'subtitle' => $locale === 'ne' ? 'विशेषीकरण र अनुसन्धान केन्द्रित' : 'Specialization & research focused',
-        ],
-        [
-            'level' => 'diploma',
-            'title' => $locale === 'ne' ? 'डिप्लोमा/सर्टिफिकेट' : 'Diploma / Certificate',
-            'subtitle' => $locale === 'ne' ? 'छोटो अवधि, सीप आधारित' : 'Short-term, skill-based',
-        ],
-    ]);
 @endphp
 
 @extends('layouts.public')
 
+@push('head')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <style>
+        .leaflet-control-layers,
+        .leaflet-control-zoom,
+        .leaflet-control-scale {
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+    </style>
+@endpush
+
 @section('content')
-    <div class="bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+    <div class="bg-gradient-to-b from-white via-red-50/30 to-white text-gray-900 dark:from-gray-950 dark:via-gray-950 dark:to-gray-950 dark:text-gray-100">
         <a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-gray-900 dark:focus:bg-gray-900 dark:focus:text-gray-100">
             {{ $locale === 'ne' ? 'मुख्य सामग्रीमा जानुहोस्' : 'Skip to content' }}
         </a>
 
-        <header class="sticky top-0 z-50 border-b border-gray-200/70 bg-white/90 backdrop-blur dark:border-gray-800/70 dark:bg-gray-950/75">
+        <header class="sticky top-0 z-50 border-b border-white/10 bg-gradient-to-r from-red-700 via-red-600 to-red-700 backdrop-blur">
             <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
                 <a href="{{ route('home') }}" class="flex items-center gap-3">
-                    <img src="{{ $departmentLogoUrl }}" alt="{{ $departmentName }} logo" class="h-10 w-10 rounded-lg object-contain ring-1 ring-gray-200 dark:ring-gray-800">
+                    <img src="{{ $departmentLogoUrl }}" alt="{{ $departmentName }} logo" class="h-10 w-10 rounded-lg bg-white/10 object-contain ring-1 ring-white/20">
                     <div class="leading-tight">
-                        <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $departmentShort }}</div>
-                        <div class="text-xs text-gray-600 dark:text-gray-300">{{ $departmentName }}</div>
+                        <div class="text-sm font-semibold text-white">{{ $departmentShort }}</div>
+                        <div class="text-xs text-white/80">{{ $departmentName }}</div>
                     </div>
                 </a>
 
-                <nav class="hidden flex-1 items-center justify-center gap-6 text-sm font-medium text-gray-700 dark:text-gray-200 lg:flex">
-                    <a href="#about" class="hover:text-red-700 dark:hover:text-red-400">{{ $locale === 'ne' ? 'बारेमा' : 'About' }}</a>
-                    <a href="#programs" class="hover:text-red-700 dark:hover:text-red-400">{{ $locale === 'ne' ? 'कार्यक्रम' : 'Programs' }}</a>
-                    <a href="#curriculum" class="hover:text-red-700 dark:hover:text-red-400">{{ $locale === 'ne' ? 'पाठ्यक्रम' : 'Curriculum' }}</a>
-                    <a href="#faculty" class="hover:text-red-700 dark:hover:text-red-400">{{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</a>
-                    <a href="#notices" class="hover:text-red-700 dark:hover:text-red-400">{{ $locale === 'ne' ? 'सूचना' : 'News & Events' }}</a>
-                    <a href="#resources" class="hover:text-red-700 dark:hover:text-red-400">{{ $locale === 'ne' ? 'स्रोत' : 'Resources' }}</a>
-                    <a href="#contact" class="hover:text-red-700 dark:hover:text-red-400">{{ $locale === 'ne' ? 'सम्पर्क' : 'Contact' }}</a>
+                <nav class="hidden flex-1 items-center justify-center gap-6 text-sm font-medium text-white/90 lg:flex">
+                    <a href="#about" class="hover:text-white">{{ $locale === 'ne' ? 'बारेमा' : 'About' }}</a>
+                    <a href="#programs" class="hover:text-white">{{ $locale === 'ne' ? 'कार्यक्रम' : 'Programs' }}</a>
+                    <a href="#curriculum" class="hover:text-white">{{ $locale === 'ne' ? 'पाठ्यक्रम' : 'Curriculum' }}</a>
+                    <a href="#faculty" class="hover:text-white">{{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</a>
+                    <a href="#notices" class="hover:text-white">{{ $locale === 'ne' ? 'सूचना' : 'News & Events' }}</a>
+                    <a href="#resources" class="hover:text-white">{{ $locale === 'ne' ? 'स्रोत' : 'Resources' }}</a>
+                    <a href="#contact" class="hover:text-white">{{ $locale === 'ne' ? 'सम्पर्क' : 'Contact' }}</a>
                 </nav>
 
                 <div class="ml-auto flex items-center gap-2">
                     <form method="POST" action="{{ route('language.switch') }}" class="hidden sm:block">
                         @csrf
                         <label class="sr-only" for="localeSelect">{{ $locale === 'ne' ? 'भाषा' : 'Language' }}</label>
-                        <select id="localeSelect" name="locale" onchange="this.form.submit()" class="rounded-lg border-gray-300 bg-white text-sm text-gray-800 shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                        <select id="localeSelect" name="locale" onchange="this.form.submit()" class="rounded-lg border border-white/20 bg-white/10 text-sm text-white shadow-sm focus:border-white/40 focus:ring-white/30">
                             @foreach (config('locales.supported') as $code => $label)
                                 <option value="{{ $code }}" @selected($code === $locale)>{{ $label }}</option>
                             @endforeach
                         </select>
                     </form>
 
-                    <button id="darkModeToggle" type="button" class="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white p-2 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800" aria-label="{{ $locale === 'ne' ? 'डार्क मोड टगल' : 'Toggle dark mode' }}" aria-pressed="false">
+                    <button id="darkModeToggle" type="button" class="inline-flex items-center justify-center rounded-lg border border-white/20 bg-white/10 p-2 text-white shadow-sm hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/40" aria-label="{{ $locale === 'ne' ? 'डार्क मोड टगल' : 'Toggle dark mode' }}" aria-pressed="false">
                         <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
                             <path d="M21 14.1A8.5 8.5 0 0 1 9.9 3 7 7 0 1 0 21 14.1Z" />
                         </svg>
@@ -148,11 +212,11 @@
                     </button>
 
                     @auth
-                        <a href="{{ route('dashboard') }}" class="hidden rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 sm:inline-flex">
+                        <a href="{{ route('dashboard') }}" class="hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-white/40 sm:inline-flex">
                             {{ $locale === 'ne' ? 'ड्यासबोर्ड' : 'Dashboard' }}
                         </a>
                     @else
-                        <a href="{{ route('login') }}" class="hidden rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 sm:inline-flex">
+                        <a href="{{ route('login') }}" class="hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-white/40 sm:inline-flex">
                             {{ $locale === 'ne' ? 'लगइन' : 'Login' }}
                         </a>
                     @endauth
@@ -161,11 +225,16 @@
         </header>
 
         <main id="content">
-            <section class="relative isolate overflow-hidden">
+            <section class="relative isolate overflow-hidden bg-gray-950" x-data="heroSlider({ slides: @js($heroSlides->values()->all()) })">
                 <div class="absolute inset-0 -z-10">
-                    <img src="{{ asset('images/hero-image.jpg') }}" alt="" class="h-full w-full object-cover" />
-                    <div class="absolute inset-0 bg-gradient-to-r from-gray-950/80 via-gray-950/55 to-gray-950/20"></div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-gray-950/60 via-transparent to-transparent"></div>
+                    <div class="relative h-full w-full">
+                        <template x-for="(src, idx) in slides" :key="src">
+                            <img :src="src" alt="" class="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+                                 :class="idx === active ? 'opacity-100' : 'opacity-0'" />
+                        </template>
+                        <div class="absolute inset-0 bg-gradient-to-r from-gray-950/80 via-gray-950/55 to-gray-950/20"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-gray-950/60 via-transparent to-transparent"></div>
+                    </div>
                 </div>
 
                 <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
@@ -214,6 +283,37 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Slider controls: arrows left/right, dots bottom center -->
+                <div x-show="slides.length > 1" class="pointer-events-none absolute inset-0">
+                    <div class="pointer-events-auto absolute left-4 right-4 top-1/2 flex -translate-y-1/2 items-center justify-between sm:left-6 sm:right-6 lg:left-10 lg:right-10">
+                        <button type="button"
+                                class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-red-600 ring-1 ring-white/25 backdrop-blur hover:bg-white/25 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                @click="prev()" aria-label="Previous slide">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                <path fill-rule="evenodd" d="M15.78 4.22a.75.75 0 0 1 0 1.06L9.06 12l6.72 6.72a.75.75 0 1 1-1.06 1.06l-7.25-7.25a.75.75 0 0 1 0-1.06l7.25-7.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                        <button type="button"
+                                class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-red-600 ring-1 ring-white/25 backdrop-blur hover:bg-white/25 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                @click="next()" aria-label="Next slide">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                <path fill-rule="evenodd" d="M8.22 19.78a.75.75 0 0 1 0-1.06L14.94 12 8.22 5.28a.75.75 0 1 1 1.06-1.06l7.25 7.25a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0Z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="pointer-events-auto absolute bottom-6 left-1/2 -translate-x-1/2">
+                        <div class="flex items-center gap-2 rounded-full bg-black/20 px-3 py-2 ring-1 ring-white/15 backdrop-blur">
+                            <template x-for="(src, idx) in slides" :key="idx">
+                                <button type="button"
+                                        class="h-2.5 w-2.5 rounded-full ring-1 ring-white/60 transition"
+                                        :class="idx === active ? 'bg-red-500 ring-red-300' : 'bg-red-100 hover:bg-red-300'"
+                                        @click="go(idx)" :aria-label="`Slide ${idx+1}`"></button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <section id="about" class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
@@ -222,11 +322,22 @@
                         <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
                             {{ $locale === 'ne' ? 'विभागको परिचय' : 'About the Department' }}
                         </h2>
-                        <p class="mt-4 text-sm leading-7 text-gray-700 dark:text-gray-300">
-                            {{ $aboutText ?: ($locale === 'ne'
-                                ? 'यो विभागले विद्यार्थी, शिक्षक र अभिभावकका लागि एकीकृत सूचना प्रणालीमार्फत शैक्षिक व्यवस्थापनलाई डिजिटल बनाउँछ।'
-                                : 'This department portal brings academics, resources, and communication together for students, faculty, and parents.') }}
-                        </p>
+                        <div class="mt-4 overflow-hidden rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-950" style="height: 500px;">
+                            <div class="whitespace-pre-wrap text-sm font-bold leading-7 text-gray-700 dark:text-gray-300 overflow-hidden">
+                                {{ $aboutText ?: ($locale === 'ne'
+                                    ? 'यो विभागले विद्यार्थी, शिक्षक र अभिभावकका लागि एकीकृत सूचना प्रणालीमार्फत शैक्षिक व्यवस्थापनलाई डिजिटल बनाउँछ।'
+                                    : 'This department portal brings academics, resources, and communication together for students, faculty, and parents.') }}
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <a href="{{ route('department.about', ['id' => $department?->id ?? 1]) }}"
+                               class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 dark:hover:bg-red-700">
+                                <span>{{ $locale === 'ne' ? 'थप पढ्नुहोस्' : 'Read More' }}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                    <path fill-rule="evenodd" d="M16.72 7.72a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 1 1-1.06-1.06L21.44 12l-4.72-4.28a.75.75 0 0 1 0-1.06zM12 7a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-1.5 0V7.75A.75.75 0 0 1 12 7z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                        </div>
 
                         <div class="mt-6 grid gap-4 sm:grid-cols-2">
                             <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
@@ -248,22 +359,47 @@
                         <div class="rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-6 shadow-sm dark:border-gray-800 dark:from-gray-900 dark:to-gray-900">
                             <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $locale === 'ne' ? 'छिटो पहुँच' : 'Quick Access' }}</h3>
                             <div class="mt-5 grid gap-3">
-                                <a href="#notices" class="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900">
-                                    {{ $locale === 'ne' ? 'सूचना बोर्ड' : 'Notice Board' }}
+                                <a href="#notices" class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900">
+                                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-700 ring-1 ring-red-100 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                            <path d="M2.25 6.75A2.25 2.25 0 0 1 4.5 4.5h15A2.25 2.25 0 0 1 21.75 6.75v10.5A2.25 2.25 0 0 1 19.5 19.5h-15a2.25 2.25 0 0 1-2.25-2.25V6.75Zm2.25-.75a.75.75 0 0 0-.75.75v.243l7.5 4.5 7.5-4.5V6.75a.75.75 0 0 0-.75-.75h-15Zm15.75 3.006-7.114 4.268a1.5 1.5 0 0 1-1.542 0L4.5 9.006v8.244c0 .414.336.75.75.75h15a.75.75 0 0 0 .75-.75V9.006Z"/>
+                                        </svg>
+                                    </span>
+                                    <span>{{ $locale === 'ne' ? 'सूचना बोर्ड' : 'Notice Board' }}</span>
                                 </a>
-                                <a href="#resources" class="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900">
-                                    {{ $locale === 'ne' ? 'दस्तावेज/स्रोत' : 'Documents & Resources' }}
+                                <a href="#resources" class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900">
+                                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-700 ring-1 ring-amber-100 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-900/50">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                            <path d="M6.75 2.25A2.25 2.25 0 0 0 4.5 4.5v15A2.25 2.25 0 0 0 6.75 21.75h10.5A2.25 2.25 0 0 0 19.5 19.5V7.5a.75.75 0 0 0-.22-.53l-4.5-4.5a.75.75 0 0 0-.53-.22H6.75Zm7.5 1.81L17.69 7.5h-2.94a.5.5 0 0 1-.5-.5V4.06Z"/>
+                                        </svg>
+                                    </span>
+                                    <span>{{ $locale === 'ne' ? 'दस्तावेज/स्रोत' : 'Documents & Resources' }}</span>
                                 </a>
-                                <a href="{{ route('gallery.index') }}" class="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900">
-                                    {{ $locale === 'ne' ? 'ग्यालरी' : 'Gallery' }}
+                                <a href="{{ route('gallery.index') }}" class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900">
+                                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900/50">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                            <path d="M1.5 6.75A2.25 2.25 0 0 1 3.75 4.5h16.5A2.25 2.25 0 0 1 22.5 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 17.25V6.75ZM4.5 7.5a.75.75 0 0 0-.75.75v.5l4.286 3.214a.75.75 0 0 0 .9 0L13.5 8.25l4.564 3.709a.75.75 0 0 0 .936-.012L21 10.28V8.25a.75.75 0 0 0-.75-.75h-15.75Z"/>
+                                        </svg>
+                                    </span>
+                                    <span>{{ $locale === 'ne' ? 'ग्यालरी' : 'Gallery' }}</span>
                                 </a>
                                 @auth
-                                    <a href="{{ route('dashboard') }}" class="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                        {{ $locale === 'ne' ? 'ड्यासबोर्ड खोल्नुहोस्' : 'Open Dashboard' }}
+                                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:from-red-700 hover:to-rose-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                                <path d="M11.25 3.75a.75.75 0 0 1 1.5 0v7.5h7.5a.75.75 0 0 1 0 1.5h-7.5v7.5a.75.75 0 0 1-1.5 0v-7.5h-7.5a.75.75 0 0 1 0-1.5h7.5v-7.5Z"/>
+                                            </svg>
+                                        </span>
+                                        <span>{{ $locale === 'ne' ? 'ड्यासबोर्ड खोल्नुहोस्' : 'Open Dashboard' }}</span>
                                     </a>
                                 @else
-                                    <a href="{{ route('login') }}" class="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                        {{ $locale === 'ne' ? 'लगइन गरेर सुरु गर्नुहोस्' : 'Sign in to continue' }}
+                                    <a href="{{ route('login') }}" class="flex items-center gap-3 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:from-red-700 hover:to-rose-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                                <path fill-rule="evenodd" d="M7.5 3.75A3.75 3.75 0 0 1 11.25 0h1.5A3.75 3.75 0 0 1 16.5 3.75V9a.75.75 0 0 1-1.5 0V3.75c0-1.243-1.007-2.25-2.25-2.25h-1.5C10.007 1.5 9 2.507 9 3.75V9a.75.75 0 0 1-1.5 0V3.75Zm-6 9A2.25 2.25 0 0 1 3.75 10.5h16.5A2.25 2.25 0 0 1 22.5 12.75v7.5A3.75 3.75 0 0 1 18.75 24H5.25A3.75 3.75 0 0 1 1.5 20.25v-7.5Zm7.5 3a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5h-6Z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </span>
+                                        <span>{{ $locale === 'ne' ? 'लगइन गरेर सुरु गर्नुहोस्' : 'Sign in to continue' }}</span>
                                     </a>
                                 @endauth
                             </div>
@@ -286,84 +422,144 @@
                                     </div>
                                 </div>
                             @endif
+
+                            @if (!empty($mapEmbedUrl))
+                                <div class="mt-6 border-t border-gray-200 pt-5">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $mapLabel }}</div>
+                                        @if (!empty($mapOpenUrl))
+                                            <a href="{{ $mapOpenUrl }}" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-red-700 hover:underline dark:text-red-400">
+                                                {{ $locale === 'ne' ? 'नक्सामा खोल्नुहोस्' : 'Open map' }}
+                                            </a>
+                                        @endif
+                                    </div>
+                                    <div class="mt-3 overflow-hidden rounded-2xl ring-1 ring-gray-200 dark:ring-gray-800">
+                                        <iframe title="Map" src="{{ $mapEmbedUrl }}" class="h-44 w-full border-0" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section id="programs" class="bg-gray-50 py-14 dark:bg-gray-900/30">
+            <section id="programs" class="py-14">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                            <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
-                                {{ $locale === 'ne' ? 'शैक्षिक कार्यक्रम' : 'Academic Programs' }}
-                            </h2>
-                            <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                                {{ $locale === 'ne' ? 'कार्यक्रम अनुसार पाठ्यक्रम र विषयहरू छान्नुहोस्।' : 'Discover programs and explore semester-wise curriculum.' }}
-                            </p>
+                    <div class="grid gap-10 lg:grid-cols-12 lg:items-center">
+                        <div class="lg:col-span-5">
+                            <div class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                                <img src="{{ $programsImageUrl ?: asset('images/hero-image.jpg') }}" alt="" class="h-72 w-full object-cover sm:h-80" />
+                            </div>
                         </div>
-                        <a href="#curriculum" class="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900">
-                            {{ $locale === 'ne' ? 'पाठ्यक्रम हेर्नुहोस्' : 'View Curriculum' }}
-                        </a>
-                    </div>
-
-                    <div x-data="programTabs()" class="mt-8">
-                        <div class="flex flex-wrap gap-2">
-                            <button type="button" class="rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-inset"
-                                :class="active === 'all' ? 'bg-red-600 text-white ring-red-600' : 'bg-white text-gray-800 ring-gray-200 hover:bg-gray-50 dark:bg-gray-950 dark:text-gray-100 dark:ring-gray-800 dark:hover:bg-gray-900'"
-                                @click="active='all'">
-                                {{ $locale === 'ne' ? 'सबै' : 'All' }}
-                            </button>
-                            <button type="button" class="rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-inset"
-                                :class="active === 'ug' ? 'bg-red-600 text-white ring-red-600' : 'bg-white text-gray-800 ring-gray-200 hover:bg-gray-50 dark:bg-gray-950 dark:text-gray-100 dark:ring-gray-800 dark:hover:bg-gray-900'"
-                                @click="active='ug'">
-                                {{ $locale === 'ne' ? 'स्नातक' : 'UG' }}
-                            </button>
-                            <button type="button" class="rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-inset"
-                                :class="active === 'pg' ? 'bg-red-600 text-white ring-red-600' : 'bg-white text-gray-800 ring-gray-200 hover:bg-gray-50 dark:bg-gray-950 dark:text-gray-100 dark:ring-gray-800 dark:hover:bg-gray-900'"
-                                @click="active='pg'">
-                                {{ $locale === 'ne' ? 'स्नातकोत्तर' : 'PG' }}
-                            </button>
-                            <button type="button" class="rounded-full px-4 py-2 text-sm font-semibold ring-1 ring-inset"
-                                :class="active === 'diploma' ? 'bg-red-600 text-white ring-red-600' : 'bg-white text-gray-800 ring-gray-200 hover:bg-gray-50 dark:bg-gray-950 dark:text-gray-100 dark:ring-gray-800 dark:hover:bg-gray-900'"
-                                @click="active='diploma'">
-                                {{ $locale === 'ne' ? 'डिप्लोमा' : 'Diploma' }}
-                            </button>
-                        </div>
-
-                        <div class="mt-6 grid gap-6 md:grid-cols-3">
-                            <template x-for="program in filtered" :key="program.title">
-                                <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-950">
-                                    <div class="flex items-start justify-between gap-4">
-                                        <div>
-                                            <div class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400" x-text="badge(program.level)"></div>
-                                            <div class="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100" x-text="program.title"></div>
-                                            <div class="mt-2 text-sm leading-6 text-gray-700 dark:text-gray-300" x-text="program.subtitle"></div>
-                                        </div>
-                                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-700 ring-1 ring-red-100 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-6 w-6">
-                                                <path d="M12 3a1 1 0 0 1 .6.2l8 6a1 1 0 0 1 .4.8v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10a1 1 0 0 1 .4-.8l8-6A1 1 0 0 1 12 3Zm0 2.25L5 10.5V19h14v-8.5l-7-5.25ZM8 12h8a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2Z"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div class="mt-6">
-                                        <a href="#curriculum" class="inline-flex items-center gap-2 text-sm font-semibold text-red-700 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
-                                            {{ $locale === 'ne' ? 'विषयहरू हेर्नुहोस्' : 'See subjects & curriculum' }}
-                                            <span aria-hidden="true">→</span>
-                                        </a>
-                                    </div>
+                        <div class="lg:col-span-7">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                                <div>
+                                    <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
+                                        {{ $programsTitle ?: ($locale === 'ne' ? 'शैक्षिक कार्यक्रम' : 'Academic Programs') }}
+                                    </h2>
+                                    <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                                        {{ $locale === 'ne' ? 'कार्यक्रम र सिकाइ यात्राको छोटो परिचय।' : 'A short overview of our programs and learning path.' }}
+                                    </p>
                                 </div>
-                            </template>
+                                <a href="#curriculum" class="inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900">
+                                    {{ $locale === 'ne' ? 'पाठ्यक्रम हेर्नुहोस्' : 'View Curriculum' }}
+                                </a>
+                            </div>
+
+                            <div class="mt-5 rounded-3xl border border-gray-200 bg-white p-6 text-sm leading-7 text-gray-700 shadow-sm dark:border-gray-800 dark:bg-gray-950 dark:text-gray-200">
+                                {!! nl2br(e($programsContent ?: ($locale === 'ne'
+                                    ? 'हाम्रो विभागले विद्यार्थीहरूको सीप विकास, व्यावहारिक प्रयोगशाला अभ्यास र उद्योगसँग जोडिएको सिकाइलाई प्राथमिकता दिने शैक्षिक कार्यक्रमहरू सञ्चालन गर्दछ।'
+                                    : 'Our department runs academic programs focused on practical learning, lab-based skills, and industry-ready outcomes.'))) !!}
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
             <section id="curriculum" class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8" x-data="subjectCatalog({
-                initialSemester: @js($selectedSemester ?: 'all'),
+                initialSemester: @js($defaultSemester),
+                maxItems: @js($subjectPreviewMax),
+                indexUrl: @js(route('subjects.index')),
                 subjects: @js($subjectPayload),
                 locale: @js($locale),
             })">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
+                            {{ $locale === 'ne' ? 'हाम्रा पाठ्यक्रम' : 'Our Courses' }}
+                        </h2>
+                        <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                            {{ $locale === 'ne' ? 'सेमेस्टर अनुसार विषयहरू हेर्नुहोस्।' : 'Browse semester-wise course highlights.' }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-wrap items-center gap-2">
+                    @foreach ($semesterSummary->take(4) as $sem => $meta)
+                        @continue(empty($sem))
+                        <button type="button"
+                            class="rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-red-500"
+                            :class="String(semester) === @js((string) $sem) ? 'border-gray-900 bg-gray-900 text-white dark:border-white dark:bg-white dark:text-gray-900' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-200 dark:hover:bg-gray-900'"
+                            @click="semester=@js((string) $sem); query=''; openId=null;">
+                            {{ $locale === 'ne' ? "{$sem} सेमेस्टर" : "Semester {$sem}" }}
+                        </button>
+                    @endforeach
+                </div>
+
+                <div class="mt-8 grid gap-6 md:grid-cols-3">
+                    <template x-for="s in visibleSubjects" :key="s.id">
+                        <div class="flex flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                            <div class="text-base font-bold text-gray-900 dark:text-gray-100" x-text="s.title"></div>
+                            <div class="mt-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
+                                <span x-text="((s.teachers || [])[0]) ? s.teachers[0] : (locale === 'ne' ? 'शिक्षक तोकिएको छैन' : 'Instructor TBA')"></span>
+                                <span class="mx-2 text-gray-300 dark:text-gray-700">|</span>
+                                <span x-text="(s.has_lab || String(s.type || '').toLowerCase().includes('lab')) ? (locale === 'ne' ? 'प्रयोगशाला' : 'Lab') : (locale === 'ne' ? 'सिद्धान्त' : 'Theory')"></span>
+                            </div>
+                            <div class="mt-3 line-clamp-3 text-sm text-gray-700 dark:text-gray-300" x-text="s.description || fallbackDescription"></div>
+
+                            <div x-show="openId === s.id" x-cloak class="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700 dark:border-gray-800 dark:bg-gray-900/40 dark:text-gray-200">
+                                <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                                    <template x-if="s.code">
+                                        <span class="rounded-full bg-white px-3 py-1 text-gray-700 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-200 dark:ring-gray-800" x-text="s.code"></span>
+                                    </template>
+                                    <template x-if="s.credits !== null && s.credits !== undefined">
+                                        <span class="rounded-full bg-gray-100 px-3 py-1 text-gray-700 dark:bg-gray-900 dark:text-gray-200" x-text="creditText(s.credits)"></span>
+                                    </template>
+                                    <template x-if="s.category">
+                                        <span class="rounded-full bg-red-50 px-3 py-1 text-red-700 dark:bg-red-950/40 dark:text-red-300" x-text="s.category"></span>
+                                    </template>
+                                </div>
+                                <template x-if="s.prerequisite">
+                                    <div class="mt-3 text-sm">
+                                        <span class="font-semibold">{{ $locale === 'ne' ? 'पूर्व-आवश्यकता' : 'Prerequisite' }}:</span>
+                                        <span x-text="s.prerequisite"></span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="mt-5 flex items-center justify-center">
+                                <button type="button"
+                                    class="inline-flex w-28 items-center justify-center rounded-lg bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
+                                    @click="toggle(s.id)">
+                                    {{ $locale === 'ne' ? 'जानकारी' : 'Info' }}
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div x-show="visibleSubjects.length === 0" class="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300 md:col-span-3">
+                        {{ $locale === 'ne' ? 'हाल कुनै विषय उपलब्ध छैन।' : 'No courses available yet.' }}
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-center">
+                    <a :href="viewAllUrl"
+                       class="inline-flex items-center justify-center rounded-lg bg-gray-700 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-white">
+                        {{ $locale === 'ne' ? 'सबै पाठ्यक्रम हेर्नुहोस्' : 'Explore All Courses' }}
+                    </a>
+                </div>
+
+                {{--
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
@@ -404,7 +600,7 @@
                             </div>
 
                             <div class="divide-y divide-gray-200 dark:divide-gray-800">
-                                <template x-for="s in filteredSubjects" :key="s.id">
+                                <template x-for="s in visibleSubjects" :key="s.id">
                                     <div class="px-6 py-4">
                                         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                             <div class="min-w-0">
@@ -460,6 +656,13 @@
                                     {{ $locale === 'ne' ? 'कुनै विषय भेटिएन।' : 'No subjects found.' }}
                                 </div>
                             </div>
+
+                            <div x-show="showViewAll" class="border-t border-gray-200 px-6 py-4 dark:border-gray-800">
+                                <a :href="viewAllUrl"
+                                   class="inline-flex w-full items-center justify-center rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                    {{ $locale === 'ne' ? 'सबै विषय हेर्नुहोस्' : 'View all subjects' }}
+                                </a>
+                            </div>
                         </div>
                     </div>
 
@@ -489,14 +692,15 @@
                         </div>
                     </div>
                 </div>
+                --}}
             </section>
 
-            <section id="faculty" class="bg-gray-50 py-14 dark:bg-gray-900/30">
+            <section id="faculty" class="py-14">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                             <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
-                                {{ $locale === 'ne' ? 'शिक्षक तथा स्टाफ' : 'Faculty & Staff' }}
+                                {{ $locale === 'ne' ? 'हाम्रा शिक्षक' : 'Meet Our Faculty' }}
                             </h2>
                             <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
                                 {{ $locale === 'ne' ? 'विभागका सक्रिय शिक्षकहरूको झलक।' : 'Meet our active department faculty.' }}
@@ -504,50 +708,77 @@
                         </div>
                     </div>
 
-                    @if (!empty($hod))
-                        <div class="mt-8 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-700 ring-1 ring-red-100 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
-                                        <span class="text-lg font-bold">{{ Str::of($hod->name ?? 'H')->substr(0, 1)->upper() }}</span>
-                                    </div>
-                                    <div>
-                                        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'विभाग प्रमुख' : 'Head of Department' }}</div>
-                                        <div class="mt-1 text-base font-bold text-gray-900 dark:text-gray-100">{{ $hod->name }}</div>
-                                        @if (!empty($hod->email))
-                                            <div class="mt-1 text-sm text-gray-700 dark:text-gray-300">
-                                                <a href="mailto:{{ $hod->email }}" class="text-red-700 hover:underline dark:text-red-400">{{ $hod->email }}</a>
-                                            </div>
-                                        @endif
-                                    </div>
+                    @if (($hods ?? collect())->isNotEmpty())
+                        <div class="mt-8">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    {{ $locale === 'ne' ? 'विभाग प्रमुख (HOD)' : 'HOD' }}
                                 </div>
-                                <a href="#contact" class="inline-flex items-center justify-center rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                    {{ $locale === 'ne' ? 'सम्पर्क गर्नुहोस्' : 'Contact' }}
+                                <a href="#contact" class="inline-flex items-center gap-2 text-xs font-semibold text-red-700 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
+                                    {{ $locale === 'ne' ? 'सम्पर्क' : 'Contact' }}
+                                    <span aria-hidden="true">→</span>
                                 </a>
+                            </div>
+
+                            <div class="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                                @foreach (($hods ?? collect()) as $leader)
+                                    @php
+                                        $leaderName = $leader->name ?: 'Admin';
+                                        $leaderInitial = Str::of($leaderName)->trim()->substr(0, 1)->upper();
+                                        $leaderDept = $leader->department ?? null;
+                                        $leaderPhoto = $leader->profile_photo_url ?? null;
+                                        $leaderMeta = $leaderDept ?: ($leader->email ?: null);
+                                    @endphp
+                                    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                                        <div class="flex h-64 items-center justify-center bg-red-100/60 dark:bg-red-950/25">
+                                            @if (!empty($leaderPhoto))
+                                                <img src="{{ $leaderPhoto }}" alt="{{ $leaderName }}" class="h-full w-full object-cover" />
+                                            @else
+                                                <div class="flex h-20 w-24 items-center justify-center rounded-lg bg-red-200 text-red-800 dark:bg-red-900/40 dark:text-red-200">
+                                                    <span class="text-sm font-bold">{{ $leaderInitial }}</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="p-5">
+                                            <div class="truncate text-sm font-bold text-gray-900 dark:text-gray-100">{{ $leaderName }}</div>
+                                            <div class="mt-1 text-xs font-semibold text-gray-600 dark:text-gray-300">{{ $locale === 'ne' ? 'विभाग प्रमुख' : 'HOD / Admin' }}</div>
+                                            <div class="mt-2 text-xs text-gray-600 dark:text-gray-300">
+                                                {{ $locale === 'ne' ? 'विवरण' : 'Detail' }}:
+                                                <span class="font-medium text-gray-800 dark:text-gray-200">{{ $leaderMeta ?: ($locale === 'ne' ? 'उपलब्ध छैन' : 'Not specified') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     @endif
 
                     <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                        @forelse (($teachers ?? collect())->take(8) as $t)
+                        @forelse (($teachers ?? collect())->take(4) as $t)
                             @php
                                 $name = $t->user?->name ?: 'Unknown';
                                 $initials = Str::of($name)->trim()->explode(' ')->filter()->take(2)->map(fn ($p) => Str::substr($p, 0, 1))->join('');
-                                $subjectCount = $t->subjects?->count() ?? 0;
+                                $photoUrl = $t->user?->profile_photo_url;
+                                $titleText = $t->qualification ?: ($locale === 'ne' ? 'शिक्षक' : 'Professor');
+                                $expertiseText = $t->bio ?: ($t->department ?: ($t->user?->department ?: null));
                             @endphp
-                            <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-950">
-                                <div class="flex items-center gap-4">
-                                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 text-gray-700 ring-1 ring-gray-200 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-800">
-                                        <span class="text-sm font-bold">{{ $initials ?: Str::of($name)->substr(0, 1)->upper() }}</span>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <div class="truncate text-sm font-bold text-gray-900 dark:text-gray-100">{{ $name }}</div>
-                                        <div class="mt-1 text-xs text-gray-600 dark:text-gray-300">{{ $t->qualification ?: ($locale === 'ne' ? 'शिक्षक' : 'Faculty') }}</div>
-                                    </div>
+                            <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-950">
+                                <div class="flex h-64 items-center justify-center bg-gray-200/80 dark:bg-gray-900">
+                                    @if (!empty($photoUrl))
+                                        <img src="{{ $photoUrl }}" alt="{{ $name }}" class="h-full w-full object-cover" />
+                                    @else
+                                        <div class="flex h-20 w-24 items-center justify-center rounded-lg bg-gray-300 text-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                            <span class="text-sm font-bold">{{ $initials ?: Str::of($name)->substr(0, 1)->upper() }}</span>
+                                        </div>
+                                    @endif
                                 </div>
-                                <div class="mt-5 flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-gray-300">
-                                    <span>{{ $locale === 'ne' ? 'विषय' : 'Subjects' }}</span>
-                                    <span class="rounded-full bg-gray-100 px-3 py-1 text-gray-700 dark:bg-gray-900 dark:text-gray-100">{{ $subjectCount }}</span>
+                                <div class="p-5">
+                                    <div class="truncate text-sm font-bold text-gray-900 dark:text-gray-100">{{ $name }}</div>
+                                    <div class="mt-1 text-xs font-semibold text-gray-600 dark:text-gray-300">{{ $titleText }}</div>
+                                    <div class="mt-2 text-xs text-gray-600 dark:text-gray-300">
+                                        {{ $locale === 'ne' ? 'विशेषज्ञता' : 'Expertise Area' }}:
+                                        <span class="font-medium text-gray-800 dark:text-gray-200">{{ $expertiseText ?: ($locale === 'ne' ? 'उपलब्ध छैन' : 'Not specified') }}</span>
+                                    </div>
                                 </div>
                             </div>
                         @empty
@@ -555,6 +786,13 @@
                                 {{ $locale === 'ne' ? 'हाल कुनै शिक्षक उपलब्ध छैन।' : 'No faculty records available yet.' }}
                             </div>
                         @endforelse
+                    </div>
+
+                    <div class="mt-8 flex justify-center">
+                        <a href="{{ route('faculty.index') }}"
+                           class="inline-flex items-center justify-center rounded-lg bg-gray-700 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-white">
+                            {{ $locale === 'ne' ? 'सबै शिक्षक हेर्नुहोस्' : 'View All Faculty' }}
+                        </a>
                     </div>
                 </div>
             </section>
@@ -597,7 +835,12 @@
                             </div>
                             <div class="mt-5 flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-gray-400">
                                 <span>{{ $n->localized_audience_label }}</span>
-                                <span class="text-red-700 dark:text-red-400">{{ $locale === 'ne' ? 'पढ्नुहोस्' : 'Read' }} →</span>
+                                <span class="inline-flex items-center gap-1 text-red-700 dark:text-red-400">
+                                    <span>{{ $locale === 'ne' ? 'पढ्नुहोस्' : 'Read' }}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3 w-3">
+                                        <path d="M13.207 3.793a1 1 0 0 1 1.414 0l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414-1.414L17.586 11H4a1 1 0 1 1 0-2h13.586l-4.379-4.379a1 1 0 0 1 0-1.414z"/>
+                                    </svg>
+                                </span>
                             </div>
                         </button>
                     @empty
@@ -632,7 +875,7 @@
                 </div>
             </section>
 
-            <section id="resources" class="bg-gray-50 py-14 dark:bg-gray-900/30" x-data="documentRepo({ documents: @js($documentPayload), locale: @js($locale) })">
+            <section id="resources" class="py-14" x-data="documentRepo({ documents: @js($documentPayload), locale: @js($locale) })">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
@@ -659,50 +902,63 @@
                         </div>
                     </div>
 
-                    <div class="mt-8 rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                        <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-6 py-4 dark:border-gray-800">
-                            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                {{ $locale === 'ne' ? 'रिपोजिटरी' : 'Repository' }}
-                            </div>
-                            <div class="text-xs font-medium text-gray-500 dark:text-gray-400" x-text="resultText"></div>
-                        </div>
-                        <div class="divide-y divide-gray-200 dark:divide-gray-800">
-                            <template x-for="d in filtered" :key="d.id">
-                                <div class="px-6 py-4">
-                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                        <div class="min-w-0">
-                                            <div class="flex flex-wrap items-center gap-2">
-                                                <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-900 dark:text-gray-200" x-text="d.type_label"></span>
-                                                <template x-if="d.subject">
-                                                    <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-200 dark:ring-gray-800" x-text="d.subject"></span>
-                                                </template>
-                                                <template x-if="d.size">
-                                                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400" x-text="d.size"></span>
-                                                </template>
-                                            </div>
-                                            <div class="mt-2 truncate text-base font-semibold text-gray-900 dark:text-gray-100" x-text="d.title"></div>
-                                            <div class="mt-1 line-clamp-2 text-sm text-gray-700 dark:text-gray-300" x-text="d.description || fallbackDescription"></div>
-                                            <div class="mt-3 text-xs font-medium text-gray-500 dark:text-gray-400" x-text="uploadedText(d.uploaded_at)"></div>
-                                        </div>
-                                        <div class="shrink-0">
-                                            <template x-if="d.url">
-                                                <a :href="d.url" target="_blank" rel="noopener" class="inline-flex items-center justify-center rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                                    {{ $locale === 'ne' ? 'खोल्नुहोस्' : 'Open' }}
-                                                </a>
-                                            </template>
-                                            <template x-if="!d.url">
-                                                <span class="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-400 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-500">
-                                                    {{ $locale === 'ne' ? 'उपलब्ध छैन' : 'Unavailable' }}
-                                                </span>
-                                            </template>
-                                        </div>
+                    <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        <template x-for="d in filtered" :key="d.id">
+                            <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-950">
+                                <div class="flex h-48 items-center justify-center bg-gray-100 dark:bg-gray-900">
+                                    <div class="flex items-center justify-center text-gray-400 dark:text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-16 w-16">
+                                            <path d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 .621-.504 1.125-1.125 1.125H1.5V5.25a3.75 3.75 0 0 1 4.125-3.75Z" />
+                                            <path fill-rule="evenodd" d="M23.25 7.5a.75.75 0 0 1-.75.75H.75a.75.75 0 0 1-.75-.75v-8a.75.75 0 0 1 .75-.75h22.5a.75.75 0 0 1 .75.75v8Zm-3-5.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" clip-rule="evenodd" />
+                                            <path fill-rule="evenodd" d="M.75 14.25a.75.75 0 0 0 .75.75h22.5a.75.75 0 0 0 .75-.75v-6a.75.75 0 0 0-.75-.75H1.5a.75.75 0 0 0-.75.75v6Zm22.5 6a.75.75 0 0 0 .75-.75v-2a.75.75 0 0 0-.75-.75H1.5a.75.75 0 0 0-.75.75v2a.75.75 0 0 0 .75.75h22.5Z" clip-rule="evenodd" />
+                                        </svg>
                                     </div>
                                 </div>
-                            </template>
-                            <div x-show="filtered.length === 0" class="px-6 py-10 text-center text-sm text-gray-600 dark:text-gray-300">
+                                <div class="p-5">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-900 dark:text-gray-200" x-text="d.type_label"></span>
+                                        <template x-if="d.size">
+                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400" x-text="d.size"></span>
+                                        </template>
+                                    </div>
+                                    <div class="mt-3 line-clamp-2 text-sm font-bold text-gray-900 dark:text-gray-100" x-text="d.title"></div>
+                                    <template x-if="d.subject">
+                                        <div class="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                                            <span class="font-medium text-gray-900 dark:text-gray-200" x-text="d.subject"></span>
+                                        </div>
+                                    </template>
+                                    <div class="mt-2 text-xs text-gray-500 dark:text-gray-400" x-text="uploadedText(d.uploaded_at)"></div>
+                                    <div class="mt-4 flex items-center gap-2">
+                                        <template x-if="d.url">
+                                            <a :href="d.url" target="_blank" rel="noopener" class="flex-1 inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                                {{ $locale === 'ne' ? 'हेर्नुहोस्' : 'View' }}
+                                            </a>
+                                        </template>
+                                        <template x-if="!d.url">
+                                            <span class="flex-1 inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-400 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-500">
+                                                {{ $locale === 'ne' ? 'उपलब्ध छैन' : 'N/A' }}
+                                            </span>
+                                        </template>
+
+                                        <template x-if="d.download_url">
+                                            <a :href="d.download_url" class="flex-1 inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900">
+                                                {{ $locale === 'ne' ? 'डाउनलोड' : 'Download' }}
+                                            </a>
+                                        </template>
+                                        <template x-if="!d.download_url">
+                                            <span class="flex-1 inline-flex items-center justify-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-400 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-500">
+                                                {{ $locale === 'ne' ? 'डाउनलोड छैन' : 'No download' }}
+                                            </span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="filtered.length === 0">
+                            <div class="rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300 sm:col-span-2 lg:col-span-3">
                                 {{ $locale === 'ne' ? 'कुनै सामग्री भेटिएन।' : 'No materials found.' }}
                             </div>
-                        </div>
+                        </template>
                     </div>
                 </div>
             </section>
@@ -732,6 +988,23 @@
                                     {{ $locale === 'ne' ? 'तस्विर छैन' : 'No image' }}
                                 </div>
                             @endif
+                            @if ($g->image_url)
+                                <div class="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-gray-950/65 via-gray-950/10 to-transparent"></div>
+                                    <div class="pointer-events-auto absolute right-3 top-3 flex gap-2">
+                                        <button type="button"
+                                            onclick="event.preventDefault(); event.stopPropagation(); window.open(@js($g->image_url), '_blank', 'noopener');"
+                                            class="inline-flex items-center justify-center rounded-lg bg-white/90 px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-white/20 hover:bg-white">
+                                            {{ $locale === 'ne' ? 'हेर्नुहोस्' : 'View' }}
+                                        </button>
+                                        <button type="button"
+                                            onclick="event.preventDefault(); event.stopPropagation(); window.location.href = @js(route('gallery.download', ['id' => $g->id]));"
+                                            class="inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                            {{ $locale === 'ne' ? 'डाउनलोड' : 'Download' }}
+                                        </button>
+                                    </div>
+                                </div>
+                            @endif
                             <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-gray-950/70 via-gray-950/35 to-transparent p-4">
                                 <div class="truncate text-sm font-semibold text-white">{{ $g->title }}</div>
                                 <div class="mt-1 text-xs font-medium text-white/80">{{ $g->category_text }}</div>
@@ -745,116 +1018,202 @@
                 </div>
             </section>
 
-            <section id="contact" class="bg-gray-50 py-14 dark:bg-gray-900/30">
+            <section id="contact" class="py-14">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="grid gap-10 lg:grid-cols-12 lg:items-start">
-                        <div class="lg:col-span-5">
-                            <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
-                                {{ $locale === 'ne' ? 'सम्पर्क तथा सहयोग' : 'Contact & Support' }}
-                            </h2>
-                            <p class="mt-3 text-sm leading-7 text-gray-700 dark:text-gray-300">
-                                {{ $locale === 'ne'
-                                    ? 'कुनै प्रश्न, सुझाव वा सहयोगका लागि हामीलाई सम्पर्क गर्नुहोस्।'
-                                    : 'Reach out for questions, suggestions, or support.' }}
-                            </p>
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
+                            {{ $locale === 'ne' ? 'सम्पर्क तथा सहयोग' : 'Contact & Support' }}
+                        </h2>
+                        <p class="mt-3 max-w-3xl text-sm leading-7 text-gray-700 dark:text-gray-300">
+                            {{ $locale === 'ne'
+                                ? 'कुनै प्रश्न, सुझाव वा सहयोगका लागि हामीलाई सम्पर्क गर्नुहोस्।'
+                                : 'Reach out for questions, suggestions, or support.' }}
+                        </p>
 
-                            <div class="mt-6 space-y-4">
-                                <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'इमेल' : 'Email' }}</div>
-                                    <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                        @if (!empty($department?->email))
-                                            <a class="text-red-700 hover:underline dark:text-red-400" href="mailto:{{ $department->email }}">{{ $department->email }}</a>
-                                        @else
-                                            <span class="text-gray-500 dark:text-gray-400">support@example.edu</span>
+                        <div class="mt-8 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                            @if (!empty($lat) && !empty($lng))
+                                <div class="relative">
+                                    <div id="departmentMap"
+                                        class="h-[22rem] w-full sm:h-[26rem] lg:h-[32rem]"
+                                        data-lat="{{ (float) $lat }}"
+                                        data-lng="{{ (float) $lng }}"
+                                        data-name="{{ e($departmentName) }}"
+                                        data-label="{{ e($mapLabel) }}"></div>
+
+                                    <div class="absolute left-3 top-3 z-[500] flex flex-wrap gap-2">
+                                        <button type="button" data-map-action="locate"
+                                            class="inline-flex items-center justify-center rounded-lg bg-white/95 px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-950/95 dark:text-gray-100 dark:ring-gray-800">
+                                            {{ $locale === 'ne' ? 'मेरो स्थान' : 'My Location' }}
+                                        </button>
+                                        <button type="button" data-map-action="layers"
+                                            class="inline-flex items-center justify-center rounded-lg bg-white/95 px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-950/95 dark:text-gray-100 dark:ring-gray-800">
+                                            {{ $locale === 'ne' ? 'लेयर' : 'Layers' }}
+                                        </button>
+                                        <button type="button" data-map-action="reset"
+                                            class="inline-flex items-center justify-center rounded-lg bg-white/95 px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-950/95 dark:text-gray-100 dark:ring-gray-800">
+                                            {{ $locale === 'ne' ? 'रीसेट' : 'Reset' }}
+                                        </button>
+                                        <button type="button" data-map-action="copy"
+                                            class="inline-flex items-center justify-center rounded-lg bg-white/95 px-3 py-2 text-xs font-semibold text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gray-950/95 dark:text-gray-100 dark:ring-gray-800">
+                                            {{ $locale === 'ne' ? 'कपी' : 'Copy' }}
+                                        </button>
+
+                                        @if (!empty($mapOpenUrl))
+                                            <a href="{{ $mapOpenUrl }}" target="_blank" rel="noopener"
+                                                class="inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                                {{ $locale === 'ne' ? 'खोल्नुहोस्' : 'Open' }}
+                                            </a>
                                         @endif
+                                        <button type="button" data-map-action="directions"
+                                            class="inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                                            {{ $locale === 'ne' ? 'दिशा' : 'Directions' }}
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'फोन' : 'Phone' }}</div>
-                                    <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                        {{ $department?->phone ?: '+977-000-0000000' }}
-                                    </div>
+                            @else
+                                <div class="flex h-[22rem] items-center justify-center bg-gray-100 text-sm text-gray-600 dark:bg-gray-900 dark:text-gray-300 sm:h-[26rem] lg:h-[32rem]">
+                                    {{ $locale === 'ne' ? 'नक्सा डेटा उपलब्ध छैन' : 'Map data not available' }}
                                 </div>
-                                <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'ठेगाना' : 'Address' }}</div>
-                                    <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                        {{ $addressText ?: ($locale === 'ne' ? 'विभागीय कार्यालय' : 'Department office') }}
-                                    </div>
-                                </div>
-                            </div>
+                            @endif
                         </div>
 
-                        <div class="lg:col-span-7">
-                            <div class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                                @php
-                                    $lat = $department?->latitude;
-                                    $lng = $department?->longitude;
-                                    $mapUrl = null;
-                                    if ($lat && $lng) {
-                                        $mapUrl = "https://www.openstreetmap.org/export/embed.html?bbox=" . ($lng - 0.01) . "%2C" . ($lat - 0.01) . "%2C" . ($lng + 0.01) . "%2C" . ($lat + 0.01) . "&layer=mapnik&marker={$lat}%2C{$lng}";
-                                    }
-                                @endphp
-                                @if ($mapUrl)
-                                    <iframe title="{{ $locale === 'ne' ? 'नक्सा' : 'Map' }}" src="{{ $mapUrl }}" class="h-80 w-full" loading="lazy"></iframe>
-                                @else
-                                    <div class="flex h-80 items-center justify-center bg-gray-100 text-sm text-gray-600 dark:bg-gray-900 dark:text-gray-300">
-                                        {{ $locale === 'ne' ? 'नक्सा डेटा उपलब्ध छैन' : 'Map data not available' }}
-                                    </div>
-                                @endif
+                        <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'इमेल' : 'Email' }}</div>
+                                <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    @if (!empty($department?->email))
+                                        <a class="text-red-700 hover:underline dark:text-red-400" href="mailto:{{ $department->email }}">{{ $department->email }}</a>
+                                    @else
+                                        <span class="text-gray-500 dark:text-gray-400">support@example.edu</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'फोन' : 'Phone' }}</div>
+                                <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    {{ $department?->phone ?: '+977-000-0000000' }}
+                                </div>
+                            </div>
+                            <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'ठेगाना' : 'Address' }}</div>
+                                <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    {{ $addressText ?: ($locale === 'ne' ? 'विभागीय कार्यालय' : 'Department office') }}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <footer class="border-t border-gray-200 bg-white py-10 dark:border-gray-800 dark:bg-gray-950">
+            <footer class="border-t border-white/10 bg-gradient-to-b from-gray-950 via-slate-950 to-black py-12 text-white">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="grid gap-8 md:grid-cols-12">
                         <div class="md:col-span-5">
                             <div class="flex items-center gap-3">
-                                <img src="{{ $departmentLogoUrl }}" alt="" class="h-10 w-10 rounded-lg object-contain ring-1 ring-gray-200 dark:ring-gray-800">
+                                <img src="{{ $departmentLogoUrl }}" alt="" class="h-10 w-10 rounded-lg bg-white/5 object-contain ring-1 ring-white/10">
                                 <div>
-                                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $departmentName }}</div>
-                                    <div class="mt-1 text-xs text-gray-600 dark:text-gray-300">{{ config('app.name', 'IT-DMS') }}</div>
+                                    <div class="text-sm font-semibold text-white">{{ $departmentName }}</div>
+                                    <div class="mt-1 text-xs text-white/70">{{ config('app.name', 'IT-DMS') }}</div>
                                 </div>
                             </div>
-                            <p class="mt-4 text-sm text-gray-700 dark:text-gray-300">
+                            <p class="mt-4 text-sm text-white/75">
                                 {{ $locale === 'ne'
                                     ? 'विद्यार्थी, शिक्षक र अभिभावकका लागि विभागीय सेवा र स्रोतहरू।'
                                     : 'Department services and resources for students, faculty, and parents.' }}
                             </p>
+
+                            <div class="mt-5 flex flex-wrap items-center gap-3">
+                                @if (!empty($department?->website))
+                                    <a href="{{ Str::startsWith($department->website, ['http://', 'https://']) ? $department->website : 'https://' . ltrim($department->website, '/') }}" target="_blank" rel="noopener noreferrer"
+                                       class="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-xs font-semibold text-white ring-1 ring-white/10 hover:bg-white/10">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75S6.615 21.75 12 21.75 21.75 17.385 21.75 12 17.385 2.25 12 2.25Zm-1.5 16.2a8.25 8.25 0 0 1 0-12.9v.2c0 2.2.75 4.68 2.25 6.45-1.5 1.77-2.25 4.25-2.25 6.45v-.2Zm3 0v.2a8.25 8.25 0 0 0 0-12.9v.2c0 2.2-.75 4.68-2.25 6.45 1.5 1.77 2.25 4.25 2.25 6.45Z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>{{ $locale === 'ne' ? 'वेबसाइट' : 'Website' }}</span>
+                                    </a>
+                                @endif
+                                @if (!empty($department?->email))
+                                    <a href="mailto:{{ $department->email }}" class="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-xs font-semibold text-white ring-1 ring-white/10 hover:bg-white/10">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                            <path d="M1.5 6.75A2.25 2.25 0 0 1 3.75 4.5h16.5A2.25 2.25 0 0 1 22.5 6.75v10.5A2.25 2.25 0 0 1 20.25 19.5H3.75A2.25 2.25 0 0 1 1.5 17.25V6.75Zm2.25-.75a.75.75 0 0 0-.75.75v.243l7.5 4.5 7.5-4.5V6.75a.75.75 0 0 0-.75-.75H3.75Z"/>
+                                        </svg>
+                                        <span>{{ $locale === 'ne' ? 'इमेल' : 'Email' }}</span>
+                                    </a>
+                                @endif
+                                @if (!empty($department?->phone))
+                                    <a href="tel:{{ preg_replace('/\\s+/', '', $department->phone) }}" class="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-2 text-xs font-semibold text-white ring-1 ring-white/10 hover:bg-white/10">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                            <path fill-rule="evenodd" d="M1.5 4.5A3 3 0 0 1 4.5 1.5h.75A2.25 2.25 0 0 1 7.5 3.75v2.26a2.25 2.25 0 0 1-1.318 2.046l-.85.377a.75.75 0 0 0-.427.896 12.02 12.02 0 0 0 7.767 7.767.75.75 0 0 0 .896-.427l.377-.85A2.25 2.25 0 0 1 17.99 16.5h2.26A2.25 2.25 0 0 1 22.5 18.75v.75a3 3 0 0 1-3 3H18c-9.113 0-16.5-7.387-16.5-16.5V4.5Z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>{{ $locale === 'ne' ? 'फोन' : 'Phone' }}</span>
+                                    </a>
+                                @endif
+                            </div>
                         </div>
 
                         <div class="md:col-span-3">
-                            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $locale === 'ne' ? 'छिटो लिंक' : 'Quick Links' }}</div>
-                            <ul class="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-300">
-                                <li><a class="hover:text-red-700 dark:hover:text-red-400" href="#about">{{ $locale === 'ne' ? 'बारेमा' : 'About' }}</a></li>
-                                <li><a class="hover:text-red-700 dark:hover:text-red-400" href="#curriculum">{{ $locale === 'ne' ? 'पाठ्यक्रम' : 'Curriculum' }}</a></li>
-                                <li><a class="hover:text-red-700 dark:hover:text-red-400" href="#notices">{{ $locale === 'ne' ? 'सूचना' : 'Notices' }}</a></li>
-                                <li><a class="hover:text-red-700 dark:hover:text-red-400" href="{{ route('gallery.index') }}">{{ $locale === 'ne' ? 'ग्यालरी' : 'Gallery' }}</a></li>
+                            <div class="text-sm font-semibold text-white">{{ $locale === 'ne' ? 'छिटो लिंक' : 'Quick Links' }}</div>
+                            <ul class="mt-4 space-y-2 text-sm text-white/75">
+                                <li><a class="inline-flex items-center gap-2 hover:text-white" href="#about"><span class="h-1.5 w-1.5 rounded-full bg-red-400"></span>{{ $locale === 'ne' ? 'बारेमा' : 'About' }}</a></li>
+                                <li><a class="inline-flex items-center gap-2 hover:text-white" href="#curriculum"><span class="h-1.5 w-1.5 rounded-full bg-red-400"></span>{{ $locale === 'ne' ? 'पाठ्यक्रम' : 'Curriculum' }}</a></li>
+                                <li><a class="inline-flex items-center gap-2 hover:text-white" href="#notices"><span class="h-1.5 w-1.5 rounded-full bg-red-400"></span>{{ $locale === 'ne' ? 'सूचना' : 'Notices' }}</a></li>
+                                <li><a class="inline-flex items-center gap-2 hover:text-white" href="{{ route('gallery.index') }}"><span class="h-1.5 w-1.5 rounded-full bg-red-400"></span>{{ $locale === 'ne' ? 'ग्यालरी' : 'Gallery' }}</a></li>
                             </ul>
                         </div>
 
-                        <div class="md:col-span-4">
-                            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $locale === 'ne' ? 'Account' : 'Account' }}</div>
-                            <ul class="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                        <div class="md:col-span-2">
+                            <div class="text-sm font-semibold text-white">{{ $locale === 'ne' ? 'खाता' : 'Account' }}</div>
+                            <ul class="mt-4 space-y-2 text-sm text-white/75">
                                 @auth
-                                    <li><a class="hover:text-red-700 dark:hover:text-red-400" href="{{ route('dashboard') }}">{{ $locale === 'ne' ? 'ड्यासबोर्ड' : 'Dashboard' }}</a></li>
+                                    <li><a class="inline-flex items-center gap-2 hover:text-white" href="{{ route('dashboard') }}"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>{{ $locale === 'ne' ? 'ड्यासबोर्ड' : 'Dashboard' }}</a></li>
                                 @else
-                                    <li><a class="hover:text-red-700 dark:hover:text-red-400" href="{{ route('login') }}">{{ $locale === 'ne' ? 'लगइन' : 'Login' }}</a></li>
+                                    <li><a class="inline-flex items-center gap-2 hover:text-white" href="{{ route('login') }}"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>{{ $locale === 'ne' ? 'लगइन' : 'Login' }}</a></li>
                                     @if (Route::has('register'))
-                                        <li><a class="hover:text-red-700 dark:hover:text-red-400" href="{{ route('register') }}">{{ $locale === 'ne' ? 'दर्ता' : 'Register' }}</a></li>
+                                        <li><a class="inline-flex items-center gap-2 hover:text-white" href="{{ route('register') }}"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>{{ $locale === 'ne' ? 'दर्ता' : 'Register' }}</a></li>
                                     @endif
                                 @endauth
                             </ul>
                         </div>
+
+                        <div class="md:col-span-2">
+                            <div class="text-sm font-semibold text-white">{{ $locale === 'ne' ? 'सामाजिक' : 'Connect' }}</div>
+                            <div class="mt-4 flex items-center gap-2">
+                                @php
+                                    $mapHref = $mapOpenUrl ?? null;
+                                @endphp
+                                @if (!empty($mapHref))
+                                    <a href="{{ $mapHref }}" target="_blank" rel="noopener noreferrer" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 hover:bg-white/10" aria-label="Map">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-white/80">
+                                            <path fill-rule="evenodd" d="M11.54 22.351A.75.75 0 0 0 12.46 22.35l7.5-3.75a.75.75 0 0 0 .414-.67V3.75a.75.75 0 0 0-1.086-.67L12 6.773 4.71 3.08A.75.75 0 0 0 3.624 3.75v14.18c0 .284.16.544.414.67l7.5 3.75ZM11.25 8.07 5.124 4.987v12.4l6.126 3.062V8.07Zm1.5 12.38 6.126-3.062v-12.4L12.75 8.07v12.38Z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </a>
+                                @endif
+                                @if (!empty($department?->website))
+                                    <a href="{{ Str::startsWith($department->website, ['http://', 'https://']) ? $department->website : 'https://' . ltrim($department->website, '/') }}" target="_blank" rel="noopener noreferrer" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 hover:bg-white/10" aria-label="Website">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-white/80">
+                                            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75S6.615 21.75 12 21.75 21.75 17.385 21.75 12 17.385 2.25 12 2.25Zm-3.375 9.75c0-1.42.29-2.766.815-3.988A18.7 18.7 0 0 0 7.5 12c0 1.42.29 2.766.815 3.988A18.7 18.7 0 0 0 8.625 12Zm1.912-5.655A15.54 15.54 0 0 1 12 3.902a15.54 15.54 0 0 1 1.463 2.443A18.73 18.73 0 0 0 12 6c-.507 0-.998.023-1.463.345ZM12 7.5c.62 0 1.217.03 1.781.09.29.86.469 1.791.469 2.66 0 .87-.179 1.8-.469 2.66A18.6 18.6 0 0 1 12 13.5a18.6 18.6 0 0 1-1.781-.09A8.53 8.53 0 0 1 9.75 10.25c0-.87.179-1.8.469-2.66.564-.06 1.161-.09 1.781-.09Z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </a>
+                                @endif
+                                @if (!empty($department?->email))
+                                    <a href="mailto:{{ $department->email }}" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10 hover:bg-white/10" aria-label="Email">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5 text-white/80">
+                                            <path d="M2.25 6.75A2.25 2.25 0 0 1 4.5 4.5h15A2.25 2.25 0 0 1 21.75 6.75v10.5A2.25 2.25 0 0 1 19.5 19.5h-15A2.25 2.25 0 0 1 2.25 17.25V6.75Zm2.25-.75a.75.75 0 0 0-.75.75v.243l7.5 4.5 7.5-4.5V6.75a.75.75 0 0 0-.75-.75h-15Z"/>
+                                        </svg>
+                                    </a>
+                                @endif
+                            </div>
+                            <p class="mt-4 text-xs text-white/60">
+                                {{ $locale === 'ne' ? 'नयाँ अपडेटका लागि जोडिनुहोस्।' : 'Stay connected for updates.' }}
+                            </p>
+                        </div>
                     </div>
 
-                    <div class="mt-10 flex flex-col gap-2 border-t border-gray-200 pt-6 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
                         <div>© {{ now()->year }} {{ $departmentShort }}. {{ $locale === 'ne' ? 'सबै अधिकार सुरक्षित।' : 'All rights reserved.' }}</div>
                         <form method="POST" action="{{ route('language.switch') }}" class="sm:hidden">
                             @csrf
-                            <select name="locale" onchange="this.form.submit()" class="rounded-lg border-gray-300 bg-white text-xs text-gray-800 shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                            <select name="locale" onchange="this.form.submit()" class="rounded-lg border-white/15 bg-white/5 text-xs text-white shadow-sm focus:border-red-500 focus:ring-red-500">
                                 @foreach (config('locales.supported') as $code => $label)
                                     <option value="{{ $code }}" @selected($code === $locale)>{{ $label }}</option>
                                 @endforeach
@@ -866,23 +1225,39 @@
 
             <script>
                 document.addEventListener('alpine:init', () => {
-                    Alpine.data('programTabs', () => ({
-                        active: 'all',
-                        programs: @js($programs->values()),
-                        get filtered() {
-                            if (this.active === 'all') return this.programs;
-                            return this.programs.filter(p => p.level === this.active);
+                    Alpine.data('heroSlider', (config) => ({
+                        slides: Array.isArray(config.slides) ? config.slides : [],
+                        active: 0,
+                        timer: null,
+                        go(i) {
+                            const n = this.slides.length || 0;
+                            if (!n) return;
+                            const idx = Number(i);
+                            this.active = ((Number.isFinite(idx) ? idx : 0) + n) % n;
+                            this.restart();
                         },
-                        badge(level) {
-                            const map = { ug: 'UG', pg: 'PG', diploma: 'Diploma' };
-                            return map[level] || 'Program';
+                        next() {
+                            this.go(this.active + 1);
+                        },
+                        prev() {
+                            this.go(this.active - 1);
+                        },
+                        restart() {
+                            if (this.timer) clearInterval(this.timer);
+                            if (this.slides.length <= 1) return;
+                            this.timer = setInterval(() => this.next(), 5000);
+                        },
+                        init() {
+                            this.restart();
                         },
                     }));
 
                     Alpine.data('subjectCatalog', (config) => ({
                         locale: config.locale || 'en',
                         subjects: Array.isArray(config.subjects) ? config.subjects : [],
-                        query: '',
+                        indexUrl: config.indexUrl || null,
+                        maxItems: Number.isFinite(config.maxItems) ? Number(config.maxItems) : null,
+                        query: config.initialQuery || '',
                         semester: config.initialSemester || 'all',
                         openId: null,
                         detailLabel: (config.locale === 'ne') ? 'विवरण' : 'Details',
@@ -900,10 +1275,35 @@
                                 return hay.includes(q);
                             });
                         },
+                        get visibleSubjects() {
+                            const max = this.maxItems;
+                            if (!max || max < 1) return this.filteredSubjects;
+                            return this.filteredSubjects.slice(0, max);
+                        },
+                        get showViewAll() {
+                            const max = this.maxItems;
+                            if (!this.indexUrl) return false;
+                            if (!max || max < 1) return false;
+                            return this.filteredSubjects.length > max;
+                        },
+                        get viewAllUrl() {
+                            if (!this.indexUrl) return '#';
+                            const params = [];
+                            if (this.semester && this.semester !== 'all') {
+                                params.push(`semester=${encodeURIComponent(this.semester)}`);
+                            }
+                            if (this.query) {
+                                params.push(`q=${encodeURIComponent(this.query)}`);
+                            }
+                            return this.indexUrl + (params.length ? `?${params.join('&')}` : '');
+                        },
                         get resultText() {
-                            const total = this.subjects.length;
-                            const shown = this.filteredSubjects.length;
-                            return (this.locale === 'ne') ? `${shown} / ${total} विषय` : `${shown} / ${total} subjects`;
+                            const total = this.filteredSubjects.length;
+                            const shown = this.visibleSubjects.length;
+                            if (this.showViewAll) {
+                                return (this.locale === 'ne') ? `${shown} / ${total} (पूर्वावलोकन)` : `${shown} / ${total} (preview)`;
+                            }
+                            return (this.locale === 'ne') ? `${total} विषय` : `${total} subjects`;
                         },
                         semesterLabel(sem) {
                             const s = String(sem || '').trim();
@@ -959,3 +1359,139 @@
         </main>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const el = document.getElementById('departmentMap');
+            if (!el || typeof window.L === 'undefined') return;
+
+            const lat = Number(el.dataset.lat);
+            const lng = Number(el.dataset.lng);
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+            const deptName = el.dataset.name || 'Department';
+            const label = el.dataset.label || 'Location';
+
+            const map = L.map('departmentMap', { scrollWheelZoom: false }).setView([lat, lng], 16);
+
+            const layers = {
+                'Standard': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap contributors',
+                }),
+                'Humanitarian': L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap contributors, HOT',
+                }),
+                'Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    maxZoom: 19,
+                    attribution: 'Tiles &copy; Esri',
+                }),
+            };
+
+            layers['Standard'].addTo(map);
+            const layerControl = L.control.layers(layers, null, { collapsed: true, position: 'topright' }).addTo(map);
+            L.control.scale({ position: 'bottomleft', imperial: false }).addTo(map);
+
+            const marker = L.marker([lat, lng]).addTo(map);
+            marker.bindPopup(`<strong>${deptName}</strong><br/>${label}`);
+
+            const container = el.closest('.relative');
+            const actionButtons = container ? container.querySelectorAll('[data-map-action]') : [];
+
+            const toggleLayersUi = () => {
+                const c = layerControl.getContainer();
+                const isHidden = c.style.display === 'none';
+                c.style.display = isHidden ? '' : 'none';
+            };
+
+            actionButtons.forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const action = btn.getAttribute('data-map-action');
+
+                    if (action === 'reset') {
+                        map.setView([lat, lng], 16);
+                        marker.openPopup();
+                        return;
+                    }
+
+                    if (action === 'layers') {
+                        toggleLayersUi();
+                        return;
+                    }
+
+                    if (action === 'copy') {
+                        const txt = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                        try {
+                            await navigator.clipboard.writeText(txt);
+                            btn.textContent = '{{ $locale === 'ne' ? 'कपी भयो' : 'Copied' }}';
+                            setTimeout(() => (btn.textContent = '{{ $locale === 'ne' ? 'कपी' : 'Copy' }}'), 1200);
+                        } catch (e) {
+                            window.prompt('Copy coordinates:', txt);
+                        }
+                        return;
+                    }
+
+                    if (action === 'locate') {
+                        if (!navigator.geolocation) return;
+                        navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                                const userLat = pos.coords.latitude;
+                                const userLng = pos.coords.longitude;
+
+                                L.circleMarker([userLat, userLng], {
+                                    radius: 8,
+                                    color: '#ef4444',
+                                    weight: 2,
+                                    fillColor: '#ef4444',
+                                    fillOpacity: 0.25,
+                                })
+                                    .addTo(map)
+                                    .bindPopup('{{ $locale === 'ne' ? 'मेरो स्थान' : 'My location' }}')
+                                    .openPopup();
+
+                                map.fitBounds(L.latLngBounds([
+                                    [lat, lng],
+                                    [userLat, userLng],
+                                ]), { padding: [24, 24] });
+                            },
+                            () => {},
+                            { enableHighAccuracy: true, timeout: 8000 }
+                        );
+                        return;
+                    }
+
+                    if (action === 'directions') {
+                        const dest = `${lat},${lng}`;
+                        const openDirections = (origin) => {
+                            const url = origin
+                                ? `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(dest)}`
+                                : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}`;
+                            window.open(url, '_blank', 'noopener');
+                        };
+
+                        if (!navigator.geolocation) {
+                            openDirections(null);
+                            return;
+                        }
+
+                        navigator.geolocation.getCurrentPosition(
+                            (pos) => openDirections(`${pos.coords.latitude},${pos.coords.longitude}`),
+                            () => openDirections(null),
+                            { enableHighAccuracy: true, timeout: 8000 }
+                        );
+                    }
+                });
+            });
+
+            // Hide layers UI by default; button toggles it.
+            layerControl.getContainer().style.display = 'none';
+
+            // Enable scroll zoom only when user focuses the map.
+            map.on('focus', () => map.scrollWheelZoom.enable());
+            map.on('blur', () => map.scrollWheelZoom.disable());
+        });
+    </script>
+@endpush

@@ -29,18 +29,18 @@
             <div class="bg-white p-4 border-b-2 border-black">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-4">
-                        <img src="{{ $collegeLogoUrl ?? asset('images/default-logo.svg') }}" alt="College Logo" class="h-16 w-16 object-contain" />
+                        <img src="{{ $departmentLogoUrl ?? asset('images/default-logo.svg') }}" alt="Department Logo" class="h-16 w-16 object-contain" />
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-800">{{ $college->name ?? 'My College' }}</h1>
+                            <h1 class="text-2xl font-bold text-gray-800">{{ $department->name ?? 'My Department' }}</h1>
                             @php
                                 $addressParts = array_filter([
-                                    $college->address ?? null,
-                                    $college->city ?? null,
-                                    $college->district ?? null,
+                                    $department->address ?? null,
+                                    $department->city ?? null,
+                                    $department->district ?? null,
                                 ]);
                                 $contactParts = array_filter([
-                                    $college->email ? 'Email: '.$college->email : null,
-                                    $college->phone ? 'Phone: '.$college->phone : null,
+                                    $department->email ? 'Email: '.$department->email : null,
+                                    $department->phone ? 'Phone: '.$department->phone : null,
                                 ]);
                             @endphp
                             @if(count($addressParts) > 0)

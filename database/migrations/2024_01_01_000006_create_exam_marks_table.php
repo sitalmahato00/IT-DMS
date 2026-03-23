@@ -23,18 +23,18 @@ return new class extends Migration
             $table->enum('marks_status', ['filled', 'partial', 'empty', 'absent'])->nullable()->default('empty');
             $table->decimal('full_marks', 5, 2)->default(100);
             $table->decimal('passing_marks', 5, 2)->default(40);
-            $table->decimal('theory_internal_marks', 5, 2)->nullable()->after('grade');
-            $table->decimal('theory_external_marks', 5, 2)->nullable()->after('theory_internal_marks');
-            $table->decimal('practical_internal_marks', 5, 2)->nullable()->after('theory_external_marks');
-            $table->decimal('practical_external_marks', 5, 2)->nullable()->after('practical_internal_marks');
-            $table->decimal('theory_internal_full_marks', 5, 2)->nullable()->after('practical_external_marks');
-            $table->decimal('theory_external_full_marks', 5, 2)->nullable()->after('theory_internal_full_marks');
-            $table->decimal('practical_internal_full_marks', 5, 2)->nullable()->after('theory_external_full_marks');
-            $table->decimal('practical_external_full_marks', 5, 2)->nullable()->after('practical_internal_full_marks');
-            $table->unsignedInteger('theory_internal_pass_marks')->nullable()->after('practical_external_full_marks');
-            $table->unsignedInteger('theory_external_pass_marks')->nullable()->after('theory_internal_pass_marks');
-            $table->unsignedInteger('practical_internal_pass_marks')->nullable()->after('theory_external_pass_marks');
-            $table->unsignedInteger('practical_external_pass_marks')->nullable()->after('practical_internal_pass_marks');
+            $table->decimal('theory_internal_marks', 5, 2)->nullable();
+            $table->decimal('theory_external_marks', 5, 2)->nullable();
+            $table->decimal('practical_internal_marks', 5, 2)->nullable();
+            $table->decimal('practical_external_marks', 5, 2)->nullable();
+            $table->decimal('theory_internal_full_marks', 5, 2)->nullable();
+            $table->decimal('theory_external_full_marks', 5, 2)->nullable();
+            $table->decimal('practical_internal_full_marks', 5, 2)->nullable();
+            $table->decimal('practical_external_full_marks', 5, 2)->nullable();
+            $table->unsignedInteger('theory_internal_pass_marks')->nullable();
+            $table->unsignedInteger('theory_external_pass_marks')->nullable();
+            $table->unsignedInteger('practical_internal_pass_marks')->nullable();
+            $table->unsignedInteger('practical_external_pass_marks')->nullable();
             $table->decimal('percentage', 5, 2)->nullable();
             $table->string('grade', 5)->nullable();
             $table->text('remarks')->nullable();
@@ -59,4 +59,3 @@ return new class extends Migration
         Schema::dropIfExists('exam_marks');
     }
 };
-

@@ -943,7 +943,7 @@ class CourseController extends Controller
         }
 
         $courses = $coursesQuery->orderBy("subjects.subject_name")->get();
-        $college = \App\Models\College::first();
+        $college = \App\Models\Department::first();
 
         return view('admin.print.course-list', compact('courses', 'college'));
     }

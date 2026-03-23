@@ -2,14 +2,14 @@
 <aside id="sidebar" x-data="{ activeGroup: 'academic', toggleGroup(group){this.activeGroup = this.activeGroup === group ? null : group} }" class="hidden lg:flex lg:w-60 bg-white text-slate-900 flex-col fixed lg:static w-64 left-0 z-30 overflow-y-auto transition-all duration-300 shadow-xl border-r border-red-500/40">
     <!-- Brand Header - Logo kept as is -->
     <div class="hidden lg:flex flex-col items-center justify-center px-4 py-2 min-h-[88px] bg-[#FF0037] text-white border-b border-red-500">
-        @if($college && $college->logo_path)
-            <img src="{{ $collegeLogoUrl }}" alt="{{ $college->name ?? 'College Logo' }}" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg">
+        @if($department && $department->logo_path)
+            <img src="{{ $departmentLogoUrl }}" alt="{{ $department->name ?? 'Department Logo' }}" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg">
         @else
             <img src="{{ asset('images/default-logo.svg') }}" alt="Default Logo" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg">
         @endif
         <div class="mt-3 text-center">
             <h1 class="font-semibold text-xl sm:text-2xl leading-7 text-white block tracking-tight">
-                {{ $college?->short_name ?? ($college?->name ?? __('IT-DMS')) }}
+                {{ $department?->short_name ?? ($department?->name ?? __('IT-DMS')) }}
             </h1>
             <p class="text-sm sm:text-[13px] leading-5 text-white/80">{{ __("Faculty Portal") }}</p>
         </div>
@@ -199,4 +199,3 @@
         }
     }
 </style>
-

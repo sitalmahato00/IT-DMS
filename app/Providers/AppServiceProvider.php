@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\View;
 use App\Models\AuditLog;
 use App\Observers\AuditObserver;
 use App\Observers\NotificationObserver;
-use App\View\Composers\CollegeComposer;
+use App\View\Composers\DepartmentComposer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,8 +40,8 @@ class AppServiceProvider extends ServiceProvider
         // This enables <x-mail::layout> syntax in Blade templates
         View::addNamespace('mail', resource_path('views/emails'));
 
-        // Register college details view composer for all views
-        View::composer('*', CollegeComposer::class);
+        // Register department details view composer for all views
+        View::composer('*', DepartmentComposer::class);
 
         // Make supported locales available in views via config('locales.supported')
 

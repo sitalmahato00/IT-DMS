@@ -535,9 +535,8 @@ class ParentController extends Controller
             return $parent;
         });
 
-        $college = \App\Models\College::first();
+        $college = \App\Models\Department::first();
 
         return view('admin.print.parents-list', compact('parents', 'college'));
     }
 }
-

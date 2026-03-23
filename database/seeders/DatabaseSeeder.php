@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             // Core data
-            CollegeSeeder::class,
+            DepartmentSeeder::class,
             SemesterSeeder::class,
             SubjectSeeder::class,
             
@@ -25,7 +25,6 @@ class DatabaseSeeder extends Seeder
             
             // Relations
             SubjectTeacherSeeder::class,
-            SubjectStudentSeeder::class,
             
             // Operational data
             ExamSeeder::class,
@@ -36,4 +35,3 @@ class DatabaseSeeder extends Seeder
         ]);
     }
 }
-

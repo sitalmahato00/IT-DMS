@@ -3,13 +3,13 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\College;
+use App\Models\Department;
 
-class CollegeSeeder extends Seeder
+class DepartmentSeeder extends Seeder
 {
     public function run(): void
     {
-        College::create([
+        Department::create([
             'name' => 'DIT College of Engineering',
             'name_nepali' => 'डिट कलेज अफ इन्जिनियरिङ',
             'short_name' => 'DIT',
@@ -31,7 +31,6 @@ class CollegeSeeder extends Seeder
         ]);
 
         // Update ErpSetting if exists
-        \App\Models\ErpSetting::updateOrCreate(['key' => 'college_id'], ['value' => 1]);
+        \App\Models\ErpSetting::updateOrCreate(['key' => 'department_id'], ['value' => 1]);
     }
 }
-

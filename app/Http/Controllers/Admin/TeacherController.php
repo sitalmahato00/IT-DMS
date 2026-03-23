@@ -453,7 +453,7 @@ class TeacherController extends Controller
             ->orderBy('name');
 
         $teachers = $teachersQuery->get();
-        $college = \App\Models\College::first();
+        $college = \App\Models\Department::first();
 
         return view('admin.print.teachers-list', compact('teachers', 'college'));
     }
