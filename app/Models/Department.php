@@ -72,4 +72,17 @@ class Department extends Model
 
         return asset('images/default-logo.svg');
     }
+
+    public function getProgramsImageUrl(): ?string
+    {
+        if (!$this->programs_image_path) {
+            return null;
+        }
+
+        if (Storage::disk('public')->exists($this->programs_image_path)) {
+            return Storage::url($this->programs_image_path);
+        }
+
+        return asset('storage/' . ltrim($this->programs_image_path, '/'));
+    }
 }

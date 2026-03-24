@@ -90,19 +90,7 @@
         : null;
 
     $defaultProgramsImage = asset('images/hero-image.jpg');
-    $programsImageUrl = $defaultProgramsImage;
-    if (!empty($department?->programs_image_path)) {
-        $programImagePath = ltrim($department->programs_image_path, '/');
-        try {
-            if (Storage::disk('public')->exists($programImagePath)) {
-                $programsImageUrl = Storage::disk('public')->url($programImagePath);
-            } else {
-                $programsImageUrl = asset('storage/' . $programImagePath);
-            }
-        } catch (\Throwable $e) {
-            $programsImageUrl = asset('storage/' . $programImagePath);
-        }
-    }
+    $programsImageUrl = $department?->getProgramsImageUrl() ?: $defaultProgramsImage;
 
     $subjectPayload = ($subjects ?? collect())->map(function ($s) {
         $teachers = collect($s->teachers ?? [])

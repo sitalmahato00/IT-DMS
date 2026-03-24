@@ -25,7 +25,6 @@ class DepartmentController extends Controller
             'logo' => 'nullable|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'hero_images' => 'nullable|array',
             'hero_images.*' => 'nullable|image|max:4096',
-            'replace_hero_images' => 'nullable|boolean',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'website' => 'nullable|url|max:255',
@@ -79,27 +78,13 @@ class DepartmentController extends Controller
                     ->values()
                     ->all();
 
-                $replace = (bool) ($validated['replace_hero_images'] ?? false);
                 $oldPaths = collect($department->hero_images ?? [])->filter()->values()->all();
-
-                if ($replace) {
-                    foreach ($oldPaths as $path) {
-                        if ($path && Storage::disk('public')->exists($path)) {
-                            Storage::disk('public')->delete($path);
-                        }
-                    }
-
-                    $validated['hero_images'] = $newPaths;
-                } else {
-                    $validated['hero_images'] = collect(array_merge($oldPaths, $newPaths))
-                        ->filter()
-                        ->values()
-                        ->all();
-                }
+                $validated['hero_images'] = collect(array_merge($oldPaths, $newPaths))
+                    ->filter()
+                    ->values()
+                    ->all();
             }
         }
-
-        unset($validated['replace_hero_images']);
 
         if ($request->hasFile('programs_image') && $request->file('programs_image')->isValid()) {
             if ($department->programs_image_path && Storage::disk('public')->exists($department->programs_image_path)) {
@@ -137,5 +122,46 @@ class DepartmentController extends Controller
             'success' => false,
             'message' => 'No logo found to delete',
         ], 404);
+    }
+
+    public function deleteHeroImage($index)
+    {
+        $department = Department::first();
+
+        if (!$department) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Department not found',
+            ], 404);
+        }
+
+        $heroImages = collect($department->hero_images ?? [])->filter()->values();
+        $index = (int) $index;
+
+        if (!isset($heroImages[$index])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hero image not found',
+            ], 404);
+        }
+
+        $path = $heroImages[$index];
+
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+
+        $updatedImages = $heroImages
+            ->reject(fn ($_, $key) => (int) $key === $index)
+            ->values()
+            ->all();
+
+        $department->update(['hero_images' => $updatedImages]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Hero image deleted successfully',
+            'hero_images' => $updatedImages,
+        ]);
     }
 }

@@ -195,16 +195,17 @@
                         <label class="block text-sm font-medium text-gray-900 mb-2">Hero Photos (multiple)</label>
                         <input type="file" name="hero_images[]" multiple accept="image/*"
                             class="block w-full text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700" />
-                        <label class="mt-3 inline-flex items-center gap-2 text-xs font-medium text-gray-700">
-                            <input type="checkbox" name="replace_hero_images" value="1" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
-                            Replace existing hero photos (deletes old)
-                        </label>
                         @if($department && !empty($department->hero_images))
                             <div class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
-                                @foreach((array) $department->hero_images as $img)
+                                @foreach((array) $department->hero_images as $index => $img)
                                     @if(!empty($img))
-                                        <div class="aspect-[4/3] overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                                        <div class="relative aspect-[4/3] overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
                                             <img src="{{ asset('storage/' . ltrim($img, '/')) }}" alt="Hero photo" class="h-full w-full object-cover" />
+                                            <button type="button"
+                                                class="absolute right-2 top-2 rounded-full bg-blue-500 p-1.5 text-white shadow-sm transition hover:bg-blue-600"
+                                                onclick="deleteHeroImage({{ $index }})">
+                                                <i class="bi bi-trash text-xs"></i>
+                                            </button>
                                         </div>
                                     @endif
                                 @endforeach
@@ -236,7 +237,7 @@
                             class="block w-full text-sm text-gray-700 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700" />
                         @if($department && !empty($department->programs_image_path))
                             <div class="mt-3 aspect-[16/9] overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-                                <img src="{{ asset('storage/' . ltrim($department->programs_image_path, '/')) }}" alt="Programs photo" class="h-full w-full object-cover" />
+                                <img src="{{ $department->getProgramsImageUrl() }}" alt="Programs photo" class="h-full w-full object-cover" />
                             </div>
                         @endif
                     </div>
@@ -313,6 +314,33 @@
             }
         } catch (e) {
             showToast('Error deleting logo', 'error');
+            showLoader(false);
+        }
+    }
+
+    async function deleteHeroImage(index) {
+        if (!confirm('Delete this hero image?')) return;
+        showLoader(true, 'Deleting hero image...');
+
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            const response = await fetch(`{{ url('/admin/department/hero-images') }}/${index}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                showToast('Hero image deleted successfully', 'success');
+                setTimeout(() => window.location.reload(), 800);
+            } else {
+                showToast(data.message || 'Error deleting hero image', 'error');
+                showLoader(false);
+            }
+        } catch (e) {
+            showToast('Error deleting hero image', 'error');
             showLoader(false);
         }
     }

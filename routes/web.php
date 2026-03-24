@@ -421,6 +421,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/department', [DepartmentController::class, 'edit'])->name('department.edit');
     Route::post('/department', [DepartmentController::class, 'update'])->name('department.update');
     Route::delete('/department/logo', [DepartmentController::class, 'deleteLogo'])->name('department.logo.delete');
+    Route::delete('/department/hero-images/{index}', [DepartmentController::class, 'deleteHeroImage'])->name('department.hero-image.delete');
 });
 
 require __DIR__ . '/auth.php';
