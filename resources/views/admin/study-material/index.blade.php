@@ -3,6 +3,22 @@
 @section('title', 'Document Management')
 
 @section('content')
+@php
+    $studyMaterialPayload = $materials->getCollection()->map(function ($material) {
+        return [
+            'id' => $material->id,
+            'title' => $material->title,
+            'description' => $material->description,
+            'semester' => $material->semester,
+            'document_type' => $material->document_type,
+            'course' => $material->subject->subject_name ?? '',
+            'visibility' => $material->visibility,
+            'file_name' => $material->file_name,
+            'file_icon' => $material->file_icon,
+        ];
+    })->values();
+@endphp
+
 {{-- Page Header - Using standardized component --}}
 @include('admin.components.admin-page-header', [
     'title' => 'Documents Management',
@@ -142,4 +158,9 @@
 @include('admin.study-material.partials.add-modal')
 @include('admin.study-material.partials.edit-modal')
 @include('admin.study-material.partials.delete-modal')
+
+<script>
+    window.studyMaterialsData = @json($studyMaterialPayload);
+    window.studyMaterialUpdateBaseUrl = @json(url('/admin/study-material'));
+</script>
 @endsection

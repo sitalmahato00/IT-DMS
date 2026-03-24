@@ -63,35 +63,41 @@ class GalleryController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:200',
             'description' => 'nullable|string',
-            'image' => 'required|image|max:10240|mimes:jpeg,jpg,png,gif,webp',
+            'images' => 'required|array|min:1',
+            'images.*' => 'required|image|max:10240|mimes:jpeg,jpg,png,gif,webp',
             'category' => 'required|in:campus,events,activities,students,faculty,facilities',
             'order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
         ]);
 
         try {
-            // Handle file upload
-            if ($request->hasFile('image')) {
-                $file = $request->file('image');
+            $uploadedCount = 0;
+            $files = $request->file('images', []);
+
+            foreach ($files as $index => $file) {
                 $fileName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                 $filePath = $file->storeAs('gallery', $fileName, 'public');
+
+                $gallery = new Gallery();
+                $gallery->title = count($files) > 1
+                    ? $validated['title'] . ' (' . ($index + 1) . ')'
+                    : $validated['title'];
+                $gallery->description = $validated['description'] ?? null;
+                $gallery->image_path = $filePath;
+                $gallery->image_name = $file->getClientOriginalName();
+                $gallery->category = $validated['category'];
+                $gallery->order = ($validated['order'] ?? 0) + $index;
+                $gallery->is_active = $validated['is_active'] ?? true;
+                $gallery->save();
+
+                $uploadedCount++;
             }
 
-            $gallery = new Gallery();
-            $gallery->title = $validated['title'];
-            $gallery->description = $validated['description'] ?? null;
-            $gallery->image_path = $filePath ?? null;
-            $gallery->image_name = $file->getClientOriginalName() ?? null;
-            $gallery->category = $validated['category'];
-            $gallery->order = $validated['order'] ?? 0;
-            $gallery->is_active = $validated['is_active'] ?? true;
-            $gallery->save();
-
             // Log activity
-            $this->logActivity('Gallery', 'Uploaded Image', "Gallery item '{$validated['title']}' uploaded - Category: {$validated['category']}");
+            $this->logActivity('Gallery', 'Uploaded Image', "Gallery item '{$validated['title']}' uploaded ({$uploadedCount} image(s)) - Category: {$validated['category']}");
 
             return redirect()->route('admin.gallery')
-                ->with('success', 'Gallery item added successfully.');
+                ->with('success', $uploadedCount . ' gallery image(s) added successfully.');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to add gallery item. Please try again.')

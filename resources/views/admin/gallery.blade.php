@@ -184,12 +184,17 @@
 
             <!-- Image Upload -->
             <div>
-                <label class="block text-xs font-medium text-gray-900 mb-1">Photo *</label>
-                <input type="file" name="image" id="galleryImage" accept="image/*" required class="w-full px-3 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" onchange="previewImage(this, 'imagePreview')">
-                <div id="imagePreview" class="mt-2 hidden">
-                    <img src="" alt="Preview" class="max-h-40 rounded-lg">
+                <label class="block text-xs font-medium text-gray-900 mb-1">Photos *</label>
+                <input type="file" name="images[]" id="galleryImage" accept="image/*" multiple required class="w-full px-3 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" onchange="previewGalleryImages(this, 'imagePreview')">
+                <div id="imagePreview" class="mt-2 hidden grid grid-cols-2 gap-2 sm:grid-cols-3">
                 </div>
-                <p class="text-xs text-gray-500 mt-1">Max size: 10MB. Allowed: JPG, PNG, GIF, WebP</p>
+                <p class="text-xs text-gray-500 mt-1">Select one or more images. Max size: 10MB each. Allowed: JPG, PNG, GIF, WebP</p>
+                @error('images')
+                <p class="text-blue-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+                @error('images.*')
+                <p class="text-blue-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- Category -->
@@ -227,7 +232,7 @@
                     Cancel
                 </button>
                 <button type="submit" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition">
-                    Upload Photo
+                    Upload Photos
                 </button>
             </div>
         </form>
@@ -327,6 +332,15 @@
     function closeCreateGalleryModal() {
         document.getElementById('createGalleryModal').classList.add('hidden');
         document.body.style.overflow = 'auto';
+        const form = document.querySelector('#createGalleryModal form');
+        const preview = document.getElementById('imagePreview');
+        if (form) {
+            form.reset();
+        }
+        if (preview) {
+            preview.innerHTML = '';
+            preview.classList.add('hidden');
+        }
     }
 
     function openEditGalleryModal(id) {
@@ -377,6 +391,38 @@
             }
             reader.readAsDataURL(input.files[0]);
         }
+    }
+
+    function previewGalleryImages(input, previewId) {
+        const preview = document.getElementById(previewId);
+        const files = Array.from(input.files || []);
+
+        preview.innerHTML = '';
+
+        if (!files.length) {
+            preview.classList.add('hidden');
+            return;
+        }
+
+        files.forEach((file) => {
+            if (!file.type.startsWith('image/')) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const item = document.createElement('div');
+                item.className = 'overflow-hidden rounded-lg border border-gray-200 bg-gray-50';
+                item.innerHTML = `
+                    <img src="${e.target.result}" alt="${file.name}" class="h-24 w-full object-cover">
+                    <div class="truncate px-2 py-1 text-[10px] text-gray-600">${file.name}</div>
+                `;
+                preview.appendChild(item);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        preview.classList.remove('hidden');
     }
 
     function toggleGalleryStatus(id, status) {
@@ -524,5 +570,3 @@
     });
 </script>
 @endsection
-
-

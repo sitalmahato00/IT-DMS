@@ -126,6 +126,13 @@ class StudyMaterialController extends Controller
                 'material' => [
                     'id' => $material->id,
                     'title' => $material->title,
+                    'description' => $material->description,
+                    'semester' => $material->semester,
+                    'document_type' => $material->document_type,
+                    'course' => $material->subject->subject_name ?? '',
+                    'visibility' => $material->visibility,
+                    'file_name' => $material->file_name,
+                    'file_icon' => $material->file_icon,
                 ],
                 'row_html' => $rowHtml,
                 'stats' => $stats,
@@ -331,4 +338,3 @@ class StudyMaterialController extends Controller
         }
     }
 }
-

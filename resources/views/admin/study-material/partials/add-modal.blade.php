@@ -1,12 +1,12 @@
 {{-- Add Material Modal --}}
 <div id="addMaterialModal" class="fixed inset-0 z-50 hidden">
     <div class="fixed inset-0 bg-black bg-opacity-50" onclick="closeAddMaterialModal()"></div>
-    <div class="relative bg-white rounded-lg shadow-xl max-w-md mx-auto mt-20" style="width: 90%; max-width: 500px;">
+    <div class="relative mt-10 flex max-h-[calc(100vh-4rem)] w-[90%] max-w-md flex-col overflow-hidden rounded-lg bg-white shadow-xl mx-auto" style="max-width: 500px;">
         <div class="flex items-center justify-between p-4 border-b">
             <h3 class="text-lg font-semibold text-gray-900">Add Study Material</h3>
             <button onclick="closeAddMaterialModal()" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
         </div>
-        <form id="addMaterialForm" method="POST" action="{{ route('admin.study-material.store-ajax') }}" enctype="multipart/form-data" class="p-4">
+        <form id="addMaterialForm" method="POST" action="{{ route('admin.study-material.store-ajax') }}" enctype="multipart/form-data" class="overflow-y-auto p-4">
             @csrf
             
             <div class="mb-4">
@@ -201,6 +201,7 @@ document.getElementById('addMaterialForm').addEventListener('submit', function(e
                     
                     // Add the new row to the table
                     addMaterialRowToTable(response.row_html);
+                    syncStudyMaterialCache(response.material);
                     
                     // Update statistics
                     updateStatistics(response.stats);
@@ -269,6 +270,25 @@ function addMaterialRowToTable(rowHtml) {
     }, 50);
 }
 
+function syncStudyMaterialCache(material) {
+    if (!material || !material.id) {
+        return;
+    }
+
+    if (!Array.isArray(window.studyMaterialsData)) {
+        window.studyMaterialsData = [];
+    }
+
+    const existingIndex = window.studyMaterialsData.findIndex(item => Number(item.id) === Number(material.id));
+
+    if (existingIndex >= 0) {
+        window.studyMaterialsData[existingIndex] = material;
+        return;
+    }
+
+    window.studyMaterialsData.unshift(material);
+}
+
 // Function to update statistics cards
 function updateStatistics(stats) {
     // Update total count
@@ -296,5 +316,3 @@ function updateStatistics(stats) {
     }
 }
 </script>
-
-

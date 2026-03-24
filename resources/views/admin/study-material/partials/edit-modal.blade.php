@@ -1,12 +1,12 @@
 {{-- Edit Material Modal --}}
 <div id="editMaterialModal" class="fixed inset-0 z-50 hidden">
     <div class="fixed inset-0 bg-black bg-opacity-50" onclick="closeEditMaterialModal()"></div>
-    <div class="relative bg-white rounded-lg shadow-xl max-w-md mx-auto mt-20" style="width: 90%; max-width: 500px;">
+    <div class="relative mt-10 flex max-h-[calc(100vh-4rem)] w-[90%] max-w-md flex-col overflow-hidden rounded-lg bg-white shadow-xl mx-auto" style="max-width: 500px;">
         <div class="flex items-center justify-between p-4 border-b">
             <h3 class="text-lg font-semibold text-gray-900">Edit Study Material</h3>
             <button onclick="closeEditMaterialModal()" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
         </div>
-        <form id="editMaterialForm" method="POST" enctype="multipart/form-data" class="p-4">
+        <form id="editMaterialForm" method="POST" enctype="multipart/form-data" class="overflow-y-auto p-4">
             @csrf
             @method('PUT')
             
@@ -114,7 +114,8 @@
 <script>
 function openEditMaterialModal(materialId) {
     // Find the material data from the global array
-    const material = window.studyMaterialsData.find(m => m.id === materialId);
+    const materials = Array.isArray(window.studyMaterialsData) ? window.studyMaterialsData : [];
+    const material = materials.find(m => Number(m.id) === Number(materialId));
     
     if (!material) {
         alert('Material not found');
@@ -139,7 +140,8 @@ function openEditMaterialModal(materialId) {
     }
     
     // Update form action
-    document.getElementById('editMaterialForm').action = '/admin/study-material/' + materialId;
+    const updateBaseUrl = window.studyMaterialUpdateBaseUrl || '/admin/study-material';
+    document.getElementById('editMaterialForm').action = updateBaseUrl + '/' + materialId;
     
     // Show modal
     document.getElementById('editMaterialModal').classList.remove('hidden');
@@ -161,4 +163,3 @@ document.getElementById('editMaterialModal').addEventListener('click', function(
     if (e.target === this) closeEditMaterialModal();
 });
 </script>
-

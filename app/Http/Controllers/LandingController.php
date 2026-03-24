@@ -79,12 +79,12 @@ class LandingController extends Controller
             ->limit(6)
             ->get();
 
-        // Documents/resources: keep the public landing page limited to "all" visibility.
+        // Documents/resources: landing page should show materials intended for general/student access.
         $documents = StudyMaterial::published()
             ->with(['subject', 'teacher'])
-            ->where('visibility', 'all')
+            ->whereIn('visibility', ['all', 'students'])
             ->orderBy('created_at', 'desc')
-            ->limit(12)
+            ->limit(6)
             ->get();
 
         // Gallery preview (public)
@@ -129,4 +129,3 @@ class LandingController extends Controller
         return view('department.about', compact('department'));
     }
 }
-

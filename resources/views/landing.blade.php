@@ -313,9 +313,11 @@
 
 @section('content')
     <div class="relative text-gray-900 dark:text-gray-100" style="background: var(--landing-bg);">
-        <div class="float-orb left-[-5rem] top-28 h-36 w-36 bg-red-300/60 dark:bg-red-500/20"></div>
-        <div class="float-orb right-[-3rem] top-[34rem] h-40 w-40 bg-red-200/55 [animation-delay:1.2s] dark:bg-red-400/20"></div>
-        <div class="float-orb bottom-40 left-[12%] h-28 w-28 bg-red-400/45 [animation-delay:2.1s] dark:bg-red-500/20"></div>
+        <div class="pointer-events-none absolute inset-0 overflow-x-clip">
+            <div class="float-orb left-[-5rem] top-28 h-36 w-36 bg-red-300/60 dark:bg-red-500/20"></div>
+            <div class="float-orb right-[-3rem] top-[34rem] h-40 w-40 bg-red-200/55 [animation-delay:1.2s] dark:bg-red-400/20"></div>
+            <div class="float-orb bottom-40 left-[12%] h-28 w-28 bg-red-400/45 [animation-delay:2.1s] dark:bg-red-500/20"></div>
+        </div>
         <a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-gray-900 dark:focus:bg-gray-900 dark:focus:text-gray-100">
             {{ $locale === 'ne' ? 'मुख्य सामग्रीमा जानुहोस्' : 'Skip to content' }}
         </a>

@@ -16,7 +16,7 @@ class PublicStudyMaterialController extends Controller
 
         $materialsQuery = StudyMaterial::published()
             ->with('subject')
-            ->where('visibility', 'all')
+            ->whereIn('visibility', ['all', 'students'])
             ->latest();
 
         if ($type !== '' && $type !== 'all') {
@@ -56,7 +56,7 @@ class PublicStudyMaterialController extends Controller
     public function download($id)
     {
         $material = StudyMaterial::published()
-            ->where('visibility', 'all')
+            ->whereIn('visibility', ['all', 'students'])
             ->findOrFail($id);
 
         if (empty($material->file_path) || !Storage::disk('public')->exists($material->file_path)) {
