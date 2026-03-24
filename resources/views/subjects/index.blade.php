@@ -37,9 +37,15 @@
 
 @extends('layouts.public')
 
+@push('head')
+    @include('partials.public-page-theme')
+@endpush
+
 @section('content')
-    <div class="bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">
-        <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8" x-data="subjectCatalog({
+    <div class="brand-page-bg text-gray-900 dark:text-gray-100">
+        <div class="brand-page-orb left-[-4rem] top-28 h-36 w-36 bg-red-300/55 dark:bg-red-500/20"></div>
+        <div class="brand-page-orb right-[-3rem] top-64 h-44 w-44 bg-red-200/55 [animation-delay:1.2s] dark:bg-red-400/20"></div>
+        <section class="brand-page-shell mx-auto px-4 py-12 sm:px-6 lg:px-8" x-data="subjectCatalog({
             initialSemester: @js($selectedSemester ?: 'all'),
             initialQuery: @js($initialQuery ?? ''),
             subjects: @js($subjectPayload),
@@ -49,14 +55,18 @@
             <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <div class="flex flex-wrap items-center gap-3">
-                        <a href="{{ route('home') }}" class="text-sm font-semibold text-red-700 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
+                        <a href="{{ route('home') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-red-700 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
                             {{ $locale === 'ne' ? '← गृहपृष्ठ' : '← Home' }}
                         </a>
                         <span class="text-xs font-medium text-gray-400 dark:text-gray-600">/</span>
-                        <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
-                            {{ $locale === 'ne' ? 'सबै विषय' : 'All Subjects' }}
-                        </h1>
                     </div>
+                    <p class="brand-page-chip mt-5">
+                        <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                        {{ $locale === 'ne' ? 'पाठ्यक्रम' : 'Curriculum' }}
+                    </p>
+                    <h1 class="brand-page-title mt-4 text-3xl font-bold text-gray-900 dark:text-gray-100 sm:text-5xl">
+                        {{ $locale === 'ne' ? 'सबै विषय' : 'All Subjects' }}
+                    </h1>
                     <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         {{ $locale === 'ne' ? 'विषय खोज्नुहोस् र विवरण/पूर्व-आवश्यकता हेर्नुहोस्।' : 'Search subjects and view details, prerequisites, and credits.' }}
                     </p>
@@ -64,11 +74,11 @@
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <label class="sr-only" for="subjectSearch">{{ $locale === 'ne' ? 'विषय खोज' : 'Search subjects' }}</label>
                     <input id="subjectSearch" type="search" x-model.trim="query" placeholder="{{ $locale === 'ne' ? 'विषय/कोड खोज्नुहोस्…' : 'Search by subject or code…' }}"
-                        class="w-full rounded-xl border-gray-300 bg-white px-4 py-2 text-sm shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 sm:w-72" />
+                        class="brand-page-input w-full px-4 py-3 text-sm text-gray-900 dark:text-gray-100 sm:w-72" />
 
                     <label class="sr-only" for="semesterFilter">{{ $locale === 'ne' ? 'सेमेस्टर' : 'Semester' }}</label>
                     <select id="semesterFilter" x-model="semester"
-                        class="w-full rounded-xl border-gray-300 bg-white px-4 py-2 text-sm shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 sm:w-44">
+                        class="brand-page-select w-full px-4 py-3 text-sm text-gray-900 dark:text-gray-100 sm:w-44">
                         <option value="all">{{ $locale === 'ne' ? 'सबै सेमेस्टर' : 'All semesters' }}</option>
                         @foreach ($semesterSummary as $sem => $meta)
                             @if (!empty($sem))
@@ -81,8 +91,8 @@
 
             <div class="mt-10 grid gap-8 lg:grid-cols-12">
                 <div class="lg:col-span-7">
-                    <div class="rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                        <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+                    <div class="brand-page-panel rounded-[2rem]">
+                        <div class="border-b border-red-100 bg-gradient-to-r from-red-100 to-red-50 px-6 py-4 dark:border-red-900/30 dark:from-red-950/25 dark:to-slate-950/30">
                             <div class="flex items-center justify-between gap-3">
                                 <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                     {{ $locale === 'ne' ? 'विषय सूची' : 'Subject catalog' }}
@@ -91,19 +101,19 @@
                             </div>
                         </div>
 
-                        <div class="divide-y divide-gray-200 dark:divide-gray-800">
+                        <div class="divide-y divide-red-100 dark:divide-red-900/20">
                             <template x-for="s in visibleSubjects" :key="s.id">
-                                <div class="px-6 py-4">
+                                <div class="brand-page-soft px-6 py-5">
                                     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                         <div class="min-w-0">
                                             <div class="flex flex-wrap items-center gap-2">
-                                                <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-900 dark:text-gray-200" x-text="s.code || '—'"></span>
+                                                <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-red-700 ring-1 ring-red-100 dark:bg-slate-950 dark:text-red-200 dark:ring-red-900/30" x-text="s.code || '—'"></span>
                                                 <span class="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-300" x-text="semesterLabel(s.semester)"></span>
                                                 <template x-if="s.has_lab">
-                                                    <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">{{ $locale === 'ne' ? 'ल्याब' : 'Lab' }}</span>
+                                                    <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-300">{{ $locale === 'ne' ? 'ल्याब' : 'Lab' }}</span>
                                                 </template>
                                                 <template x-if="s.is_elective_open">
-                                                    <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">{{ $locale === 'ne' ? 'इलेक्टिभ' : 'Elective' }}</span>
+                                                    <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-300">{{ $locale === 'ne' ? 'इलेक्टिभ' : 'Elective' }}</span>
                                                 </template>
                                             </div>
                                             <div class="mt-2 truncate text-base font-semibold text-gray-900 dark:text-gray-100" x-text="s.title"></div>
@@ -112,14 +122,14 @@
                                         </div>
 
                                         <div class="shrink-0">
-                                            <button type="button" class="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900"
+                                            <button type="button" class="brand-page-cta inline-flex items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
                                                 @click="toggle(s.id)">
                                                 <span x-text="openId === s.id ? closeLabel : detailLabel"></span>
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div x-show="openId === s.id" x-transition class="mt-4 rounded-2xl bg-gray-50 p-4 text-sm text-gray-700 dark:bg-gray-900/40 dark:text-gray-200">
+                                    <div x-show="openId === s.id" x-transition class="mt-4 rounded-2xl border border-red-100 bg-gradient-to-br from-red-50 to-white p-4 text-sm text-gray-700 dark:border-red-900/30 dark:from-red-950/20 dark:to-slate-950/40 dark:text-gray-200">
                                         <div class="grid gap-4 sm:grid-cols-2">
                                             <div>
                                                 <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'क्रेडिट' : 'Credits' }}</div>
@@ -135,7 +145,7 @@
                                                 <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</div>
                                                 <div class="mt-2 flex flex-wrap gap-2">
                                                     <template x-for="t in s.teachers" :key="t">
-                                                        <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-200 dark:ring-gray-800" x-text="t"></span>
+                                                        <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-red-700 ring-1 ring-red-100 dark:bg-slate-950 dark:text-red-200 dark:ring-red-900/30" x-text="t"></span>
                                                     </template>
                                                 </div>
                                             </div>
@@ -152,19 +162,19 @@
                 </div>
 
                 <div class="lg:col-span-5">
-                    <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                    <div class="brand-page-panel rounded-[2rem] p-6">
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                             {{ $locale === 'ne' ? 'सेमेस्टर अनुसार सारांश' : 'Semester-wise overview' }}
                         </h3>
                         <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
                             @foreach ($semesterSummary as $sem => $meta)
                                 @continue(empty($sem))
-                                <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900/40">
+                                <div class="brand-page-card rounded-2xl p-4">
                                     <div class="flex items-center justify-between">
                                         <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                             {{ $locale === 'ne' ? "{$sem} सेमेस्टर" : "Semester {$sem}" }}
                                         </div>
-                                        <div class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-200 dark:ring-gray-800">
+                                        <div class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-red-700 ring-1 ring-red-100 dark:bg-slate-950 dark:text-red-200 dark:ring-red-900/30">
                                             {{ $meta['count'] }} {{ $locale === 'ne' ? 'विषय' : 'subjects' }}
                                         </div>
                                     </div>

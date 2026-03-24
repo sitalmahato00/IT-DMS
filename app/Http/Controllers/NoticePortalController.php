@@ -10,6 +10,43 @@ use Illuminate\Http\Request;
 
 class NoticePortalController extends Controller
 {
+    public function publicIndex(Request $request)
+    {
+        $locale = app()->getLocale();
+        $audience = (string) $request->get('audience', 'all');
+        $query = trim((string) $request->get('q', ''));
+
+        $noticeQuery = Notice::published()
+            ->with('creator', 'subject')
+            ->orderBy('is_important', 'desc')
+            ->orderBy('published_at_bs', 'desc')
+            ->orderBy('created_at', 'desc');
+
+        if ($audience !== '' && $audience !== 'all') {
+            $noticeQuery->forAudience($audience);
+        }
+
+        if ($query !== '') {
+            $noticeQuery->where(function ($builder) use ($query) {
+                $builder->where('title', 'like', '%' . $query . '%')
+                    ->orWhere('title_ne', 'like', '%' . $query . '%')
+                    ->orWhere('message', 'like', '%' . $query . '%')
+                    ->orWhere('message_ne', 'like', '%' . $query . '%');
+            });
+        }
+
+        $notices = $noticeQuery->paginate(9)->withQueryString();
+
+        $audienceOptions = [
+            'all' => $locale === 'ne' ? 'सबै' : 'All',
+            'students' => $locale === 'ne' ? 'विद्यार्थी' : 'Students',
+            'faculty' => $locale === 'ne' ? 'शिक्षक' : 'Faculty',
+            'parents' => $locale === 'ne' ? 'अभिभावक' : 'Parents',
+        ];
+
+        return view('notices.index', compact('notices', 'audience', 'query', 'audienceOptions'));
+    }
+
     /**
      * Display notices and gallery for the public portal.
      */

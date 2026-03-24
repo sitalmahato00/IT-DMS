@@ -18,7 +18,9 @@ Route::get('/', [\App\Http\Controllers\LandingController::class, 'index'])->name
 Route::get('/department/about/{id?}', [\App\Http\Controllers\LandingController::class, 'about'])->name('department.about');
 Route::get('/subjects', [\App\Http\Controllers\SubjectsController::class, 'index'])->name('subjects.index');
 Route::get('/faculty', [FacultyController::class, 'index'])->name('faculty.index');
+Route::get('/resources', [PublicStudyMaterialController::class, 'index'])->name('public.resources.index');
 Route::get('/resources/download/{id}', [PublicStudyMaterialController::class, 'download'])->name('materials.download');
+Route::get('/notices', [NoticePortalController::class, 'publicIndex'])->name('public.notices.index');
 Route::get('/notices/fetch', [NoticePortalController::class, 'fetch'])->name('notices.fetch');
 Route::get('/notices/{id}', [NoticePortalController::class, 'show'])->name('notices.show');
 Route::get('/gallery/fetch', [GalleryPortalController::class, 'fetch'])->name('gallery.fetch');
