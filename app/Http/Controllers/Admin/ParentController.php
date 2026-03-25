@@ -130,23 +130,29 @@ class ParentController extends Controller
             }
         }
 
-        // Send notification with login credentials to the parent
+        $credentialsEmailSent = true;
         try {
             $user->notify(new ParentAccountNotification($password));
         } catch (\Exception $e) {
+            $credentialsEmailSent = false;
             \Illuminate\Support\Facades\Log::error('Failed to send parent notification: ' . $e->getMessage());
         }
+
+        $message = $credentialsEmailSent
+            ? 'Parent created successfully. Login credentials have been sent to the parent\'s email.'
+            : 'Parent created successfully, but the credentials email could not be sent. Check mail settings and logs.';
 
         // Check if this is an AJAX request
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Parent created successfully. Login credentials have been sent to the parent\'s email.',
+                'message' => $message,
+                'email_sent' => $credentialsEmailSent,
                 'parent' => $user
             ]);
         }
 
-        return redirect()->route('admin.parents')->with('success', 'Parent created successfully. Login credentials have been sent to the parent\'s email.');
+        return redirect()->route('admin.parents')->with($credentialsEmailSent ? 'success' : 'warning', $message);
     }
 
     public function getStudents()

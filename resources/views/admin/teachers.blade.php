@@ -789,6 +789,42 @@ function handleFormError(error, defaultMessage = 'An error occurred') {
     return errorMessage;
 }
 
+function setTeacherSubmitState(form, isSubmitting, loadingText) {
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (!submitBtn) {
+        return;
+    }
+
+    if (!submitBtn.dataset.originalHtml) {
+        submitBtn.dataset.originalHtml = submitBtn.innerHTML;
+    }
+
+    submitBtn.disabled = isSubmitting;
+    submitBtn.innerHTML = isSubmitting ? loadingText : submitBtn.dataset.originalHtml;
+}
+
+async function parseTeacherResponse(response, fallbackMessage) {
+    let payload = null;
+
+    try {
+        payload = await response.json();
+    } catch (error) {
+        payload = null;
+    }
+
+    if (response.ok) {
+        return payload;
+    }
+
+    const requestError = new Error(payload?.message || fallbackMessage);
+    requestError.response = {
+        status: response.status,
+        data: payload,
+    };
+
+    throw requestError;
+}
+
 // Form submission handlers
 document.addEventListener('DOMContentLoaded', function() {
     // Add keyboard escape handler for all modals
@@ -809,58 +845,51 @@ document.addEventListener('DOMContentLoaded', function() {
     // AJAX form submission for Add Teacher
     const addForm = document.getElementById('addTeacherForm');
     if (addForm) {
-        addForm.addEventListener('submit', function(e) {
+        addForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const formData = new FormData(addForm);
-            const submitBtn = addForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Adding...';
-            submitBtn.disabled = true;
-            
-            // Reset button function to be called on modal close or form completion
-            const resetSubmitButton = () => {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            };
-            
-            // Override close function to reset button first
-            const originalCloseAddModal = window.closeAddTeacherModal;
-            window.closeAddTeacherModal = function() {
-                resetSubmitButton();
-                originalCloseAddModal();
-            };
-            
-            fetch(addForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                showLoading('Adding teacher...');
-                if (!response.ok) {
-                    return response.json().then(data => { throw new Error(data.message || 'Failed to add teacher'); });
-                }
-                return response.json();
-            })
-            .then(data => {
+
+            if (addForm.dataset.submitting === 'true') {
+                return;
+            }
+
+            addForm.dataset.submitting = 'true';
+            setTeacherSubmitState(addForm, true, '<i class="bi bi-arrow-repeat animate-spin me-1"></i>Adding...');
+            showLoading('Adding teacher...');
+
+            try {
+                const response = await fetch(addForm.action, {
+                    method: 'POST',
+                    body: new FormData(addForm),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await parseTeacherResponse(response, 'Failed to add teacher');
+
                 if (data.success) {
                     showToast(data.message || 'Teacher added successfully', 'success');
-                    closeAddTeacherModal();
                     addForm.reset();
+                    const addTeacherAvatarImg = document.getElementById('addTeacherAvatarImg');
+                    const addTeacherInitial = document.getElementById('addTeacherInitial');
+                    if (addTeacherAvatarImg) {
+                        addTeacherAvatarImg.src = '';
+                        addTeacherAvatarImg.style.display = 'none';
+                    }
+                    if (addTeacherInitial) {
+                        addTeacherInitial.style.display = 'inline-flex';
+                    }
+                    closeAddTeacherModal();
                     setTimeout(() => location.reload(), 1500);
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 handleFormError(error, 'Failed to add teacher');
-            })
-            .finally(() => {
-                resetSubmitButton();
+            } finally {
+                addForm.dataset.submitting = 'false';
+                setTeacherSubmitState(addForm, false);
                 try { hideLoading(); } catch(e) { }
-            });
+            }
         });
 
     // Image preview helpers for teacher forms
@@ -896,58 +925,42 @@ document.addEventListener('DOMContentLoaded', function() {
     // AJAX form submission for Edit Teacher
     const editForm = document.getElementById('editTeacherForm');
     if (editForm) {
-        editForm.addEventListener('submit', function(e) {
+        editForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const formData = new FormData(editForm);
+
+            if (editForm.dataset.submitting === 'true') {
+                return;
+            }
+
             const teacherId = document.getElementById('editTeacherId').value;
-            const submitBtn = editForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Saving...';
-            submitBtn.disabled = true;
-            
-            // Reset button function to be called on modal close or form completion
-            const resetSubmitButton = () => {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            };
-            
-            // Override close function to reset button first
-            const originalCloseEditModal = window.closeEditTeacherModal;
-            window.closeEditTeacherModal = function() {
-                resetSubmitButton();
-                originalCloseEditModal();
-            };
-            
-            fetch(`/admin/teachers/${teacherId}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                showLoading('Saving teacher...');
-                if (!response.ok) {
-                    return response.json().then(data => { throw new Error(data.message || 'Failed to update teacher'); });
-                }
-                return response.json();
-            })
-            .then(data => {
+            editForm.dataset.submitting = 'true';
+            setTeacherSubmitState(editForm, true, '<i class="bi bi-arrow-repeat animate-spin me-1"></i>Saving...');
+            showLoading('Saving teacher...');
+
+            try {
+                const response = await fetch(`/admin/teachers/${teacherId}`, {
+                    method: 'POST',
+                    body: new FormData(editForm),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await parseTeacherResponse(response, 'Failed to update teacher');
+
                 if (data.success) {
                     showToast(data.message || 'Teacher updated successfully', 'success');
                     closeEditTeacherModal();
                     setTimeout(() => location.reload(), 1500);
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 handleFormError(error, 'Failed to update teacher');
-            })
-            .finally(() => {
-                resetSubmitButton();
+            } finally {
+                editForm.dataset.submitting = 'false';
+                setTeacherSubmitState(editForm, false);
                 try { hideLoading(); } catch(e) { }
-            });
+            }
         });
     }
     
@@ -1043,6 +1056,5 @@ function printTeacher() {
 
 </script>
 @endsection
-
 
 

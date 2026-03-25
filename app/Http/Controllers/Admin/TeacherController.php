@@ -9,7 +9,12 @@ use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\Subject;
 use App\Notifications\TeacherAccountNotification;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -20,11 +25,15 @@ class TeacherController extends Controller
         $user = auth()->user();
         $query = $request->get('q');
         $status = $request->get('status');
-        $department = $request->get('department');
+        $subjectId = $request->get('course');
         $perPage = intval($request->get('per_page', 10)) ?: 10;
 
-        // Fetch subjects from database for filter dropdown
-        $subjects = Subject::orderBy('subject_name')->get();
+        $subjects = Subject::orderBy('subject_name')
+            ->get()
+            ->mapWithKeys(function ($subject) {
+                $label = trim(($subject->subject_code ? $subject->subject_code . ' - ' : '') . $subject->subject_name);
+                return [$subject->id => $label];
+            });
 
         $builder = User::where('role', 'teacher')->with('teacher');
         
@@ -56,9 +65,9 @@ class TeacherController extends Controller
                     $t->where('status', $status);
                 });
             })
-            ->when($department, function($q) use ($department) {
-                $q->whereHas('teacher', function($t) use ($department) {
-                    $t->where('department', $department);
+            ->when($subjectId, function($q) use ($subjectId) {
+                $q->whereHas('teacher.subjects', function($subjectQuery) use ($subjectId) {
+                    $subjectQuery->where('subjects.id', $subjectId);
                 });
             })
             ->orderBy('created_at', 'desc');
@@ -83,65 +92,55 @@ class TeacherController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|digits:10',
-            'teacher_id' => 'nullable|string|max:50',
-            'department' => 'nullable|string|max:100',
-            'qualification' => 'nullable|string|max:100',
-            'bio' => 'nullable|string',
-            'address' => 'nullable|string',
-            'status' => 'nullable|string',
-            'profile_photo' => 'nullable|image|max:4096',
-            'gender' => 'nullable|string|max:20',
-        ]);
-
-        // Generate a temporary password
+        $data = $this->validateTeacherData($request);
         $password = Str::random(10);
+        $storedPhotoPath = null;
 
-        $user = \App\Models\User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($password),
-            'role' => 'teacher',
-        ]);
-
-        // Create teacher record with profile fields
-        $teacher = $user->teacher()->create([
-            'teacher_code' => $data['teacher_id'] ?? null,
-            'qualification' => $data['qualification'] ?? null,
-            'gender' => $data['gender'] ?? null,
-            'phone' => $data['phone'] ?? null,
-            'department' => $data['department'] ?? null,
-            'bio' => $data['bio'] ?? null,
-            'address' => $data['address'] ?? null,
-            'status' => $data['status'] ?? 'active',
-        ]);
-
-        if ($request->hasFile('profile_photo')) {
-            $path = $request->file('profile_photo')->store('profiles', 'public');
-            $teacher->profile_photo_path = $path;
-            $teacher->save();
-        }
-
-        // Send notification with login credentials to the teacher
         try {
-            $user->notify(new TeacherAccountNotification($password));
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Failed to send teacher notification: ' . $e->getMessage());
-        }
+            $user = DB::transaction(function () use ($data, $request, $password, &$storedPhotoPath) {
+                $user = User::create([
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'password' => Hash::make($password),
+                    'role' => 'teacher',
+                ]);
 
-        // Check if this is an AJAX request
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Teacher created successfully. Login credentials have been sent to the teacher\'s email.',
-                'teacher' => $user
+                $teacher = $user->teacher()->create($this->buildTeacherPayload($data));
+
+                if ($request->hasFile('profile_photo')) {
+                    $storedPhotoPath = $request->file('profile_photo')->store('profiles', 'public');
+                    $teacher->update([
+                        'profile_photo_path' => $storedPhotoPath,
+                    ]);
+                }
+
+                return $user->load('teacher');
+            });
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            if ($storedPhotoPath) {
+                Storage::disk('public')->delete($storedPhotoPath);
+            }
+
+            Log::error('Teacher create failed', [
+                'email' => $request->input('email'),
+                'teacher_id' => $request->input('teacher_id'),
+                'error' => $exception->getMessage(),
             ]);
+
+            return $this->teacherErrorResponse(
+                $request,
+                'Teacher could not be created. No partial data was saved.'
+            );
         }
 
-        return redirect()->route('admin.teachers')->with('success', 'Teacher created successfully. Login credentials have been sent to the teacher\'s email.');
+        $credentialsEmailSent = $this->sendTeacherCredentials($user, $password);
+        $message = $credentialsEmailSent
+            ? 'Teacher created successfully. Login credentials have been sent to the teacher email.'
+            : 'Teacher created successfully, but the credentials email could not be sent. Check mail settings and logs.';
+
+        return $this->teacherSuccessResponse($request, $message, $user, $credentialsEmailSent);
     }
 
     public function edit($id)
@@ -175,70 +174,148 @@ class TeacherController extends Controller
 
     public function update(Request $request, $id)
     {
-        $user = \App\Models\User::where('role','teacher')->findOrFail($id);
+        $user = User::where('role','teacher')->with('teacher')->findOrFail($id);
+        $data = $this->validateTeacherData($request, $user);
+        $storedPhotoPath = null;
+        $oldPhotoPath = $user->teacher?->profile_photo_path;
 
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'teacher_id' => 'nullable|string|max:50',
-            'phone' => 'nullable|digits:10',
-            'department' => 'nullable|string|max:100',
-            'qualification' => 'nullable|string|max:100',
-            'address' => 'nullable|string',
-            'bio' => 'nullable|string',
-            'status' => 'nullable|string',
-            'profile_photo' => 'nullable|image|max:4096',
-            'gender' => 'nullable|string|max:20',
+        try {
+            DB::transaction(function () use ($user, $data, $request, &$storedPhotoPath) {
+                $user->update([
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'role' => 'teacher',
+                ]);
+
+                $teacher = $user->teacher;
+
+                if ($teacher) {
+                    $teacher->update($this->buildTeacherPayload($data));
+                } else {
+                    $teacher = Teacher::create(array_merge(
+                        ['user_id' => $user->id],
+                        $this->buildTeacherPayload($data)
+                    ));
+                }
+
+                if ($request->hasFile('profile_photo')) {
+                    $storedPhotoPath = $request->file('profile_photo')->store('profiles', 'public');
+                    $teacher->update([
+                        'profile_photo_path' => $storedPhotoPath,
+                    ]);
+                }
+            });
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            if ($storedPhotoPath) {
+                Storage::disk('public')->delete($storedPhotoPath);
+            }
+
+            Log::error('Teacher update failed', [
+                'teacher_user_id' => $user->id,
+                'email' => $request->input('email'),
+                'teacher_id' => $request->input('teacher_id'),
+                'error' => $exception->getMessage(),
+            ]);
+
+            return $this->teacherErrorResponse(
+                $request,
+                'Teacher could not be updated. No partial data was saved.'
+            );
+        }
+
+        if ($storedPhotoPath && $oldPhotoPath && $oldPhotoPath !== $storedPhotoPath) {
+            Storage::disk('public')->delete($oldPhotoPath);
+        }
+
+        $user->refresh()->load('teacher');
+
+        return $this->teacherSuccessResponse($request, 'Teacher updated successfully', $user);
+    }
+
+    protected function validateTeacherData(Request $request, ?User $user = null): array
+    {
+        $teacherIdRule = Rule::unique('teachers', 'teacher_code');
+
+        if ($user?->teacher) {
+            $teacherIdRule->ignore($user->teacher->id);
+        }
+
+        return $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user?->id)],
+            'phone' => ['required', 'digits:10'],
+            'teacher_id' => ['required', 'string', 'max:20', $teacherIdRule],
+            'department' => ['required', 'string', 'max:100'],
+            'qualification' => ['nullable', 'string', 'max:100'],
+            'bio' => ['nullable', 'string'],
+            'address' => ['nullable', 'string'],
+            'status' => ['required', Rule::in(['active', 'inactive', 'suspended', 'On Leave', 'Retired'])],
+            'profile_photo' => ['nullable', 'image', 'max:4096'],
+            'gender' => ['nullable', 'string', 'max:20'],
+        ], [
+            'teacher_id.unique' => 'This teacher ID is already in use.',
         ]);
+    }
 
-        $user->name = $data['name'];
-        $user->email = $data['email'];
-        $user->role = 'teacher';
-        $user->save();
+    protected function buildTeacherPayload(array $data): array
+    {
+        return [
+            'teacher_code' => trim($data['teacher_id']),
+            'qualification' => $data['qualification'] ?? null,
+            'gender' => $data['gender'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'department' => $data['department'] ?? null,
+            'bio' => $data['bio'] ?? null,
+            'address' => $data['address'] ?? null,
+            'status' => $data['status'] ?? 'active',
+        ];
+    }
 
-        // Update teacher record with profile fields
-        if ($user->teacher) {
-            $user->teacher->update([
-                'teacher_code' => $data['teacher_id'] ?? null,
-                'gender' => $data['gender'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'department' => $data['department'] ?? null,
-                'qualification' => $data['qualification'] ?? null,
-                'address' => $data['address'] ?? null,
-                'bio' => $data['bio'] ?? null,
-                'status' => $data['status'] ?? 'active',
-            ]);
-        } else {
-            // Create teacher record if it doesn't exist
-            Teacher::create([
+    protected function sendTeacherCredentials(User $user, string $password): bool
+    {
+        try {
+            $user->notify(new TeacherAccountNotification($password));
+            return true;
+        } catch (\Throwable $exception) {
+            Log::error('Failed to send teacher notification', [
                 'user_id' => $user->id,
-                'teacher_code' => $data['teacher_id'] ?? null,
-                'gender' => $data['gender'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'department' => $data['department'] ?? null,
-                'qualification' => $data['qualification'] ?? null,
-                'address' => $data['address'] ?? null,
-                'bio' => $data['bio'] ?? null,
-                'status' => $data['status'] ?? 'active',
+                'email' => $user->email,
+                'error' => $exception->getMessage(),
             ]);
-        }
 
-        if ($request->hasFile('profile_photo')) {
-            $path = $request->file('profile_photo')->store('profiles', 'public');
-            $user->teacher->profile_photo_path = $path;
-            $user->teacher->save();
+            return false;
         }
+    }
 
-        // Check if this is an AJAX request
+    protected function teacherSuccessResponse(Request $request, string $message, User $user, ?bool $credentialsEmailSent = null)
+    {
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Teacher updated successfully',
-                'teacher' => $user
+                'message' => $message,
+                'email_sent' => $credentialsEmailSent,
+                'teacher' => $user,
             ]);
         }
 
-        return redirect()->route('admin.teachers')->with('success', 'Teacher updated');
+        return redirect()->route('admin.teachers')->with(
+            $credentialsEmailSent === false ? 'warning' : 'success',
+            $message
+        );
+    }
+
+    protected function teacherErrorResponse(Request $request, string $message)
+    {
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => $message,
+            ], 500);
+        }
+
+        return redirect()->back()->withInput()->with('error', $message);
     }
 
     public function destroy($id)

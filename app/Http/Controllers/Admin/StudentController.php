@@ -351,8 +351,13 @@ class StudentController extends Controller
 
             \DB::commit();
 
-            // Send notification with login credentials to the student
-            $user->notify(new StudentAccountNotification($password, 'student'));
+            $credentialsEmailSent = true;
+            try {
+                $user->notify(new StudentAccountNotification($password, 'student'));
+            } catch (\Exception $e) {
+                $credentialsEmailSent = false;
+                \Illuminate\Support\Facades\Log::error('Failed to send student notification: ' . $e->getMessage());
+            }
 
             // Log the activity
             AuditLog::create([
@@ -374,7 +379,12 @@ class StudentController extends Controller
                 'user_agent' => request()->userAgent(),
             ]);
 
-            return redirect()->route('admin.students', ['page' => 1])->with('success', 'Student added successfully. Login credentials have been sent to the student\'s email.');
+            $message = $credentialsEmailSent
+                ? 'Student added successfully. Login credentials have been sent to the student\'s email.'
+                : 'Student added successfully, but the credentials email could not be sent. Check mail settings and logs.';
+
+            return redirect()->route('admin.students', ['page' => 1])
+                ->with($credentialsEmailSent ? 'success' : 'warning', $message);
         } catch (\Exception $e) {
             \DB::rollBack();
             // Log the failed attempt
@@ -427,7 +437,7 @@ class StudentController extends Controller
 
             $user->delete();
 
-            return redirect()->route('admin.students')->with('success', 'Student removed');
+            return redirect()->route('admin.students')->with('success', 'Student removed successfully.');
         } catch (\Exception $e) {
             // Log and return error
             \Log::error('Failed to delete student user id ' . $id . ': ' . $e->getMessage());
