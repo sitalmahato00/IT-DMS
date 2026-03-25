@@ -59,6 +59,7 @@ class TeacherMarksController extends Controller
                     'selectedExam' => null,
                     'selectedCategory' => 'assessment',
                     'selectedStatus' => null,
+                    'selectedSortBy' => 'roll_no',
                     'search' => '',
                     'stats' => $this->getEmptyStats(),
                 ]);
@@ -81,6 +82,7 @@ class TeacherMarksController extends Controller
                     'selectedExam' => null,
                     'selectedCategory' => 'assessment',
                     'selectedStatus' => null,
+                    'selectedSortBy' => 'roll_no',
                     'search' => '',
                     'stats' => $this->getEmptyStats(),
                 ]);
@@ -107,6 +109,7 @@ class TeacherMarksController extends Controller
             $category = $request->get('category', 'assessment');
             $status = $request->get('status', '');
             $search = $request->get('search', '');
+            $sortBy = $request->get('sort_by', 'roll_no');
             $perPage = intval($request->get('per_page', 25)) ?: 25;
             // Validate per_page - only allow safe values
             $allowedPerPage = [10, 25, 50];
@@ -208,6 +211,7 @@ class TeacherMarksController extends Controller
                 'category' => $category,
                 'status' => $status,
                 'search' => $search,
+                'sortBy' => $sortBy,
                 'perPage' => $perPage,
             ]);
             
@@ -256,6 +260,7 @@ class TeacherMarksController extends Controller
                 'selectedExam' => $exam,
                 'selectedCategory' => $category,
                 'selectedStatus' => $status,
+                'selectedSortBy' => $sortBy,
                 'search' => $search,
                 'stats' => $stats,
             ]);
@@ -278,6 +283,7 @@ class TeacherMarksController extends Controller
                 'selectedExam' => null,
                 'selectedCategory' => 'assessment',
                 'selectedStatus' => null,
+                'selectedSortBy' => 'roll_no',
                 'search' => '',
                 'stats' => $this->getEmptyStats(),
             ]);
@@ -330,7 +336,19 @@ class TeacherMarksController extends Controller
             })->orWhere('roll_no', 'like', "%{$search}%");
         }
 
-        $students = $studentsQuery->orderBy('students.roll_no')->paginate($filters['perPage']);
+        switch ($filters['sortBy'] ?? 'roll_no') {
+            case 'name':
+                $studentsQuery->join('users', 'users.id', '=', 'students.user_id')
+                    ->orderBy('users.name')
+                    ->select('students.*');
+                break;
+            case 'roll_no':
+            default:
+                $studentsQuery->orderBy('students.roll_no');
+                break;
+        }
+
+        $students = $studentsQuery->paginate($filters['perPage']);
 
         // Get exam and subject info
         $exam = null;

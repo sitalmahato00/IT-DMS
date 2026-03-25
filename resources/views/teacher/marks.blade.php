@@ -3,170 +3,111 @@
 @section('title', __('Marks/Results'))
 
 @section('content')
+@php
+    $currentExam = $selectedExam ? App\Models\Exam::find($selectedExam) : null;
+    $filteredSubjects = collect($subjects);
+    if ($selectedSemester) {
+        $filteredSubjects = $filteredSubjects->where('semester', $selectedSemester);
+    }
+@endphp
 <div class="space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif" id="teacherMarksApp">
-    <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ __('Marks/Results') }}</h1>
-            <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ __('Manage exam marks and results for your subjects.') }}</p>
-        </div>
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ __('Student Marks') }}</h1>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('Check and update marks for the subjects assigned to your semesters.') }}</p>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Total Students') }}</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $stats['total'] ?? 0 }}</p>
-                </div>
-                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
-                    <i class="bi bi-people text-xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Filled') }}</p>
-                    <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">{{ $stats['filled'] ?? 0 }}</p>
-                </div>
-                <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400">
-                    <i class="bi bi-check-circle text-xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Empty') }}</p>
-                    <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-2">{{ $stats['empty'] ?? 0 }}</p>
-                </div>
-                <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400">
-                    <i class="bi bi-x-circle text-xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Passed') }}</p>
-                    <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">{{ $stats['passed'] ?? 0 }}</p>
-                </div>
-                <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400">
-                    <i class="bi bi-mortarboard text-xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Failed') }}</p>
-                    <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-2">{{ $stats['failed'] ?? 0 }}</p>
-                </div>
-                <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400">
-                    <i class="bi bi-exclamation-triangle text-xl"></i>
-                </div>
+    <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex items-center gap-4">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ __('Category') }}:</span>
+            <div class="flex rounded-lg overflow-hidden border border-gray-300 dark:border-slate-600">
+                <button
+                    type="button"
+                    class="px-6 py-2 text-sm font-medium transition-colors {{ $selectedCategory === 'assessment' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600' }}"
+                    onclick="switchCategory('assessment')"
+                >
+                    {{ __('Assessment') }}
+                </button>
+                <button
+                    type="button"
+                    class="px-6 py-2 text-sm font-medium transition-colors {{ $selectedCategory === 'ctevt' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600' }}"
+                    onclick="switchCategory('ctevt')"
+                >
+                    {{ __('CTEVT') }}
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Filters Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <form id="marksFilterForm" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Category -->
-                <div class="flex flex-col">
-                    <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Category') }}</label>
-                    <select name="category" id="categorySelect" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500" onchange="categoryChanged()">
-                        <option value="assessment" {{ $selectedCategory === 'assessment' ? 'selected' : '' }}>{{ __('Assessment') }}</option>
-                        <option value="ctevt" {{ $selectedCategory === 'ctevt' ? 'selected' : '' }}>{{ __('CTEVT') }}</option>
+    <div class="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div class="flex flex-col gap-3 border-b border-gray-200 p-5 lg:flex-row lg:items-center lg:justify-between dark:border-slate-700">
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Filters & Exports') }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Use the filters below to target marks from your assigned semester subjects.') }}</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="printMarks()" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-700 transition hover:bg-gray-50 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700">
+                    <i class="bi bi-printer"></i>
+                    <span>{{ __('Print') }}</span>
+                </button>
+                <button type="button" onclick="exportMarks('excel')" class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white hover:bg-green-700">
+                    <i class="bi bi-file-earmark-spreadsheet"></i>
+                    <span>{{ __('Excel') }}</span>
+                </button>
+                <button type="button" onclick="exportMarks('csv')" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white hover:bg-blue-700">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>{{ __('CSV') }}</span>
+                </button>
+            </div>
+        </div>
+        <form id="marksFilterForm" class="space-y-4 p-5">
+            <input type="hidden" name="category" id="categorySelect" value="{{ $selectedCategory }}">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Search') }}</label>
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ $search }}"
+                        placeholder="{{ __('Name or Roll No...') }}"
+                        class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                    >
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Semester') }}</label>
+                    <select name="semester" id="semesterSelect" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white" onchange="semesterChanged()">
+                        <option value="">{{ __('Select Semester') }}</option>
+                        @foreach($semesters as $sem)
+                            <option value="{{ $sem['id'] }}" {{ (string) $selectedSemester === (string) $sem['id'] ? 'selected' : '' }}>
+                                {{ $sem['name'] }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
-
-                <!-- Program -->
-                <div class="flex flex-col">
-                    <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Program') }}</label>
-                    <select name="program" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <option value="">{{ __('All Programs') }}</option>
-                        @if($programs->isNotEmpty())
-                            @foreach($programs as $program)
-                                <option value="{{ $program['id'] }}" {{ $selectedProgram == $program['id'] ? 'selected' : '' }}>
-                                    {{ $program['name'] }}
-                                </option>
-                            @endforeach
-                        @endif
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Subject') }}</label>
+                    <select name="subject" id="subjectSelect" onchange="categoryChanged()" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white" {{ $selectedSemester ? '' : 'disabled' }}>
+                        <option value="">{{ $selectedSemester ? __('Select Subject') : __('Select semester first') }}</option>
+                        @foreach($filteredSubjects as $subject)
+                            <option value="{{ $subject['id'] }}" {{ (string) $selectedSubject === (string) $subject['id'] ? 'selected' : '' }}>
+                                {{ $subject['code'] ?? '' }} - {{ $subject['name'] }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
-
-                <!-- Semester -->
-                <div class="flex flex-col">
-                    <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Semester') }}</label>
-                    <select name="semester" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <option value="">{{ __('All Semesters') }}</option>
-                        @if($semesters->isNotEmpty())
-                            @foreach($semesters as $sem)
-                                <option value="{{ $sem['id'] }}" {{ $selectedSemester == $sem['id'] ? 'selected' : '' }}>
-                                    {{ $sem['name'] }}
-                                </option>
-                            @endforeach
-                        @endif
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Exam') }}</label>
+                    <select name="exam" id="examSelect" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="">{{ __('Select Exam') }}</option>
+                        @foreach($exams as $exam)
+                            <option value="{{ $exam['id'] }}" {{ (string) $selectedExam === (string) $exam['id'] ? 'selected' : '' }}>
+                                {{ $exam['formatted_assessment'] ?? '' }} - {{ $exam['name'] ?? $exam['exam_name'] }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
-
-                <!-- Batch -->
-                <div class="flex flex-col">
-                    <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Batch') }}</label>
-                    <select name="batch" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <option value="">{{ __('All Batches') }}</option>
-                        @if($batches->isNotEmpty())
-                            @foreach($batches as $batch)
-                                <option value="{{ $batch['id'] }}" {{ $selectedBatch == $batch['id'] ? 'selected' : '' }}>
-                                    {{ $batch['name'] }}
-                                </option>
-                            @endforeach
-                        @endif
-                    </select>
-                </div>
-
-                <!-- Subject -->
-                <div class="flex flex-col">
-                    <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Subject') }}</label>
-                    <select name="subject" id="subjectSelect" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <option value="">{{ __('All Subjects') }}</option>
-                        @if($subjects->isNotEmpty())
-                            @foreach($subjects as $subject)
-                                <option value="{{ $subject['id'] }}" {{ $selectedSubject == $subject['id'] ? 'selected' : '' }}>
-                                    {{ $subject['code'] ?? '' }} - {{ $subject['name'] }}
-                                </option>
-                            @endforeach
-                        @endif
-                    </select>
-                </div>
-
-                <!-- Exam -->
-                <div class="flex flex-col">
-                    <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Exam') }}</label>
-                    <select name="exam" id="examSelect" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <option value="">{{ __('All Exams') }}</option>
-                        @if($exams->isNotEmpty())
-                            @foreach($exams as $exam)
-                                <option value="{{ $exam['id'] }}" {{ $selectedExam == $exam['id'] ? 'selected' : '' }}>
-                                    {{ $exam['formatted_assessment'] ?? '' }} - {{ $exam['name'] ?? $exam['exam_name'] }}
-                                </option>
-                            @endforeach
-                        @endif
-                    </select>
-                </div>
-
-                <!-- Status -->
-                <div class="flex flex-col">
-                    <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Status') }}</label>
-                    <select name="status" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Status') }}</label>
+                    <select name="status" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
                         <option value="">{{ __('All') }}</option>
                         <option value="filled" {{ $selectedStatus === 'filled' ? 'selected' : '' }}>{{ __('Filled') }}</option>
                         <option value="empty" {{ $selectedStatus === 'empty' ? 'selected' : '' }}>{{ __('Empty') }}</option>
@@ -174,50 +115,49 @@
                         <option value="fail" {{ $selectedStatus === 'fail' ? 'selected' : '' }}>{{ __('Fail') }}</option>
                     </select>
                 </div>
-
-                <!-- Search -->
-                <div class="flex flex-col">
-                    <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Search') }}</label>
-                    <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('Student Name, Roll No') }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Sort By') }}</label>
+                    <select name="sort_by" class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white">
+                        <option value="roll_no" {{ ($selectedSortBy ?? 'roll_no') === 'roll_no' ? 'selected' : '' }}>{{ __('Roll Number') }}</option>
+                        <option value="name" {{ ($selectedSortBy ?? '') === 'name' ? 'selected' : '' }}>{{ __('Student Name') }}</option>
+                    </select>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 justify-between flex-wrap pt-2">
-                <div class="flex gap-2 flex-wrap">
-                    <button type="button" onclick="applyFilters()" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-colors font-medium shadow-sm">
-                        <i class="bi bi-funnel"></i> {{ __('Apply Filter') }}
-                    </button>
-                    <a href="{{ route('teacher.marks') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium">
-                        <i class="bi bi-arrow-clockwise"></i> {{ __('Reset') }}
-                    </a>
-                </div>
-                <div class="flex gap-2 flex-wrap">
-                    <button type="button" onclick="printMarks()" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-md text-sm hover:bg-gray-700 transition-colors font-medium">
-                        <i class="bi bi-printer"></i> {{ __('Print') }}
-                    </button>
-                    <button type="button" onclick="exportMarks('pdf')" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors font-medium">
-                        <i class="bi bi-file-pdf"></i> {{ __('PDF') }}
-                    </button>
-                    <button type="button" onclick="exportMarks('excel')" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-colors font-medium">
-                        <i class="bi bi-file-excel"></i> {{ __('Excel') }}
-                    </button>
-                    <button type="button" onclick="exportMarks('csv')" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors font-medium">
-                        <i class="bi bi-file-earmark-text"></i> {{ __('CSV') }}
-                    </button>
-                </div>
+            <div class="flex flex-wrap gap-3 border-t border-gray-100 pt-3 dark:border-slate-700">
+                <button type="button" onclick="applyFilters()" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+                    <i class="bi bi-funnel"></i>
+                    <span>{{ __('Apply Filters') }}</span>
+                </button>
+                <a href="{{ route('teacher.marks') }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-700">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    <span>{{ __('Reset') }}</span>
+                </a>
             </div>
         </form>
     </div>
 
     <!-- Marks Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden" id="marksTableContainer">
-        @if(!$selectedExam && !$selectedSubject && !$selectedSemester && !$selectedBatch)
-            <div class="p-8 text-center">
-                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="bi bi-funnel text-2xl text-gray-400 dark:text-gray-500"></i>
+    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800" id="marksTableContainer">
+        @if(!$selectedSemester || !$selectedSubject)
+            <div class="m-5 rounded-xl border border-amber-200 bg-amber-50 p-6 text-amber-900 shadow-sm dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+                <div class="flex items-start gap-3">
+                    <i class="bi bi-info-circle text-2xl"></i>
+                    <div>
+                        <h3 class="text-lg font-semibold">{{ __('Select Semester & Subject') }}</h3>
+                        <p class="mt-1 text-sm">{{ __('Choose a semester first, then pick one of your assigned subjects to view the marks grid below.') }}</p>
+                    </div>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ __('Select Filters to View Marks') }}</h3>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('Please select an Exam, Subject, or use other filters to display student marks.') }}</p>
+            </div>
+        @elseif(!$selectedExam)
+            <div class="m-5 rounded-xl border border-blue-200 bg-blue-50 p-6 text-blue-900 shadow-sm dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-100">
+                <div class="flex items-start gap-3">
+                    <i class="bi bi-journal-check text-2xl"></i>
+                    <div>
+                        <h3 class="text-lg font-semibold">{{ __('Select Exam') }}</h3>
+                        <p class="mt-1 text-sm">{{ __('Pick an exam for the selected subject to check and update marks.') }}</p>
+                    </div>
+                </div>
             </div>
         @elseif($students->isNotEmpty())
             <div class="overflow-x-auto">
@@ -245,7 +185,6 @@
                             
                             <th class="px-4 py-3 text-center border-l border-gray-300 dark:border-gray-600">{{ __('Total') }}</th>
                             <th class="px-4 py-3 text-center">{{ __('Result') }}</th>
-                            <th class="px-4 py-3 text-center">{{ __('Actions') }}</th>
                         </tr>
                         <!-- Sub-header for column details -->
                         <tr class="bg-gray-100 dark:bg-gray-600 text-xs">
@@ -268,7 +207,7 @@
                                 <th class="px-1 py-2 text-center">{{ __('Pass') }}</th>
                                 <th class="px-1 py-2 text-center">{{ __('Obt.') }}</th>
                             @endif
-                            <th colspan="3" class="px-4 py-2"></th>
+                            <th colspan="2" class="px-4 py-2"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -279,10 +218,7 @@
                             $result = $student->result;
                             
                             // Get exam info for column headers
-                            $exam = null;
-                            if($selectedExam) {
-                                $exam = App\Models\Exam::find($selectedExam);
-                            }
+                            $exam = $currentExam;
                         @endphp
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition {{ $isFilled ? 'bg-green-50 dark:bg-green-900/10' : 'bg-red-50 dark:bg-red-900/10' }}">
                             <td class="px-4 py-4 text-sm font-medium text-gray-900 dark:text-white">
@@ -325,6 +261,7 @@
                                 <td class="px-1 py-4 text-center">
                                     <input type="number" 
                                         class="w-14 px-2 py-1 text-center border border-gray-300 dark:border-gray-600 rounded text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 {{ $tiPass === false ? 'border-red-500 bg-red-50 dark:bg-red-900/30' : '' }}" 
+                                        data-mark-id="{{ $mark?->id }}"
                                         data-student-id="{{ $student->id }}"
                                         data-component="ti"
                                         data-exam-id="{{ $selectedExam }}"
@@ -340,6 +277,7 @@
                                 <td class="px-1 py-4 text-center">
                                     <input type="number" 
                                         class="w-14 px-2 py-1 text-center border border-gray-300 dark:border-gray-600 rounded text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 {{ $tePass === false ? 'border-red-500 bg-red-50 dark:bg-red-900/30' : '' }}" 
+                                        data-mark-id="{{ $mark?->id }}"
                                         data-student-id="{{ $student->id }}"
                                         data-component="te"
                                         data-exam-id="{{ $selectedExam }}"
@@ -356,6 +294,7 @@
                                     <td class="px-1 py-4 text-center">
                                         <input type="number" 
                                             class="w-14 px-2 py-1 text-center border border-gray-300 dark:border-gray-600 rounded text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 {{ $piPass === false ? 'border-red-500 bg-red-50 dark:bg-red-900/30' : '' }}" 
+                                            data-mark-id="{{ $mark?->id }}"
                                             data-student-id="{{ $student->id }}"
                                             data-component="pi"
                                             data-exam-id="{{ $selectedExam }}"
@@ -371,6 +310,7 @@
                                     <td class="px-1 py-4 text-center">
                                         <input type="number" 
                                             class="w-14 px-2 py-1 text-center border border-gray-300 dark:border-gray-600 rounded text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 {{ $pePass === false ? 'border-red-500 bg-red-50 dark:bg-red-900/30' : '' }}" 
+                                            data-mark-id="{{ $mark?->id }}"
                                             data-student-id="{{ $student->id }}"
                                             data-component="pe"
                                             data-exam-id="{{ $selectedExam }}"
@@ -391,6 +331,7 @@
                                     @endphp
                                     <input type="number" 
                                         class="w-20 px-2 py-1 text-center border border-gray-300 dark:border-gray-600 rounded text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-500 {{ $assessPass === false && $mark ? 'border-red-500 bg-red-50 dark:bg-red-900/30' : '' }}" 
+                                        data-mark-id="{{ $mark?->id }}"
                                         data-student-id="{{ $student->id }}"
                                         data-component="marks"
                                         data-exam-id="{{ $selectedExam }}"
@@ -428,12 +369,6 @@
                                 @endif
                             </td>
                             
-                            <!-- Actions -->
-                            <td class="px-4 py-4 text-center">
-                                <button onclick="editStudentMarks({{ $student->id }})" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -455,22 +390,36 @@
     </div>
 </div>
 
-<!-- Edit Modal -->
-<div id="editMarksModal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal()"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-2xl shadow-2xl">
-        <div class="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-6 flex items-center justify-between rounded-t-2xl">
+<div id="printModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePrintModal()"></div>
+    <div class="relative mx-auto w-full max-w-6xl h-[92vh] flex flex-col overflow-hidden rounded-xl bg-white dark:bg-slate-800 shadow-2xl border border-gray-200 dark:border-slate-700">
+        <div class="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-rose-600 to-red-600">
             <div>
-                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">{{ __('Edit Marks') }}</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400" id="modalStudentInfo"></p>
+                <h3 class="text-base font-semibold text-white">{{ __('Print Marks') }}</h3>
+                <p class="text-rose-100 text-xs">{{ __('A4 preview (use Print to open dialog)') }}</p>
             </div>
-            <button onclick="closeModal()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                <i class="bi bi-x-lg text-xl"></i>
+            <button onclick="closePrintModal()" class="text-rose-100 hover:text-white p-2 rounded-full hover:bg-white/10" aria-label="Close print preview">
+                <i class="bi bi-x-lg"></i>
             </button>
         </div>
-        
-        <div class="p-6" id="modalContent">
-            <!-- Content loaded via AJAX -->
+
+        <div class="flex-1 bg-gray-100 dark:bg-slate-900 p-4 overflow-auto">
+            <iframe id="printFrame" src="" class="w-full h-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white"></iframe>
+        </div>
+
+        <div class="px-5 py-3 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-between items-center gap-3">
+            <span class="text-xs text-gray-600 dark:text-gray-400">{{ __('Tip: Use "New tab" for full-page preview.') }}</span>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="openPrintInNewTab()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition">
+                    <i class="bi bi-box-arrow-up-right mr-1"></i> {{ __('New tab') }}
+                </button>
+                <button type="button" onclick="printFrame()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition shadow-sm">
+                    <i class="bi bi-printer mr-1"></i> {{ __('Print') }}
+                </button>
+                <button type="button" onclick="closePrintModal()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition">
+                    {{ __('Close') }}
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -479,6 +428,9 @@
 
 @push('scripts')
 <script>
+    let currentPrintPreviewUrl = '';
+    const teacherSubjects = @json(collect($subjects)->values());
+
     // Apply filters
     function applyFilters() {
         const form = document.getElementById('marksFilterForm');
@@ -492,7 +444,50 @@
         window.location.href = '{{ route("teacher.marks") }}?' + params.toString();
     }
 
-    // Category changed - reload exams
+    function switchCategory(category) {
+        const categoryInput = document.getElementById('categorySelect');
+        if (!categoryInput) return;
+
+        categoryInput.value = category;
+        const subjectSelect = document.getElementById('subjectSelect');
+        const examSelect = document.getElementById('examSelect');
+        if (subjectSelect) subjectSelect.value = '';
+        if (examSelect) examSelect.value = '';
+        applyFilters();
+    }
+
+    function semesterChanged() {
+        const semesterSelect = document.getElementById('semesterSelect');
+        const subjectSelect = document.getElementById('subjectSelect');
+        const examSelect = document.getElementById('examSelect');
+        if (!semesterSelect || !subjectSelect) return;
+
+        const semester = semesterSelect.value;
+        const filteredSubjects = teacherSubjects.filter(subject => {
+            if (!semester) return false;
+            return String(subject.semester) === String(semester);
+        });
+
+        subjectSelect.innerHTML = '';
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = semester ? '{{ __("Select Subject") }}' : '{{ __("Select semester first") }}';
+        subjectSelect.appendChild(defaultOption);
+
+        filteredSubjects.forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject.id;
+            option.textContent = `${subject.code ?? ''} - ${subject.name}`.replace(/^ - /, '');
+            subjectSelect.appendChild(option);
+        });
+
+        subjectSelect.disabled = !semester;
+        subjectSelect.value = '';
+        if (examSelect) {
+            examSelect.innerHTML = '<option value="">{{ __("Select Exam") }}</option>';
+        }
+    }
+
     function categoryChanged() {
         const category = document.getElementById('categorySelect').value;
         const subjectId = document.getElementById('subjectSelect').value;
@@ -514,12 +509,11 @@
                 }
             })
             .catch(error => console.error('Error:', error));
-        
-        applyFilters();
     }
 
     // Update marks via AJAX
     function updateMarks(input) {
+        const markId = input.dataset.markId;
         const studentId = input.dataset.studentId;
         const component = input.dataset.component;
         const examId = input.dataset.examId;
@@ -531,15 +525,33 @@
             return;
         }
 
-        // Send AJAX request
         const formData = new FormData();
-        formData.append('student_id', studentId);
-        formData.append('exam_id', examId);
-        formData.append('component', component);
-        formData.append('value', value);
-        
-        fetch('{{ route("teacher.marks.update") }}', {
-            method: 'POST',
+        let url = '{{ route("teacher.marks.store") }}';
+        let method = 'POST';
+
+        if (markId) {
+            url = '{{ route("teacher.marks.update", ["id" => "__MARK_ID__"]) }}'.replace('__MARK_ID__', markId);
+            method = 'POST';
+            formData.append('_method', 'PUT');
+
+            if (component === 'marks') {
+                formData.append('marks_obtained', value);
+            } else {
+                formData.append(component + '_marks', value);
+            }
+        } else {
+            formData.append('exam_id', examId);
+            formData.append('marks[0][student_id]', studentId);
+
+            if (component === 'marks') {
+                formData.append('marks[0][marks]', value);
+            } else {
+                formData.append(`marks[0][${component}_marks]`, value);
+            }
+        }
+
+        fetch(url, {
+            method: method,
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json'
@@ -578,8 +590,8 @@
         formData.forEach((value, key) => {
             if (value) params.set(key, value);
         });
-        
-        window.location.href = '{{ route("teacher.marks.print") }}?' + params.toString();
+
+        openPrintModal('{{ route("teacher.marks.print") }}?' + params.toString());
     }
 
     // Export marks
@@ -591,48 +603,47 @@
         formData.forEach((value, key) => {
             if (value) params.set(key, value);
         });
-        
-                        window.location.href = '{{ route("teacher.marks.export") }}?format=' + format + '&' + params.toString();
+        window.location.href = '{{ route("teacher.marks.export") }}?format=' + format + '&' + params.toString();
     }
 
-    // Edit student marks
-    function editStudentMarks(studentId) {
-        const modal = document.getElementById('editMarksModal');
+    function openPrintModal(url) {
+        const modal = document.getElementById('printModal');
+        const frame = document.getElementById('printFrame');
+        if (!modal || !frame) return;
+
+        currentPrintPreviewUrl = url || '';
+        frame.src = currentPrintPreviewUrl;
         modal.classList.remove('hidden');
-        
-        const params = new URLSearchParams({
-            student_id: studentId,
-            exam_id: document.querySelector('select[name="exam"]')?.value || ''
-        });
-        
-        fetch('{{ route("teacher.marks.edit") }}?' + params.toString())
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('modalStudentInfo').textContent = data.student_info;
-                    document.getElementById('modalContent').innerHTML = data.html;
-                } else {
-                    alert('Failed to load student marks');
-                    closeModal();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to load student marks');
-                closeModal();
-            });
+        document.body.style.overflow = 'hidden';
     }
 
-    // Close modal
-    function closeModal() {
-        document.getElementById('editMarksModal').classList.add('hidden');
+    function closePrintModal() {
+        const modal = document.getElementById('printModal');
+        const frame = document.getElementById('printFrame');
+        if (!modal) return;
+
+        modal.classList.add('hidden');
+        if (frame) frame.src = '';
+        currentPrintPreviewUrl = '';
+        document.body.style.overflow = '';
     }
 
-    // Close modal on escape key
+    function openPrintInNewTab() {
+        if (!currentPrintPreviewUrl) return;
+        const url = currentPrintPreviewUrl + (currentPrintPreviewUrl.includes('?') ? '&' : '?') + 'newTab=1';
+        window.open(url, '_blank');
+    }
+
+    function printFrame() {
+        const frame = document.getElementById('printFrame');
+        if (frame && frame.contentWindow) frame.contentWindow.print();
+    }
+
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            closeModal();
+            closePrintModal();
         }
     });
+
 </script>
 @endpush
