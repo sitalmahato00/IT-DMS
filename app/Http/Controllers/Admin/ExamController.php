@@ -2807,12 +2807,8 @@ $exam->load(['subject', 'marks.student.user']);
         
         $examMarks = $examMarksQuery->get();
 
-        // If multiple marks exist for the same subject (from different exams/uploads), keep only the latest entry.
-        $examMarks = $examMarks->sortByDesc(function ($mark) {
-            return $mark->exam?->exam_date ? strtotime($mark->exam->exam_date) : $mark->exam_id;
-        })->unique('subject_id')->values();
-
-        // Filter by pass/fail result if requested
+        // Filter by pass/fail result before collapsing repeated subject entries.
+        // Otherwise a failing latest assessment can hide an older passing row and produce a false empty state.
         $resultFilter = $request->get('result', '');
         if (in_array($resultFilter, ['pass', 'fail'])) {
             $examMarks = $examMarks->filter(function ($mark) use ($resultFilter) {
@@ -2820,6 +2816,16 @@ $exam->load(['subject', 'marks.student.user']);
                 return $resultFilter === 'pass' ? $isPass : !$isPass;
             })->values();
         }
+
+        // If multiple marks exist for the same subject (from different exams/uploads), keep one representative entry.
+        // For assessment marksheets, prefer the highest assessment number; otherwise fall back to exam date / id.
+        $examMarks = $examMarks->sortByDesc(function ($mark) {
+            if (($mark->exam?->exam_category ?? null) === 'assessment' && !empty($mark->assessment_number)) {
+                return (int) $mark->assessment_number;
+            }
+
+            return $mark->exam?->exam_date ? strtotime($mark->exam->exam_date) : $mark->exam_id;
+        })->unique('subject_id')->values();
 
         // Group marks by subject
         $marksBySubject = $examMarks->groupBy('subject_id');

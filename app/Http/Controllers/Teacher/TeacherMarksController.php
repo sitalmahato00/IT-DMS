@@ -1441,6 +1441,27 @@ class TeacherMarksController extends Controller
             // Get teacher's subjects
             $subjectIds = $this->getTeacherSubjectIds();
             $subjects = Subject::whereIn('id', $subjectIds)->orderBy('subject_name')->get();
+
+            $availableSemesters = $subjects->pluck('semester')
+                ->filter()
+                ->map(fn ($semester) => (string) $semester)
+                ->unique()
+                ->sort()
+                ->values()
+                ->toArray();
+
+            $selectedSemester = trim((string) $request->get('semester', ''));
+            if (!empty($availableSemesters)) {
+                if ($selectedSemester === '' && count($availableSemesters) === 1) {
+                    $selectedSemester = $availableSemesters[0];
+                } elseif ($selectedSemester !== '' && !in_array($selectedSemester, $availableSemesters, true)) {
+                    $selectedSemester = count($availableSemesters) === 1 ? $availableSemesters[0] : '';
+                }
+            }
+
+            if ((string) $request->get('semester', '') !== $selectedSemester) {
+                $request->merge(['semester' => $selectedSemester]);
+            }
             
             // Get filter data
             $years = \App\Models\Exam::distinct()
@@ -1451,7 +1472,7 @@ class TeacherMarksController extends Controller
                 ->values()
                 ->toArray();
             
-            $semesters = ['1', '2', '3', '4', '5', '6'];
+            $semesters = !empty($availableSemesters) ? $availableSemesters : ['1', '2', '3', '4', '5', '6'];
             
             // Get exam types
             $examTypes = \App\Models\Exam::distinct()
@@ -1468,8 +1489,8 @@ class TeacherMarksController extends Controller
                 ->when($request->filled('academic_year'), function ($q) use ($request) {
                     $q->where('academic_year', $request->academic_year);
                 })
-                ->when($request->filled('semester'), function ($q) use ($request) {
-                    $q->where('semester', $request->semester);
+                ->when($selectedSemester !== '', function ($q) use ($selectedSemester) {
+                    $q->where('semester', $selectedSemester);
                 })
                 ->when(!empty($subjectIds), function ($q) use ($subjectIds) {
                     $q->whereIn('subject_id', $subjectIds);
@@ -1480,12 +1501,19 @@ class TeacherMarksController extends Controller
                 ->unique()
                 ->sort()
                 ->values();
+
+            $selectedAssessmentNumber = trim((string) $request->get('assessment_number', ''));
+            $availableAssessmentNumbers = $assessmentNumbers->map(fn ($number) => (string) $number)->all();
+            if ($selectedAssessmentNumber !== '' && !in_array($selectedAssessmentNumber, $availableAssessmentNumbers, true)) {
+                $selectedAssessmentNumber = '';
+                $request->merge(['assessment_number' => '']);
+            }
             
             $filters = [
                 'academic_year' => $request->get('academic_year', ''),
-                'semester' => $request->get('semester', ''),
+                'semester' => $selectedSemester,
                 'exam_category' => $request->get('exam_category', 'assessment'),
-                'assessment_number' => $request->get('assessment_number', ''),
+                'assessment_number' => $selectedAssessmentNumber,
                 'student_id' => $request->get('student_id', ''),
                 'dob' => $request->get('dob', ''),
                 'dob_bs' => $request->get('dob_bs', ''),
@@ -1669,12 +1697,8 @@ class TeacherMarksController extends Controller
         
         $examMarks = $examMarksQuery->get();
 
-        // If multiple marks exist for the same subject (from different exams/uploads), keep only the latest entry.
-        $examMarks = $examMarks->sortByDesc(function ($mark) {
-            return $mark->exam?->exam_date ? strtotime($mark->exam->exam_date) : $mark->exam_id;
-        })->unique('subject_id')->values();
-
-        // Filter by pass/fail result if requested
+        // Filter by pass/fail result before collapsing repeated subject entries.
+        // Otherwise a failing latest assessment can hide an older passing row and produce a false empty state.
         $resultFilter = $request->get('result', '');
         if (in_array($resultFilter, ['pass', 'fail'])) {
             $examMarks = $examMarks->filter(function ($mark) use ($resultFilter) {
@@ -1682,6 +1706,16 @@ class TeacherMarksController extends Controller
                 return $resultFilter === 'pass' ? $isPass : !$isPass;
             })->values();
         }
+
+        // If multiple marks exist for the same subject (from different exams/uploads), keep one representative entry.
+        // For assessment marksheets, prefer the highest assessment number; otherwise fall back to exam date / id.
+        $examMarks = $examMarks->sortByDesc(function ($mark) {
+            if (($mark->exam?->exam_category ?? null) === 'assessment' && !empty($mark->assessment_number)) {
+                return (int) $mark->assessment_number;
+            }
+
+            return $mark->exam?->exam_date ? strtotime($mark->exam->exam_date) : $mark->exam_id;
+        })->unique('subject_id')->values();
 
         // Group marks by subject
         $marksBySubject = $examMarks->groupBy('subject_id');
