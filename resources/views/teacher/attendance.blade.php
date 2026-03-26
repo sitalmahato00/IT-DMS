@@ -264,7 +264,7 @@
             <div class="flex items-center gap-3 text-xs flex-wrap">
                 <span class="text-gray-600 dark:text-gray-400 font-medium">{{ __('Mark all as:') }}</span>
                 <label class="inline-flex items-center cursor-pointer">
-                    <input type="radio" name="bulkStatus" value="present" class="sr-only" checked>
+                    <input type="radio" name="bulkStatus" value="present" class="sr-only">
                     <div class="px-3 py-1.5 rounded text-xs font-medium border border-green-300 dark:border-green-900/40 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/30">
                         <i class="bi bi-check-circle text-xs mr-1.5"></i> {{ __('Present') }}
                     </div>
@@ -828,7 +828,7 @@ async function viewSubjectAttendance(date, subjectId, subjectName) {
                     'X-CSRF-TOKEN': csrfToken,
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify({ date: date, subject_id: subjectId })
+                body: JSON.stringify({ date: date, subject_id: subjectId, marked_only: true })
             });
             const data = await res.json();
 
@@ -903,6 +903,10 @@ async function openEditSubjectAttendance(date, date_bs, subjectId, subjectName) 
         editSubjectData.date_bs = date_bs;
         editSubjectData.subject_id = subjectId;
         editSubjectData.subject_name = subjectName;
+        editSubjectData.students = [];
+        document.querySelectorAll('input[name="bulkStatus"]').forEach(input => {
+            input.checked = false;
+        });
         
         document.getElementById('editSubjectTitle').textContent = subjectName + ' - ' + date;
         document.getElementById('editSubjectStudentsBody').innerHTML = '<tr><td colspan="5" class="px-3 py-8 text-center text-gray-500">Loading...</td></tr>';
@@ -923,7 +927,7 @@ async function openEditSubjectAttendance(date, date_bs, subjectId, subjectName) 
                     'X-CSRF-TOKEN': csrfToken,
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify({ date: date, subject_id: subjectId })
+                body: JSON.stringify({ date: date, subject_id: subjectId, marked_only: true })
             });
             const data = await res.json();
 
@@ -971,28 +975,39 @@ async function openEditSubjectAttendance(date, date_bs, subjectId, subjectName) 
     }
 
     function updateStudentStatus(studentId, newStatus) {
-        const student = editSubjectData.students.find(s => s.student_id === studentId);
+        const student = editSubjectData.students.find(s => String(s.student_id) === String(studentId));
         if (student) {
-            student.new_status = newStatus;
+            student.new_status = String(student.status || '') === String(newStatus) ? null : newStatus;
         }
     }
 
     function closeEditSubjectModal() {
         document.getElementById('editSubjectModal').classList.add('hidden');
+        document.querySelectorAll('input[name="bulkStatus"]').forEach(input => {
+            input.checked = false;
+        });
         editSubjectData = { date: '', date_bs: '', subject_id: '', subject_name: '', students: [] };
     }
 
     async function saveSubjectAttendance() {
         const bulkStatus = document.querySelector('input[name="bulkStatus"]:checked')?.value;
-        
-        const attendance = editSubjectData.students
-            .filter(s => s.new_status)
-            .map(s => ({ student_id: s.student_id, status: s.new_status }));
+        const changedStatuses = new Map(
+            editSubjectData.students
+                .filter(s => s.new_status)
+                .map(s => [String(s.student_id), s.new_status])
+        );
 
-        if (attendance.length === 0 && bulkStatus) {
-            editSubjectData.students.forEach(s => {
-                attendance.push({ student_id: s.student_id, status: bulkStatus });
-            });
+        let attendance = [];
+
+        if (bulkStatus) {
+            attendance = editSubjectData.students.map(s => ({
+                student_id: s.student_id,
+                status: changedStatuses.get(String(s.student_id)) || bulkStatus
+            }));
+        } else {
+            attendance = editSubjectData.students
+                .filter(s => s.new_status)
+                .map(s => ({ student_id: s.student_id, status: s.new_status }));
         }
 
         if (attendance.length === 0) {

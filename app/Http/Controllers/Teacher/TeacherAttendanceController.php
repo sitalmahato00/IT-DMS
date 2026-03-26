@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Department;
+use App\Support\TeacherSubjectRoster;
 use App\Traits\LogsActivity;
 
 class TeacherAttendanceController extends Controller
@@ -88,6 +89,68 @@ class TeacherAttendanceController extends Controller
         }
 
         return array_values(array_unique(array_merge($pivotIds, $fallbackByUserId, $legacyIds)));
+    }
+
+    /**
+     * Resolve the semester(s) this teacher is assigned for a subject.
+     */
+    private function getAssignedSemestersForSubject(int $subjectId, $teacher, $user): array
+    {
+        $teacherIds = array_values(array_filter([
+            $teacher?->id,
+            $user?->id,
+        ], fn ($id) => !is_null($id) && $id !== ''));
+
+        $assignedSemesters = SubjectTeacher::where('subject_id', $subjectId)
+            ->when(!empty($teacherIds), function ($query) use ($teacherIds) {
+                $query->whereIn('teacher_id', $teacherIds);
+            })
+            ->whereNotNull('semester')
+            ->pluck('semester')
+            ->filter(fn ($semester) => $semester !== null && $semester !== '')
+            ->map(fn ($semester) => (string) $semester)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (!empty($assignedSemesters)) {
+            return $assignedSemesters;
+        }
+
+        $subjectSemester = DB::table('subjects')
+            ->where('id', $subjectId)
+            ->value('semester');
+
+        return $subjectSemester !== null && $subjectSemester !== ''
+            ? [(string) $subjectSemester]
+            : [];
+    }
+
+    /**
+     * Build the subject roster limited to the teacher's assigned semester for that subject.
+     */
+    private function getRosterStudentsForSubject(int $subjectId, array $assignedSemesters = [])
+    {
+        $students = TeacherSubjectRoster::studentRowsForSubject($subjectId);
+
+        if (!empty($assignedSemesters)) {
+            $allowedSemesters = array_map('strval', $assignedSemesters);
+            $students = $students
+                ->filter(function ($student) use ($allowedSemesters) {
+                    return in_array((string) ($student->semester ?? ''), $allowedSemesters, true);
+                })
+                ->values();
+        }
+
+        return $students->map(function ($student) {
+            return (object) [
+                'student_id' => (int) $student->student_id,
+                'name' => (string) ($student->name ?? ''),
+                'email' => (string) ($student->email ?? ''),
+                'roll_no' => (string) ($student->roll_no ?? ''),
+                'semester' => (string) ($student->semester ?? ''),
+            ];
+        })->values();
     }
 
     /**
@@ -467,6 +530,7 @@ class TeacherAttendanceController extends Controller
     {
         $subjectId = (int) $request->input('subject_id');
         $date = $request->input('date', '');
+        $markedOnly = $request->boolean('marked_only');
 
         $user = auth()->user();
         $teacher = $user->teacher;
@@ -475,56 +539,42 @@ class TeacherAttendanceController extends Controller
             return response()->json(['error' => 'Teacher profile not found'], 404);
         }
 
-        $subjectIds = $this->loadTeacherSubjectIds();
-        if (!in_array($subjectId, $subjectIds)) {
-            // Fallback: if subject is not in teacher's list, try to fetch enrolled students for that subject anyway
-            // but proceed with an empty assigned semesters constraint to avoid blocking UI.
-            $subjectIds = $subjectIds; // keep existing behavior, but allow fetch fallback below
+        $subjectIds = array_map('intval', $this->loadTeacherSubjectIds());
+        if ($subjectId <= 0) {
+            return response()->json(['error' => 'Invalid subject selected'], 422);
         }
 
-        // Only include students from semesters the teacher is responsible for (for this subject)
-        $assignedSemesters = SubjectTeacher::where('subject_id', $subjectId)
-            ->where('teacher_id', $teacher->id)
-            ->whereNotNull('semester')
-            ->pluck('semester')
-            ->filter()
-            ->unique()
-            ->toArray();
-        // Fetch students enrolled in the subject (or all if legacy data exists)
-        // Ensure we only fetch students actually enrolled in the subject
-        // subject_students.student_id references students.id, and students.user_id points to users.id
-        $students = DB::table('subject_students')
-            ->join('students', 'subject_students.student_id', '=', 'students.id')
-            ->join('users', 'students.user_id', '=', 'users.id')
-            ->where('subject_students.subject_id', $subjectId)
-            ->where('users.role', 'student')
-            ->where('students.is_active', 1)
-            ->where('students.is_alumni', 0)
-            ->when(!empty($assignedSemesters), function ($query) use ($assignedSemesters) {
-                $query->whereIn('students.semester', $assignedSemesters);
-            })
-            ->select(
-                'students.id as student_id',
-                'users.name',
-                'users.email',
-                'students.roll_no',
-                'students.semester'
-            )
-            ->orderBy('users.name')
-            ->get();
+        if (!in_array($subjectId, $subjectIds, true)) {
+            return response()->json(['error' => 'Subject not assigned to you'], 403);
+        }
+
+        $assignedSemesters = $this->getAssignedSemestersForSubject($subjectId, $teacher, $user);
+        $students = $this->getRosterStudentsForSubject($subjectId, $assignedSemesters);
 
         $existingAttendance = collect([]);
         if (!empty($date)) {
             $existingAttendance = DB::table('attendance')
                 ->where('date', $date)
                 ->where('subject_id', $subjectId)
-                ->pluck('status', 'student_id');
+                ->select('student_id', 'status', 'remarks')
+                ->get()
+                ->keyBy('student_id');
+        }
+
+        if ($markedOnly) {
+            $students = $students
+                ->filter(function ($student) use ($existingAttendance) {
+                    return $existingAttendance->has($student->student_id);
+                })
+                ->values();
         }
 
         $students = $students->map(function ($student) use ($existingAttendance) {
-            $student->status = $existingAttendance->get($student->student_id, 'present');
+            $attendance = $existingAttendance->get($student->student_id);
+            $student->status = $attendance->status ?? ($attendance ? null : 'present');
+            $student->remarks = $attendance->remarks ?? null;
             return $student;
-        });
+        })->values();
 
         return response()->json([
             'students' => $students,
@@ -557,8 +607,11 @@ class TeacherAttendanceController extends Controller
             $records = [];
 
             foreach ($subjectIds as $sid) {
-                // enrolled students for this subject
-                $enrolled = DB::table('subject_students')->where('subject_id', $sid)->pluck('student_id')->toArray();
+                $assignedSemesters = $this->getAssignedSemestersForSubject((int) $sid, $teacher, $user);
+                $enrolled = $this->getRosterStudentsForSubject((int) $sid, $assignedSemesters)
+                    ->pluck('student_id')
+                    ->map(fn ($studentId) => (int) $studentId)
+                    ->all();
                 foreach ($enrolled as $stid) {
                     // skip if an attendance record already exists for this date and subject
                     $exists = DB::table('attendance')->where('date', $today)->where('subject_id', $sid)->where('student_id', $stid)->exists();
@@ -617,23 +670,17 @@ class TeacherAttendanceController extends Controller
                 abort(404, 'Subject not found');
             }
         }
-        // Fetch enrolled students for this subject
-        $students = DB::table('subject_students')
-            ->join('students', 'subject_students.student_id', '=', 'students.id')
-            ->join('users', 'students.user_id', '=', 'users.id')
-            ->where('subject_students.subject_id', $subjectId)
-            ->where('users.role', 'student')
-            ->where('students.is_active', 1)
-            ->where('students.is_alumni', 0)
-            ->select(
-                'students.id as student_id',
-                'users.name',
-                'users.email',
-                'students.roll_no',
-                'students.semester'
-            )
-            ->orderBy('users.name')
-            ->get();
+        $students = TeacherSubjectRoster::studentRowsForSubject($subjectId)
+            ->map(function ($student) {
+                return (object) [
+                    'student_id' => (int) $student->student_id,
+                    'name' => (string) ($student->name ?? ''),
+                    'email' => (string) ($student->email ?? ''),
+                    'roll_no' => (string) ($student->roll_no ?? ''),
+                    'semester' => (string) ($student->semester ?? ''),
+                ];
+            })
+            ->values();
 
         // Attach status if attendance exists for given date
         $existingAttendance = collect([]);
@@ -641,12 +688,16 @@ class TeacherAttendanceController extends Controller
             $existingAttendance = DB::table('attendance')
                 ->where('date', $date)
                 ->where('subject_id', $subjectId)
-                ->pluck('status', 'student_id');
+                ->select('student_id', 'status', 'remarks')
+                ->get()
+                ->keyBy('student_id');
         }
         $students = $students->map(function($s) use ($existingAttendance) {
-            $s->status = $existingAttendance->get($s->student_id, 'present');
+            $attendance = $existingAttendance->get($s->student_id);
+            $s->status = $attendance->status ?? 'present';
+            $s->remarks = $attendance->remarks ?? null;
             return $s;
-        });
+        })->values();
 
         $subject = \App\Models\Subject::find($subjectId);
         $subjectName = $subject->subject_name ?? 'Subject';
@@ -731,8 +782,8 @@ class TeacherAttendanceController extends Controller
                 return response()->json(['error' => 'Teacher profile not found'], 404);
             }
 
-            $subjectIds = $this->loadTeacherSubjectIds();
-            if (!in_array($data['subject_id'], $subjectIds)) {
+            $subjectIds = array_map('intval', $this->loadTeacherSubjectIds());
+            if (!in_array((int) $data['subject_id'], $subjectIds, true)) {
                 return response()->json(['error' => 'Subject not assigned to you'], 403);
             }
 
@@ -741,21 +792,24 @@ class TeacherAttendanceController extends Controller
             $now = now()->toDateTimeString();
 
             // Ensure we only save attendance for students actually enrolled in this subject
-            $enrolledStudentIds = DB::table('subject_students')
-                ->where('subject_id', $data['subject_id'])
+            $assignedSemesters = $this->getAssignedSemestersForSubject((int) $data['subject_id'], $teacher, $user);
+            $enrolledStudentIds = $this->getRosterStudentsForSubject((int) $data['subject_id'], $assignedSemesters)
                 ->pluck('student_id')
-                ->toArray();
+                ->map(fn ($studentId) => (int) $studentId)
+                ->all();
 
             $records = [];
             foreach ($data['attendance'] as $item) {
-                if (!in_array($item['student_id'], $enrolledStudentIds)) {
+                $studentId = (int) $item['student_id'];
+
+                if (!in_array($studentId, $enrolledStudentIds, true)) {
                     // Skip any student not enrolled in this subject
                     continue;
                 }
 
                 $remarks = $item['status'] === 'absent' ? 'Absent' : ($item['status'] === 'leave' ? 'Leave' : 'Present');
                 $records[] = [
-                    'student_id' => $item['student_id'],
+                    'student_id' => $studentId,
                     'subject_id' => $data['subject_id'],
                     'teacher_id' => $teacher->id,
                     'date' => $date,
