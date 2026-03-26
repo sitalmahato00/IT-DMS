@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SubjectTeacher;
 use App\Models\Subject;
+use App\Support\TeacherSubjectRoster;
 use Illuminate\Support\Facades\Schema;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -105,13 +106,26 @@ class TeacherStudentController extends Controller
             ->values()
             ->toArray();
 
-        // Build base query for students enrolled in the teacher's subjects
-        // Note: subject_students.student_id references students.id in this project.
-        $query = DB::table('subject_students as ss')
-            ->join('subjects as sub', 'ss.subject_id', '=', 'sub.id')
-            ->join('students as st', 'ss.student_id', '=', 'st.id')
+        $selectedSubject = $request->get('subject');
+        $selectedSemester = $request->get('semester');
+        $filteredSubjects = $subjects;
+        if ($selectedSemester && in_array((int) $selectedSemester, $availableSemesters, true)) {
+            $filteredSubjects = $filteredSubjects
+                ->filter(fn ($subject) => (int) ($subject['semester'] ?? 0) === (int) $selectedSemester)
+                ->values();
+        }
+
+        $filteredSubjectIds = $filteredSubjects->pluck('id')->all();
+
+        if ($selectedSubject && in_array($selectedSubject, $filteredSubjectIds)) {
+            $studentIds = TeacherSubjectRoster::studentIdsForSubject((int) $selectedSubject);
+        } else {
+            $studentIds = TeacherSubjectRoster::studentIdsForSubjects($filteredSubjectIds);
+        }
+
+        $query = DB::table('students as st')
             ->join('users as u', 'st.user_id', '=', 'u.id')
-            ->whereIn('ss.subject_id', $subjectIds)
+            ->whereIn('st.id', $studentIds)
             ->where('u.role', 'student')
             ->where(function ($q) {
                 $q->where('st.status', 'active')
@@ -121,18 +135,6 @@ class TeacherStudentController extends Controller
                 $q->where('st.is_alumni', 0)
                     ->orWhereNull('st.is_alumni');
             });
-
-        // Filter by subject if selected
-        $selectedSubject = $request->get('subject');
-        if ($selectedSubject && in_array($selectedSubject, $subjectIds)) {
-            $query->where('ss.subject_id', $selectedSubject);
-        }
-
-        // Filter by semester if selected
-        $selectedSemester = $request->get('semester');
-        if ($selectedSemester && in_array((int) $selectedSemester, $availableSemesters, true)) {
-            $query->where('sub.semester', (int) $selectedSemester);
-        }
 
         // Search filter
         $search = $request->get('q');
@@ -228,24 +230,23 @@ class TeacherStudentController extends Controller
         // Get student and verify they're in teacher's subjects
         $student = User::where('id', $id)
             ->where('role', 'student')
-            ->whereHas('student', function ($q) use ($subjectIds) {
-                $q->whereHas('subjects', function ($sq) use ($subjectIds) {
-                    $sq->whereIn('subjects.id', $subjectIds);
-                });
-            })
             ->with('student')
             ->first();
 
-        if (!$student) {
+        $accessibleStudentIds = TeacherSubjectRoster::studentIdsForSubjects($subjectIds);
+
+        if (
+            !$student ||
+            !$student->student ||
+            !in_array($student->student->id, $accessibleStudentIds, true)
+        ) {
             return redirect()->route('teacher.students')->with('error', 'Student not found in your subjects.');
         }
 
-        // Get student's subjects (only those taught by this teacher - both sources)
-        $studentSubjects = DB::table('subject_students')
-            ->where('student_id', $id)
-            ->whereIn('subject_id', $subjectIds)
-            ->join('subjects', 'subject_students.subject_id', '=', 'subjects.id')
-            ->select('subjects.id', 'subjects.subject_name', 'subjects.subject_code', 'subjects.semester')
+        $studentSubjects = Subject::whereIn('id', $subjectIds)
+            ->where('semester', $student->student->semester)
+            ->select('id', 'subject_name', 'subject_code', 'semester')
+            ->orderBy('subject_name')
             ->get();
 
         // Get attendance records for this student in teacher's subjects

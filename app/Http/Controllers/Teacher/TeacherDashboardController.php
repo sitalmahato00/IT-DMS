@@ -12,6 +12,7 @@ use App\Models\Notice;
 use App\Models\Attendance;
 use App\Models\Exam;
 use App\Models\ExamMark;
+use App\Support\TeacherSubjectRoster;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
@@ -90,13 +91,7 @@ class TeacherDashboardController extends Controller
         // (Note: this count is a best-effort distinct count across all assigned subjects)
         $totalStudents = 0;
         if (!empty($subjectIds)) {
-            $totalStudents = DB::table('subject_students as ss')
-                ->join('students', 'ss.student_id', '=', 'students.id')
-                ->whereIn('ss.subject_id', $subjectIds)
-                ->where('students.status', 'active')
-                ->where('students.is_alumni', 0)
-                ->distinct('students.id')
-                ->count('students.id');
+            $totalStudents = count(TeacherSubjectRoster::studentIdsForSubjects($subjectIds));
         }
 
         $avgAttendance = $this->getTeacherAttendancePercentage($subjectIds);
@@ -123,12 +118,7 @@ class TeacherDashboardController extends Controller
             $subject = $item['subject'];
             $assignment = $item['assignment'];
             
-            $studentCount = DB::table('subject_students as ss')
-                ->join('students', 'ss.student_id', '=', 'students.id')
-                ->where('ss.subject_id', $subject->id)
-                ->where('students.status', 'active')
-                ->where('students.is_alumni', 0)
-                ->count();
+            $studentCount = TeacherSubjectRoster::studentCountForSubject($subject->id);
             
             $attendanceStats = DB::table('attendance')
                 ->join('students', 'attendance.student_id', '=', 'students.id')

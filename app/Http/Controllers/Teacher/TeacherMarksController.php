@@ -10,6 +10,7 @@ use App\Models\Exam;
 use App\Models\Subject;
 use App\Models\Student;
 use App\Models\Course;
+use App\Support\TeacherSubjectRoster;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -36,7 +37,7 @@ class TeacherMarksController extends Controller
     }
 
     /**
-     * Display marks for teacher's subjects
+     * Display marks for teacher's subjects - using new simplified view
      */
     public function index(Request $request)
     {
@@ -48,20 +49,11 @@ class TeacherMarksController extends Controller
                 return view('teacher.marks', [
                     'students' => collect([]),
                     'subjects' => collect([]),
-                    'exams' => collect([]),
-                    'programs' => collect([]),
                     'semesters' => collect([]),
-                    'batches' => collect([]),
-                    'selectedProgram' => null,
-                    'selectedSemester' => null,
-                    'selectedBatch' => null,
-                    'selectedSubject' => null,
-                    'selectedExam' => null,
+                    'academicYears' => collect([]),
+                    'assessments' => [],
                     'selectedCategory' => 'assessment',
-                    'selectedStatus' => null,
-                    'selectedSortBy' => 'roll_no',
-                    'search' => '',
-                    'stats' => $this->getEmptyStats(),
+                    'currentFilters' => [],
                 ]);
             }
             
@@ -71,221 +63,220 @@ class TeacherMarksController extends Controller
                 return view('teacher.marks', [
                     'students' => collect([]),
                     'subjects' => collect([]),
-                    'exams' => collect([]),
-                    'programs' => collect([]),
                     'semesters' => collect([]),
-                    'batches' => collect([]),
-                    'selectedProgram' => null,
-                    'selectedSemester' => null,
-                    'selectedBatch' => null,
-                    'selectedSubject' => null,
-                    'selectedExam' => null,
+                    'academicYears' => collect([]),
+                    'assessments' => [],
                     'selectedCategory' => 'assessment',
-                    'selectedStatus' => null,
-                    'selectedSortBy' => 'roll_no',
-                    'search' => '',
-                    'stats' => $this->getEmptyStats(),
+                    'currentFilters' => [],
                 ]);
             }
             
-            // Debug: Log the request parameters
-            Log::info('Teacher marks index called with params:', [
-                'program' => $request->get('program', ''),
-                'semester' => $request->get('semester', ''),
-                'batch' => $request->get('batch', ''),
-                'subject' => $request->get('subject', ''),
-                'exam' => $request->get('exam', ''),
-                'category' => $request->get('category', 'assessment'),
-                'status' => $request->get('status', ''),
-                'search' => $request->get('search', '')
-            ]);
-            
             // Get filter parameters
-            $program = $request->get('program', '');
-            $semester = $request->get('semester', '');
-            $batch = $request->get('batch', '');
-            $subject = $request->get('subject', '');
-            $exam = $request->get('exam', '');
             $category = $request->get('category', 'assessment');
-            $status = $request->get('status', '');
+            $semester = $request->get('semester', '');
+            $subjectId = $request->get('subject_id', '');
+            $academicYear = $request->get('academic_year', '');
+            $assessmentId = $request->get('assessment_id', '');
             $search = $request->get('search', '');
-            $sortBy = $request->get('sort_by', 'roll_no');
-            $perPage = intval($request->get('per_page', 25)) ?: 25;
-            // Validate per_page - only allow safe values
-            $allowedPerPage = [10, 25, 50];
-            if (!in_array($perPage, $allowedPerPage, true)) {
-                $perPage = 25;
-            }
-            // normalize request param so pagination links use a sanitized value
-            $request->merge(['per_page' => $perPage]);
             
-            // Get unique programs from subjects
-            $programs = Subject::whereIn('id', $subjectIds)
-                ->whereNotNull('category')
-                ->distinct()
-                ->pluck('category')
-                ->filter()
-                ->map(function ($cat) {
-                    return ['id' => $cat, 'name' => $cat];
-                })
-                ->values();
-            
-            // Get semesters
+            // Get unique semesters from teacher's subjects
             $semesters = Subject::whereIn('id', $subjectIds)
                 ->distinct()
                 ->pluck('semester')
                 ->filter()
-                ->map(function ($s) {
-                    return ['id' => $s, 'name' => $s . ' Semester'];
-                })
+                ->sort()
                 ->values();
             
-            // Get batches from students
-            $batches = Student::whereHas('subjects', function($q) use ($subjectIds) {
-                    $q->whereIn('subjects.id', $subjectIds);
-                })
-                ->where('batch_year', '!=', null)
+            // Get unique academic years from exam marks for teacher's subjects
+            $academicYears = ExamMark::whereHas('exam', function ($q) use ($subjectIds) {
+                $q->whereIn('subject_id', $subjectIds);
+            })
                 ->distinct()
-                ->pluck('batch_year')
+                ->orderBy('academic_year', 'desc')
+                ->pluck('academic_year')
                 ->filter()
-                ->map(function ($b) {
-                    return ['id' => $b, 'name' => $b];
+                ->values();
+            
+            // Get unique assessments (Assessment category only)
+            $assessments = Exam::whereIn('subject_id', $subjectIds)
+                ->where('exam_category', 'assessment')
+                ->distinct()
+                ->orderBy('exam_date', 'asc')
+                ->pluck('exam_name', 'id')
+                ->toArray();
+            
+            // Get subjects for teacher (format for display)
+            $subjects = SubjectTeacher::where('teacher_id', $teacher->id)
+                ->with('subject')
+                ->get()
+                ->map(function ($st) {
+                    return [
+                        'id' => $st->subject->id,
+                        'name' => $st->subject->subject_name,
+                        'code' => $st->subject->subject_code,
+                        'semester' => $st->subject->semester,
+                    ];
                 })
                 ->values();
             
-            // Get subjects for dropdown (filtered by category if selected)
-            $subjectQuery = SubjectTeacher::where('teacher_id', $teacher->id)
-                ->with('subject');
-            
-            $subjectsData = $subjectQuery->get()->map(function ($st) {
-                return [
-                    'id' => $st->subject->id,
-                    'name' => $st->subject->subject_name,
-                    'code' => $st->subject->subject_code,
-                    'category' => $st->subject->category,
-                    'semester' => $st->subject->semester,
-                ];
-            });
-            
-            if ($program) {
-                $subjectsData = $subjectsData->where('category', $program);
-            }
-            if ($semester) {
-                $subjectsData = $subjectsData->where('semester', $semester);
-            }
-            
-            $subjects = $subjectsData->values();
-            
-            // Get exams for selected subject or all subjects
-            $examQuery = Exam::whereIn('subject_id', $subjectIds)
-                ->select('*', 'assessment_number')
-                ->orderBy('exam_date', 'desc');
-            
-            if ($category) {
-                $examQuery->where('exam_category', $category);
-            }
-            
-            if ($subject) {
-                $examQuery->where('subject_id', $subject);
-            }
-            
-            $exams = $examQuery->get()->map(function ($e) {
-                return [
-                    'id' => $e->id,
-                    'name' => $e->exam_name,
-                    'formatted_assessment' => $e->formatted_assessment,
-                    'category' => $e->exam_category,
-                    'full_marks' => $e->full_marks,
-                    'passing_marks' => $e->passing_marks,
-                    'exam_date' => $e->exam_date,
-                ];
-            });
-            
-            // Get students for the table
-            $students = $this->getStudentsWithMarks($request, $subjectIds, [
-                'program' => $program,
-                'semester' => $semester,
-                'batch' => $batch,
-                'subject' => $subject,
-                'exam' => $exam,
-                'category' => $category,
-                'status' => $status,
-                'search' => $search,
-                'sortBy' => $sortBy,
-                'perPage' => $perPage,
-            ]);
-            
-            // Get statistics
-            $stats = $this->getStats($subjectIds, $request);
-            
-            // Determine whether the selected subject has a lab component
-            $selectedSubjectHasLab = false;
-            if ($subject) {
-                $subjectModel = Subject::find($subject);
-                $selectedSubjectHasLab = $subjectModel ? (bool) $subjectModel->has_lab : false;
-            }
+            // Get students with marks if subject is selected
+            $students = collect([]);
+            if (!empty($subjectId)) {
+                // Validate that this subject is owned by the teacher
+                $subject = Subject::find($subjectId);
+                if (!$subject || !in_array($subjectId, $subjectIds)) {
+                    $subjectId = '';
+                } else {
+                    // Get students in this subject's semester
+                    $studentQuery = Student::whereHas('subjects', function ($q) use ($subjectId) {
+                        $q->where('subject_id', $subjectId);
+                    })
+                    ->with('user', 'examMarks');
+                    
+                    // Filter by academic year if specified
+                    if (!empty($academicYear)) {
+                        $studentQuery->whereHas('examMarks', function ($q) use ($academicYear) {
+                            $q->where('academic_year', $academicYear);
+                        });
+                    }
+                    
+                    $studentQuery->when($search, function ($q) use ($search) {
+                        return $q->whereHas('user', function ($uq) use ($search) {
+                            $uq->where('name', 'like', '%' . $search . '%')
+                              ->orWhere('email', 'like', '%' . $search . '%')
+                              ->orWhere('phone', 'like', '%' . $search . '%');
+                        })->orWhere('roll_no', 'like', '%' . $search . '%');
+                    });
 
-            // Handle AJAX request
-            if ($request->ajax()) {
-                $tableHtml = view('teacher.partials.marks_table', [
-                    'students' => $students,
-                    'selectedExam' => $exam,
-                    'selectedCategory' => $category,
-                    'selectedSubjectHasLab' => $selectedSubjectHasLab,
-                ])->render();
-            
-                $paginationHtml = $students->links('vendor.pagination.tailwind')->toHtml();
-            
-                return response()->json([
-                    'success' => true,
-                    'table_html' => $tableHtml,
-                    'pagination_html' => $paginationHtml,
-                    'stats' => $stats,
-                    'selected_subject_has_lab' => $selectedSubjectHasLab,
-                ]);
+                    $students = $studentQuery->paginate(25)->withQueryString();
+                    
+                    // Format student marks data
+                    $students->getCollection()->transform(function ($student) use ($subjectId, $category, $academicYear) {
+                        // Get exams for this subject/category
+                        $exams = Exam::where('subject_id', $subjectId)
+                            ->where('exam_category', $category)
+                            ->orderBy('exam_date', 'asc');
+                        
+                        // Filter by academic year if specified
+                        if (!empty($academicYear)) {
+                            $exams->where('academic_year', $academicYear);
+                        }
+                        
+                        $exams = $exams->get();
+                        
+                        $totalMarks = 0;
+                        $totalFull = 0;
+                        $totalPass = 0;
+                        $allPassed = true;
+                        $assessments = [];
+                        
+                        // Calculate CTEVT or Assessment marks
+                        if ($category === 'ctevt') {
+                            foreach ($exams as $exam) {
+                                $mark = ExamMark::where('student_id', $student->id)
+                                    ->where('exam_id', $exam->id)
+                                    ->first();
+                                
+                                if ($mark) {
+                                    $totalMarks += ($mark->theory_internal_marks ?? 0) +
+                                                  ($mark->theory_external_marks ?? 0) +
+                                                  ($mark->practical_internal_marks ?? 0) +
+                                                  ($mark->practical_external_marks ?? 0);
+                                    
+                                    $totalFull += ($exam->theory_internal_max_marks ?? 0) +
+                                               ($exam->theory_external_max_marks ?? 0) +
+                                               ($exam->practical_internal_max_marks ?? 0) +
+                                               ($exam->practical_external_max_marks ?? 0);
+                                }
+                            }
+                        } else {
+                            // Assessment marks - track individual assessments
+                            foreach ($exams as $exam) {
+                                $mark = ExamMark::where('student_id', $student->id)
+                                    ->where('exam_id', $exam->id)
+                                    ->first();
+                                
+                                $obtained = $mark ? ($mark->marks_obtained ?? 0) : 0;
+                                $full = $exam->full_marks ?? 0;
+                                $pass = $exam->passing_marks ?? 0;
+                                
+                                $assessments[] = [
+                                    'exam_id' => $exam->id,
+                                    'exam_name' => $exam->exam_name,
+                                    'exam_date' => $exam->exam_date,
+                                    'obtained' => $obtained,
+                                    'full' => $full,
+                                    'pass' => $pass,
+                                    'percentage' => $full > 0 ? round(($obtained / $full) * 100, 1) : 0,
+                                    'is_passed' => $obtained >= $pass && $full > 0,
+                                ];
+                                
+                                $totalMarks += $obtained;
+                                $totalFull += $full;
+                                $totalPass += $pass;
+                                
+                                if ($obtained < $pass) {
+                                    $allPassed = false;
+                                }
+                            }
+                        }
+                        
+                        return [
+                            'id' => $student->id,
+                            'roll_no' => $student->roll_no,
+                            'name' => $student->user->name ?? 'N/A',
+                            'total_marks' => $totalMarks,
+                            'full_marks' => $totalFull,
+                            'pass_marks' => $totalPass,
+                            'is_passed' => $allPassed && $totalFull > 0,
+                            'assessments' => $assessments,
+                            'ti_full' => 0,
+                            'ti_pass' => 0,
+                            'ti_obtained' => 0,
+                            'ti_is_pass' => null,
+                            'te_full' => 0,
+                            'te_pass' => 0,
+                            'te_obtained' => 0,
+                            'te_is_pass' => null,
+                            'pi_full' => 0,
+                            'pi_pass' => 0,
+                            'pi_obtained' => 0,
+                            'pi_is_pass' => null,
+                            'pe_full' => 0,
+                            'pe_pass' => 0,
+                            'pe_obtained' => 0,
+                            'pe_is_pass' => null,
+                        ];
+                    });
+                }
             }
-
+            
             return view('teacher.marks', [
                 'students' => $students,
                 'subjects' => $subjects,
-                'exams' => $exams,
-                'programs' => $programs,
                 'semesters' => $semesters,
-                'batches' => $batches,
-                'selectedProgram' => $program,
-                'selectedSemester' => $semester,
-                'selectedBatch' => $batch,
-                'selectedSubject' => $subject,
-                'selectedSubjectHasLab' => $selectedSubjectHasLab,
-                'selectedExam' => $exam,
+                'academicYears' => $academicYears,
+                'assessments' => $assessments,
                 'selectedCategory' => $category,
-                'selectedStatus' => $status,
-                'selectedSortBy' => $sortBy,
-                'search' => $search,
-                'stats' => $stats,
+                'currentFilters' => [
+                    'category' => $category,
+                    'semester' => $semester,
+                    'subject_id' => $subjectId,
+                    'academic_year' => $academicYear,
+                    'assessment_id' => $assessmentId,
+                    'search' => $search,
+                ],
             ]);
         } catch (\Exception $e) {
-            Log::error('Teacher marks error: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
-            
-            // Return view with default empty data
+            Log::error('Teacher marks error: ' . $e->getMessage());
             return view('teacher.marks', [
                 'students' => collect([]),
                 'subjects' => collect([]),
-                'exams' => collect([]),
-                'programs' => collect([]),
                 'semesters' => collect([]),
-                'batches' => collect([]),
-                'selectedProgram' => null,
-                'selectedSemester' => null,
-                'selectedBatch' => null,
-                'selectedSubject' => null,
-                'selectedSubjectHasLab' => false,
-                'selectedExam' => null,
+                'academicYears' => collect([]),
+                'assessments' => [],
                 'selectedCategory' => 'assessment',
-                'selectedStatus' => null,
-                'selectedSortBy' => 'roll_no',
-                'search' => '',
-                'stats' => $this->getEmptyStats(),
+                'currentFilters' => [],
             ]);
         }
     }
@@ -295,12 +286,27 @@ class TeacherMarksController extends Controller
      */
     private function getStudentsWithMarks(Request $request, array $subjectIds, array $filters)
     {
-        // Get students enrolled in teacher's subjects
-        $studentIds = DB::table('subject_students')
-            ->whereIn('subject_id', $subjectIds)
-            ->distinct()
-            ->pluck('student_id')
-            ->toArray();
+        $filteredSubjectIds = $subjectIds;
+
+        if (!empty($filters['program'])) {
+            $filteredSubjectIds = Subject::whereIn('id', $filteredSubjectIds)
+                ->where('category', $filters['program'])
+                ->pluck('id')
+                ->all();
+        }
+
+        if (!empty($filters['semester'])) {
+            $filteredSubjectIds = Subject::whereIn('id', $filteredSubjectIds)
+                ->where('semester', $filters['semester'])
+                ->pluck('id')
+                ->all();
+        }
+
+        if (!empty($filters['subject']) && in_array($filters['subject'], $filteredSubjectIds)) {
+            $studentIds = TeacherSubjectRoster::studentIdsForSubject((int) $filters['subject']);
+        } else {
+            $studentIds = TeacherSubjectRoster::studentIdsForSubjects($filteredSubjectIds);
+        }
 
         if (empty($studentIds)) {
             return collect([]);
@@ -309,13 +315,6 @@ class TeacherMarksController extends Controller
         // Build student query
         $studentsQuery = Student::with(['user', 'subjects'])
             ->whereIn('students.id', $studentIds);
-
-        // Apply program filter
-        if (!empty($filters['program'])) {
-            $studentsQuery->whereHas('subjects', function($q) use ($filters) {
-                $q->where('category', $filters['program']);
-            });
-        }
 
         // Apply semester filter
         if (!empty($filters['semester'])) {
@@ -489,6 +488,7 @@ class TeacherMarksController extends Controller
     {
         $category = $request->get('category', 'assessment');
         $subjectId = $request->get('subject_id');
+        $assessmentNumber = $request->get('assessment_number');
 
         $subjectIds = $this->getTeacherSubjectIds();
 
@@ -498,6 +498,10 @@ class TeacherMarksController extends Controller
 
         if ($subjectId) {
             $examQuery->where('subject_id', $subjectId);
+        }
+
+        if ($category === 'assessment' && $assessmentNumber !== null && $assessmentNumber !== '') {
+            $examQuery->where('assessment_number', $assessmentNumber);
         }
 
         $exams = $examQuery->get(['id', 'exam_name', 'exam_category', 'full_marks', 'passing_marks']);

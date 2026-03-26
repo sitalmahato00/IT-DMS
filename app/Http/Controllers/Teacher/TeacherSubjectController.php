@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SubjectTeacher;
 use App\Models\Subject;
+use App\Support\TeacherSubjectRoster;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -85,27 +86,7 @@ class TeacherSubjectController extends Controller
         $subjectAssignments = $rawResults->map(function ($assignment) {
                 $subject = $assignment->subject;
                 
-                // Get student count for this subject - filter: role='student', status='active', is_alumni=0
-                // Also limit to the semester the teacher is assigned for this subject (if set)
-                $studentCountQuery = DB::table('subject_students')
-                    ->where('subject_students.subject_id', $subject->id)
-                    ->join('students', 'subject_students.student_id', '=', 'students.id')
-                    ->join('users', 'students.user_id', '=', 'users.id')
-                    ->where('users.role', 'student')
-                    ->where(function ($q) {
-                        $q->where('students.status', 'active')
-                          ->orWhereNull('students.status');
-                    })
-                    ->where(function ($q) {
-                        $q->where('students.is_alumni', 0)
-                          ->orWhereNull('students.is_alumni');
-                    });
-
-                if (!empty($assignment->semester)) {
-                    $studentCountQuery->where('students.semester', $assignment->semester);
-                }
-
-                $studentCount = $studentCountQuery->count('subject_students.student_id');
+                $studentCount = TeacherSubjectRoster::studentCountForSubject($subject->id);
                 
                 // Get attendance stats for this subject
                 $attendanceStats = DB::table('attendance')
@@ -250,23 +231,16 @@ class TeacherSubjectController extends Controller
 
         $subject = $assignment->subject;
         
-        // Get enrolled students - filter: role='student', status='active', is_alumni=0
-        $students = DB::table('subject_students')
-            ->where('subject_id', $subject->id)
-            ->join('users', 'subject_students.student_id', '=', 'users.id')
-            ->leftJoin('students', 'users.id', '=', 'students.user_id')
-            ->where('users.role', 'student')
-            ->where(function($q) {
-                $q->where('students.status', 'active')
-                  ->orWhereNull('students.status');
-            })
-            ->where(function($q) {
-                $q->where('students.is_alumni', 0)
-                  ->orWhereNull('students.is_alumni');
-            })
-            ->select('users.id', 'users.name', 'users.email', 'students.roll_no', 'students.registration_number')
-            ->orderBy('users.name', 'asc')
-            ->get();
+        $students = TeacherSubjectRoster::studentRowsForSubject($subject->id)
+            ->map(function ($student) {
+                return (object) [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'email' => $student->email,
+                    'roll_no' => $student->roll_no,
+                    'registration_number' => $student->registration_number,
+                ];
+            });
 
         // Get recent attendance for this subject
         $recentAttendance = DB::table('attendance')
@@ -306,10 +280,7 @@ class TeacherSubjectController extends Controller
             ->map(function ($assignment) {
                 $subject = $assignment->subject;
                 
-                // Get student count for this subject
-                $studentCount = DB::table('subject_students')
-                    ->where('subject_id', $subject->id)
-                    ->count('student_id');
+                $studentCount = TeacherSubjectRoster::studentCountForSubject($subject->id);
                 
                 // Get attendance stats for this subject
                 $attendanceStats = DB::table('attendance')

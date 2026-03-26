@@ -1,16 +1,8 @@
-# Laravel Landing Page Fixed ✅
+# Teacher Marks Page Fixes
 
-## Completed:
-- [x] composer install --no-dev (vendor/ created, packages installed)
-- [x] vendor/autoload.php generated (via dump-autoload)
-- [x] npm install & npx vite build (assets in public/build/)
-- [x] Framework files present (Illuminate/Foundation/)
-
-## Test:
-Run `php artisan serve` and visit **http://localhost:8000** - landing.blade.php should load without autoloader error.
-
-## Final Status: Error resolved - vendor/autoload.php fixed!
-
-
-
-
+## Steps:
+- [x] Create TODO.md
+- [x] Edit resources/views/teacher/marks.blade.php: Add switchCategoryAndSubmit() JS function, update tab onclicks to call it + applyFilters() for server reload on category change
+- [x] Test category tabs trigger page reload with filtered exams/table
+- [x] Verify semester → dynamic subject loading works
+- [ ] attempt_completion

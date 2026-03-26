@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\ExamMark;
 use App\Models\Subject;
+use App\Models\SubjectTeacher;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Attendance;
@@ -1831,6 +1832,21 @@ $exam->load(['subject', 'marks.student.user']);
     }
 
     /**
+     * Get subject IDs assigned to the current teacher (if user is teacher).
+     */
+    private function getTeacherSubjectIds(): ?array
+    {
+        $user = auth()->user();
+        if (!$user || $user->role !== 'teacher' || !$user->teacher) {
+            return null;
+        }
+
+        return SubjectTeacher::where('teacher_id', $user->teacher->id)
+            ->pluck('subject_id')
+            ->toArray();
+    }
+
+    /**
      * Display dynamic marks page with Assessment and CTEVT support.
      */
     public function dynamicMarksIndex(Request $request)
@@ -1846,8 +1862,13 @@ $exam->load(['subject', 'marks.student.user']);
             // Get filter data
             $filterData = $this->getDynamicMarksFilterData($category);
             
-            // Get all subjects for this category (show all subjects for selection)
-            $subjects = Subject::orderBy('subject_name')->get();
+            // Get subject IDs and list (restrict for teacher if needed)
+            $teacherSubjectIds = $this->getTeacherSubjectIds();
+            $subjectQuery = Subject::orderBy('subject_name');
+            if (is_array($teacherSubjectIds)) {
+                $subjectQuery->whereIn('id', $teacherSubjectIds);
+            }
+            $subjects = $subjectQuery->get();
             
             // Current filters
             $currentFilters = [
@@ -1874,7 +1895,7 @@ $exam->load(['subject', 'marks.student.user']);
             $columnStructure = $this->getColumnStructure($category, $columnSubjects);
             
             // Get students with marks
-            $students = $this->getDynamicMarksStudents($request, $category);
+            $students = $this->getDynamicMarksStudents($request, $category, $teacherSubjectIds);
             
             return view('admin.marks.dynamic', [
                 'category' => $category,
@@ -1931,9 +1952,12 @@ $exam->load(['subject', 'marks.student.user']);
      */
     private function getDynamicMarksAssessmentNumbers(Request $request, string $category)
     {
+        $teacherSubjectIds = $this->getTeacherSubjectIds();
+
         $query = Exam::query()
             ->where('exam_category', 'assessment')
             ->whereNotNull('assessment_number')
+            ->when(is_array($teacherSubjectIds), fn ($q) => $q->whereIn('subject_id', $teacherSubjectIds))
             ->when($request->filled('subject_id'), fn ($q) => $q->where('subject_id', $request->subject_id))
             ->when($request->filled('semester'), fn ($q) => $q->where('semester', (string) $request->semester))
             // Dynamic marks "academic_year" filter uses BS (from students table), so match exams.academic_year_bs.
@@ -1966,8 +1990,13 @@ $exam->load(['subject', 'marks.student.user']);
     /**
      * Get students with marks for dynamic marks page.
      */
-    private function getDynamicMarksStudents(Request $request, $category)
+    private function getDynamicMarksStudents(Request $request, $category, ?array $teacherSubjectIds = null)
     {
+        // Teacher should only access assigned subjects
+        if (is_array($teacherSubjectIds) && $request->filled('subject_id') && !in_array($request->subject_id, $teacherSubjectIds)) {
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 25);
+        }
+
         // Require at least one filter: subject_id, semester, batch, academic year, or search
         $hasFilters = $request->filled('subject_id') || 
                       $request->filled('semester') || 
@@ -2090,7 +2119,8 @@ $exam->load(['subject', 'marks.student.user']);
     {
         try {
             $category = $request->get('category', 'assessment');
-            $students = $this->getDynamicMarksStudents($request, $category);
+            $teacherSubjectIds = $this->getTeacherSubjectIds();
+            $students = $this->getDynamicMarksStudents($request, $category, $teacherSubjectIds);
             
             $html = view('admin.marks.partials.dynamic_table_rows', [
                 'students' => $students,
@@ -2136,7 +2166,12 @@ $exam->load(['subject', 'marks.student.user']);
         try {
             $category = $request->get('category', 'assessment');
             $currentFilters = $this->getCurrentFilters($request);
-            $subjects = Subject::orderBy('subject_name')->get();
+            $teacherSubjectIds = $this->getTeacherSubjectIds();
+            $subjectQuery = Subject::orderBy('subject_name');
+            if (is_array($teacherSubjectIds)) {
+                $subjectQuery->whereIn('id', $teacherSubjectIds);
+            }
+            $subjects = $subjectQuery->get();
             $selectedSubject = null;
             if (!empty($currentFilters['subject_id'])) {
                 $selectedSubject = $subjects->firstWhere('id', $currentFilters['subject_id']);
