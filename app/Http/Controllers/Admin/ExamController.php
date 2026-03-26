@@ -2082,7 +2082,38 @@ $exam->load(['subject', 'marks.student.user']);
             $query->orderBy('roll_no');
         }
         
-        return $query->paginate(25);
+        $students = $query->paginate(25);
+        $subjectId = $request->filled('subject_id') ? (int) $request->subject_id : null;
+
+        $students->getCollection()->transform(function ($student) use ($subjectId) {
+            $student->attendance_percentage = $this->calculateMarksAttendancePercentage($student->id, $subjectId);
+            return $student;
+        });
+
+        return $students;
+    }
+
+    private function calculateMarksAttendancePercentage(int $studentId, ?int $subjectId = null): float
+    {
+        $attendanceQuery = Attendance::where('student_id', $studentId);
+
+        if ($subjectId) {
+            $attendanceQuery->where('subject_id', $subjectId);
+        }
+
+        $totalAttendance = $attendanceQuery->count();
+        if ($totalAttendance === 0) {
+            return 0;
+        }
+
+        $presentAttendance = Attendance::where('student_id', $studentId)
+            ->where('status', 'present');
+
+        if ($subjectId) {
+            $presentAttendance->where('subject_id', $subjectId);
+        }
+
+        return round(($presentAttendance->count() / $totalAttendance) * 100, 1);
     }
 
     /**
@@ -2097,6 +2128,7 @@ $exam->load(['subject', 'marks.student.user']);
             'batch' => $request->get('batch', ''),
             'subject_id' => $request->get('subject_id', ''),
             'status' => $request->get('status', ''),
+            'assessment_number' => $request->get('assessment_number', ''),
             'sort_by' => $request->get('sort_by', 'roll_no'),
         ];
     }
@@ -2148,10 +2180,151 @@ $exam->load(['subject', 'marks.student.user']);
     {
         try {
             $category = $request->get('category', 'assessment');
-            $students = $this->getDynamicMarksStudents($request, $category);
-            
-            // Export logic here
-            return back()->with('success', 'Export functionality coming soon');
+            $currentFilters = $this->getCurrentFilters($request);
+            $format = strtolower($format) === 'excel' ? 'excel' : 'csv';
+            $teacherSubjectIds = $this->getTeacherSubjectIds();
+            $subjectQuery = Subject::orderBy('subject_name');
+            if (is_array($teacherSubjectIds)) {
+                $subjectQuery->whereIn('id', $teacherSubjectIds);
+            }
+            $subjects = $subjectQuery->get();
+            $selectedSubject = null;
+            if (!empty($currentFilters['subject_id'])) {
+                $selectedSubject = $subjects->firstWhere('id', $currentFilters['subject_id']);
+            }
+
+            if (!$selectedSubject) {
+                return back()->with('error', 'Please select a subject to export marks');
+            }
+
+            $students = $this->getDynamicMarksStudents($request, $category, $teacherSubjectIds);
+            if ($students instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+                $students = $students->getCollection();
+            } else {
+                $students = collect($students);
+            }
+
+            $subjectName = preg_replace('/[^A-Za-z0-9_-]+/', '_', strtolower($selectedSubject->subject_name ?? 'subject'));
+            $filename = sprintf('admin_marks_%s_%s', trim($subjectName, '_') ?: 'subject', now()->format('Ymd_His'));
+            $delimiter = $format === 'excel' ? "\t" : ',';
+            $contentType = $format === 'excel' ? 'application/vnd.ms-excel' : 'text/csv';
+            $extension = $format === 'excel' ? 'xls' : 'csv';
+
+            $callback = function () use ($students, $category, $selectedSubject, $currentFilters, $delimiter) {
+                $out = fopen('php://output', 'w');
+                $statusFilter = $currentFilters['status'] ?? '';
+
+                if ($category === 'assessment') {
+                    $selectedAssessmentNumber = $currentFilters['assessment_number'] ?? null;
+                    if ($selectedAssessmentNumber === '') {
+                        $selectedAssessmentNumber = null;
+                    }
+
+                    fputcsv($out, ['Roll No', 'Student Name', 'Attendance %', 'Full Marks', 'Pass Marks', 'Obtained', 'Percentage', 'Result'], $delimiter);
+
+                    foreach ($students as $student) {
+                        $examMark = $student->getExamMarkForSubject($selectedSubject->id, $category, null, $selectedAssessmentNumber);
+                        $marksFilled = $examMark ? $examMark->isFilled() : false;
+                        $isPassed = $examMark ? $examMark->isPassedAllComponents() : false;
+                        $totalObtained = $examMark ? $examMark->calculateTotalMarks() : 0;
+                        $totalFull = $examMark ? $examMark->calculateFullMarks() : 0;
+                        $percentage = $totalFull > 0 ? round(($totalObtained / $totalFull) * 100, 1) : 0;
+
+                        if ($statusFilter === 'pass' && !$isPassed) {
+                            continue;
+                        }
+                        if ($statusFilter === 'fail' && (!$examMark || $isPassed)) {
+                            continue;
+                        }
+                        if ($statusFilter === 'marks_filled' && !$marksFilled) {
+                            continue;
+                        }
+                        if ($statusFilter === 'marks_not_filled' && $marksFilled) {
+                            continue;
+                        }
+
+                        fputcsv($out, [
+                            $student->roll_no,
+                            $student->user->name ?? 'N/A',
+                            ($student->attendance_percentage ?? 0) . '%',
+                            $examMark ? ($examMark->full_marks ?? $examMark->exam->full_marks ?? '') : '',
+                            $examMark ? ($examMark->passing_marks ?? $examMark->exam->passing_marks ?? '') : '',
+                            $examMark ? ($examMark->isAbsent() ? 'ABS' : ($examMark->marks_obtained ?? '')) : '',
+                            $examMark ? ($examMark->isAbsent() ? 'ABS' : ($percentage . '%')) : '',
+                            $examMark ? ($examMark->isAbsent() ? 'ABS' : $examMark->getResultAttribute()) : 'Pending',
+                        ], $delimiter);
+                    }
+                } else {
+                    fputcsv($out, [
+                        'Roll No',
+                        'Student Name',
+                        'TI Full',
+                        'TI Pass',
+                        'TI Obtained',
+                        'TE Full',
+                        'TE Pass',
+                        'TE Obtained',
+                        'PI Full',
+                        'PI Pass',
+                        'PI Obtained',
+                        'PE Full',
+                        'PE Pass',
+                        'PE Obtained',
+                        'Total',
+                        'Result',
+                    ], $delimiter);
+
+                    foreach ($students as $student) {
+                        $examMark = $student->getExamMarkForSubject($selectedSubject->id, $category);
+                        $marksFilled = $examMark ? $examMark->isFilled() : false;
+                        $isPassed = $examMark ? $examMark->isPassedAllComponents() : false;
+
+                        if ($statusFilter === 'pass' && !$isPassed) {
+                            continue;
+                        }
+                        if ($statusFilter === 'fail' && (!$examMark || $isPassed)) {
+                            continue;
+                        }
+                        if ($statusFilter === 'marks_filled' && !$marksFilled) {
+                            continue;
+                        }
+                        if ($statusFilter === 'marks_not_filled' && $marksFilled) {
+                            continue;
+                        }
+
+                        $componentValues = [];
+                        foreach (['TI', 'TE', 'PI', 'PE'] as $component) {
+                            $componentValues[$component] = (array) $student->getComponentMarks($selectedSubject->id, $component);
+                        }
+
+                        fputcsv($out, [
+                            $student->roll_no,
+                            $student->user->name ?? 'N/A',
+                            $componentValues['TI']['full'] ?? 0,
+                            $componentValues['TI']['pass'] ?? 0,
+                            $componentValues['TI']['obtained'] ?? 0,
+                            $componentValues['TE']['full'] ?? 0,
+                            $componentValues['TE']['pass'] ?? 0,
+                            $componentValues['TE']['obtained'] ?? 0,
+                            $componentValues['PI']['full'] ?? 0,
+                            $componentValues['PI']['pass'] ?? 0,
+                            $componentValues['PI']['obtained'] ?? 0,
+                            $componentValues['PE']['full'] ?? 0,
+                            $componentValues['PE']['pass'] ?? 0,
+                            $componentValues['PE']['obtained'] ?? 0,
+                            $examMark ? $examMark->calculateTotalMarks() : '',
+                            $examMark ? $examMark->getResultAttribute() : 'Pending',
+                        ], $delimiter);
+                    }
+                }
+
+                fclose($out);
+            };
+
+            return response()->stream($callback, 200, [
+                'Content-Type' => $contentType,
+                'Content-Disposition' => "attachment; filename={$filename}.{$extension}",
+            ]);
         } catch (\Exception $e) {
             Log::error('Error exporting marks: ' . $e->getMessage());
             return back()->with('error', 'Failed to export: ' . $e->getMessage());

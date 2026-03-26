@@ -286,40 +286,6 @@
     @endif
 </div>
 
-<div id="marksheetPrintModal" class="fixed inset-0 z-50 hidden">
-    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeMarksheetPrintModal()"></div>
-    <div class="relative mx-auto w-full max-w-6xl h-[92vh] flex flex-col overflow-hidden rounded-xl bg-white dark:bg-slate-800 shadow-2xl border border-gray-200 dark:border-slate-700">
-        <div class="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-blue-600 to-indigo-600">
-            <div>
-                <h3 class="text-base font-semibold text-white">Print Marksheet</h3>
-                <p class="text-blue-100 text-xs">A4 preview (use Print to open dialog)</p>
-            </div>
-            <button onclick="closeMarksheetPrintModal()" class="text-blue-100 hover:text-white p-2 rounded-full hover:bg-white/10" aria-label="Close print preview">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-
-        <div class="flex-1 bg-gray-100 dark:bg-slate-900 p-4 overflow-auto">
-            <iframe id="marksheetPrintFrame" src="" class="w-full h-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white"></iframe>
-        </div>
-
-        <div class="px-5 py-3 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-between items-center gap-3">
-            <span class="text-xs text-gray-600 dark:text-gray-400">Tip: Use “New tab” for full-page preview.</span>
-            <div class="flex items-center gap-2">
-                <button type="button" onclick="openMarksheetPrintInNewTab()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition">
-                    <i class="bi bi-box-arrow-up-right mr-1"></i> New tab
-                </button>
-                <button type="button" onclick="printMarksheetFrame()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm">
-                    <i class="bi bi-printer mr-1"></i> Print
-                </button>
-                <button type="button" onclick="closeMarksheetPrintModal()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @push('scripts')
 <script>
     function toggleMarksheetAssessmentFilter() {
@@ -343,50 +309,15 @@
         }
     }
 
-    let currentMarksheetPrintUrl = '';
-
     document.addEventListener('DOMContentLoaded', function() {
         toggleMarksheetAssessmentFilter();
     });
 
     function openMarksheetPrintModal(url) {
-        const modal = document.getElementById('marksheetPrintModal');
-        const frame = document.getElementById('marksheetPrintFrame');
-        if (!modal || !frame) return;
-
-        currentMarksheetPrintUrl = url || '';
-        frame.src = currentMarksheetPrintUrl;
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+        teacherOpenPrintPreview(url, {
+            title: 'Print Marksheet',
+        });
     }
-
-    function closeMarksheetPrintModal() {
-        const modal = document.getElementById('marksheetPrintModal');
-        const frame = document.getElementById('marksheetPrintFrame');
-        if (!modal) return;
-
-        modal.classList.add('hidden');
-        if (frame) frame.src = '';
-        currentMarksheetPrintUrl = '';
-        document.body.style.overflow = '';
-    }
-
-    function openMarksheetPrintInNewTab() {
-        if (!currentMarksheetPrintUrl) return;
-        const url = currentMarksheetPrintUrl + (currentMarksheetPrintUrl.includes('?') ? '&' : '?') + 'newTab=1';
-        window.open(url, '_blank');
-    }
-
-    function printMarksheetFrame() {
-        const frame = document.getElementById('marksheetPrintFrame');
-        if (frame && frame.contentWindow) frame.contentWindow.print();
-    }
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeMarksheetPrintModal();
-        }
-    });
 </script>
 @endpush
 @endsection

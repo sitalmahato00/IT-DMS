@@ -14,6 +14,7 @@
         const baseUrl = '{{ route("teacher.marksheets") }}';
         const availableSemesters = @json($semesters ?? []);
         const availableSubjects = @json($subjects ?? []);
+        const availableAssessments = @json($assessments ?? []);
 
         function buildFilterParams(overrides = {}) {
             const form = document.getElementById('marksheetsFilterForm');
@@ -73,6 +74,33 @@
             
             subjectSelect.disabled = !selectedSemester;
         }
+
+        function toggleAssessmentFilter() {
+            const categorySelect = document.getElementById('examCategorySelect');
+            const assessmentFilter = document.getElementById('assessmentNumberFilter');
+            const assessmentSelect = document.querySelector('select[name="assessment_id"]');
+            
+            if (!categorySelect || !assessmentFilter) return;
+            
+            const selectedCategory = categorySelect.value;
+            if (selectedCategory === 'assessment') {
+                assessmentFilter.classList.remove('hidden');
+            } else {
+                assessmentFilter.classList.add('hidden');
+                if (assessmentSelect) {
+                    assessmentSelect.value = '';
+                }
+            }
+        }
+
+        // Initialize assessment filter visibility on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleAssessmentFilter();
+            const categorySelect = document.getElementById('examCategorySelect');
+            if (categorySelect) {
+                categorySelect.addEventListener('change', toggleAssessmentFilter);
+            }
+        });
     </script>
 
     <div class="space-y-4" id="marksheetsContainer">
@@ -94,7 +122,7 @@
                 </div>
             </div>
             <form id="marksheetsFilterForm" class="p-4 space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Search') }}</label>
                         <input 
@@ -150,6 +178,35 @@
                             @foreach($filteredSubjects as $subject)
                                 <option value="{{ $subject['id'] }}" {{ ($currentFilters['subject_id'] ?? '') == $subject['id'] ? 'selected' : '' }}>
                                     {{ $subject['name'] }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Exam Category') }}</label>
+                        <select 
+                            name="exam_category" 
+                            id="examCategorySelect"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-white"
+                        >
+                            <option value="">{{ __('All Categories') }}</option>
+                            <option value="assessment" {{ ($currentFilters['exam_category'] ?? '') === 'assessment' ? 'selected' : '' }}>{{ __('Assessment') }}</option>
+                            <option value="ctevt" {{ ($currentFilters['exam_category'] ?? '') === 'ctevt' ? 'selected' : '' }}>{{ __('CTEVT') }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="assessmentNumberFilter" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Assessment Number') }}</label>
+                        <select 
+                            name="assessment_id" 
+                            id="filterAssessmentId"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-white"
+                        >
+                            <option value="">{{ __('All Assessments') }}</option>
+                            @foreach($assessments as $id => $name)
+                                <option value="{{ $id }}" {{ ($currentFilters['assessment_id'] ?? '') == $id ? 'selected' : '' }}>
+                                    {{ $name }}
                                 </option>
                             @endforeach
                         </select>
@@ -234,10 +291,14 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-center">
-                                        <a href="{{ route('teacher.marksheet.print', ['student_id' => $student['id'], 'subject_id' => $currentFilters['subject_id']]) }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition">
+                                        <button
+                                            type="button"
+                                            onclick="openTeacherMarksheetPrint('{{ route('teacher.marksheet.print', ['student_id' => $student['id'], 'subject_id' => $currentFilters['subject_id']]) }}')"
+                                            class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition"
+                                        >
                                             <i class="bi bi-printer"></i>
                                             <span>{{ __('Print') }}</span>
-                                        </a>
+                                        </button>
                                     </td>
                                 </tr>
                             @empty
@@ -260,4 +321,14 @@
         @endif
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    function openTeacherMarksheetPrint(url) {
+        teacherOpenPrintPreview(url, {
+            title: '{{ __('Print Marksheet') }}',
+        });
+    }
+</script>
 @endsection

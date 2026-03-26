@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('styles')
+    @stack('styles')
 </head>
 <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900">
     <!-- Department Logo Background for All Pages -->
@@ -68,7 +69,107 @@
         </div>
     </div>
 
+    <div id="teacherPrintPreviewModal" class="fixed inset-0 z-[70] hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="teacherClosePrintPreview()"></div>
+        <div class="relative mx-auto w-full max-w-6xl h-[92vh] flex flex-col overflow-hidden rounded-xl bg-white dark:bg-slate-800 shadow-2xl border border-gray-200 dark:border-slate-700">
+            <div class="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-rose-600 to-red-600">
+                <div>
+                    <h3 id="teacherPrintPreviewTitle" class="text-base font-semibold text-white">{{ __('Print Preview') }}</h3>
+                    <p id="teacherPrintPreviewSubtitle" class="text-rose-100 text-xs">{{ __('A4 preview (use Print to open dialog)') }}</p>
+                </div>
+                <button onclick="teacherClosePrintPreview()" class="text-rose-100 hover:text-white p-2 rounded-full hover:bg-white/10" aria-label="Close print preview">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 bg-gray-100 dark:bg-slate-900 p-4 overflow-auto">
+                <iframe id="teacherPrintPreviewFrame" src="" class="w-full h-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white"></iframe>
+            </div>
+
+            <div class="px-5 py-3 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-between items-center gap-3">
+                <span class="text-xs text-gray-600 dark:text-gray-400">{{ __('Tip: Use "New tab" for full-page preview.') }}</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="teacherOpenPrintPreviewInNewTab()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition">
+                        <i class="bi bi-box-arrow-up-right mr-1"></i> {{ __('New tab') }}
+                    </button>
+                    <button type="button" onclick="teacherPrintPreviewFrame()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition shadow-sm">
+                        <i class="bi bi-printer mr-1"></i> {{ __('Print') }}
+                    </button>
+                    <button type="button" onclick="teacherClosePrintPreview()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition">
+                        {{ __('Close') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        window.teacherPrintPreviewState = {
+            url: '',
+            previousOverflow: '',
+        };
+
+        function teacherOpenPrintPreview(url, options = {}) {
+            const modal = document.getElementById('teacherPrintPreviewModal');
+            const frame = document.getElementById('teacherPrintPreviewFrame');
+            const title = document.getElementById('teacherPrintPreviewTitle');
+            const subtitle = document.getElementById('teacherPrintPreviewSubtitle');
+
+            if (!modal || !frame || !url) {
+                return;
+            }
+
+            window.teacherPrintPreviewState.url = url;
+            window.teacherPrintPreviewState.previousOverflow = document.body.style.overflow;
+
+            if (title) {
+                title.textContent = options.title || '{{ __('Print Preview') }}';
+            }
+
+            if (subtitle) {
+                subtitle.textContent = options.subtitle || '{{ __('A4 preview (use Print to open dialog)') }}';
+            }
+
+            frame.src = url;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function teacherClosePrintPreview() {
+            const modal = document.getElementById('teacherPrintPreviewModal');
+            const frame = document.getElementById('teacherPrintPreviewFrame');
+
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.add('hidden');
+
+            if (frame) {
+                frame.src = '';
+            }
+
+            document.body.style.overflow = window.teacherPrintPreviewState.previousOverflow || '';
+            window.teacherPrintPreviewState.url = '';
+            window.teacherPrintPreviewState.previousOverflow = '';
+        }
+
+        function teacherOpenPrintPreviewInNewTab() {
+            if (!window.teacherPrintPreviewState.url) {
+                return;
+            }
+
+            const url = window.teacherPrintPreviewState.url + (window.teacherPrintPreviewState.url.includes('?') ? '&' : '?') + 'newTab=1';
+            window.open(url, '_blank');
+        }
+
+        function teacherPrintPreviewFrame() {
+            const frame = document.getElementById('teacherPrintPreviewFrame');
+            if (frame && frame.contentWindow) {
+                frame.contentWindow.print();
+            }
+        }
+
         // Toast notification system
         function showToast(message, type = 'success', subMessage = '') {
             const toast = document.getElementById('toastNotification');
@@ -110,6 +211,15 @@
             const error = document.getElementById('flashError');
             if (success) showToast(success.dataset.message, 'success');
             if (error) showToast(error.dataset.message, 'error');
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('teacherPrintPreviewModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    teacherClosePrintPreview();
+                }
+            }
         });
 
         // Sidebar Toggle Functionality
@@ -164,5 +274,6 @@
     </script>
 
     @yield('scripts')
+    @stack('scripts')
 </body>
 </html>

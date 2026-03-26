@@ -127,31 +127,28 @@ class TeacherMarksController extends Controller
                 if (!$subject || !in_array($subjectId, $subjectIds)) {
                     $subjectId = '';
                 } else {
-                    // Get students in this subject's semester
-                    $studentQuery = Student::whereHas('subjects', function ($q) use ($subjectId) {
-                        $q->where('subject_id', $subjectId);
-                    })
-                    ->with('user', 'examMarks');
-                    
-                    // Filter by academic year if specified
-                    if (!empty($academicYear)) {
-                        $studentQuery->whereHas('examMarks', function ($q) use ($academicYear) {
-                            $q->where('academic_year', $academicYear);
-                        });
-                    }
-                    
+                    // Use the shared roster helper so subjects without pivot rows still resolve students.
+                    $studentIds = TeacherSubjectRoster::studentIdsForSubject((int) $subjectId);
+
+                    $studentQuery = Student::query()
+                        ->whereIn('id', $studentIds)
+                        ->with('user')
+                        ->orderBy('roll_no');
+
                     $studentQuery->when($search, function ($q) use ($search) {
-                        return $q->whereHas('user', function ($uq) use ($search) {
-                            $uq->where('name', 'like', '%' . $search . '%')
-                              ->orWhere('email', 'like', '%' . $search . '%')
-                              ->orWhere('phone', 'like', '%' . $search . '%');
-                        })->orWhere('roll_no', 'like', '%' . $search . '%');
+                        return $q->where(function ($studentQuery) use ($search) {
+                            $studentQuery->whereHas('user', function ($uq) use ($search) {
+                                $uq->where('name', 'like', '%' . $search . '%')
+                                    ->orWhere('email', 'like', '%' . $search . '%')
+                                    ->orWhere('phone', 'like', '%' . $search . '%');
+                            })->orWhere('roll_no', 'like', '%' . $search . '%');
+                        });
                     });
 
                     $students = $studentQuery->paginate(25)->withQueryString();
                     
                     // Format student marks data
-                    $students->getCollection()->transform(function ($student) use ($subjectId, $category, $academicYear) {
+                    $students->getCollection()->transform(function ($student) use ($subjectId, $category, $academicYear, $assessmentId) {
                         // Get exams for this subject/category
                         $exams = Exam::where('subject_id', $subjectId)
                             ->where('exam_category', $category)
@@ -161,14 +158,25 @@ class TeacherMarksController extends Controller
                         if (!empty($academicYear)) {
                             $exams->where('academic_year', $academicYear);
                         }
+
+                        if ($category === 'assessment' && !empty($assessmentId)) {
+                            $exams->where('id', $assessmentId);
+                        }
                         
                         $exams = $exams->get();
+                        $attendancePercentage = $this->calculateAttendancePercentage($student, $subjectId);
                         
                         $totalMarks = 0;
                         $totalFull = 0;
                         $totalPass = 0;
                         $allPassed = true;
                         $assessments = [];
+                        $components = [
+                            'ti' => ['full' => 0, 'pass' => 0, 'obtained' => 0, 'is_pass' => null],
+                            'te' => ['full' => 0, 'pass' => 0, 'obtained' => 0, 'is_pass' => null],
+                            'pi' => ['full' => 0, 'pass' => 0, 'obtained' => 0, 'is_pass' => null],
+                            'pe' => ['full' => 0, 'pass' => 0, 'obtained' => 0, 'is_pass' => null],
+                        ];
                         
                         // Calculate CTEVT or Assessment marks
                         if ($category === 'ctevt') {
@@ -178,17 +186,36 @@ class TeacherMarksController extends Controller
                                     ->first();
                                 
                                 if ($mark) {
-                                    $totalMarks += ($mark->theory_internal_marks ?? 0) +
-                                                  ($mark->theory_external_marks ?? 0) +
-                                                  ($mark->practical_internal_marks ?? 0) +
-                                                  ($mark->practical_external_marks ?? 0);
-                                    
-                                    $totalFull += ($exam->theory_internal_max_marks ?? 0) +
-                                               ($exam->theory_external_max_marks ?? 0) +
-                                               ($exam->practical_internal_max_marks ?? 0) +
-                                               ($exam->practical_external_max_marks ?? 0);
+                                    $components['ti']['full'] += (float) ($mark->theory_internal_full_marks ?? $exam->theory_internal_max_marks ?? 0);
+                                    $components['ti']['pass'] += (float) ($mark->theory_internal_pass_marks ?? $exam->theory_internal_pass_marks ?? 0);
+                                    $components['ti']['obtained'] += (float) ($mark->theory_internal_marks ?? 0);
+
+                                    $components['te']['full'] += (float) ($mark->theory_external_full_marks ?? $exam->theory_external_max_marks ?? 0);
+                                    $components['te']['pass'] += (float) ($mark->theory_external_pass_marks ?? $exam->theory_external_pass_marks ?? 0);
+                                    $components['te']['obtained'] += (float) ($mark->theory_external_marks ?? 0);
+
+                                    $components['pi']['full'] += (float) ($mark->practical_internal_full_marks ?? $exam->practical_internal_max_marks ?? 0);
+                                    $components['pi']['pass'] += (float) ($mark->practical_internal_pass_marks ?? $exam->practical_internal_pass_marks ?? 0);
+                                    $components['pi']['obtained'] += (float) ($mark->practical_internal_marks ?? 0);
+
+                                    $components['pe']['full'] += (float) ($mark->practical_external_full_marks ?? $exam->practical_external_max_marks ?? 0);
+                                    $components['pe']['pass'] += (float) ($mark->practical_external_pass_marks ?? $exam->practical_external_pass_marks ?? 0);
+                                    $components['pe']['obtained'] += (float) ($mark->practical_external_marks ?? 0);
                                 }
                             }
+
+                            foreach ($components as $key => $component) {
+                                if ($component['full'] > 0) {
+                                    $components[$key]['is_pass'] = $component['obtained'] >= $component['pass'];
+                                }
+                            }
+
+                            $totalMarks = collect($components)->sum('obtained');
+                            $totalFull = collect($components)->sum('full');
+                            $totalPass = collect($components)->sum('pass');
+                            $allPassed = collect($components)->every(function ($component) {
+                                return $component['full'] <= 0 || $component['obtained'] >= $component['pass'];
+                            });
                         } else {
                             // Assessment marks - track individual assessments
                             foreach ($exams as $exam) {
@@ -225,27 +252,28 @@ class TeacherMarksController extends Controller
                             'id' => $student->id,
                             'roll_no' => $student->roll_no,
                             'name' => $student->user->name ?? 'N/A',
+                            'attendance_percentage' => $attendancePercentage,
                             'total_marks' => $totalMarks,
                             'full_marks' => $totalFull,
                             'pass_marks' => $totalPass,
                             'is_passed' => $allPassed && $totalFull > 0,
                             'assessments' => $assessments,
-                            'ti_full' => 0,
-                            'ti_pass' => 0,
-                            'ti_obtained' => 0,
-                            'ti_is_pass' => null,
-                            'te_full' => 0,
-                            'te_pass' => 0,
-                            'te_obtained' => 0,
-                            'te_is_pass' => null,
-                            'pi_full' => 0,
-                            'pi_pass' => 0,
-                            'pi_obtained' => 0,
-                            'pi_is_pass' => null,
-                            'pe_full' => 0,
-                            'pe_pass' => 0,
-                            'pe_obtained' => 0,
-                            'pe_is_pass' => null,
+                            'ti_full' => $components['ti']['full'],
+                            'ti_pass' => $components['ti']['pass'],
+                            'ti_obtained' => $components['ti']['obtained'],
+                            'ti_is_pass' => $components['ti']['is_pass'],
+                            'te_full' => $components['te']['full'],
+                            'te_pass' => $components['te']['pass'],
+                            'te_obtained' => $components['te']['obtained'],
+                            'te_is_pass' => $components['te']['is_pass'],
+                            'pi_full' => $components['pi']['full'],
+                            'pi_pass' => $components['pi']['pass'],
+                            'pi_obtained' => $components['pi']['obtained'],
+                            'pi_is_pass' => $components['pi']['is_pass'],
+                            'pe_full' => $components['pe']['full'],
+                            'pe_pass' => $components['pe']['pass'],
+                            'pe_obtained' => $components['pe']['obtained'],
+                            'pe_is_pass' => $components['pe']['is_pass'],
                         ];
                     });
                 }
@@ -296,6 +324,8 @@ class TeacherMarksController extends Controller
                     'subjects' => collect([]),
                     'semesters' => collect([]),
                     'academicYears' => collect([]),
+                    'assessments' => [],
+                    'filteredSubjects' => [],
                     'currentFilters' => [],
                 ]);
             }
@@ -308,6 +338,8 @@ class TeacherMarksController extends Controller
                     'subjects' => collect([]),
                     'semesters' => collect([]),
                     'academicYears' => collect([]),
+                    'assessments' => [],
+                    'filteredSubjects' => [],
                     'currentFilters' => [],
                 ]);
             }
@@ -317,6 +349,8 @@ class TeacherMarksController extends Controller
             $subjectId = $request->get('subject_id', '');
             $academicYear = $request->get('academic_year', '');
             $search = $request->get('search', '');
+            $examCategory = $request->get('exam_category', '');
+            $assessmentId = $request->get('assessment_id', '');
             
             // Get unique semesters from teacher's subjects
             $semesters = Subject::whereIn('id', $subjectIds)
@@ -350,6 +384,34 @@ class TeacherMarksController extends Controller
                 })
                 ->values();
             
+            // Get filtered subjects based on selected semester
+            $filteredSubjects = $subjects;
+            if (!empty($semester)) {
+                $filteredSubjects = $subjects->filter(function ($s) use ($semester) {
+                    return $s['semester'] == $semester;
+                })->values();
+            }
+            
+            // Get assessments for the selected filters (only for Assessment category)
+            $assessments = [];
+            if ($examCategory === 'assessment' || empty($examCategory)) {
+                $assessmentQuery = Exam::where('exam_category', 'assessment')
+                    ->whereIn('subject_id', $subjectIds)
+                    ->when(!empty($semester), function ($q) use ($semester) {
+                        $q->where('semester', $semester);
+                    })
+                    ->when(!empty($academicYear), function ($q) use ($academicYear) {
+                        $q->where('academic_year', $academicYear);
+                    })
+                    ->when(!empty($subjectId), function ($q) use ($subjectId) {
+                        $q->where('subject_id', $subjectId);
+                    });
+                
+                $assessments = $assessmentQuery->pluck('assessment_number', 'id')
+                    ->filter()
+                    ->toArray();
+            }
+            
             // Get students with marksheet data if subject is selected
             $students = collect([]);
             if (!empty($subjectId)) {
@@ -358,7 +420,7 @@ class TeacherMarksController extends Controller
                 if (!$subject || !in_array($subjectId, $subjectIds)) {
                     $subjectId = '';
                 } else {
-                    // Get all exams (both assessment and ctevt) for this subject
+                    // Get all exams for this subject, filtered by exam_category if specified
                     $studentQuery = Student::whereHas('subjects', function ($q) use ($subjectId) {
                         $q->where('subject_id', $subjectId);
                     })
@@ -381,17 +443,27 @@ class TeacherMarksController extends Controller
                     ->paginate(25);
                     
                     // Format student marksheet data
-                    $students = $studentQuery->map(function ($student) use ($subjectId, $academicYear) {
-                        // Get all exams (assessment and ctevt) for this subject
-                        $exams = Exam::where('subject_id', $subjectId)
+                    $students = $studentQuery->map(function ($student) use ($subjectId, $academicYear, $examCategory, $assessmentId) {
+                        // Get exams for this subject, filtered by category if specified
+                        $examsQuery = Exam::where('subject_id', $subjectId)
                             ->orderBy('exam_date', 'asc');
+                        
+                        // Filter by exam category if specified
+                        if (!empty($examCategory)) {
+                            $examsQuery->where('exam_category', $examCategory);
+                        }
+                        
+                        // Filter by assessment ID if specified
+                        if (!empty($assessmentId)) {
+                            $examsQuery->where('id', $assessmentId);
+                        }
                         
                         // Filter by academic year if specified
                         if (!empty($academicYear)) {
-                            $exams->where('academic_year', $academicYear);
+                            $examsQuery->where('academic_year', $academicYear);
                         }
                         
-                        $exams = $exams->get();
+                        $exams = $examsQuery->get();
                         
                         $totalMarks = 0;
                         $totalFull = 0;
@@ -399,7 +471,7 @@ class TeacherMarksController extends Controller
                         $allPassed = true;
                         $grade = 'N/A';
                         
-                        // Calculate total marks from all exams (both categories)
+                        // Calculate total marks from filtered exams
                         foreach ($exams as $exam) {
                             $mark = ExamMark::where('student_id', $student->id)
                                 ->where('exam_id', $exam->id)
@@ -470,13 +542,17 @@ class TeacherMarksController extends Controller
             return view('teacher.marksheets', [
                 'students' => $students,
                 'subjects' => $subjects,
+                'filteredSubjects' => $filteredSubjects,
                 'semesters' => $semesters,
                 'academicYears' => $academicYears,
+                'assessments' => $assessments,
                 'currentFilters' => [
                     'semester' => $semester,
                     'subject_id' => $subjectId,
                     'academic_year' => $academicYear,
                     'search' => $search,
+                    'exam_category' => $examCategory,
+                    'assessment_id' => $assessmentId,
                 ],
             ]);
         } catch (\Exception $e) {
@@ -486,6 +562,8 @@ class TeacherMarksController extends Controller
                 'subjects' => collect([]),
                 'semesters' => collect([]),
                 'academicYears' => collect([]),
+                'assessments' => [],
+                'filteredSubjects' => [],
                 'currentFilters' => [],
             ]);
         }
@@ -608,13 +686,15 @@ class TeacherMarksController extends Controller
         $query = DB::table('attendance')
             ->where('student_id', $student->id);
 
-        if ($subject) {
-            $query->where('subject_id', $subject->id);
+        $subjectId = is_numeric($subject) ? (int) $subject : ($subject->id ?? null);
+
+        if ($subjectId) {
+            $query->where('subject_id', $subjectId);
         }
 
         $total = $query->count();
         if ($total === 0) {
-            return 100; // Default to 100% if no attendance records
+            return 0;
         }
 
         $present = $query->where('status', 'present')->count();
@@ -1032,6 +1112,10 @@ class TeacherMarksController extends Controller
      */
     public function export(Request $request)
     {
+        if (!$request->filled('exam')) {
+            return $this->exportCurrentMarksCsv($request);
+        }
+
         $format = $request->get('format', 'excel');
         $examId = $request->get('exam');
         $subjectId = $request->get('subject');
@@ -1074,6 +1158,131 @@ class TeacherMarksController extends Controller
             return $this->exportPdf($students, $marks, $exam, $filename);
         } else {
             return $this->exportExcel($students, $marks, $exam, $filename);
+        }
+    }
+
+    private function exportCurrentMarksCsv(Request $request)
+    {
+        try {
+            $marksPage = $this->index($request);
+
+            if (!($marksPage instanceof \Illuminate\View\View)) {
+                return $marksPage;
+            }
+
+            $data = $marksPage->getData();
+            $currentFilters = $data['currentFilters'] ?? [];
+            $subjects = collect($data['subjects'] ?? []);
+            $selectedSubject = null;
+
+            if (!empty($currentFilters['subject_id'])) {
+                $selectedSubject = $subjects->firstWhere('id', (int) $currentFilters['subject_id'])
+                    ?? $subjects->firstWhere('id', $currentFilters['subject_id']);
+            }
+
+            if (!$selectedSubject) {
+                return back()->with('error', 'Please select a subject to export marks');
+            }
+
+            $students = $data['students'] ?? collect([]);
+            if ($students instanceof LengthAwarePaginator) {
+                $students = $students->getCollection();
+            } else {
+                $students = collect($students);
+            }
+
+            $category = $data['selectedCategory'] ?? 'assessment';
+            $selectedAssessmentId = !empty($currentFilters['assessment_id']) ? (int) $currentFilters['assessment_id'] : null;
+            $subjectName = preg_replace('/[^A-Za-z0-9_-]+/', '_', strtolower($selectedSubject['name'] ?? 'subject'));
+            $filename = sprintf('teacher_marks_%s_%s', trim($subjectName, '_') ?: 'subject', now()->format('Ymd_His'));
+
+            $callback = function () use ($students, $category, $selectedAssessmentId) {
+                $out = fopen('php://output', 'w');
+
+                if ($category === 'assessment') {
+                    fputcsv($out, ['Roll No', 'Student Name', 'Attendance %', 'Full Marks', 'Pass Marks', 'Obtained', 'Percentage', 'Result']);
+
+                    foreach ($students as $student) {
+                        $selectedAssessment = null;
+                        if ($selectedAssessmentId && isset($student['assessments']) && is_array($student['assessments'])) {
+                            $selectedAssessment = collect($student['assessments'])->firstWhere('exam_id', $selectedAssessmentId);
+                        }
+
+                        $displayFull = $selectedAssessment['full'] ?? ($student['full_marks'] ?? 0);
+                        $displayPass = $selectedAssessment['pass'] ?? ($student['pass_marks'] ?? 0);
+                        $displayObtained = $selectedAssessment['obtained'] ?? ($student['total_marks'] ?? 0);
+                        $displayPercentage = $selectedAssessment['percentage']
+                            ?? ($displayFull > 0 ? round(($displayObtained / $displayFull) * 100, 1) : 0);
+                        $isPassed = isset($selectedAssessment['is_passed'])
+                            ? $selectedAssessment['is_passed']
+                            : ($student['is_passed'] ?? false);
+
+                        fputcsv($out, [
+                            $student['roll_no'] ?? '',
+                            $student['name'] ?? 'N/A',
+                            ($student['attendance_percentage'] ?? 0) . '%',
+                            $displayFull > 0 ? $displayFull : '',
+                            $displayPass > 0 ? $displayPass : '',
+                            $displayFull > 0 ? $displayObtained : '',
+                            $displayFull > 0 ? ($displayPercentage . '%') : '',
+                            $displayFull > 0 ? ($isPassed ? 'PASS' : 'FAIL') : 'Pending',
+                        ]);
+                    }
+                } else {
+                    fputcsv($out, [
+                        'Roll No',
+                        'Student Name',
+                        'Attendance %',
+                        'TI Full',
+                        'TI Pass',
+                        'TI Obtained',
+                        'TE Full',
+                        'TE Pass',
+                        'TE Obtained',
+                        'PI Full',
+                        'PI Pass',
+                        'PI Obtained',
+                        'PE Full',
+                        'PE Pass',
+                        'PE Obtained',
+                        'Total',
+                        'Result',
+                    ]);
+
+                    foreach ($students as $student) {
+                        fputcsv($out, [
+                            $student['roll_no'] ?? '',
+                            $student['name'] ?? 'N/A',
+                            ($student['attendance_percentage'] ?? 0) . '%',
+                            $student['ti_full'] ?? 0,
+                            $student['ti_pass'] ?? 0,
+                            $student['ti_obtained'] ?? 0,
+                            $student['te_full'] ?? 0,
+                            $student['te_pass'] ?? 0,
+                            $student['te_obtained'] ?? 0,
+                            $student['pi_full'] ?? 0,
+                            $student['pi_pass'] ?? 0,
+                            $student['pi_obtained'] ?? 0,
+                            $student['pe_full'] ?? 0,
+                            $student['pe_pass'] ?? 0,
+                            $student['pe_obtained'] ?? 0,
+                            $student['total_marks'] ?? 0,
+                            ($student['is_passed'] ?? false) ? 'PASS' : 'FAIL',
+                        ]);
+                    }
+                }
+
+                fclose($out);
+            };
+
+            return response()->stream($callback, 200, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename={$filename}.csv",
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Teacher marks export error: ' . $e->getMessage());
+
+            return back()->with('error', 'Failed to export marks: ' . $e->getMessage());
         }
     }
 
@@ -1185,40 +1394,35 @@ class TeacherMarksController extends Controller
      */
     public function print(Request $request)
     {
-        $examId = $request->get('exam');
-        $subjectId = $request->get('subject');
+        try {
+            $marksPage = $this->index($request);
 
-        if (!$examId) {
-            return back()->with('error', 'Please select an exam to print');
+            if (!($marksPage instanceof \Illuminate\View\View)) {
+                return $marksPage;
+            }
+
+            $data = $marksPage->getData();
+            $currentFilters = $data['currentFilters'] ?? [];
+            $subjects = collect($data['subjects'] ?? []);
+            $selectedSubject = null;
+
+            if (!empty($currentFilters['subject_id'])) {
+                $selectedSubject = $subjects->firstWhere('id', (int) $currentFilters['subject_id'])
+                    ?? $subjects->firstWhere('id', $currentFilters['subject_id']);
+            }
+
+            return view('teacher.marks.print', [
+                'students' => $data['students'] ?? collect([]),
+                'selectedCategory' => $data['selectedCategory'] ?? 'assessment',
+                'currentFilters' => $currentFilters,
+                'selectedSubject' => $selectedSubject,
+                'subjectLabel' => $selectedSubject['name'] ?? 'Selected Subject',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Teacher marks print error: ' . $e->getMessage());
+
+            return back()->with('error', 'Failed to load print preview: ' . $e->getMessage());
         }
-
-        $exam = Exam::with('subject')->findOrFail($examId);
-        $subjectIds = $this->getTeacherSubjectIds();
-
-        if (!in_array($exam->subject_id, $subjectIds)) {
-            return back()->with('error', 'Unauthorized');
-        }
-
-        $studentIds = DB::table('subject_students')
-            ->where('subject_id', $exam->subject_id)
-            ->pluck('student_id');
-
-        $students = Student::with('user')
-            ->whereIn('id', $studentIds)
-            ->orderBy('roll_no')
-            ->get();
-
-        $marks = ExamMark::where('exam_id', $examId)
-            ->where('subject_id', $subjectId ?? $exam->subject_id)
-            ->get()
-            ->keyBy('student_id');
-
-        return view('teacher.exports.marks_print', [
-            'students' => $students,
-            'marks' => $marks,
-            'exam' => $exam,
-            'filters' => $request->only(['program', 'semester', 'batch', 'subject', 'category', 'status']),
-        ]);
     }
 
     /**

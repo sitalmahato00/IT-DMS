@@ -54,7 +54,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Use the filters below to target marks by academic session, semester, and subject.</p>
             </div>
             <div class="flex flex-wrap gap-2">
-                <button type="button" onclick="printMarks()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition">
+                <button type="button" onclick="printMarks()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition">
                     <i class="bi bi-printer"></i>
                     <span>Print</span>
                 </button>
@@ -202,6 +202,7 @@
                         <tr class="bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
                             <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200 sticky left-0 bg-gray-50 dark:bg-slate-700 z-10">Roll</th>
                             <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200 sticky left-20 bg-gray-50 dark:bg-slate-700 z-10">Student Name</th>
+                            <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">Attendance %</th>
                             <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">Full Marks</th>
                             <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">Pass Marks</th>
                             <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">Obtained</th>
@@ -223,6 +224,12 @@
                                 $totalFull = $examMark ? $examMark->calculateFullMarks() : 0;
                                 $percentage = $totalFull > 0 ? round(($totalObtained / $totalFull) * 100, 1) : 0;
                                 $resultLabel = $examMark ? $examMark->getResultAttribute() : 'Pending';
+                                $attendancePercentage = $student->attendance_percentage ?? 0;
+                                $attendanceClass = $attendancePercentage >= 75
+                                    ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                                    : ($attendancePercentage >= 50
+                                        ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+                                        : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300');
                                 $statusFilter = $currentFilters['status'] ?? '';
                                 $skipRow = false;
                                 if ($statusFilter === 'pass' && !$isPassed) $skipRow = true;
@@ -240,6 +247,11 @@
                             >
                                 <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{{ $student->roll_no }}</td>
                                 <td class="px-4 py-3 text-gray-700 dark:text-gray-200">{{ $student->user->name ?? 'N/A' }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $attendanceClass }}">
+                                        {{ $attendancePercentage }}%
+                                    </span>
+                                </td>
                                 <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-300">{{ $examMark ? ($examMark->full_marks ?? $examMark->exam->full_marks ?? '-') : '-' }}</td>
                                 <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">{{ $examMark ? ($examMark->passing_marks ?? $examMark->exam->passing_marks ?? '-') : '-' }}</td>
                                 <td class="px-4 py-3 text-center font-medium {{ $examMark && $examMark->isAbsent() ? 'text-purple-600 dark:text-purple-400 font-bold' : ($examMark && !$isPassed ? 'text-red-600 dark:text-red-400' : ($examMark ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-gray-300')) }}">
@@ -254,7 +266,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="8" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
                                     <div class="flex flex-col items-center justify-center">
                                         <i class="bi bi-search text-4xl mb-2"></i>
                                         <p>No student marks found. Try adjusting your filters.</p>

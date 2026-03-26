@@ -122,8 +122,18 @@
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
             <div class="p-4 border-b border-gray-200 dark:border-slate-700 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ __('Filters') }}</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ __('Filters & Exports') }}</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Use the filters below to target marks from your assigned semester subjects.') }}</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" onclick="printMarks()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition">
+                        <i class="bi bi-printer"></i>
+                        <span>{{ __('Print') }}</span>
+                    </button>
+                    <button type="button" onclick="exportMarks('csv')" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>{{ __('CSV') }}</span>
+                    </button>
                 </div>
             </div>
             <form id="marksFilterForm" class="p-4 space-y-4">
@@ -239,28 +249,13 @@
             <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
                 <div class="p-4 border-b border-gray-200 dark:border-slate-700">
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ __('Assessment Marks') }} - {{ $subjectLabel }}</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ empty($currentFilters['assessment_id'] ?? '') ? __('Marks for all assessments.') : __('Marks for selected assessment.') }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Filtered by the current selection.') }}</p>
                 </div>
                 @php
-                    $allAssessments = [];
                     $selectedAssessmentId = $currentFilters['assessment_id'] ?? '';
-                    foreach ($students as $student) {
-                        if (isset($student['assessments']) && is_array($student['assessments'])) {
-                            foreach ($student['assessments'] as $assessment) {
-                                if (!isset($allAssessments[$assessment['exam_id']])) {
-                                    $allAssessments[$assessment['exam_id']] = $assessment;
-                                }
-                            }
-                        }
-                    }
-                    // Filter by selected assessment if provided
                     if (!empty($selectedAssessmentId)) {
                         $selectedAssessmentId = (int) $selectedAssessmentId;
-                        $allAssessments = array_filter($allAssessments, function($a) use ($selectedAssessmentId) {
-                            return (int)$a['exam_id'] === $selectedAssessmentId;
-                        });
                     }
-                    ksort($allAssessments);
                 @endphp
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
@@ -268,105 +263,67 @@
                             <tr class="bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">{{ __('Roll') }}</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">{{ __('Student Name') }}</th>
-                                @if(!empty($selectedAssessmentId))
-                                    @foreach($allAssessments as $assessment)
-                                        <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap">
-                                            <div class="text-xs">{{ $assessment['exam_name'] ?? 'N/A' }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ @date('d M', strtotime($assessment['exam_date'] ?? '')) }}</div>
-                                        </th>
-                                    @endforeach
-                                    <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">%</th>
-                                    <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">{{ __('Result') }}</th>
-                                @else
-                                    @foreach($allAssessments as $assessment)
-                                        <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap">
-                                            <div class="text-xs">{{ $assessment['exam_name'] ?? 'N/A' }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ @date('d M', strtotime($assessment['exam_date'] ?? '')) }}</div>
-                                        </th>
-                                    @endforeach
-                                    <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">{{ __('Total') }}</th>
-                                    <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">{{ __('Full') }}</th>
-                                    <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">{{ __('Pass') }}</th>
-                                    <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">%</th>
-                                    <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">{{ __('Result') }}</th>
-                                @endif
+                                <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">{{ __('Attendance %') }}</th>
+                                <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">{{ __('Full Marks') }}</th>
+                                <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">{{ __('Pass Marks') }}</th>
+                                <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">{{ __('Obtained') }}</th>
+                                <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">%</th>
+                                <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">{{ __('Result') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($students as $student)
                                 @php
-                                    if (!empty($selectedAssessmentId)) {
-                                        // Show only selected assessment
-                                        $selectedAssessmentId = (int) $selectedAssessmentId;
-                                        $selectedAss = null;
-                                        if (isset($student['assessments']) && is_array($student['assessments'])) {
-                                            $selectedAss = collect($student['assessments'])->firstWhere('exam_id', $selectedAssessmentId);
-                                        }
-                                    } else {
-                                        // Show totals
-                                        $selectedAss = null;
+                                    $selectedAss = null;
+                                    if (!empty($selectedAssessmentId) && isset($student['assessments']) && is_array($student['assessments'])) {
+                                        $selectedAss = collect($student['assessments'])->firstWhere('exam_id', $selectedAssessmentId);
                                     }
+
                                     $totalObtained = $student['total_marks'] ?? 0;
                                     $totalFull = $student['full_marks'] ?? 0;
-                                    $percentage = $totalFull > 0 ? round(($totalObtained / $totalFull) * 100, 1) : 0;
-                                    $isPassed = $student['is_passed'] ?? false;
+                                    $totalPass = $student['pass_marks'] ?? 0;
+
+                                    $displayFull = $selectedAss['full'] ?? $totalFull;
+                                    $displayPass = $selectedAss['pass'] ?? $totalPass;
+                                    $displayObtained = $selectedAss['obtained'] ?? $totalObtained;
+                                    $displayPercentage = $selectedAss['percentage'] ?? ($displayFull > 0 ? round(($displayObtained / $displayFull) * 100, 1) : 0);
+                                    $isPassed = isset($selectedAss['is_passed']) ? $selectedAss['is_passed'] : ($student['is_passed'] ?? false);
                                     $resultLabel = $isPassed ? 'PASS' : 'FAIL';
+                                    $attendancePercentage = $student['attendance_percentage'] ?? 0;
+                                    $attendanceClass = $attendancePercentage >= 75
+                                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                                        : ($attendancePercentage >= 50
+                                            ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+                                            : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300');
+                                    $obtainedClass = $displayFull > 0
+                                        ? ($isPassed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400')
+                                        : 'text-gray-400';
                                 @endphp
                                 <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 border-b border-gray-200 dark:border-slate-600">
                                     <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{{ $student['roll_no'] }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-200">{{ $student['name'] ?? 'N/A' }}</td>
-                                    @if(!empty($selectedAssessmentId))
-                                        @if($selectedAss)
-                                            <td class="px-4 py-3 text-center">
-                                                <span class="font-medium {{ !$selectedAss['is_passed'] ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}">
-                                                    {{ $selectedAss['obtained'] }}
-                                                </span>
-                                                <span class="text-xs text-gray-500 dark:text-gray-400">/{{ $selectedAss['full'] }}</span>
-                                            </td>
-                                            <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-300">{{ $selectedAss['percentage'] }}%</td>
-                                            <td class="px-4 py-3 text-center">
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold {{ $selectedAss['is_passed'] ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' }}">
-                                                    {{ $selectedAss['is_passed'] ? 'PASS' : 'FAIL' }}
-                                                </span>
-                                            </td>
-                                        @else
-                                            <td class="px-4 py-3 text-center text-gray-400">-</td>
-                                            <td class="px-4 py-3 text-center text-gray-400">-</td>
-                                            <td class="px-4 py-3 text-center text-gray-400">-</td>
-                                        @endif
-                                    @else
-                                        @foreach($allAssessments as $assessment)
-                                            @php
-                                                $studentAssessment = null;
-                                                if (isset($student['assessments']) && is_array($student['assessments'])) {
-                                                    $studentAssessment = collect($student['assessments'])->firstWhere('exam_id', $assessment['exam_id']);
-                                                }
-                                            @endphp
-                                            <td class="px-4 py-3 text-center">
-                                                @if($studentAssessment)
-                                                    <span class="font-medium {{ !$studentAssessment['is_passed'] ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}">
-                                                        {{ $studentAssessment['obtained'] }}
-                                                    </span>
-                                                    <span class="text-xs text-gray-500 dark:text-gray-400">/{{ $studentAssessment['full'] }}</span>
-                                                @else
-                                                    <span class="text-gray-400">-</span>
-                                                @endif
-                                            </td>
-                                        @endforeach
-                                        <td class="px-4 py-3 text-center font-medium text-gray-800 dark:text-gray-100">{{ $totalObtained }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-300">{{ $totalFull }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">{{ $student['pass_marks'] ?? '-' }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-300">{{ $percentage }}%</td>
-                                        <td class="px-4 py-3 text-center">
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $attendanceClass }}">
+                                            {{ $attendancePercentage }}%
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-300">{{ $displayFull > 0 ? $displayFull : '-' }}</td>
+                                    <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">{{ $displayPass > 0 ? $displayPass : '-' }}</td>
+                                    <td class="px-4 py-3 text-center font-medium {{ $obtainedClass }}">{{ $displayFull > 0 ? $displayObtained : '-' }}</td>
+                                    <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-300">{{ $displayFull > 0 ? ($displayPercentage . '%') : '-' }}</td>
+                                    <td class="px-4 py-3 text-center">
+                                        @if($displayFull > 0)
                                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold {{ $resultLabel === 'PASS' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300' }}">
                                                 {{ $resultLabel }}
                                             </span>
-                                        </td>
-                                    @endif
+                                        @else
+                                            <span class="text-gray-400">{{ __('Pending') }}</span>
+                                        @endif
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ (count($allAssessments) + 7) }}" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                                    <td colspan="8" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
                                         <div class="flex flex-col items-center justify-center">
                                             <i class="bi bi-search text-4xl mb-2"></i>
                                             <p>{{ __('No student marks found. Try adjusting your filters.') }}</p>
@@ -468,3 +425,21 @@
 
 @endsection
 
+@section('scripts')
+<script>
+    const printUrl = '{{ route("teacher.marks.print") }}';
+    const exportUrl = '{{ route("teacher.marks.export") }}';
+
+    function printMarks() {
+        const params = buildFilterParams();
+        teacherOpenPrintPreview(`${printUrl}?${params.toString()}`, {
+            title: '{{ __('Print Marks') }}',
+        });
+    }
+
+    function exportMarks(format) {
+        const params = buildFilterParams({ format });
+        window.location.href = `${exportUrl}?${params.toString()}`;
+    }
+</script>
+@endsection

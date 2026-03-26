@@ -130,6 +130,7 @@
                         <tr>
                             <th>Roll No</th>
                             <th>Student Name</th>
+                            <th class="text-center">Attendance %</th>
                             <th class="text-center">Full</th>
                             <th class="text-center">Pass</th>
                             <th class="text-center">Obtained</th>
@@ -146,10 +147,12 @@
                                 $percentage = $totalFull > 0 ? round(($totalObtained / $totalFull) * 100, 1) : 0;
                                 $resultLabel = $examMark ? $examMark->getResultAttribute() : 'Pending';
                                 $badgeClass = $resultLabel === 'PASS' ? 'badge badge-pass' : 'badge badge-fail';
+                                $attendancePercentage = $student->attendance_percentage ?? 0;
                             @endphp
                             <tr>
                                 <td>{{ $student->roll_no }}</td>
                                 <td>{{ $student->user->name ?? 'N/A' }}</td>
+                                <td class="text-center">{{ $attendancePercentage }}%</td>
                                 <td class="text-center">{{ $examMark ? ($examMark->full_marks ?? '-') : '-' }}</td>
                                 <td class="text-center">{{ $examMark ? ($examMark->passing_marks ?? '-') : '-' }}</td>
                                 <td class="text-center">{{ $examMark ? ($examMark->marks_obtained ?? '-') : '-' }}</td>
@@ -160,7 +163,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center">No student marks found for the selected filters.</td>
+                                <td colspan="8" class="text-center">No student marks found for the selected filters.</td>
                             </tr>
                         @endforelse
                     </tbody>
