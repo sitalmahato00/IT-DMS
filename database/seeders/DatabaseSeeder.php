@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             
             // Relations
             SubjectTeacherSeeder::class,
+            TimetableSeeder::class,
             
             // Operational data
             ExamSeeder::class,

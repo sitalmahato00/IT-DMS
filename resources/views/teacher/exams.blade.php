@@ -70,14 +70,11 @@
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Semester') }}</label>
                     <select name="semester" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <option value="">{{ __('All Semesters') }}</option>
-                        @if(isset($semesters) && is_array($semesters))
-                            @foreach($semesters as $sem)
-                                <option value="{{ $sem }}" {{ $selectedSemester == $sem ? 'selected' : '' }}>
-                                    {{ __('Semester') }} {{ $sem }}
-                                </option>
-                            @endforeach
-                        @endif
+                        @foreach($semesterOptions as $value => $label)
+                            <option value="{{ $value }}" {{ (string)$selectedSemester === (string)$value ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -173,7 +170,7 @@
                                 {{ $exam['exam_date_bs'] ?? '-' }}
                             </td>
                             <td class="px-4 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                                {{ $exam['total_marks'] ?? 0 }}
+                                {{ data_get($exam, 'full_marks', data_get($exam, 'total_marks', 0)) }}
                             </td>
                             <td class="px-4 py-4">
                                 @php
@@ -185,8 +182,11 @@
                                 </span>
                             </td>
                             <td class="px-4 py-4 text-center">
-                                <a href="{{ route('teacher.exams.show', $exam['id']) }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 rounded transition">
-                                    <i class="bi bi-eye"></i> {{ __('View') }}
+                                <a href="{{ route('teacher.exams.show', $exam['id']) }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-green-700 bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 rounded transition" title="Upload Marks">
+                                    <i class="bi bi-cloud-upload"></i> {{ __('Upload Marks') }}
+                                </a>
+                                <a href="{{ route('teacher.marks', ['subject_id' => $exam['subject_id'] ?? '', 'category' => $exam['exam_category'] ?? 'assessment', 'assessment_id' => $exam['id'] ?? '']) }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 rounded transition mt-1 block">
+                                    <i class="bi bi-eye"></i> {{ __('View Marks') }}
                                 </a>
                             </td>
                         </tr>

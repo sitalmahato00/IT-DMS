@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SubjectTeacher;
 use App\Models\Exam;
+use App\Models\Subject;
+use App\Models\Student;
+use App\Models\ExamMark;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Support\TeacherSubjectRoster;
 use App\Traits\LogsActivity;
 use Carbon\Carbon;
 
@@ -68,30 +72,23 @@ class TeacherExamsController extends Controller
             
             $subject = $request->get('subject', '');
             $semester = $request->get('semester', '');
+            $selectedSemester = $semester;
             $search = $request->get('q', '');
             $academic_year = $request->get('academic_year', '');
             $exam_category = $request->get('exam_category', '');
             $status = $request->get('status', '');
             
-            // Get teacher's first assigned semester for auto-selection
-            $firstAssignment = SubjectTeacher::where('teacher_id', $teacher->id)
-                ->orderBy('semester', 'asc')
-                ->first();
-            $defaultSemester = $firstAssignment ? $firstAssignment->semester : null;
-            
-            // Auto-select first semester if none selected
-            if (empty($semester) && $defaultSemester) {
-                $semester = $defaultSemester;
-            }
-            
             // Get unique semesters from assignments
-            $semesters = SubjectTeacher::where('teacher_id', $teacher->id)
+            $assignedSemesters = SubjectTeacher::where('teacher_id', $teacher->id)
                 ->whereNotNull('semester')
                 ->distinct()
                 ->pluck('semester')
                 ->sort()
                 ->values()
                 ->toArray();
+            
+            // Prepare semester options, include explicit "all" for all-semester exams and optional "" for no filter
+            $semesterOptions = array_merge(['' => 'All Exams (All + Semester-specific)', 'all' => 'All Semesters'], array_combine($assignedSemesters, $assignedSemesters));
             
             // Get subjects for dropdown
             $subjects = SubjectTeacher::where('teacher_id', $teacher->id)
@@ -134,18 +131,22 @@ class TeacherExamsController extends Controller
                         'sixth' => '6',
                     ];
                     $numberToKey = array_flip($keyToNumber);
-                    
+
                     $numericSemester = $keyToNumber[$requested] ?? $requested;
                     $textSemester = $numberToKey[$requested] ?? $requested;
-                    
+
                     $candidates = array_values(array_unique(array_filter([
                         $requested,
                         $numericSemester,
                         $textSemester,
                     ])));
-                    
-                    // Show only exams for the specific semester (not including 'all')
-                    $examsQuery = $examsQuery->whereIn('semester', $candidates);
+
+                    // Include all-semester exams also when a specific assigned semester is selected
+                    $examsQuery = $examsQuery->where(function ($q) use ($candidates) {
+                        $q->whereIn('semester', $candidates)
+                          ->orWhere('semester', 'all')
+                          ->orWhereNull('semester');
+                    });
                 }
             }
             // If empty string, don't filter - show all exams
@@ -233,10 +234,12 @@ class TeacherExamsController extends Controller
             return view('teacher.exams', compact(
                 'exams',
                 'academicYears',
+                'semesterOptions',
                 'semesters',
                 'subjects',
                 'stats',
                 'semesterCards',
+                'selectedSemester',
                 'selectedSemesterLabel',
                 'selectedSemesterSubjects'
             ));
@@ -449,4 +452,471 @@ class TeacherExamsController extends Controller
             'exam' => $exam,
         ]);
     }
+
+    /**
+     * Show exam details and upload modal for teacher.
+     */
+    public function show(Exam $exam)
+    {
+        try {
+            $teacher = auth()->user()->teacher;
+            if (!$teacher) {
+                return redirect()->route('teacher.exams')->with('error', 'Teacher profile not found.');
+            }
+
+            $subjectIds = $this->getTeacherSubjectIds();
+            if ($exam->subject_id && !in_array($exam->subject_id, $subjectIds, true)) {
+                return redirect()->route('teacher.exams')->with('error', 'Exam is not assigned to your subjects.');
+            }
+
+            $exam->load(['subject', 'marks.student.user']);
+
+            $totalStudents = $exam->marks()->count();
+            $averageMarks = $exam->marks()->avg('marks_obtained') ?? 0;
+            $passCount = $exam->marks()->where('percentage', '>=', 35)->count();
+            $passRate = $totalStudents > 0 ? round(($passCount / $totalStudents) * 100, 2) : 0;
+
+            $subjects = Subject::whereIn('id', $subjectIds)->orderBy('subject_name')->get();
+            $semesters = $this->getSemesters();
+            $activeExamCategory = in_array($exam->exam_category, ['assessment', 'ctevt']) ? $exam->exam_category : 'assessment';
+
+            return view('teacher.exam-show', compact(
+                'exam',
+                'totalStudents',
+                'averageMarks',
+                'passRate',
+                'subjects',
+                'semesters',
+                'activeExamCategory'
+            ));
+        } catch (\Exception $e) {
+            Log::error('Error showing teacher exam: ' . $e->getMessage());
+            return redirect()->route('teacher.exams')->with('error', 'Failed to load exam details.');
+        }
+    }
+
+    /**
+     * Get available academic years and semesters (teacher scope)
+     */
+    public function getAvailableYearsAndSemesters()
+    {
+        try {
+            $students = Student::where('is_active', true)
+                ->select('academic_year_bs', 'batch_year', 'semester')
+                ->get();
+
+            $yearSemesterMap = [];
+            foreach ($students as $student) {
+                $year = $student->academic_year_bs ?? $student->batch_year;
+                $semester = $student->semester;
+
+                if ($year && $semester) {
+                    if (!isset($yearSemesterMap[$year])) {
+                        $yearSemesterMap[$year] = [];
+                    }
+                    if (!in_array($semester, $yearSemesterMap[$year], true)) {
+                        $yearSemesterMap[$year][] = $semester;
+                    }
+                }
+            }
+
+            $semesterLabels = [
+                '1' => 'First',
+                '2' => 'Second',
+                '3' => 'Third',
+                '4' => 'Fourth',
+                '5' => 'Fifth',
+                '6' => 'Sixth',
+            ];
+
+            $years = array_keys($yearSemesterMap);
+            rsort($years);
+
+            $grouped = [];
+            foreach ($years as $year) {
+                $semesters = $yearSemesterMap[$year];
+                sort($semesters);
+
+                $semesterOptions = array_map(function ($sem) use ($semesterLabels) {
+                    return [
+                        'value' => (string)$sem,
+                        'label' => $semesterLabels[$sem] ?? "Semester {$sem}",
+                    ];
+                }, $semesters);
+
+                $grouped[] = [
+                    'year' => $year,
+                    'semesters' => $semesterOptions,
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'years' => $grouped,
+                'message' => count($grouped) === 0 ? 'No students found with academic year and semester' : null,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting academic years and semesters (teacher): ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to load data: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get subjects by semester (teacher scope) for modals
+     */
+    public function getSubjectsBySemester(Request $request)
+    {
+        $semester = (string)$request->get('semester', '');
+        $isAll = $semester === '' || strtolower($semester) === 'all';
+
+        $subjectIds = $this->getTeacherSubjectIds();
+        $query = Subject::whereIn('id', $subjectIds);
+
+        if (!$isAll) {
+            $query->where('semester', $semester);
+        }
+
+        $subjects = $query->select(['id', 'subject_name', 'subject_code', 'semester'])->orderBy('subject_name')->get();
+
+        return response()->json(['success' => true, 'subjects' => $subjects]);
+    }
+
+    /**
+     * Get students with existing marks for the exam and optional subject filter.
+     */
+    public function getStudentsWithMarks(Request $request, Exam $exam)
+    {
+        $teacher = auth()->user()->teacher;
+        if (!$teacher) {
+            return response()->json(['success' => false, 'message' => 'Teacher profile not found'], 404);
+        }
+
+        $subjectIds = $this->getTeacherSubjectIds();
+
+        $subjectId = $request->get('subject_id') ?: $exam->subject_id;
+        if ($subjectId) {
+            $subjectId = (int) $subjectId;
+            if (!in_array($subjectId, $subjectIds, true)) {
+                return response()->json(['success' => false, 'message' => 'Subject not assigned to you'], 403);
+            }
+            $subjectIds = [$subjectId];
+        }
+
+        if (empty($subjectIds)) {
+            return response()->json(['success' => false, 'message' => 'No subjects assigned'], 400);
+        }
+
+        // If specific subject is selected, only that subject; otherwise teacher subjects.
+        if ($subjectId) {
+            $studentIds = TeacherSubjectRoster::studentIdsForSubject((int)$subjectId);
+        } else {
+            $studentIds = TeacherSubjectRoster::studentIdsForSubjects($subjectIds);
+        }
+
+        if (empty($studentIds)) {
+            return response()->json(['success' => true, 'students' => [], 'existing_marks' => [], 'subject_full_marks' => $exam->full_marks, 'subject_passing_marks' => $exam->passing_marks]);
+        }
+
+        $studentQuery = Student::with('user')->whereIn('id', $studentIds);
+
+        $semester = (string)$request->get('semester', '');
+        if ($semester && strtolower($semester) !== 'all') {
+            $studentQuery->where('semester', $semester);
+        }
+
+        $students = $studentQuery->get()->map(function ($student) {
+            return (object)[
+                'id' => $student->id,
+                'student_name' => $student->user->name ?? 'Unknown',
+                'roll_no' => $student->roll_no ?? '-',
+                'attendance_percentage' => $student->attendance_percentage ?? 0,
+            ];
+        });
+
+        $examMarks = ExamMark::where('exam_id', $exam->id)
+            ->when($subjectId, function ($q) use ($subjectId) {
+                $q->where('subject_id', $subjectId);
+            })
+            ->get();
+
+        $existingMarks = [];
+        foreach ($examMarks as $mark) {
+            $existingMarks[$mark->student_id] = [
+                'marks_obtained' => $mark->marks_obtained,
+                'full_marks' => $mark->full_marks,
+                'passing_marks' => $mark->passing_marks,
+                'percentage' => $mark->percentage,
+                'grade' => $mark->grade,
+                'subject_id' => $mark->subject_id,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'students' => $students,
+            'existing_marks' => $existingMarks,
+            'subject_full_marks' => $exam->full_marks,
+            'subject_passing_marks' => $exam->passing_marks,
+        ]);
+    }
+
+    /**
+     * Upload marks for teacher exam from modal form.
+     */
+    public function uploadMarks(Request $request, Exam $exam)
+    {
+        $teacher = auth()->user()->teacher;
+        if (!$teacher) {
+            return back()->with('error', 'Teacher profile not found.');
+        }
+
+        $subjectIds = $this->getTeacherSubjectIds();
+        if ($exam->subject_id && !in_array($exam->subject_id, $subjectIds, true)) {
+            return back()->with('error', 'Exam is not assigned to your subjects.');
+        }
+
+        $validated = $request->validate([
+            'marks' => 'required|array|min:1',
+            'marks.*.student_id' => 'required|exists:students,id',
+            'marks.*.marks_obtained' => 'required|numeric|min:0',
+            'marks.*.full_marks' => 'nullable|numeric|min:0',
+            'marks.*.passing_marks' => 'nullable|numeric|min:0',
+            'marks.*.subject_id' => 'nullable|exists:subjects,id',
+            'description' => 'nullable|string|max:1000',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $createdCount = 0;
+            $updatedCount = 0;
+
+            foreach ($validated['marks'] as $markData) {
+                $studentId = $markData['student_id'];
+                $marksObtained = $markData['marks_obtained'];
+                $subjectId = $markData['subject_id'] ?? $exam->subject_id;
+
+                $fullMarks = $markData['full_marks'] ?? $exam->full_marks;
+                $passingMarks = $markData['passing_marks'] ?? $exam->passing_marks;
+
+                if ($subjectId && !in_array($subjectId, $subjectIds, true)) {
+                    continue;
+                }
+
+                $percentage = $fullMarks > 0 ? round(($marksObtained / $fullMarks) * 100, 2) : 0;
+                $grade = $this->calculateGrade($marksObtained, $fullMarks);
+
+                $existing = ExamMark::where('exam_id', $exam->id)
+                    ->where('student_id', $studentId)
+                    ->where('subject_id', $subjectId)
+                    ->first();
+
+                if ($existing) {
+                    $existing->update([
+                        'marks_obtained' => $marksObtained,
+                        'full_marks' => $fullMarks,
+                        'passing_marks' => $passingMarks,
+                        'percentage' => $percentage,
+                        'grade' => $grade,
+                        'graded_by' => auth()->id(),
+                        'graded_at' => now(),
+                        'remarks' => $request->input('description'),
+                    ]);
+                    $updatedCount++;
+                } else {
+                    ExamMark::create([
+                        'exam_id' => $exam->id,
+                        'subject_id' => $subjectId,
+                        'student_id' => $studentId,
+                        'marks_obtained' => $marksObtained,
+                        'full_marks' => $fullMarks,
+                        'passing_marks' => $passingMarks,
+                        'percentage' => $percentage,
+                        'grade' => $grade,
+                        'graded_by' => auth()->id(),
+                        'graded_at' => now(),
+                        'remarks' => $request->input('description'),
+                    ]);
+                    $createdCount++;
+                }
+            }
+
+            if ($request->has('description') && $request->description !== null) {
+                $exam->update(['description' => $request->description]);
+            }
+
+            DB::commit();
+            return back()->with('success', "Marks uploaded successfully! Created: {$createdCount}, Updated: {$updatedCount}");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error uploading marks (teacher): ' . $e->getMessage());
+            return back()->with('error', 'Failed to upload marks: ' . $e->getMessage());
+        }
+    }
+
+    private function calculateGrade($marks, $fullMarks)
+    {
+        if ($fullMarks <= 0) return 'N/A';
+
+        $percentage = ($marks / $fullMarks) * 100;
+        if ($percentage >= 90) return 'A+';
+        if ($percentage >= 80) return 'A';
+        if ($percentage >= 70) return 'B+';
+        if ($percentage >= 60) return 'B';
+        if ($percentage >= 50) return 'C+';
+        if ($percentage >= 40) return 'C';
+        if ($percentage >= 35) return 'D';
+        return 'F';
+    }
+
+    public function getSubjectMarks(Exam $exam, $subjectId)
+    {
+        try {
+            $subject = Subject::find($subjectId);
+            if (!$subject) {
+                return response()->json(['success' => false, 'message' => 'Subject not found'], 404);
+            }
+
+            $mark = ExamMark::where('exam_id', $exam->id)
+                ->where('subject_id', $subject->id)
+                ->first();
+
+            $subjectMarks = [
+                'full_marks' => $exam->full_marks,
+                'passing_marks' => $exam->passing_marks,
+                'theory_internal_full_marks' => $exam->theory_internal_max_marks,
+                'theory_external_full_marks' => $exam->theory_external_max_marks,
+                'practical_internal_full_marks' => $exam->practical_internal_max_marks,
+                'practical_external_full_marks' => $exam->practical_external_max_marks,
+                'theory_internal_pass_marks' => $exam->theory_internal_pass_marks,
+                'theory_external_pass_marks' => $exam->theory_external_pass_marks,
+                'practical_internal_pass_marks' => $exam->practical_internal_pass_marks,
+                'practical_external_pass_marks' => $exam->practical_external_pass_marks,
+            ];
+
+            if ($mark) {
+                $subjectMarks = [
+                    'full_marks' => $mark->full_marks ?? $subjectMarks['full_marks'],
+                    'passing_marks' => $mark->passing_marks ?? $subjectMarks['passing_marks'],
+                    'theory_internal_full_marks' => $mark->theory_internal_full_marks ?? $subjectMarks['theory_internal_full_marks'],
+                    'theory_external_full_marks' => $mark->theory_external_full_marks ?? $subjectMarks['theory_external_full_marks'],
+                    'practical_internal_full_marks' => $mark->practical_internal_full_marks ?? $subjectMarks['practical_internal_full_marks'],
+                    'practical_external_full_marks' => $mark->practical_external_full_marks ?? $subjectMarks['practical_external_full_marks'],
+                    'theory_internal_pass_marks' => $mark->theory_internal_pass_marks ?? $subjectMarks['theory_internal_pass_marks'],
+                    'theory_external_pass_marks' => $mark->theory_external_pass_marks ?? $subjectMarks['theory_external_pass_marks'],
+                    'practical_internal_pass_marks' => $mark->practical_internal_pass_marks ?? $subjectMarks['practical_internal_pass_marks'],
+                    'practical_external_pass_marks' => $mark->practical_external_pass_marks ?? $subjectMarks['practical_external_pass_marks'],
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'marks' => $subjectMarks
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting subject marks (teacher): ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to load subject marks'], 500);
+        }
+    }
+
+    public function getMarkData(ExamMark $mark)
+    {
+        $teacher = auth()->user()->teacher;
+        if (!$teacher) {
+            return response()->json(['success' => false, 'message' => 'Teacher profile not found'], 404);
+        }
+
+        $subjectIds = $this->getTeacherSubjectIds();
+        if (!in_array($mark->subject_id, $subjectIds, true)) {
+            return response()->json(['success' => false, 'message' => 'Subject not assigned to you'], 403);
+        }
+
+        $mark->load(['student.user', 'exam']);
+
+        return response()->json([
+            'success' => true,
+            'mark' => [
+                'id' => $mark->id,
+                'student_id' => $mark->student_id,
+                'student_name' => $mark->student->user->name ?? 'N/A',
+                'roll_no' => $mark->student->roll_no ?? '-',
+                'exam_id' => $mark->exam_id,
+                'exam_name' => $mark->exam->localized_name ?? 'N/A',
+                'marks_obtained' => $mark->marks_obtained,
+                'full_marks' => $mark->full_marks,
+                'percentage' => $mark->percentage,
+                'grade' => $mark->grade,
+                'remarks' => $mark->remarks,
+                'passing_marks' => $mark->passing_marks ?? $mark->exam->passing_marks,
+                'is_passed' => ($mark->percentage ?? 0) >= 35,
+            ]
+        ]);
+    }
+
+    public function updateMark(Request $request, ExamMark $mark)
+    {
+        $teacher = auth()->user()->teacher;
+        if (!$teacher) {
+            return response()->json(['success' => false, 'message' => 'Teacher profile not found'], 404);
+        }
+
+        $subjectIds = $this->getTeacherSubjectIds();
+        if (!in_array($mark->subject_id, $subjectIds, true)) {
+            return response()->json(['success' => false, 'message' => 'Subject not assigned to you'], 403);
+        }
+
+        $validated = $request->validate([
+            'marks_obtained' => 'required|numeric|min:0',
+            'remarks' => 'nullable|string|max:500',
+        ]);
+
+        $mark->marks_obtained = $validated['marks_obtained'];
+        $mark->remarks = $validated['remarks'] ?? $mark->remarks;
+
+        $fullMarks = $mark->full_marks ?? $mark->exam->full_marks;
+        $mark->percentage = $fullMarks > 0 ? round(($mark->marks_obtained / $fullMarks) * 100, 2) : 0;
+        $mark->grade = $this->calculateGrade($mark->marks_obtained, $fullMarks);
+        $mark->graded_by = auth()->id();
+        $mark->graded_at = now();
+        $mark->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Mark updated successfully',
+            'mark' => [
+                'id' => $mark->id,
+                'marks_obtained' => $mark->marks_obtained,
+                'percentage' => $mark->percentage,
+                'grade' => $mark->grade,
+                'remarks' => $mark->remarks,
+                'is_passed' => $mark->percentage >= 35,
+            ]
+        ]);
+    }
+
+    public function deleteMark($id)
+    {
+        try {
+            $mark = ExamMark::find($id);
+            if (!$mark) {
+                return response()->json(['success' => false, 'message' => 'Mark not found'], 404);
+            }
+
+            $teacher = auth()->user()->teacher;
+            if (!$teacher) {
+                return response()->json(['success' => false, 'message' => 'Teacher profile not found'], 403);
+            }
+
+            $subjectIds = $this->getTeacherSubjectIds();
+            if ($mark->subject_id && !in_array($mark->subject_id, $subjectIds, true)) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+
+            $mark->delete();
+            return response()->json(['success' => true, 'message' => 'Mark deleted successfully']);
+        } catch (\Exception $e) {
+            Log::error('Error deleting mark (teacher): ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to delete mark'], 500);
+        }
+    }
 }
+

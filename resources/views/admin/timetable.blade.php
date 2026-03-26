@@ -9,21 +9,28 @@
     'breadcrumbs' => [
         ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
         ['label' => 'Timetable & Scheduling']
-    ],
-    'rightContent' => '<form method="GET" class="flex items-center gap-2" id="filterForm">
-        <select name="semester" class="text-sm px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500" onchange="document.getElementById(\'filterForm\').submit()">
-            @foreach($semesters as $sem)
-                <option value="{{ $sem }}" {{ $semester == $sem ? \'selected\' : \'\' }}>Semester {{ $sem }}</option>
-            @endforeach
-        </select>
-        <select name="section" class="text-sm px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500" onchange="document.getElementById(\'filterForm\').submit()">
-            <option value="">All Sections</option>
-            @foreach($sections as $sec)
-                <option value="{{ $sec }}" {{ $section == $sec ? \'selected\' : \'\' }}>Section {{ $sec }}</option>
-            @endforeach
-        </select>
-    </form>'
+    ]
 ])
+
+<div class="flex justify-end mb-4">
+    <form method="GET" class="flex items-center gap-2" id="filterForm">
+        <select name="semester" class="text-sm px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500" onchange="document.getElementById('filterForm').submit()">
+            @foreach($semesters as $sem)
+                <option value="{{ $sem }}" {{ (string) $semester === (string) $sem ? 'selected' : '' }}>
+                    {{ __('Semester') }} {{ $sem }}
+                </option>
+            @endforeach
+        </select>
+        <select name="section" class="text-sm px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500" onchange="document.getElementById('filterForm').submit()">
+            <option value="">{{ __('All Sections') }}</option>
+            @foreach($sections as $sec)
+                <option value="{{ $sec }}" {{ $section == $sec ? 'selected' : '' }}>
+                    {{ __('Section') }} {{ $sec }}
+                </option>
+            @endforeach
+        </select>
+    </form>
+</div>
 
 {{-- Add Slot Button --}}
 <div class="flex justify-end mb-4">
@@ -158,14 +165,25 @@
                                                 });
                                             @endphp
                                             <div onclick="editSlot({{ $slot->id }})" 
-                                                class="p-1.5 rounded border text-xs cursor-pointer hover:shadow-md transition relative {{ $color }}
+                                                class="group p-1.5 pr-16 rounded border text-xs cursor-pointer hover:shadow-md transition relative {{ $color }}
                                                 {{ $hasConflict ? 'ring-2 ring-red-500' : '' }}
                                                 {{ $slot->is_locked ? 'opacity-70' : '' }}">
+                                                <div class="absolute top-1 right-1 z-10 flex items-center gap-1">
+                                                    <button type="button" onclick="viewSlot(event, {{ $slot->id }})" class="inline-flex h-5 w-5 items-center justify-center rounded bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-blue-600" title="View slot">
+                                                        <i class="bi bi-eye text-[10px]"></i>
+                                                    </button>
+                                                    <button type="button" onclick="editSlot({{ $slot->id }}, event)" class="inline-flex h-5 w-5 items-center justify-center rounded bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-amber-600" title="Edit slot">
+                                                        <i class="bi bi-pencil-square text-[10px]"></i>
+                                                    </button>
+                                                    <button type="button" onclick="deleteSlot(event, {{ $slot->id }})" class="inline-flex h-5 w-5 items-center justify-center rounded bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-red-600" title="Delete slot">
+                                                        <i class="bi bi-trash text-[10px]"></i>
+                                                    </button>
+                                                </div>
                                                 @if($hasConflict)
-                                                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[8px]">!</span>
+                                                    <span class="absolute -top-1 -left-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[8px]">!</span>
                                                 @endif
                                                 @if($slot->is_locked)
-                                                    <span class="absolute top-1 right-1 text-gray-400"><i class="bi bi-lock-fill text-[8px]"></i></span>
+                                                    <span class="absolute top-1 left-3 text-gray-400"><i class="bi bi-lock-fill text-[8px]"></i></span>
                                                 @endif
                                                 <span class="font-semibold block truncate">{{ $slot->subject->subject_name ?? '—' }}</span>
                                                 <span class="text-[10px] truncate block">{{ $slot->teacher->user->name ?? '' }}</span>
@@ -193,14 +211,25 @@
                                                         });
                                                     @endphp
                                                     <div onclick="editSlot({{ $slot->id }})" 
-                                                        class="flex-1 p-1 rounded border text-[10px] cursor-pointer hover:shadow-md transition relative {{ $color }}
+                                                        class="group flex-1 p-1 pr-10 rounded border text-[10px] cursor-pointer hover:shadow-md transition relative {{ $color }}
                                                         {{ $hasConflict ? 'ring-2 ring-red-500' : '' }}
                                                         {{ $slot->is_locked ? 'opacity-70' : '' }}">
+                                                        <div class="absolute top-0.5 right-0.5 z-10 flex items-center gap-0.5">
+                                                            <button type="button" onclick="viewSlot(event, {{ $slot->id }})" class="inline-flex h-4 w-4 items-center justify-center rounded bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-blue-600" title="View slot">
+                                                                <i class="bi bi-eye text-[8px]"></i>
+                                                            </button>
+                                                            <button type="button" onclick="editSlot({{ $slot->id }}, event)" class="inline-flex h-4 w-4 items-center justify-center rounded bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-amber-600" title="Edit slot">
+                                                                <i class="bi bi-pencil-square text-[8px]"></i>
+                                                            </button>
+                                                            <button type="button" onclick="deleteSlot(event, {{ $slot->id }})" class="inline-flex h-4 w-4 items-center justify-center rounded bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-red-600" title="Delete slot">
+                                                                <i class="bi bi-trash text-[8px]"></i>
+                                                            </button>
+                                                        </div>
                                                         @if($hasConflict)
-                                                            <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 text-white rounded-full flex items-center justify-center text-[6px]">!</span>
+                                                            <span class="absolute -top-1 -left-1 w-3 h-3 bg-red-500 text-white rounded-full flex items-center justify-center text-[6px]">!</span>
                                                         @endif
                                                         @if($slot->is_locked)
-                                                            <span class="absolute top-0.5 right-0.5 text-gray-400"><i class="bi bi-lock-fill text-[6px]"></i></span>
+                                                            <span class="absolute top-0.5 left-2.5 text-gray-400"><i class="bi bi-lock-fill text-[6px]"></i></span>
                                                         @endif
                                                         <span class="block text-[9px] font-bold">Lab {{ $slot->lab_group }}</span>
                                                         <span class="font-semibold block truncate">{{ $slot->subject->subject_name ?? '—' }}</span>
@@ -319,8 +348,8 @@
                 <label for="slotLocked" class="text-sm text-gray-600">{{ __('Lock') }}</label>
             </div>
             <div class="flex gap-3">
-                <button onclick="closeSlotModal()" class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Cancel</button>
-                <button onclick="submitSlot()" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm">Save</button>
+                <button id="slotModalCancel" onclick="closeSlotModal()" class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">Cancel</button>
+                <button id="slotModalSave" onclick="submitSlot()" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm">Save</button>
             </div>
         </div>
     </div>
@@ -332,52 +361,143 @@
 <script>
 const CSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 const SEMESTER = '{{ $semester }}';
+const SLOT_FIELD_IDS = [
+    'slotDay',
+    'slotType',
+    'slotStartTime',
+    'slotEndTime',
+    'slotSubject',
+    'slotTeacher',
+    'slotRoom',
+    'slotLabGroup',
+    'slotSection',
+    'slotRemarks',
+    'slotLocked',
+];
 
 function toggleLabGroup() {
     const type = document.getElementById('slotType').value;
     document.getElementById('labGroupSection').classList.toggle('hidden', type !== 'practical');
 }
 
-function openAddSlotModal() {
-    document.getElementById('slotModalTitle').textContent = 'Add Timetable Slot';
-    document.getElementById('slotId').value = '';
-    document.getElementById('slotDay').value = 'monday';
-    document.getElementById('slotType').value = 'theory';
-    document.getElementById('slotSubject').value = '';
-    document.getElementById('slotTeacher').value = '';
-    document.getElementById('slotStartTime').value = '';
-    document.getElementById('slotEndTime').value = '';
-    document.getElementById('slotRoom').value = '';
-    document.getElementById('slotLabGroup').value = '';
-    document.getElementById('slotSection').value = '';
-    document.getElementById('slotRemarks').value = '';
-    document.getElementById('slotLocked').checked = false;
-    document.getElementById('conflictWarning').classList.add('hidden');
-    toggleLabGroup();
-    document.getElementById('slotModal').classList.remove('hidden');
+function setSlotModalReadOnly(readOnly) {
+    SLOT_FIELD_IDS.forEach(id => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.disabled = readOnly;
+        }
+    });
+
+    const saveButton = document.getElementById('slotModalSave');
+    const cancelButton = document.getElementById('slotModalCancel');
+
+    saveButton.classList.toggle('hidden', readOnly);
+    cancelButton.textContent = readOnly ? 'Close' : 'Cancel';
 }
 
-function closeSlotModal() { document.getElementById('slotModal').classList.add('hidden'); }
-
-async function editSlot(id) {
-    const res = await fetch(`/admin/timetable/${id}`, { headers: { 'Accept': 'application/json' } });
-    const data = await res.json();
-    const slot = data.slot;
-    document.getElementById('slotModalTitle').textContent = 'Edit Timetable Slot';
-    document.getElementById('slotId').value = slot.id;
-    document.getElementById('slotDay').value = slot.day_of_week;
-    document.getElementById('slotType').value = slot.slot_type;
-    document.getElementById('slotSubject').value = slot.subject_id;
+function populateSlotForm(slot) {
+    document.getElementById('slotId').value = slot.id || '';
+    document.getElementById('slotDay').value = slot.day_of_week || 'monday';
+    document.getElementById('slotType').value = slot.slot_type || 'theory';
+    document.getElementById('slotSubject').value = slot.subject_id || '';
     document.getElementById('slotTeacher').value = slot.teacher_id || '';
-    document.getElementById('slotStartTime').value = slot.start_time?.substring(0,5) || '';
-    document.getElementById('slotEndTime').value = slot.end_time?.substring(0,5) || '';
+    document.getElementById('slotStartTime').value = slot.start_time?.substring(0, 5) || '';
+    document.getElementById('slotEndTime').value = slot.end_time?.substring(0, 5) || '';
     document.getElementById('slotRoom').value = slot.room || '';
     document.getElementById('slotLabGroup').value = slot.lab_group || '';
     document.getElementById('slotSection').value = slot.section || '';
     document.getElementById('slotRemarks').value = slot.remarks || '';
-    document.getElementById('slotLocked').checked = slot.is_locked;
+    document.getElementById('slotLocked').checked = Boolean(slot.is_locked);
+    document.getElementById('conflictWarning').classList.add('hidden');
     toggleLabGroup();
+}
+
+async function fetchSlot(id) {
+    const res = await fetch(`/admin/timetable/${id}`, { headers: { 'Accept': 'application/json' } });
+    const data = await res.json();
+
+    if (!res.ok) {
+        throw new Error(data.message || 'Unable to load timetable slot');
+    }
+
+    return data.slot;
+}
+
+function openAddSlotModal() {
+    document.getElementById('slotModalTitle').textContent = 'Add Timetable Slot';
+    populateSlotForm({
+        id: '',
+        day_of_week: 'monday',
+        slot_type: 'theory',
+        subject_id: '',
+        teacher_id: '',
+        start_time: '',
+        end_time: '',
+        room: '',
+        lab_group: '',
+        section: '',
+        remarks: '',
+        is_locked: false,
+    });
+    setSlotModalReadOnly(false);
     document.getElementById('slotModal').classList.remove('hidden');
+}
+
+function closeSlotModal() {
+    setSlotModalReadOnly(false);
+    document.getElementById('slotModal').classList.add('hidden');
+}
+
+async function viewSlot(event, id) {
+    event.stopPropagation();
+
+    try {
+        const slot = await fetchSlot(id);
+        document.getElementById('slotModalTitle').textContent = 'View Timetable Slot';
+        populateSlotForm(slot);
+        setSlotModalReadOnly(true);
+        document.getElementById('slotModal').classList.remove('hidden');
+    } catch (error) {
+        alert(error.message || 'Unable to load slot details');
+    }
+}
+
+async function editSlot(id, event = null) {
+    if (event) {
+        event.stopPropagation();
+    }
+
+    try {
+        const slot = await fetchSlot(id);
+    document.getElementById('slotModalTitle').textContent = 'Edit Timetable Slot';
+        populateSlotForm(slot);
+        setSlotModalReadOnly(false);
+        document.getElementById('slotModal').classList.remove('hidden');
+    } catch (error) {
+        alert(error.message || 'Unable to load slot details');
+    }
+}
+
+async function deleteSlot(event, id) {
+    event.stopPropagation();
+
+    if (!confirm('Delete this timetable slot?')) {
+        return;
+    }
+
+    const res = await fetch(`/admin/timetable/${id}`, {
+        method: 'DELETE',
+        headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+        location.reload();
+        return;
+    }
+
+    alert(result.message || 'Unable to delete slot');
 }
 
 async function submitSlot() {

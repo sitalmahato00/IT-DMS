@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('teacher.layouts.teacherlayout')
 
 @section('title', 'Exam Details - ' . $exam->exam_name)
 
@@ -25,7 +25,7 @@
     <!-- Back Button & Header -->
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <a href="{{ route('admin.exam') }}" class="text-gray-600 hover:text-gray-900">
+            <a href="{{ route('teacher.exams') }}" class="text-gray-600 hover:text-gray-900">
                 <i class="bi bi-arrow-left text-lg"></i>
             </a>
             <h2 class="text-lg font-semibold text-gray-900">{{ $exam->localized_name }}</h2>
@@ -95,7 +95,7 @@
                                 <input type="hidden" id="filterSemester" name="semester" value="{{ $exam->semester }}">
                             @else
                                 <select id="filterSemester" name="semester" class="js-filter-semester w-36 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="loadSubjectsForMarkUploadAndTable()">
-                                    <option value="all" selected>All Semesters</option>
+                                    <option value="">Semester</option>
                                     @foreach($semesters as $key => $label)
                                         <option value="{{ $key }}">{{ $label }}</option>
                                     @endforeach
@@ -127,11 +127,11 @@
                 </form>
 
                 <div class="flex items-center gap-2">
-                    <button id="openMarkUploadModalBtn" type="button" class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-sm transition-colors">
+                    <button onclick="openMarkUploadModal()" class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-sm transition-colors">
                         <i class="bi bi-cloud-upload mr-1"></i>Upload Marks
                     </button>
                     
-                    <button id="openViewMarksModalBtn" type="button" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 font-medium transition-colors">
+                    <button onclick="openViewMarksModal()" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 font-medium transition-colors">
                         <i class="bi bi-eye mr-1"></i>View Details
                     </button>
 
@@ -282,7 +282,7 @@
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
-        <form id="markUploadForm" method="POST" action="{{ route('admin.exam.upload-marks', $exam->id) }}" class="px-5 py-4 space-y-4 pb-24">
+        <form id="markUploadForm" method="POST" action="{{ route('teacher.exams.upload-marks', $exam->id) }}" class="px-5 py-4 space-y-4 pb-24">
             @csrf
 
             <!-- Exam Details Section (Read-only) -->
@@ -469,26 +469,7 @@
                     </div>
                     <div class="bg-gray-50 p-3 rounded">
                         <p class="text-gray-600 font-medium">Semester</p>
-                        @php
-                            $semesterLabel = 'All Semesters';
-                            if ($exam->semester && $exam->semester !== 'all') {
-                                $numeric = in_array($exam->semester, ['1','2','3','4','5','6']) ? $exam->semester : null;
-                                $labelMap = [
-                                    'first' => 'First', 'second' => 'Second', 'third' => 'Third', 'fourth' => 'Fourth',
-                                    'fifth' => 'Fifth', 'sixth' => 'Sixth',
-                                    '1' => 'First', '2' => 'Second', '3' => 'Third', '4' => 'Fourth',
-                                    '5' => 'Fifth', '6' => 'Sixth'
-                                ];
-                                if ($numeric && isset($labelMap[$numeric])) {
-                                    $semesterLabel = $labelMap[$numeric] . ' Semester';
-                                } elseif (isset($labelMap[$exam->semester])) {
-                                    $semesterLabel = $labelMap[$exam->semester] . ' Semester';
-                                } else {
-                                    $semesterLabel = ucwords($exam->semester);
-                                }
-                            }
-                        @endphp
-                        <p class="font-semibold text-gray-900">{{ $semesterLabel }}</p>
+                        <p class="font-semibold text-gray-900">{{ $exam->semester === 'all' ? 'All Semesters' : ($semesters[$exam->semester] ?? ucwords($exam->semester)) }}</p>
                     </div>
                     <div class="bg-gray-50 p-3 rounded">
                         <p class="text-gray-600 font-medium">Subject</p>
@@ -618,13 +599,13 @@
 <script>
 // ============= Route URLs (from Blade) =============
 const ROUTES = {
-    availableYearsSemesters: "{{ route('admin.exam.available-years-semesters') }}",
-    subjectsBySemester: "{{ route('admin.exam.subjects') }}",
-    allSubjects: "{{ route('admin.exam.all-subjects') }}",
-    studentsWithMarks: "{{ route('admin.exam.students-with-marks', $exam->id) }}",
+    availableYearsSemesters: "{{ route('teacher.exams.available-years-semesters') }}",
+    subjectsBySemester: "{{ route('teacher.exams.subjects') }}",
+    studentsWithMarks: "{{ route('teacher.exams.students-with-marks', $exam->id) }}",
 };
 const EXAM_CATEGORY = '{{ $activeExamCategory }}';
 const EXAM_COMPONENT_DEFINITIONS = @json($examComponentDefinitions);
+const EXAM_DATA = @json($exam->toArray());
 const DEFAULT_EXAM_FULL_MARKS = {{ $exam->full_marks ?? 0 }};
 const DEFAULT_EXAM_PASSING_MARKS = {{ $exam->passing_marks ?? 0 }};
 
@@ -810,38 +791,32 @@ function updateSubjectAggregateFields() {
 
 // Mark Upload Modal
 function openMarkUploadModal() {
-    const modal = document.getElementById('markUploadModal');
-    if (modal) {
-        modal.classList.remove('hidden');
-    }
-
+    document.getElementById('markUploadModal').classList.remove('hidden');
     // Load semesters directly since academic year filter is removed
     loadAvailableSemesters();
 
-    // Make sure subjects are loaded into filters when default semester is present
-    setTimeout(() => {
-        if (typeof onModalSemesterChange === 'function') {
-            onModalSemesterChange();
-        }
-        if (typeof updateModalActionsState === 'function') {
-            updateModalActionsState();
-        }
-    }, 300);
+    // Prefill subject-level marks with exam defaults from creation
+    const fullMarksInput = document.getElementById('subjectFullMarks');
+    const passingMarksInput = document.getElementById('subjectPassingMarks');
+    if (fullMarksInput) fullMarksInput.value = EXAM_DATA.full_marks ?? '';
+    if (passingMarksInput) passingMarksInput.value = EXAM_DATA.passing_marks ?? '';
+
+    if (EXAM_CATEGORY === 'ctevt') {
+        document.querySelectorAll('#componentMarksSection [data-component-category="ctevt"]').forEach(input => {
+            const component = input.dataset.component;
+            const valueType = input.dataset.valueType;
+            if (!component || !valueType) return;
+
+            const examValueKey = `${component}_${valueType === 'max' ? 'max' : 'pass'}_marks`;
+            if (EXAM_DATA[examValueKey] !== undefined && EXAM_DATA[examValueKey] !== null) {
+                input.value = EXAM_DATA[examValueKey];
+            }
+        });
+    }
+
+    // Ensure buttons reflect defaults
+    setTimeout(() => { if (typeof updateModalActionsState === 'function') updateModalActionsState(); }, 200);
 }
-
-// expose for inline onclick handlers
-window.openMarkUploadModal = openMarkUploadModal;
-window.openViewMarksModal = openViewMarksModal;
-window.closeMarkUploadModal = closeMarkUploadModal;
-window.closeViewMarksModal = closeViewMarksModal;
-
-document.addEventListener('DOMContentLoaded', function () {
-    const uploadBtn = document.getElementById('openMarkUploadModalBtn');
-    if (uploadBtn) uploadBtn.addEventListener('click', openMarkUploadModal);
-
-    const viewBtn = document.getElementById('openViewMarksModalBtn');
-    if (viewBtn) viewBtn.addEventListener('click', openViewMarksModal);
-});
 
 function closeMarkUploadModal() {
     document.getElementById('markUploadModal').classList.add('hidden');
@@ -916,51 +891,27 @@ function loadAvailableSemesters() {
 }
 
 function populateSemesters(select, semesters) {
-    let html = '<option value="all">All Semesters</option><option value="">Select Semester</option>';
-
-    if (semesters && semesters.length > 0) {
+    let html = '<option value="">Select Semester</option>';
+    if (!semesters || semesters.length === 0) {
+        html = '<option value="">No semesters available</option>';
+    } else {
         semesters.forEach(sem => {
             html += `<option value="${sem.value}">${sem.label}</option>`;
         });
-    } else {
-        html = '<option value="all">All Semesters</option><option value="">No semesters available</option>';
     }
-
     select.innerHTML = html;
 
-    // If a default semester is provided (from exam), pre-select it with the highest priority
+    // If a default semester is provided (from exam), pre-select it but keep select editable
     try {
-        const def = String(window.defaultModalSemester || '').trim();
-
+        const def = window.defaultModalSemester || '';
         if (def) {
-            // If 'all', keep all option
-            if (def === 'all') {
-                select.value = 'all';
-            } else {
-                let opt = Array.from(select.options).find(o => String(o.value) === def);
-                // If not found in fetched data (maybe custom semester), add it explicitly
-                if (!opt) {
-                    const labelMap = {
-                        'first': 'First', 'second': 'Second', 'third': 'Third', 'fourth': 'Fourth',
-                        'fifth': 'Fifth', 'sixth': 'Sixth', '1': 'First', '2': 'Second',
-                        '3': 'Third', '4': 'Fourth', '5': 'Fifth', '6': 'Sixth'
-                    };
-                    const label = labelMap[def] || def;
-                    const option = document.createElement('option');
-                    option.value = def;
-                    option.textContent = label;
-                    select.appendChild(option);
-                    opt = option;
-                }
-
-                if (opt) {
-                    select.value = def;
-                }
+            const opt = Array.from(select.options).find(o => String(o.value) === String(def));
+            if (opt) {
+                select.value = def;
+                // Trigger change to load subjects for that semester
+                const ev = new Event('change', { bubbles: true });
+                select.dispatchEvent(ev);
             }
-
-            // Trigger change to load subjects for that semester
-            const ev = new Event('change', { bubbles: true });
-            select.dispatchEvent(ev);
         }
     } catch (err) {
         console.error('Error setting default semester:', err);
@@ -973,67 +924,41 @@ function populateSemesters(select, semesters) {
 function onModalSemesterChange() {
     const semester = document.getElementById('modalSemesterFilter')?.value || '';
     const subjectSelect = document.getElementById('modalSubjectFilter');
-
-    if (!subjectSelect) return;
-
-    // Clear and show loading while fetching options
-    subjectSelect.innerHTML = '<option value="">Loading...</option>';
-
-    // Determine API endpoint
-    let url = '';
-    if (semester === 'all' || semester === '') {
-        url = ROUTES.allSubjects;
-    } else {
-        url = `${ROUTES.subjectsBySemester}?semester=${encodeURIComponent(semester)}`;
+    
+    if (!semester) {
+        subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+        return;
     }
-
-    fetch(url)
+    
+    subjectSelect.innerHTML = '<option value="">Loading...</option>';
+    
+    fetch(`${ROUTES.subjectsBySemester}?semester=${encodeURIComponent(semester)}`)
         .then(res => res.json())
         .then(data => {
-            let html = '<option value="all">All Subjects</option>';
-
+            let html = '<option value="">Select Subject</option>';
             if (data.success && data.subjects && Array.isArray(data.subjects)) {
                 data.subjects.forEach(subject => {
                     html += `<option value="${subject.id}">${subject.subject_name}${subject.subject_code ? ' - ' + subject.subject_code : ''}</option>`;
                 });
             }
-
             subjectSelect.innerHTML = html;
-
-            // Set default subject (if exam teaches a specific subject or full coverage)
-            try {
-                const defSub = String(window.defaultModalSubject || '').trim();
-                if (defSub) {
-                    // if default is 'all' or empty -> select all
-                    if (defSub === 'all') {
-                        subjectSelect.value = 'all';
-                    } else {
-                        const opt = Array.from(subjectSelect.options).find(o => String(o.value) === defSub);
-                        if (opt) {
-                            subjectSelect.value = defSub;
-                        } else {
-                            // If default subject isn't part of this semester list (e.g. targeted from exam), add it
-                            const added = document.createElement('option');
-                            added.value = defSub;
-                            added.textContent = 'Selected Subject';
-                            subjectSelect.appendChild(added);
-                            subjectSelect.value = defSub;
-                        }
+                // If default subject provided by exam, select it (editable)
+                try {
+                    const defSub = window.defaultModalSubject || '';
+                    if (defSub) {
+                        const opt = Array.from(subjectSelect.options).find(o => String(o.value) === String(defSub));
+                        if (opt) subjectSelect.value = defSub;
                     }
-                } else {
-                    subjectSelect.value = 'all';
+                } catch (err) {
+                    console.error('Error setting default subject:', err);
                 }
-            } catch (err) {
-                console.error('Error setting default subject:', err);
-            }
-
-            if (typeof updateModalActionsState === 'function') updateModalActionsState();
+                // Update modal action buttons state
+                if (typeof updateModalActionsState === 'function') updateModalActionsState();
         })
         .catch(err => {
             console.error('Error loading subjects:', err);
             subjectSelect.innerHTML = '<option value="">Error loading subjects</option>';
         });
-}
 }
 
 /**
@@ -1047,8 +972,9 @@ function updateSubjectSpecificMarks() {
     
     if (!subjectId) {
         section.classList.add('hidden');
-        fullMarksInput.value = '';
-        passingMarksInput.value = '';
+        if (fullMarksInput) fullMarksInput.value = EXAM_DATA.full_marks ?? '';
+        if (passingMarksInput) passingMarksInput.value = EXAM_DATA.passing_marks ?? '';
+        document.querySelectorAll('#componentMarksSection [data-component-category="ctevt"]').forEach(input => input.value = '');
         return;
     }
     
@@ -1058,23 +984,85 @@ function updateSubjectSpecificMarks() {
     
     // Try to load existing marks for this subject from the backend
     const examId = {{ $exam->id }};
-    fetch(`/admin/exam/${examId}/subject-marks/${subjectId}`)
+    fetch(`/teacher/exams/${examId}/subject-marks/${subjectId}`)
         .then(res => res.json())
         .then(data => {
             if (data.success && data.marks) {
-                fullMarksInput.value = data.marks.full_marks || '';
-                passingMarksInput.value = data.marks.passing_marks || '';
+                const marksData = data.marks || {};
+                const fullMarks = marksData.full_marks ?? EXAM_DATA.full_marks ?? '';
+                const passingMarks = marksData.passing_marks ?? EXAM_DATA.passing_marks ?? '';
+
+                if (fullMarksInput) fullMarksInput.value = fullMarks;
+                if (passingMarksInput) passingMarksInput.value = passingMarks;
+
+                if (EXAM_CATEGORY === 'ctevt') {
+                    const componentValues = {
+                        theory_internal: {
+                            max: marksData.theory_internal_full_marks ?? EXAM_DATA.theory_internal_max_marks ?? 0,
+                            pass: marksData.theory_internal_pass_marks ?? EXAM_DATA.theory_internal_pass_marks ?? 0,
+                        },
+                        theory_external: {
+                            max: marksData.theory_external_full_marks ?? EXAM_DATA.theory_external_max_marks ?? 0,
+                            pass: marksData.theory_external_pass_marks ?? EXAM_DATA.theory_external_pass_marks ?? 0,
+                        },
+                        practical_internal: {
+                            max: marksData.practical_internal_full_marks ?? EXAM_DATA.practical_internal_max_marks ?? 0,
+                            pass: marksData.practical_internal_pass_marks ?? EXAM_DATA.practical_internal_pass_marks ?? 0,
+                        },
+                        practical_external: {
+                            max: marksData.practical_external_full_marks ?? EXAM_DATA.practical_external_max_marks ?? 0,
+                            pass: marksData.practical_external_pass_marks ?? EXAM_DATA.practical_external_pass_marks ?? 0,
+                        },
+                    };
+
+                    document.querySelectorAll('#componentMarksSection [data-component-category="ctevt"]').forEach(input => {
+                        const component = input.dataset.component;
+                        const valueType = input.dataset.valueType;
+                        if (!component || !valueType || !componentValues[component]) return;
+                        input.value = componentValues[component][valueType] ?? 0;
+                    });
+                }
             } else {
-                fullMarksInput.value = '{{ $exam->full_marks }}';
-                passingMarksInput.value = '{{ $exam->passing_marks }}';
+                if (fullMarksInput) fullMarksInput.value = EXAM_DATA.full_marks ?? '';
+                if (passingMarksInput) passingMarksInput.value = EXAM_DATA.passing_marks ?? '';
+                if (EXAM_CATEGORY === 'ctevt') {
+                    const ctevtDefaults = {
+                        theory_internal: {
+                            max: EXAM_DATA.theory_internal_max_marks ?? 0,
+                            pass: EXAM_DATA.theory_internal_pass_marks ?? 0,
+                        },
+                        theory_external: {
+                            max: EXAM_DATA.theory_external_max_marks ?? 0,
+                            pass: EXAM_DATA.theory_external_pass_marks ?? 0,
+                        },
+                        practical_internal: {
+                            max: EXAM_DATA.practical_internal_max_marks ?? 0,
+                            pass: EXAM_DATA.practical_internal_pass_marks ?? 0,
+                        },
+                        practical_external: {
+                            max: EXAM_DATA.practical_external_max_marks ?? 0,
+                            pass: EXAM_DATA.practical_external_pass_marks ?? 0,
+                        },
+                    };
+                    document.querySelectorAll('#componentMarksSection [data-component-category="ctevt"]').forEach(input => {
+                        const component = input.dataset.component;
+                        const valueType = input.dataset.valueType;
+                        if (!component || !valueType || !ctevtDefaults[component]) return;
+                        input.value = ctevtDefaults[component][valueType] ?? 0;
+                    });
+                }
             }
+
             // Update the student marks display with the loaded values
+            window.currentSubjectFullMarks = parseFloat(fullMarksInput.value) || DEFAULT_EXAM_FULL_MARKS;
+            window.currentSubjectPassingMarks = parseFloat(passingMarksInput.value) || DEFAULT_EXAM_PASSING_MARKS;
+            updateSubjectAggregateFields();
             updateStudentMarksDisplay();
         })
         .catch(err => {
             console.error('Error loading subject marks:', err);
-            fullMarksInput.value = '{{ $exam->full_marks }}';
-            passingMarksInput.value = '{{ $exam->passing_marks }}';
+            if (fullMarksInput) fullMarksInput.value = EXAM_DATA.full_marks ?? '';
+            if (passingMarksInput) passingMarksInput.value = EXAM_DATA.passing_marks ?? '';
         });
 }
 
@@ -1224,12 +1212,29 @@ function loadStudents() {
             console.log('Students data received:', data);
             if (data.success) {
                 console.log('Students count:', data.students ? data.students.length : 0);
+
+                // Prefill subject marks fields at load-time, especially for CTEVT
+                const fullMarksInput = document.getElementById('subjectFullMarks');
+                const passingMarksInput = document.getElementById('subjectPassingMarks');
+                if (fullMarksInput) {
+                    fullMarksInput.value = data.subject_full_marks ?? {{ $exam->full_marks }};
+                }
+                if (passingMarksInput) {
+                    passingMarksInput.value = data.subject_passing_marks ?? {{ $exam->passing_marks }};
+                }
+
                 renderStudentMarksTable(
                     data.students || [], 
                     data.existing_marks || {}, 
-                    data.subject_full_marks || {{ $exam->full_marks }},
-                    data.subject_passing_marks || {{ $exam->passing_marks }}
+                    data.subject_full_marks ?? {{ $exam->full_marks }},
+                    data.subject_passing_marks ?? {{ $exam->passing_marks }}
                 );
+
+                // If subject is selected, pull component-level defaults from subject mark endpoint immediately
+                const subjectId = document.getElementById('modalSubjectFilter')?.value || '';
+                if (subjectId) {
+                    updateSubjectSpecificMarks();
+                }
             } else {
                 console.error('Backend returned error:', data.message);
                 tbody.innerHTML = `<tr><td colspan="11" class="px-3 py-4 text-center text-blue-500">Error: ${data.message || 'Failed to load students'}</td></tr>`;
@@ -1308,7 +1313,7 @@ function deleteMark(id) {
     
     const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     
-    fetch("{{ route('admin.exam.mark.delete', ':id') }}".replace(':id', id), {
+    fetch("{{ route('teacher.exams.mark.delete', ':id') }}".replace(':id', id), {
         method: 'DELETE',
         headers: {
             'X-CSRF-TOKEN': token,
@@ -1338,8 +1343,8 @@ function deleteMark(id) {
  * Edit Mark Modal functions
  */
 function openEditMarkModal(id) {
-    // Use direct path to avoid URL encoding issues from route() parameter replacement
-    const url = `/admin/exam/marks/${id}/edit`;
+    // Use teacher route for editing marks
+    const url = `/teacher/exams/marks/${id}/edit`;
     console.debug('Opening edit modal, fetching', url);
     fetch(url)
         .then(res => {
@@ -1442,7 +1447,7 @@ async function submitEditMarkForm(e) {
     if (!id) return showErrorMessage('Invalid mark id');
 
     // Update endpoint for mark
-    const url = `/admin/exam/marks/${id}`;
+    const url = `/teacher/exams/marks/${id}`;
     const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     const marksObtained = parseFloat(document.getElementById('editMarksObtained').value) || 0;
     const remarks = document.getElementById('editMarkRemarks').value || '';

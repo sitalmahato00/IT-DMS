@@ -101,8 +101,8 @@ class TeacherTimetableController extends Controller
             ->orderBy('start_time')
             ->get();
         
-        // Group by day
-        $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        // Timetable slots store day names in lowercase.
+        $days = TimetableSlot::getDaysOfWeek();
         $timetableByDay = [];
         
         foreach ($days as $day) {

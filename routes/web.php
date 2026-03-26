@@ -60,21 +60,15 @@ Route::middleware(['auth', 'verified', 'role:student'])->prefix('student')->name
     Route::get('/marks', [\App\Http\Controllers\Student\StudentMarkController::class, 'index'])->name('marks');
     Route::get('/marks/{subjectId}', [\App\Http\Controllers\Student\StudentMarkController::class, 'show'])->name('marks.show');
     
-    // Study Materials
-    Route::get('/study-materials', [\App\Http\Controllers\Student\StudentStudyMaterialController::class, 'index'])->name('study-materials');
-    Route::get('/study-materials/download/{id}', [\App\Http\Controllers\Student\StudentStudyMaterialController::class, 'download'])->name('study-materials.download');
-    
-    // Notices
-    Route::get('/notices', [\App\Http\Controllers\Student\StudentNoticeController::class, 'index'])->name('notices');
-    Route::get('/notices/{id}', [\App\Http\Controllers\Student\StudentNoticeController::class, 'show'])->name('notices.show');
-    
-    // Assignments
-    Route::get('/assignments', [\App\Http\Controllers\Student\StudentAssignmentController::class, 'index'])->name('assignments');
-    Route::get('/assignments/{id}', [\App\Http\Controllers\Student\StudentAssignmentController::class, 'show'])->name('assignments.show');
-    
-    // My Teachers
-    Route::get('/teachers', [\App\Http\Controllers\Student\StudentTeacherController::class, 'index'])->name('teachers');
-    Route::get('/teachers/{id}', [\App\Http\Controllers\Student\StudentTeacherController::class, 'show'])->name('teachers.show');
+    // NOTE: disabled routes pointing to missing controllers; recreate classes before enabling.
+    // Route::get('/study-materials', [\App\Http\Controllers\Student\StudentStudyMaterialController::class, 'index'])->name('study-materials');
+    // Route::get('/study-materials/download/{id}', [\App\Http\Controllers\Student\StudentStudyMaterialController::class, 'download'])->name('study-materials.download');
+    // Route::get('/notices', [\App\Http\Controllers\Student\StudentNoticeController::class, 'index'])->name('notices');
+    // Route::get('/notices/{id}', [\App\Http\Controllers\Student\StudentNoticeController::class, 'show'])->name('notices.show');
+    // Route::get('/assignments', [\App\Http\Controllers\Student\StudentAssignmentController::class, 'index'])->name('assignments');
+    // Route::get('/assignments/{id}', [\App\Http\Controllers\Student\StudentAssignmentController::class, 'show'])->name('assignments.show');
+    // Route::get('/teachers', [\App\Http\Controllers\Student\StudentTeacherController::class, 'index'])->name('teachers');
+    // Route::get('/teachers/{id}', [\App\Http\Controllers\Student\StudentTeacherController::class, 'show'])->name('teachers.show');
 });
 
 // Teacher Profile Routes
@@ -120,7 +114,17 @@ Route::middleware(['auth', 'verified', 'role:teacher'])->prefix('teacher')->name
     Route::post('/notices', [\App\Http\Controllers\Teacher\TeacherNoticesController::class, 'store'])->name('notices.store');
     Route::get('/notices', [\App\Http\Controllers\Teacher\TeacherNoticesController::class, 'index'])->name('notices');
     Route::get('/exams', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'index'])->name('exams');
+    Route::get('/exams/ajax/subjects', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'getSubjectsBySemester'])->name('exams.subjects');
+    Route::get('/exams/ajax/available-years-semesters', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'getAvailableYearsAndSemesters'])->name('exams.available-years-semesters');
+    Route::get('/exams/{exam}', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'show'])->name('exams.show');
     Route::get('/exams/{exam}/students', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'getExamStudents'])->name('exams.students');
+    Route::get('/exams/{exam}/students-with-marks', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'getStudentsWithMarks'])->name('exams.students-with-marks');
+    Route::get('/exams/{exam}/subject-marks/{subject}', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'getSubjectMarks'])->name('exams.subject-marks');
+    Route::post('/exams/{exam}/upload-marks', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'uploadMarks'])->name('exams.upload-marks');
+    Route::post('/exams/{exam}/upload-marks-ajax', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'uploadMarksAjax'])->name('exams.upload-marks-ajax');
+    Route::get('/exams/marks/{mark}/edit', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'getMarkData'])->name('exams.marks.edit');
+    Route::put('/exams/marks/{mark}', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'updateMark'])->name('exams.marks.update');
+    Route::delete('/exams/marks/{id}', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'deleteMark'])->name('exams.mark.delete');
     Route::get('/timetable', [\App\Http\Controllers\Teacher\TeacherTimetableController::class, 'index'])->name('timetable');
     Route::get('/reports', [\App\Http\Controllers\Teacher\TeacherReportsController::class, 'index'])->name('reports');
     Route::get('/notifications', function () {

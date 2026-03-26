@@ -19,8 +19,36 @@ class TimetableController extends Controller
      */
     public function index(Request $request)
     {
+        $semesterOptions = TimetableSlot::query()
+            ->whereNotNull('semester')
+            ->select('semester')
+            ->distinct()
+            ->orderByRaw('CAST(semester AS UNSIGNED)')
+            ->pluck('semester')
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->values();
+
+        if ($semesterOptions->isEmpty()) {
+            $semesterOptions = Subject::query()
+                ->where('status', 'active')
+                ->whereNotNull('semester')
+                ->select('semester')
+                ->distinct()
+                ->orderByRaw('CAST(semester AS UNSIGNED)')
+                ->pluck('semester')
+                ->filter(fn ($value) => $value !== null && $value !== '')
+                ->values();
+        }
+
+        if ($semesterOptions->isEmpty()) {
+            $semesterOptions = collect(['1', '2', '3', '4', '5', '6']);
+        }
+
         // Get filter parameters
-        $semester = $request->input('semester', '1');
+        $semester = trim((string) $request->input('semester', ''));
+        if ($semester === '' || !$semesterOptions->contains($semester)) {
+            $semester = (string) $semesterOptions->first();
+        }
         $section = $request->input('section', '');
         $day = $request->input('day', '');
         
@@ -71,12 +99,7 @@ class TimetableController extends Controller
             ->where('status', 'active')
             ->get();
 
-        // All semesters (1-6)
-        $semesters = Subject::distinct()->pluck('semester')->sort()->values();
-        
-        if ($semesters->isEmpty()) {
-            $semesters = collect(['1', '2', '3', '4', '5', '6']);
-        }
+        $semesters = $semesterOptions;
 
         // Sections
         $sections = TimetableSlot::getSections();

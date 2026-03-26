@@ -709,7 +709,8 @@
         const subjectSelect = el('editSubject');
         
         if (semester === 'all') {
-            subjectSelect.innerHTML = '<option value="">Select semester first</option>';
+            subjectSelect.innerHTML = '<option value="all">All Subjects</option>';
+            subjectSelect.value = 'all';
             subjectSelect.disabled = true;
             return;
         }
@@ -790,7 +791,6 @@
         let semester = normalizeSemesterValue(semesterRaw);
         
         const data = {
-            _method: 'PUT',
             exam_name: (el('editExamName')?.value || ''),
             full_marks: (el('editFullMarks')?.value || ''),
             passing_marks: (el('editPassingMarks')?.value || ''),
@@ -805,6 +805,17 @@
             _token: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
         };
         
+        // Add CTEVT component fields if category is ctevt
+        if (data.exam_category === 'ctevt') {
+            // Collect component values from the form inputs
+            document.querySelectorAll('#editExamComponentSection .subject-component-input').forEach(input => {
+                const fieldName = input.dataset.fieldName;
+                if (fieldName) {
+                    data[fieldName] = input.value || '';
+                }
+            });
+        }
+        
         console.log('Normalized data sent:', {semesterRaw, semester, data});
         
         const submitBtn = el('editSubmitBtn');
@@ -813,11 +824,12 @@
         showEditLoading();
         
         fetch(url, {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
             },
             body: JSON.stringify(data)
         })
@@ -886,6 +898,14 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         registerEditExamComponentListeners();
+        
+        // Add event listener for edit modal semester change
+        const editSemester = el('editSemester');
+        if (editSemester) {
+            editSemester.addEventListener('change', function() {
+                loadSubjectsForEditExam();
+            });
+        }
     });
 
     function formatDisplayNumber(value) {
@@ -1599,16 +1619,19 @@ function updateCreateExamPracticalFieldsVisibility() {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': csrfToken
                     }
                 });
-                
-                if (response.ok) {
-                    showToast('Exam deleted successfully', 'success');
+
+                const data = await response.json().catch(() => ({}));
+
+                if (response.ok && data.success !== false) {
+                    showToast(data.message || 'Exam deleted successfully', 'success');
                     setTimeout(() => location.reload(), 1500);
                 } else {
                     hideLoading();
-                    showToast('Failed to delete exam', 'error');
+                    showToast(data.message || 'Failed to delete exam', 'error');
                 }
             } catch (error) {
                 hideLoading();

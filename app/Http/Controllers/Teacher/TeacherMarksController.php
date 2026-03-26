@@ -399,7 +399,15 @@ class TeacherMarksController extends Controller
                 $assessmentQuery = Exam::where('exam_category', 'assessment')
                     ->whereIn('subject_id', $subjectIds)
                     ->when(!empty($semester), function ($q) use ($semester) {
-                        $q->where('semester', $semester);
+                        if ($semester === 'all') {
+                            $q->where('semester', 'all');
+                        } else {
+                            $q->where(function ($q2) use ($semester) {
+                                $q2->where('semester', $semester)
+                                   ->orWhere('semester', 'all')
+                                   ->orWhereNull('semester');
+                            });
+                        }
                     })
                     ->when(!empty($academicYear), function ($q) use ($academicYear) {
                         $q->where('academic_year', $academicYear);
@@ -816,7 +824,7 @@ class TeacherMarksController extends Controller
         $subjectQuery = Subject::whereIn('id', $subjectIds)
             ->where('category', $category);
 
-        if ($semester) {
+        if ($semester && $semester !== 'all') {
             $subjectQuery->where('semester', $semester);
         }
 

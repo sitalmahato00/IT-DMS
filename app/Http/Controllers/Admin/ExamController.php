@@ -337,14 +337,15 @@ class ExamController extends Controller
             }
 
             if ($category !== 'ctevt') {
-                $validated['theory_internal_max_marks'] = null;
-                $validated['theory_external_max_marks'] = null;
-                $validated['practical_internal_max_marks'] = null;
-                $validated['practical_external_max_marks'] = null;
-                $validated['theory_internal_pass_marks'] = null;
-                $validated['theory_external_pass_marks'] = null;
-                $validated['practical_internal_pass_marks'] = null;
-                $validated['practical_external_pass_marks'] = null;
+                // Persist zero values for non-CTEVT exams to comply with non-null DB columns
+                $validated['theory_internal_max_marks'] = 0;
+                $validated['theory_external_max_marks'] = 0;
+                $validated['practical_internal_max_marks'] = 0;
+                $validated['practical_external_max_marks'] = 0;
+                $validated['theory_internal_pass_marks'] = 0;
+                $validated['theory_external_pass_marks'] = 0;
+                $validated['practical_internal_pass_marks'] = 0;
+                $validated['practical_external_pass_marks'] = 0;
             }
 
             $exam = Exam::create($validated);
@@ -453,9 +454,9 @@ class ExamController extends Controller
 
             $validated = $validator->validated();
 
-            // Handle subject_id: convert 'all' to null, validate real IDs
+            // Handle subject_id: convert 'all' or empty to null, validate real IDs
             $subjectId = $validated['subject_id'] ?? null;
-            if ($subjectId === 'all') {
+            if ($subjectId === 'all' || $subjectId === '') {
                 $validated['subject_id'] = null;
             } elseif ($subjectId && is_numeric($subjectId)) {
                 if (!Subject::where('id', $subjectId)->exists()) {
@@ -486,14 +487,15 @@ class ExamController extends Controller
             }
 
             if ($category !== 'ctevt') {
-                $validated['theory_internal_max_marks'] = null;
-                $validated['theory_external_max_marks'] = null;
-                $validated['practical_internal_max_marks'] = null;
-                $validated['practical_external_max_marks'] = null;
-                $validated['theory_internal_pass_marks'] = null;
-                $validated['theory_external_pass_marks'] = null;
-                $validated['practical_internal_pass_marks'] = null;
-                $validated['practical_external_pass_marks'] = null;
+                // Persist zero values for non-CTEVT exams to comply with non-null DB columns
+                $validated['theory_internal_max_marks'] = 0;
+                $validated['theory_external_max_marks'] = 0;
+                $validated['practical_internal_max_marks'] = 0;
+                $validated['practical_external_max_marks'] = 0;
+                $validated['theory_internal_pass_marks'] = 0;
+                $validated['theory_external_pass_marks'] = 0;
+                $validated['practical_internal_pass_marks'] = 0;
+                $validated['practical_external_pass_marks'] = 0;
             }
 
             $exam->update($validated);
@@ -558,11 +560,20 @@ class ExamController extends Controller
 
             // Notifications are sent automatically by NotificationObserver
 
+            if ($request->expectsJson() || str_contains($request->header('Accept', ''), 'application/json')) {
+                return response()->json(['success' => true, 'message' => 'Exam deleted successfully!'], 200);
+            }
+
             return redirect()->route('admin.exam')
                 ->with('success', 'Exam deleted successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error deleting exam: ' . $e->getMessage());
+
+            if ($request->expectsJson() || str_contains($request->header('Accept', ''), 'application/json')) {
+                return response()->json(['success' => false, 'message' => 'Failed to delete exam: ' . $e->getMessage()], 500);
+            }
+
             return redirect()->back()
                 ->with('error', 'Failed to delete exam: ' . $e->getMessage());
         }

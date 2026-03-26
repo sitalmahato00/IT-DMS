@@ -99,7 +99,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="px-5 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
-                        <i class="bi bi-calendar-event mr-2"></i>{{ __($day) }}
+                        <i class="bi bi-calendar-event mr-2"></i>{{ __(ucfirst($day)) }}
                     </h3>
                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ $daySlots->count() }} {{ __('classes') }}</span>
                 </div>
