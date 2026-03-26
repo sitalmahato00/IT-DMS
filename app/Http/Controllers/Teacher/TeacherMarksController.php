@@ -282,6 +282,216 @@ class TeacherMarksController extends Controller
     }
 
     /**
+     * Display marksheets for all students in teacher's subjects
+     */
+    public function marksheets(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $teacher = $user->teacher;
+            
+            if (!$teacher) {
+                return view('teacher.marksheets', [
+                    'students' => collect([]),
+                    'subjects' => collect([]),
+                    'semesters' => collect([]),
+                    'academicYears' => collect([]),
+                    'currentFilters' => [],
+                ]);
+            }
+            
+            $subjectIds = $this->getTeacherSubjectIds();
+            
+            if (empty($subjectIds)) {
+                return view('teacher.marksheets', [
+                    'students' => collect([]),
+                    'subjects' => collect([]),
+                    'semesters' => collect([]),
+                    'academicYears' => collect([]),
+                    'currentFilters' => [],
+                ]);
+            }
+            
+            // Get filter parameters
+            $semester = $request->get('semester', '');
+            $subjectId = $request->get('subject_id', '');
+            $academicYear = $request->get('academic_year', '');
+            $search = $request->get('search', '');
+            
+            // Get unique semesters from teacher's subjects
+            $semesters = Subject::whereIn('id', $subjectIds)
+                ->distinct()
+                ->pluck('semester')
+                ->filter()
+                ->sort()
+                ->values();
+            
+            // Get unique academic years from exam marks for teacher's subjects
+            $academicYears = ExamMark::whereHas('exam', function ($q) use ($subjectIds) {
+                $q->whereIn('subject_id', $subjectIds);
+            })
+                ->distinct()
+                ->orderBy('academic_year', 'desc')
+                ->pluck('academic_year')
+                ->filter()
+                ->values();
+            
+            // Get subjects for teacher (format for display)
+            $subjects = SubjectTeacher::where('teacher_id', $teacher->id)
+                ->with('subject')
+                ->get()
+                ->map(function ($st) {
+                    return [
+                        'id' => $st->subject->id,
+                        'name' => $st->subject->subject_name,
+                        'code' => $st->subject->subject_code,
+                        'semester' => $st->subject->semester,
+                    ];
+                })
+                ->values();
+            
+            // Get students with marksheet data if subject is selected
+            $students = collect([]);
+            if (!empty($subjectId)) {
+                // Validate that this subject is owned by the teacher
+                $subject = Subject::find($subjectId);
+                if (!$subject || !in_array($subjectId, $subjectIds)) {
+                    $subjectId = '';
+                } else {
+                    // Get all exams (both assessment and ctevt) for this subject
+                    $studentQuery = Student::whereHas('subjects', function ($q) use ($subjectId) {
+                        $q->where('subject_id', $subjectId);
+                    })
+                    ->with('user', 'examMarks');
+                    
+                    // Filter by academic year if specified
+                    if (!empty($academicYear)) {
+                        $studentQuery->whereHas('examMarks', function ($q) use ($academicYear) {
+                            $q->where('academic_year', $academicYear);
+                        });
+                    }
+                    
+                    $studentQuery->when($search, function ($q) use ($search) {
+                        return $q->whereHas('user', function ($uq) use ($search) {
+                            $uq->where('name', 'like', '%' . $search . '%')
+                              ->orWhere('email', 'like', '%' . $search . '%')
+                              ->orWhere('phone', 'like', '%' . $search . '%');
+                        })->orWhere('roll_no', 'like', '%' . $search . '%');
+                    })
+                    ->paginate(25);
+                    
+                    // Format student marksheet data
+                    $students = $studentQuery->map(function ($student) use ($subjectId, $academicYear) {
+                        // Get all exams (assessment and ctevt) for this subject
+                        $exams = Exam::where('subject_id', $subjectId)
+                            ->orderBy('exam_date', 'asc');
+                        
+                        // Filter by academic year if specified
+                        if (!empty($academicYear)) {
+                            $exams->where('academic_year', $academicYear);
+                        }
+                        
+                        $exams = $exams->get();
+                        
+                        $totalMarks = 0;
+                        $totalFull = 0;
+                        $totalPass = 0;
+                        $allPassed = true;
+                        $grade = 'N/A';
+                        
+                        // Calculate total marks from all exams (both categories)
+                        foreach ($exams as $exam) {
+                            $mark = ExamMark::where('student_id', $student->id)
+                                ->where('exam_id', $exam->id)
+                                ->first();
+                            
+                            if ($mark) {
+                                if ($exam->exam_category === 'ctevt') {
+                                    $totalMarks += ($mark->theory_internal_marks ?? 0) +
+                                                  ($mark->theory_external_marks ?? 0) +
+                                                  ($mark->practical_internal_marks ?? 0) +
+                                                  ($mark->practical_external_marks ?? 0);
+                                    
+                                    $totalFull += ($exam->theory_internal_max_marks ?? 0) +
+                                               ($exam->theory_external_max_marks ?? 0) +
+                                               ($exam->practical_internal_max_marks ?? 0) +
+                                               ($exam->practical_external_max_marks ?? 0);
+                                } else {
+                                    // Assessment marks
+                                    $totalMarks += ($mark->marks_obtained ?? 0);
+                                    $totalFull += ($exam->full_marks ?? 0);
+                                    $totalPass += ($exam->passing_marks ?? 0);
+                                    
+                                    if (($mark->marks_obtained ?? 0) < ($exam->passing_marks ?? 0)) {
+                                        $allPassed = false;
+                                    }
+                                }
+                            } else {
+                                if ($exam->exam_category === 'ctevt') {
+                                    $totalFull += ($exam->theory_internal_max_marks ?? 0) +
+                                               ($exam->theory_external_max_marks ?? 0) +
+                                               ($exam->practical_internal_max_marks ?? 0) +
+                                               ($exam->practical_external_max_marks ?? 0);
+                                } else {
+                                    $totalFull += ($exam->full_marks ?? 0);
+                                    $totalPass += ($exam->passing_marks ?? 0);
+                                }
+                                $allPassed = false;
+                            }
+                        }
+                        
+                        // Calculate grade
+                        if ($totalFull > 0) {
+                            $percentage = ($totalMarks / $totalFull) * 100;
+                            if ($percentage >= 90) $grade = 'A+';
+                            elseif ($percentage >= 80) $grade = 'A';
+                            elseif ($percentage >= 70) $grade = 'B+';
+                            elseif ($percentage >= 60) $grade = 'B';
+                            elseif ($percentage >= 50) $grade = 'C+';
+                            elseif ($percentage >= 40) $grade = 'C';
+                            elseif ($percentage >= 35) $grade = 'D';
+                            else $grade = 'F';
+                        }
+                        
+                        return [
+                            'id' => $student->id,
+                            'roll_no' => $student->roll_no,
+                            'name' => $student->user->name ?? 'N/A',
+                            'total_marks' => $totalMarks,
+                            'full_marks' => $totalFull,
+                            'pass_marks' => $totalPass,
+                            'is_passed' => $allPassed && $totalFull > 0,
+                            'grade' => $grade,
+                        ];
+                    })->values();
+                }
+            }
+            
+            return view('teacher.marksheets', [
+                'students' => $students,
+                'subjects' => $subjects,
+                'semesters' => $semesters,
+                'academicYears' => $academicYears,
+                'currentFilters' => [
+                    'semester' => $semester,
+                    'subject_id' => $subjectId,
+                    'academic_year' => $academicYear,
+                    'search' => $search,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Teacher marksheets error: ' . $e->getMessage());
+            return view('teacher.marksheets', [
+                'students' => collect([]),
+                'subjects' => collect([]),
+                'semesters' => collect([]),
+                'academicYears' => collect([]),
+                'currentFilters' => [],
+            ]);
+        }
+    }
+
+    /**
      * Get students with marks based on filters
      */
     private function getStudentsWithMarks(Request $request, array $subjectIds, array $filters)

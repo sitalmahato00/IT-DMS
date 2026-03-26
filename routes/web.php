@@ -104,6 +104,9 @@ Route::middleware(['auth', 'verified', 'role:teacher'])->prefix('teacher')->name
     Route::get('/marks/export', [\App\Http\Controllers\Teacher\TeacherMarksController::class, 'export'])->name('marks.export');
     Route::get('/marks/print', [\App\Http\Controllers\Teacher\TeacherMarksController::class, 'print'])->name('marks.print');
     
+    // Teacher Marksheets (comprehensive view)
+    Route::get('/marksheets', [\App\Http\Controllers\Teacher\TeacherMarksController::class, 'marksheets'])->name('marksheets');
+    
     // Teacher Marksheet Search
     Route::get('/marksheet/search', [\App\Http\Controllers\Teacher\TeacherMarksController::class, 'marksheetSearch'])->name('marksheet.search');
     Route::get('/marksheet/print', [\App\Http\Controllers\Teacher\TeacherMarksController::class, 'marksheetPrint'])->name('marksheet.print');
