@@ -74,12 +74,112 @@
         </div>
     </div>
 
+    <div id="adminPrintPreviewModal" class="fixed inset-0 z-[70] hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="adminClosePrintPreview()"></div>
+        <div class="relative mx-auto w-full max-w-6xl h-[92vh] flex flex-col overflow-hidden rounded-xl bg-white dark:bg-slate-800 shadow-2xl border border-gray-200 dark:border-slate-700">
+            <div class="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-rose-600 to-red-600">
+                <div>
+                    <h3 id="adminPrintPreviewTitle" class="text-base font-semibold text-white">{{ __('Print Preview') }}</h3>
+                    <p id="adminPrintPreviewSubtitle" class="text-rose-100 text-xs">{{ __('A4 preview (use Print to open dialog)') }}</p>
+                </div>
+                <button onclick="adminClosePrintPreview()" class="text-rose-100 hover:text-white p-2 rounded-full hover:bg-white/10" aria-label="Close print preview">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 bg-gray-100 dark:bg-slate-900 p-4 overflow-auto">
+                <iframe id="adminPrintPreviewFrame" src="" class="w-full h-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white"></iframe>
+            </div>
+
+            <div class="px-5 py-3 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-between items-center gap-3">
+                <span class="text-xs text-gray-600 dark:text-gray-400">{{ __('Tip: Use "New tab" for full-page preview.') }}</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="adminOpenPrintPreviewInNewTab()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition">
+                        <i class="bi bi-box-arrow-up-right mr-1"></i> {{ __('New tab') }}
+                    </button>
+                    <button type="button" onclick="adminPrintPreviewFrame()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition shadow-sm">
+                        <i class="bi bi-printer mr-1"></i> {{ __('Print') }}
+                    </button>
+                    <button type="button" onclick="adminClosePrintPreview()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition">
+                        {{ __('Close') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @yield('ajax-modal')
 
     @yield('scripts')
     @stack('scripts')
 
     <script>
+        window.adminPrintPreviewState = {
+            url: '',
+            previousOverflow: '',
+        };
+
+        function adminOpenPrintPreview(url, options = {}) {
+            const modal = document.getElementById('adminPrintPreviewModal');
+            const frame = document.getElementById('adminPrintPreviewFrame');
+            const title = document.getElementById('adminPrintPreviewTitle');
+            const subtitle = document.getElementById('adminPrintPreviewSubtitle');
+
+            if (!modal || !frame || !url) {
+                return;
+            }
+
+            window.adminPrintPreviewState.url = url;
+            window.adminPrintPreviewState.previousOverflow = document.body.style.overflow;
+
+            if (title) {
+                title.textContent = options.title || '{{ __('Print Preview') }}';
+            }
+
+            if (subtitle) {
+                subtitle.textContent = options.subtitle || '{{ __('A4 preview (use Print to open dialog)') }}';
+            }
+
+            frame.src = url;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function adminClosePrintPreview() {
+            const modal = document.getElementById('adminPrintPreviewModal');
+            const frame = document.getElementById('adminPrintPreviewFrame');
+
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.add('hidden');
+
+            if (frame) {
+                frame.src = '';
+            }
+
+            document.body.style.overflow = window.adminPrintPreviewState.previousOverflow || '';
+            window.adminPrintPreviewState.url = '';
+            window.adminPrintPreviewState.previousOverflow = '';
+        }
+
+        function adminOpenPrintPreviewInNewTab() {
+            if (!window.adminPrintPreviewState.url) {
+                return;
+            }
+
+            const url = window.adminPrintPreviewState.url + (window.adminPrintPreviewState.url.includes('?') ? '&' : '?') + 'newTab=1';
+            window.open(url, '_blank');
+        }
+
+        function adminPrintPreviewFrame() {
+            const frame = document.getElementById('adminPrintPreviewFrame');
+            if (frame && frame.contentWindow) {
+                frame.contentWindow.print();
+            }
+        }
+
         // Global Loader Functions
         function showLoading(message = 'Loading...') {
             const loader = document.getElementById('globalLoader');
@@ -261,6 +361,15 @@
             }
             if (flashWarning) {
                 showToast(flashWarning.dataset.message, 'warning');
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('adminPrintPreviewModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    adminClosePrintPreview();
+                }
             }
         });
     </script>

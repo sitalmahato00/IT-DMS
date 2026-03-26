@@ -10,6 +10,7 @@ use App\Models\SubjectTeacher;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Attendance;
+use App\Helpers\NepaliContentHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -2624,6 +2625,7 @@ $exam->load(['subject', 'marks.student.user']);
                 'assessment_number' => $request->get('assessment_number', ''),
                 'student_id' => $request->get('student_id', ''),
                 'dob' => $request->get('dob', ''),
+                'dob_bs' => $request->get('dob_bs', ''),
                 'result' => $request->get('result', ''),
             ];
             
@@ -2664,6 +2666,7 @@ $exam->load(['subject', 'marks.student.user']);
         // Trim inputs to avoid mismatches from extra spaces (e.g., from copy/paste)
         $studentId = trim($request->get('student_id', ''));
         $dob = trim($request->get('dob', ''));
+        $dobBs = $this->normalizeBsDateOfBirth($request->get('dob_bs', ''));
         
         $query = Student::with('user');
         
@@ -2675,15 +2678,25 @@ $exam->load(['subject', 'marks.student.user']);
             });
         }
         
-        if (!empty($dob)) {
-            // Normalize and search by date of birth (AD)
-            // The date picker may return YYYY-MM-DD, but users often expect DD/MM/YYYY.
-            $normalizedDob = $this->normalizeDateOfBirth($dob);
-            if ($normalizedDob) {
-                $query->whereDate('date_of_birth', $normalizedDob);
-            } else {
-                $query->where('date_of_birth', $dob);
-            }
+        $normalizedDob = !empty($dob) ? $this->normalizeDateOfBirth($dob) : null;
+        $convertedDobBs = !empty($dobBs) ? NepaliContentHelper::convertBsToAd($dobBs) : null;
+
+        if ($normalizedDob || !empty($dob) || !empty($dobBs) || $convertedDobBs) {
+            $query->where(function ($q) use ($normalizedDob, $dob, $dobBs, $convertedDobBs) {
+                if ($normalizedDob) {
+                    $q->whereDate('date_of_birth', $normalizedDob);
+                } elseif (!empty($dob)) {
+                    $q->where('date_of_birth', $dob);
+                }
+
+                if (!empty($dobBs)) {
+                    $q->orWhere('date_of_birth_bs', $dobBs);
+                }
+
+                if ($convertedDobBs) {
+                    $q->orWhereDate('date_of_birth', $convertedDobBs);
+                }
+            });
         }
         
         $student = $query->first();
@@ -2707,6 +2720,18 @@ $exam->load(['subject', 'marks.student.user']);
         }
 
         return $student;
+    }
+
+    private function normalizeBsDateOfBirth(?string $dobBs): string
+    {
+        if (empty($dobBs)) {
+            return '';
+        }
+
+        $normalized = NepaliContentHelper::toEnglishNumber(trim($dobBs));
+        $normalized = str_replace(['/', '.'], '-', $normalized);
+
+        return preg_replace('/\s+/', '', $normalized) ?? '';
     }
 
     /**

@@ -38,7 +38,7 @@
             <i class="bi bi-chevron-down"></i>
         </button>
         <div class="absolute right-0 mt-1 w-40 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg hidden group-hover:block z-20">
-            <a href="{{ route('admin.timetable.print', ['semester' => $semester]) }}" target="_blank" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">
+            <a href="{{ route('admin.timetable.print', ['semester' => $semester]) }}" onclick="adminOpenPrintPreview('{{ route('admin.timetable.print', ['semester' => $semester]) }}', { title: 'Print Timetable' }); return false;" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">
                 <i class="bi bi-printer mr-2"></i>Print
             </a>
             <a href="{{ route('admin.timetable.exportExcel', ['semester' => $semester]) }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">

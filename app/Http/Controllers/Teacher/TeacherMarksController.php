@@ -10,6 +10,7 @@ use App\Models\Exam;
 use App\Models\Subject;
 use App\Models\Student;
 use App\Models\Course;
+use App\Helpers\NepaliContentHelper;
 use App\Support\TeacherSubjectRoster;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -1487,6 +1488,7 @@ class TeacherMarksController extends Controller
                 'assessment_number' => $request->get('assessment_number', ''),
                 'student_id' => $request->get('student_id', ''),
                 'dob' => $request->get('dob', ''),
+                'dob_bs' => $request->get('dob_bs', ''),
                 'result' => $request->get('result', ''),
             ];
             
@@ -1526,6 +1528,7 @@ class TeacherMarksController extends Controller
     {
         $studentId = $request->get('student_id', '');
         $dob = $request->get('dob', '');
+        $dobBs = $this->normalizeBsDateOfBirth($request->get('dob_bs', ''));
         
         $query = \App\Models\Student::with('user');
         
@@ -1536,15 +1539,25 @@ class TeacherMarksController extends Controller
             });
         }
         
-        if (!empty($dob)) {
-            // Normalize and search by date of birth (AD)
-            // The date picker may return YYYY-MM-DD, but users often expect DD/MM/YYYY.
-            $normalizedDob = $this->normalizeDateOfBirth($dob);
-            if ($normalizedDob) {
-                $query->whereDate('date_of_birth', $normalizedDob);
-            } else {
-                $query->where('date_of_birth', $dob);
-            }
+        $normalizedDob = !empty($dob) ? $this->normalizeDateOfBirth($dob) : null;
+        $convertedDobBs = !empty($dobBs) ? NepaliContentHelper::convertBsToAd($dobBs) : null;
+
+        if ($normalizedDob || !empty($dob) || !empty($dobBs) || $convertedDobBs) {
+            $query->where(function ($q) use ($normalizedDob, $dob, $dobBs, $convertedDobBs) {
+                if ($normalizedDob) {
+                    $q->whereDate('date_of_birth', $normalizedDob);
+                } elseif (!empty($dob)) {
+                    $q->where('date_of_birth', $dob);
+                }
+
+                if (!empty($dobBs)) {
+                    $q->orWhere('date_of_birth_bs', $dobBs);
+                }
+
+                if ($convertedDobBs) {
+                    $q->orWhereDate('date_of_birth', $convertedDobBs);
+                }
+            });
         }
         
         $student = $query->first();
@@ -1568,6 +1581,18 @@ class TeacherMarksController extends Controller
         }
 
         return $student;
+    }
+
+    private function normalizeBsDateOfBirth(?string $dobBs): string
+    {
+        if (empty($dobBs)) {
+            return '';
+        }
+
+        $normalized = NepaliContentHelper::toEnglishNumber(trim($dobBs));
+        $normalized = str_replace(['/', '.'], '-', $normalized);
+
+        return preg_replace('/\s+/', '', $normalized) ?? '';
     }
 
     /**

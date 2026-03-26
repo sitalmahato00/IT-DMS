@@ -177,7 +177,7 @@
                             <i class="bi bi-file-earmark-spreadsheet"></i>CSV
                         </button>
                     </form>
-                    <button onclick="window.open('{{ route('teachers.print-list') }}', '_blank')" class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 shadow-sm transition-colors inline-flex items-center gap-1 no-print">
+                    <button type="button" onclick="adminOpenPrintPreview('{{ route('teachers.print-list') }}', { title: 'Print Teachers' })" class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 shadow-sm transition-colors inline-flex items-center gap-1 no-print">
                         <i class="bi bi-printer"></i>Print
                     </button>
                 </div>
@@ -1045,16 +1045,11 @@ function printTeacher() {
         showToast('Teacher ID not found', 'error');
         return;
     }
-    // Mark body for modal printing context
-    document.body.classList.add('printing-modal');
-    window.print();
-    // Remove after print dialog closes
-    setTimeout(() => {
-        document.body.classList.remove('printing-modal');
-    }, 500);
+    const url = @json(route('teachers.print', ['id' => '__ID__'])).replace('__ID__', currentViewingTeacherId);
+    adminOpenPrintPreview(url, {
+        title: 'Print Teacher',
+    });
 }
 
 </script>
 @endsection
-
-

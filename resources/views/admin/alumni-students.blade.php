@@ -191,7 +191,7 @@
 							<i class="bi bi-file-earmark-spreadsheet"></i>CSV
 						</button>
 					</form>
-					<button onclick="window.open('{{ route('alumni-students.print-list') }}', '_blank')" class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 shadow-sm transition-colors inline-flex items-center gap-1 no-print">
+					<button type="button" onclick="adminOpenPrintPreview('{{ route('alumni-students.print-list') }}', { title: 'Print Alumni Students' })" class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 shadow-sm transition-colors inline-flex items-center gap-1 no-print">
 						<i class="bi bi-printer"></i>Print
 					</button>
 				</div>

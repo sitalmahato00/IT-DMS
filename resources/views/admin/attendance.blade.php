@@ -70,7 +70,8 @@
                         class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700">
                         <i class="bi bi-download mr-1"></i> Export CSV
                     </a>
-                    <a href="{{ route('admin.attendance.print-list', request()->query()) }}" target="_blank"
+                    <a href="{{ route('admin.attendance.print-list', request()->query()) }}"
+                        onclick="adminOpenPrintPreview('{{ route('admin.attendance.print-list', request()->query()) }}', { title: 'Print Attendance' }); return false;"
                         class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
                         <i class="bi bi-printer mr-1"></i> Print
                     </a>
@@ -478,41 +479,6 @@
         </div>
 
         <!-- View Subject Attendance Modal -->
-        <!-- Print Preview Modal (iframe-based) -->
-        <div id="printModal" class="fixed inset-0 z-50 hidden">
-            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closePrintModal()"></div>
-            <div class="relative mx-auto w-full max-w-6xl h-[92vh] flex flex-col overflow-hidden rounded-xl bg-white dark:bg-slate-800 shadow-2xl border border-gray-200 dark:border-slate-700">
-                <div class="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-rose-600 to-red-600">
-                    <div>
-                        <h3 class="text-base font-semibold text-white">Print Attendance</h3>
-                        <p class="text-rose-100 text-xs">A4 preview (use Print to open dialog)</p>
-                    </div>
-                    <button onclick="closePrintModal()" class="text-rose-100 hover:text-white p-2 rounded-full hover:bg-white/10" aria-label="Close print preview">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-
-                <div class="flex-1 bg-gray-100 dark:bg-slate-900 p-4 overflow-auto">
-                    <iframe id="printFrame" src="" class="w-full h-full rounded-lg border border-gray-200 dark:border-slate-700 bg-white"></iframe>
-                </div>
-
-                <div class="px-5 py-3 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-between items-center gap-3">
-                    <span class="text-xs text-gray-600 dark:text-gray-400">Tip: Use “New tab” for full-page preview.</span>
-                    <div class="flex items-center gap-2">
-                        <button type="button" onclick="openPrintInNewTab()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition">
-                            <i class="bi bi-box-arrow-up-right mr-1"></i> New tab
-                        </button>
-                        <button type="button" onclick="printFrame()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition shadow-sm">
-                            <i class="bi bi-printer mr-1"></i> Print
-                        </button>
-                        <button type="button" onclick="closePrintModal()" class="px-3 py-1.5 rounded-md text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-600 transition">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div id="viewSubjectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
             <div class="fixed inset-0 bg-black bg-opacity-40" onclick="closeViewSubjectModal()"></div>
             <div class="relative bg-white rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] overflow-hidden">
@@ -1633,36 +1599,6 @@
                 document.getElementById('viewSubjectModal').classList.add('hidden');
             }
 
-            let currentPrintPreviewUrl = '';
-
-            function openPrintModal(url) {
-                const modal = document.getElementById('printModal');
-                const frame = document.getElementById('printFrame');
-                if (!modal || !frame) return;
-
-                currentPrintPreviewUrl = url || '';
-                frame.src = currentPrintPreviewUrl;
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closePrintModal() {
-                const modal = document.getElementById('printModal');
-                const frame = document.getElementById('printFrame');
-                if (!modal) return;
-
-                modal.classList.add('hidden');
-                if (frame) frame.src = '';
-                currentPrintPreviewUrl = '';
-                document.body.style.overflow = '';
-            }
-
-            function openPrintInNewTab() {
-                if (!currentPrintPreviewUrl) return;
-                const url = currentPrintPreviewUrl + (currentPrintPreviewUrl.includes('?') ? '&' : '?') + 'newTab=1';
-                window.open(url, '_blank');
-            }
-
             function printCurrentSubjectAttendance() {
                 const sid = window.currentSubjectId || '';
                 const d = window.currentDate || '';
@@ -1671,12 +1607,9 @@
                     return;
                 }
                 const url = '{{ route('admin.attendance.print') }}' + '?subject_id=' + encodeURIComponent(sid) + '&date=' + encodeURIComponent(d);
-                openPrintModal(url);
-            }
-
-            function printFrame() {
-                const frame = document.getElementById('printFrame');
-                if (frame && frame.contentWindow) frame.contentWindow.print();
+                adminOpenPrintPreview(url, {
+                    title: 'Print Attendance',
+                });
             }
 
             // Close modal on background click
@@ -1688,7 +1621,6 @@
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     closeViewSubjectModal();
-                    closePrintModal();
                 }
             });
 

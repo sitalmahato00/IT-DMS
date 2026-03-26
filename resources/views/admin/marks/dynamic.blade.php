@@ -507,7 +507,9 @@
         const params = buildFilterParams(overrides);
         const url = new URL(printUrl, window.location.origin);
         url.search = params.toString();
-        window.open(url.toString(), '_blank');
+        adminOpenPrintPreview(url.toString(), {
+            title: 'Print Marks',
+        });
     }
 
     function getAcademicYearSelect() {

@@ -143,7 +143,7 @@
                     </button>
                 </div>
 
-                <button onclick="window.open('{{ route('courses.print-list') }}', '_blank')" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium shadow-sm transition-colors inline-flex items-center gap-2">
+                <button type="button" onclick="adminOpenPrintPreview('{{ route('courses.print-list') }}', { title: 'Print Courses' })" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium shadow-sm transition-colors inline-flex items-center gap-2">
                     <i class="bi bi-printer"></i>Print
                 </button>
             </div>

@@ -83,10 +83,34 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Birth (AD)</label>
                     <input
                         type="date"
+                        id="marksheetDobAd"
                         name="dob"
                         value="{{ $filters['dob'] }}"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-white"
                     >
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Birth (BS)</label>
+                    <div class="relative">
+                        <input
+                            type="text"
+                            id="marksheetDobBs"
+                            name="dob_bs"
+                            value="{{ $filters['dob_bs'] }}"
+                            placeholder="YYYY-MM-DD"
+                            autocomplete="off"
+                            class="bs-date w-full pr-10 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-white"
+                        >
+                        <button
+                            type="button"
+                            aria-label="Pick BS date"
+                            onclick="event?.preventDefault(); event?.stopPropagation(); window.openBsDatePicker?.('marksheetDobBs'); return false;"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white"
+                        >
+                            <i class="bi bi-calendar3"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -161,6 +185,10 @@
                     <div>
                         <span class="text-xs text-gray-500 dark:text-gray-400">Date of Birth</span>
                         <p class="font-medium text-gray-800 dark:text-gray-200">{{ $student->date_of_birth ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Date of Birth (BS)</span>
+                        <p class="font-medium text-gray-800 dark:text-gray-200">{{ $student->date_of_birth_bs ?? 'N/A' }}</p>
                     </div>
                 </div>
 
@@ -309,8 +337,155 @@
         }
     }
 
+    function normalizeNepaliDigits(value) {
+        if (!value) {
+            return value;
+        }
+
+        const map = {
+            '०': '0',
+            '१': '1',
+            '२': '2',
+            '३': '3',
+            '४': '4',
+            '५': '5',
+            '६': '6',
+            '७': '7',
+            '८': '8',
+            '९': '9',
+        };
+
+        return String(value).replace(/[०-९]/g, digit => map[digit] || digit);
+    }
+
+    async function convertMarksheetAdToBs(adDate) {
+        if (!adDate) {
+            return '';
+        }
+
+        try {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const response = await fetch('/convert/ad-to-bs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                },
+                body: JSON.stringify({ date: adDate }),
+            });
+
+            if (!response.ok) {
+                return '';
+            }
+
+            const data = await response.json();
+            return data.bs || '';
+        } catch (error) {
+            return '';
+        }
+    }
+
+    async function convertMarksheetBsToAd(bsDate) {
+        const normalizedBs = normalizeNepaliDigits(bsDate);
+        if (!normalizedBs) {
+            return '';
+        }
+
+        try {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const response = await fetch('/convert/bs-to-ad', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                },
+                body: JSON.stringify({ date: normalizedBs }),
+            });
+
+            if (!response.ok) {
+                return '';
+            }
+
+            const data = await response.json();
+            return data.ad || '';
+        } catch (error) {
+            return '';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         toggleMarksheetAssessmentFilter();
+
+        const dobAdInput = document.getElementById('marksheetDobAd');
+        const dobBsInput = document.getElementById('marksheetDobBs');
+        let isSyncingDob = false;
+
+        async function syncBsFromAd() {
+            if (!dobAdInput || !dobBsInput || isSyncingDob) {
+                return;
+            }
+
+            if (!dobAdInput.value) {
+                dobBsInput.value = '';
+                return;
+            }
+
+            isSyncingDob = true;
+            dobBsInput.value = await convertMarksheetAdToBs(dobAdInput.value);
+            isSyncingDob = false;
+        }
+
+        async function syncAdFromBs() {
+            if (!dobAdInput || !dobBsInput || isSyncingDob) {
+                return;
+            }
+
+            dobBsInput.value = normalizeNepaliDigits(dobBsInput.value).replace(/[/.]/g, '-');
+
+            if (!dobBsInput.value) {
+                dobAdInput.value = '';
+                return;
+            }
+
+            isSyncingDob = true;
+            const adDate = await convertMarksheetBsToAd(dobBsInput.value);
+            if (adDate) {
+                dobAdInput.value = adDate;
+            }
+            isSyncingDob = false;
+        }
+
+        if (dobAdInput && dobBsInput) {
+            window.initBsDatePicker?.(document);
+
+            dobAdInput.addEventListener('change', syncBsFromAd);
+            dobAdInput.addEventListener('input', syncBsFromAd);
+            dobBsInput.addEventListener('change', syncAdFromBs);
+            dobBsInput.addEventListener('input', syncAdFromBs);
+            dobBsInput.addEventListener('blur', syncAdFromBs);
+
+            if (dobAdInput.value && !dobBsInput.value) {
+                syncBsFromAd();
+            } else if (dobBsInput.value && !dobAdInput.value) {
+                syncAdFromBs();
+            } else if (dobBsInput.value) {
+                dobBsInput.value = normalizeNepaliDigits(dobBsInput.value).replace(/[/.]/g, '-');
+            }
+
+            let previousBsDob = dobBsInput.value || '';
+            setInterval(() => {
+                const currentBsDob = dobBsInput.value || '';
+                if (currentBsDob === previousBsDob) {
+                    return;
+                }
+
+                previousBsDob = currentBsDob;
+
+                if (!isSyncingDob) {
+                    syncAdFromBs();
+                }
+            }, 200);
+        }
     });
 
     function openMarksheetPrintModal(url) {

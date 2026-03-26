@@ -74,7 +74,8 @@
                 {{-- Print Button --}}
                 @if($printRoute)
                 <button 
-                    onclick="window.open('{{ $printRoute }}', '_blank')"
+                    type="button"
+                    onclick="adminOpenPrintPreview('{{ $printRoute }}', { title: 'Print Preview' })"
                     class="inline-flex items-center gap-1.5 px-3 py-2 border border-purple-300 dark:border-purple-600 bg-white dark:bg-purple-900/30 hover:bg-purple-50 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-lg text-sm font-medium transition"
                     title="Print"
                 >

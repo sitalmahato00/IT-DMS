@@ -1037,7 +1037,9 @@
     function printReport() {
         // Build query string from current filters
         const params = new URLSearchParams(window.location.search);
-        window.location.href = '{{ url("admin/reports/print") }}?' + params.toString();
+        adminOpenPrintPreview('{{ url("admin/reports/print") }}?' + params.toString(), {
+            title: 'Print Report',
+        });
     }
 
     // View student
@@ -1047,7 +1049,9 @@
 
     // Export student
     function exportStudent(id) {
-        window.location.href = '{{ url("admin/students") }}/' + id + '/print';
+        adminOpenPrintPreview('{{ url("admin/students") }}/' + id + '/print', {
+            title: 'Print Student',
+        });
     }
 
     // Move to alumni

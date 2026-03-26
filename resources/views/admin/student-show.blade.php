@@ -81,10 +81,6 @@
             </div>
         </div>
 
-        <!-- Hidden Print Component Container -->
-        <div id="printComponentContainer" style="display: none; position: absolute; left: -9999px; top: -9999px; width: 100%; height: 100%;">
-        </div>
-
         <div class="px-6 py-4 border-t flex justify-between gap-3">
             <div>
                 <button type="button" onclick="event.preventDefault(); initiateStudentPrint(); return false;" class="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700 inline-flex items-center gap-2">
@@ -221,109 +217,17 @@
 <script>
     function initiateStudentPrint() {
         const studentId = {{ $student->id }};
-        const college = @json($student->student->college ?? null);
-        const student = @json($student->toArray());
-        const marks = @json($student->marks ?? []);
-        const attendance = @json([
-            'total_days' => $student->student?->attendanceRecords()?->count() ?? 0,
-            'present_days' => $student->student?->attendanceRecords()?->where('status', 'present')->count() ?? 0
-        ]);
-
-        // Build the component HTML
-        let componentHtml = `
-            <div class="bg-white" style="font-family: Arial, sans-serif; padding: 40px;">
-                <div>
-                    <div style="text-align: center; border-bottom: 3px solid #1e3a8a; padding: 30px 20px; position: relative;">
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 15px;">
-                            <div style="height: 80px; width: 80px; background: #1e3a8a; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                                LOGO
-                            </div>
-                            <div style="text-align: left;">
-                                <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #1e3a8a;">
-                                    ${college?.name || 'Educational Institution'}
-                                </h1>
-                                ${college?.address ? `<p style="margin: 5px 0; font-size: 14px; color: #666;">${college.address}</p>` : ''}
-                                ${college?.phone ? `<p style="margin: 5px 0; font-size: 13px; color: #666;">Phone: ${college.phone}</p>` : ''}
-                            </div>
-                        </div>
-                        <h2 style="margin: 15px 0 0 0; font-size: 18px; color: #1e3a8a; border-top: 2px solid #1e3a8a; padding-top: 15px;">
-                            Student Details & Academic Record
-                        </h2>
-                    </div>
-                    <div style="padding: 25px 20px; background: #f8fafc;">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                            <div>
-                                <div style="margin-bottom: 15px;">
-                                    <label style="font-weight: bold; color: #1e3a8a; display: block; font-size: 12px; text-transform: uppercase; margin-bottom: 3px;">Student Name</label>
-                                    <p style="margin: 0; font-size: 16px; font-weight: 600; color: #000;">${student?.name || 'N/A'}</p>
-                                </div>
-                                <div style="margin-bottom: 15px;">
-                                    <label style="font-weight: bold; color: #1e3a8a; display: block; font-size: 12px; text-transform: uppercase; margin-bottom: 3px;">Roll Number</label>
-                                    <p style="margin: 0; font-size: 16px; font-weight: 600; color: #000;">${student?.student?.roll_no || 'N/A'}</p>
-                                </div>
-                                <div style="margin-bottom: 15px;">
-                                    <label style="font-weight: bold; color: #1e3a8a; display: block; font-size: 12px; text-transform: uppercase; margin-bottom: 3px;">Email</label>
-                                    <p style="margin: 0; font-size: 14px; color: #000;">${student?.email || 'N/A'}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <div style="margin-bottom: 15px;">
-                                    <label style="font-weight: bold; color: #1e3a8a; display: block; font-size: 12px; text-transform: uppercase; margin-bottom: 3px;">Date of Birth</label>
-                                    <p style="margin: 0; font-size: 16px; font-weight: 600; color: #000;">${student?.student?.date_of_birth || 'N/A'}</p>
-                                </div>
-                                <div style="margin-bottom: 15px;">
-                                    <label style="font-weight: bold; color: #1e3a8a; display: block; font-size: 12px; text-transform: uppercase; margin-bottom: 3px;">Gender</label>
-                                    <p style="margin: 0; font-size: 16px; font-weight: 600; color: #000;">${student?.student?.gender || 'N/A'}</p>
-                                </div>
-                                <div style="margin-bottom: 15px;">
-                                    <label style="font-weight: bold; color: #1e3a8a; display: block; font-size: 12px; text-transform: uppercase; margin-bottom: 3px;">Status</label>
-                                    <p style="margin: 0; font-size: 16px; font-weight: 600; color: #28a745; background: #e8f5e9; padding: 5px 10px; display: inline-block; border-radius: 4px;">${student?.student?.status || 'Active'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div style="padding: 20px; text-align: center; border-top: 2px solid #1e3a8a; margin-top: 30px; font-size: 12px; color: #666;">
-                    <p style="margin: 5px 0;"><strong>Document Generated:</strong> ${new Date().toLocaleString()}</p>
-                    <p style="margin: 5px 0; font-size: 11px; color: #999;">This is an official document</p>
-                </div>
-            </div>
-        `;
-
-        // Insert into container
-        const container = document.getElementById('printComponentContainer');
-        container.innerHTML = componentHtml;
-
-        // Show container temporarily and print
-        container.style.display = 'block';
-        container.style.position = 'fixed';
-        container.style.left = '0';
-        container.style.top = '0';
-        container.style.width = '100%';
-        container.style.height = '100%';
-        container.style.zIndex = '10000';
-        container.style.backgroundColor = 'white';
-        container.style.overflow = 'auto';
-
-        // Trigger print after content renders
-        setTimeout(() => {
-            window.print();
-            // Hide after print dialog
-            setTimeout(() => {
-                container.style.display = 'none';
-                container.style.position = 'absolute';
-                container.style.left = '-9999px';
-                container.style.top = '-9999px';
-            }, 500);
-        }, 100);
+        const url = @json(route('students.print-detail', ['id' => $student->id]));
+        adminOpenPrintPreview(url, {
+            title: 'Print Student',
+        });
     }
 
     function printStudentReport() {
         const studentId = {{ $student->id }};
-        const printWindow = window.open(`/admin/students/${studentId}/exam-report`, 'StudentReport', 'width=1000,height=800');
-        if (printWindow) {
-            printWindow.focus();
-        }
+        adminOpenPrintPreview(`/admin/students/${studentId}/exam-report`, {
+            title: 'Print Student Report',
+        });
     }
     // Close view modal when clicking on the backdrop
     document.getElementById('viewStudentModal')?.addEventListener('click', function(e) {
@@ -388,5 +292,3 @@
     });
 </script>
 @endsection
-
-
