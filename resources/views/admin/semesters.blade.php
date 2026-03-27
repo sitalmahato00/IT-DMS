@@ -143,12 +143,19 @@
                             {{ $semester->status === 'open' ? __('Close') : __('Open') }}
                         </button>
 
-                        @if(!$semester->is_active)
-                            <!-- Set Active -->
+                        @if($semester->is_active)
+                            <!-- Deactivate -->
+                            <button onclick="setActiveSemester({{ $semester->id }})"
+                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition">
+                                <i class="bi bi-x-circle"></i>
+                                {{ __('Deactivate') }}
+                            </button>
+                        @else
+                            <!-- Activate -->
                             <button onclick="setActiveSemester({{ $semester->id }})"
                                 class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg transition">
                                 <i class="bi bi-check-circle"></i>
-                                {{ __('Set Active') }}
+                                {{ __('Activate') }}
                             </button>
                         @endif
 

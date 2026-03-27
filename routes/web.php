@@ -127,9 +127,7 @@ Route::middleware(['auth', 'verified', 'role:teacher'])->prefix('teacher')->name
     Route::delete('/exams/marks/{id}', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'deleteMark'])->name('exams.mark.delete');
     Route::get('/timetable', [\App\Http\Controllers\Teacher\TeacherTimetableController::class, 'index'])->name('timetable');
     Route::get('/reports', [\App\Http\Controllers\Teacher\TeacherReportsController::class, 'index'])->name('reports');
-    Route::get('/notifications', function () {
-        return view('teacher.notifications');
-    })->name('notifications');
+    Route::get('/notifications', [\App\Http\Controllers\Teacher\TeacherNotificationsController::class, 'index'])->name('notifications');
 });
 
 // Parent Profile Routes

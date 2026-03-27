@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                 {{ ucfirst($assignment->role ?? 'Primary') }}
             </span>
         </div>
@@ -44,8 +44,8 @@
                     <p class="text-gray-600 dark:text-gray-400 text-xs font-medium">Enrolled Students</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $students->count() }}</p>
                 </div>
-                <div class="bg-green-100 dark:bg-green-900/40 p-2.5 rounded-lg">
-                    <i class="bi bi-people text-lg text-green-600 dark:text-green-400"></i>
+                <div class="bg-red-100 dark:bg-red-900/40 p-2.5 rounded-lg">
+                    <i class="bi bi-people text-lg text-red-600 dark:text-red-400"></i>
                 </div>
             </div>
         </div>
@@ -103,10 +103,10 @@
             </div>
         </a>
 
-        <a href="{{ route('teacher.study-materials') }}?subject={{ $subject->id }}" class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 hover:border-green-300 dark:hover:border-green-700 transition group">
+        <a href="{{ route('teacher.study-materials') }}?subject={{ $subject->id }}" class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-700 transition group">
             <div class="flex items-center gap-3">
-                <div class="bg-green-100 dark:bg-green-900/40 p-2 rounded-lg group-hover:bg-green-600 transition">
-                    <i class="bi bi-journal-bookmark text-green-600 dark:text-green-400 group-hover:text-white"></i>
+                <div class="bg-red-100 dark:bg-red-900/40 p-2 rounded-lg group-hover:bg-red-600 transition">
+                    <i class="bi bi-journal-bookmark text-red-600 dark:text-red-400 group-hover:text-white"></i>
                 </div>
                 <div>
                     <p class="font-medium text-gray-900 dark:text-white text-sm">Upload Materials</p>

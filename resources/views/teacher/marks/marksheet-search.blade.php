@@ -152,7 +152,7 @@
                     <a
                         href="{{ route('teacher.marksheet.export', array_merge($filters, ['student_id' => $student->id])) }}"
                         target="_blank"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                         <i class="bi bi-download"></i>
                         Export CSV

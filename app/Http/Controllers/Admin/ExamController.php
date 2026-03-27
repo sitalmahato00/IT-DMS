@@ -10,6 +10,7 @@ use App\Models\SubjectTeacher;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Attendance;
+use App\Models\Semester;
 use App\Helpers\NepaliContentHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,7 @@ use App\Traits\LogsActivity;
 use App\Notifications\ResultNotification;
 use App\Notifications\ExamNotification;
 use App\Services\NotificationService;
+use Illuminate\Validation\Rule;
 
 class ExamController extends Controller
 {
@@ -34,6 +36,8 @@ class ExamController extends Controller
         'fourth' => '4',
         'fifth' => '5',
         'sixth' => '6',
+        'seventh' => '7',
+        'eighth' => '8',
     ];
 
     /**
@@ -136,6 +140,7 @@ class ExamController extends Controller
             // Get filter data
             $academicYears = $this->getAcademicYears();
             $semesters = $this->getSemesters();
+            $activeSemesters = $this->getActiveSemesters();
             $subjects = Subject::all();
 
             $stats = $this->getStatistics();
@@ -166,6 +171,7 @@ class ExamController extends Controller
                 'exams',
                 'academicYears',
                 'semesters',
+                'activeSemesters',
                 'subjects',
                 'subjectOptions',
                 'stats',
@@ -265,7 +271,7 @@ class ExamController extends Controller
                 'exam_name' => 'required|string|max:255',
                 'exam_name_ne' => 'nullable|string|max:255',
                 'academic_year' => 'nullable|string',
-                'semester' => 'nullable|string|in:all,first,second,third,fourth,fifth,sixth',
+                'semester' => ['nullable', 'string', Rule::in($this->getAllowedSemesterValues())],
                 'subject_id' => 'nullable|string',
                 'exam_category' => 'required|string|in:assessment,ctevt,general',
                 'full_marks' => 'required|integer|min:0',
@@ -421,7 +427,7 @@ class ExamController extends Controller
                 'exam_name' => 'sometimes|required|string|max:255',
                 'exam_name_ne' => 'sometimes|nullable|string|max:255',
                 'academic_year' => 'sometimes|nullable|string',
-                'semester' => 'sometimes|required|string|in:all,first,second,third,fourth,fifth,sixth,1,2,3,4,5,6',
+                'semester' => ['sometimes', 'required', 'string', Rule::in($this->getAllowedSemesterValues())],
                 'subject_id' => 'sometimes|nullable|string',
                 'exam_category' => 'sometimes|required|string|in:assessment,ctevt,general',
                 'full_marks' => 'sometimes|required|integer|min:0',
@@ -595,8 +601,10 @@ $exam->load(['subject', 'marks.student']);
 
             // Provide subjects list for upload modal (optional subject override)
             $subjects = Subject::orderBy('subject_name')->get();
+            $semesters = $this->getSemesters();
+            $activeSemesters = $this->getActiveSemesters();
 
-            return view('admin.exam-show', compact('exam', 'totalStudents', 'averageMarks', 'passRate', 'subjects'));
+            return view('admin.exam-show', compact('exam', 'totalStudents', 'averageMarks', 'passRate', 'subjects', 'semesters', 'activeSemesters'));
         } catch (\Exception $e) {
             Log::error('Error showing exam: ' . $e->getMessage());
             return redirect()->back()
@@ -1548,14 +1556,49 @@ $exam->load(['subject', 'marks.student.user']);
      */
     protected function getSemesters(): array
     {
-        return [
-            'first' => 'First Semester',
-            'second' => 'Second Semester',
-            'third' => 'Third Semester',
-            'fourth' => 'Fourth Semester',
-            'fifth' => 'Fifth Semester',
-            'sixth' => 'Sixth Semester',
-        ];
+        $allSemesters = Semester::query()
+            ->orderBy('number')
+            ->get();
+        $semesters = [];
+        $numberToKey = array_flip(self::SEMESTER_KEY_TO_NUMBER);
+
+        foreach ($allSemesters as $sem) {
+            $key = $numberToKey[$sem->number] ?? null;
+            if ($key) {
+                $semesters[$key] = $sem->name;
+            }
+        }
+
+        return $semesters;
+    }
+
+    protected function getActiveSemesters(): array
+    {
+        $activeSemesters = Semester::query()
+            ->active()
+            ->orderBy('number')
+            ->get();
+        $semesters = [];
+        $numberToKey = array_flip(self::SEMESTER_KEY_TO_NUMBER);
+
+        foreach ($activeSemesters as $sem) {
+            $key = $numberToKey[$sem->number] ?? null;
+            if ($key) {
+                $semesters[$key] = $sem->name;
+            }
+        }
+
+        return $semesters;
+    }
+
+    protected function getAllowedSemesterValues(): array
+    {
+        $semesters = $this->getSemesters();
+        $values = array_keys($semesters);
+        $values[] = 'all';
+        // Also include numeric values
+        $values = array_merge($values, array_values(self::SEMESTER_KEY_TO_NUMBER));
+        return array_unique($values);
     }
 
     private function getSemesterCandidates(string $semester): array

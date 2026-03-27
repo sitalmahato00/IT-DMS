@@ -1045,7 +1045,7 @@ function printTeacher() {
         showToast('Teacher ID not found', 'error');
         return;
     }
-    const url = @json(route('teachers.print', ['id' => '__ID__'])).replace('__ID__', currentViewingTeacherId);
+    const url = @json(route('admin.teachers.print', ['id' => '__ID__'])).replace('__ID__', currentViewingTeacherId);
     adminOpenPrintPreview(url, {
         title: 'Print Teacher',
     });

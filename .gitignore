@@ -22,6 +22,7 @@
 /storage/framework/sessions
 /storage/framework/views
 /storage/logs
+/bootstrap/cache/*.tmp
 /vendor
 Homestead.json
 Homestead.yaml

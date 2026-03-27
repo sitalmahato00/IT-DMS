@@ -87,7 +87,10 @@
                     <div class="flex items-center gap-1">
                         <div class="relative">
                             <label class="sr-only">Semester</label>
-                            @php $semesters = ['first'=>'First','second'=>'Second','third'=>'Third','fourth'=>'Fourth','fifth'=>'Fifth','sixth'=>'Sixth']; @endphp
+                            @php
+                                $semesters = $semesters ?? ['first'=>'First','second'=>'Second','third'=>'Third','fourth'=>'Fourth','fifth'=>'Fifth','sixth'=>'Sixth'];
+                                $activeSemesterOptions = $activeSemesters ?? $semesters;
+                            @endphp
                             @if($exam->semester && $exam->semester !== 'all')
                                 <div class="w-36 px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-100 text-gray-700 font-medium">
                                     {{ $semesters[$exam->semester] ?? ucfirst($exam->semester) }}
@@ -96,7 +99,7 @@
                             @else
                                 <select id="filterSemester" name="semester" class="js-filter-semester w-36 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="loadSubjectsForMarkUploadAndTable()">
                                     <option value="all" selected>All Semesters</option>
-                                    @foreach($semesters as $key => $label)
+                                    @foreach($activeSemesterOptions as $key => $label)
                                         <option value="{{ $key }}">{{ $label }}</option>
                                     @endforeach
                                 </select>
@@ -618,7 +621,6 @@
 <script>
 // ============= Route URLs (from Blade) =============
 const ROUTES = {
-    availableYearsSemesters: "{{ route('admin.exam.available-years-semesters') }}",
     subjectsBySemester: "{{ route('admin.exam.subjects') }}",
     allSubjects: "{{ route('admin.exam.all-subjects') }}",
     studentsWithMarks: "{{ route('admin.exam.students-with-marks', $exam->id) }}",
@@ -627,6 +629,8 @@ const EXAM_CATEGORY = '{{ $activeExamCategory }}';
 const EXAM_COMPONENT_DEFINITIONS = @json($examComponentDefinitions);
 const DEFAULT_EXAM_FULL_MARKS = {{ $exam->full_marks ?? 0 }};
 const DEFAULT_EXAM_PASSING_MARKS = {{ $exam->passing_marks ?? 0 }};
+const SEMESTER_LABELS = @json($semesters ?? []);
+const ACTIVE_MODAL_SEMESTERS = @json(collect($activeSemesters ?? [])->map(fn ($label, $key) => ['value' => $key, 'label' => $label])->values()->all());
 
 
 
@@ -860,107 +864,113 @@ function closeViewMarksModal() {
 // ============= Load Semesters from Database =============
 
 /**
- * Load available semesters from database (without academic year filter)
+ * Load available semesters for the upload modal.
  */
-let _cachedSemesters = null;
-
-// Defaults for modal - prefill but editable
+// Defaults for modal - use exam semester when fixed, otherwise require an active semester choice.
 window.defaultModalSemester = '{{ $exam->semester ?? '' }}';
 window.defaultModalSubject = '{{ $exam->subject_id ?? '' }}';
+window.defaultModalSubjectLabel = @json($exam->subject ? trim($exam->subject->subject_name . ($exam->subject->subject_code ? ' - ' . $exam->subject->subject_code : '')) : 'Selected Subject');
+
+function getSemesterLabel(value) {
+    const normalized = String(value || '').trim();
+    const fallbackMap = {
+        '1': 'First',
+        '2': 'Second',
+        '3': 'Third',
+        '4': 'Fourth',
+        '5': 'Fifth',
+        '6': 'Sixth',
+        '7': 'Seventh',
+        '8': 'Eighth',
+        first: 'First',
+        second: 'Second',
+        third: 'Third',
+        fourth: 'Fourth',
+        fifth: 'Fifth',
+        sixth: 'Sixth',
+        seventh: 'Seventh',
+        eighth: 'Eighth',
+    };
+
+    return SEMESTER_LABELS[normalized] || fallbackMap[normalized] || normalized;
+}
+
+function ensureModalSemesterOption(select, value) {
+    if (!select) return null;
+
+    const normalized = String(value || '').trim();
+    if (!normalized || normalized === 'all') return null;
+
+    let option = Array.from(select.options).find(o => String(o.value) === normalized);
+    if (option) return option;
+
+    option = document.createElement('option');
+    option.value = normalized;
+    option.textContent = getSemesterLabel(normalized);
+    select.appendChild(option);
+    return option;
+}
+
+function ensureModalSubjectOption(select, value, label = null) {
+    if (!select) return null;
+
+    const normalized = String(value || '').trim();
+    if (!normalized || normalized === 'all') return null;
+
+    let option = Array.from(select.options).find(o => String(o.value) === normalized);
+    if (option) return option;
+
+    option = document.createElement('option');
+    option.value = normalized;
+    option.textContent = label || window.defaultModalSubjectLabel || 'Selected Subject';
+    select.appendChild(option);
+    return option;
+}
 
 function loadAvailableSemesters() {
     const select = document.getElementById('modalSemesterFilter');
     if (!select) return;
-    
-    // If we have cached data, use it
-    if (_cachedSemesters) {
-        populateSemesters(select, _cachedSemesters);
-        return;
-    }
-    
-    fetch(ROUTES.availableYearsSemesters)
-        .then(res => {
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            return res.json();
-        })
-        .then(data => {
-            console.log('Fetched semesters data from backend:', data);
-            if (data.success && data.years && Array.isArray(data.years)) {
-                // Collect all unique semesters from all years
-                const allSemesters = [];
-                const seenSemesters = new Set();
-                
-                data.years.forEach(yearData => {
-                    if (yearData.semesters) {
-                        yearData.semesters.forEach(sem => {
-                            const key = sem.value + '-' + sem.label;
-                            if (!seenSemesters.has(key)) {
-                                seenSemesters.add(key);
-                                allSemesters.push(sem);
-                            }
-                        });
-                    }
-                });
-                
-                _cachedSemesters = allSemesters;
-                console.log('Cached semesters:', _cachedSemesters);
-                populateSemesters(select, allSemesters);
-            } else {
-                select.innerHTML = '<option value="">No semesters available</option>';
-            }
-        })
-        .catch(err => {
-            console.error('Error loading semesters:', err);
-            select.innerHTML = '<option value="">Error loading semesters</option>';
-        });
+
+    const defaultSemester = String(window.defaultModalSemester || '').trim();
+    const fixedSemester = defaultSemester && defaultSemester !== 'all' ? defaultSemester : '';
+
+    populateSemesters(select, ACTIVE_MODAL_SEMESTERS, {
+        fixedSemester,
+        placeholder: ACTIVE_MODAL_SEMESTERS.length > 0 ? 'Select Semester' : 'No active semesters available',
+    });
 }
 
-function populateSemesters(select, semesters) {
-    let html = '<option value="all">All Semesters</option><option value="">Select Semester</option>';
+function populateSemesters(select, semesters, options = {}) {
+    const fixedSemester = String(options.fixedSemester || '').trim();
+    const placeholder = options.placeholder || 'Select Semester';
+    let html = `<option value="">${placeholder}</option>`;
 
     if (semesters && semesters.length > 0) {
         semesters.forEach(sem => {
             html += `<option value="${sem.value}">${sem.label}</option>`;
         });
     } else {
-        html = '<option value="all">All Semesters</option><option value="">No semesters available</option>';
+        html = `<option value="">${placeholder}</option>`;
     }
 
     select.innerHTML = html;
+    select.disabled = false;
 
     // If a default semester is provided (from exam), pre-select it with the highest priority
     try {
+        if (fixedSemester) {
+            ensureModalSemesterOption(select, fixedSemester);
+            select.value = fixedSemester;
+            select.disabled = true;
+            return;
+        }
+
         const def = String(window.defaultModalSemester || '').trim();
-
-        if (def) {
-            // If 'all', keep all option
-            if (def === 'all') {
-                select.value = 'all';
-            } else {
-                let opt = Array.from(select.options).find(o => String(o.value) === def);
-                // If not found in fetched data (maybe custom semester), add it explicitly
-                if (!opt) {
-                    const labelMap = {
-                        'first': 'First', 'second': 'Second', 'third': 'Third', 'fourth': 'Fourth',
-                        'fifth': 'Fifth', 'sixth': 'Sixth', '1': 'First', '2': 'Second',
-                        '3': 'Third', '4': 'Fourth', '5': 'Fifth', '6': 'Sixth'
-                    };
-                    const label = labelMap[def] || def;
-                    const option = document.createElement('option');
-                    option.value = def;
-                    option.textContent = label;
-                    select.appendChild(option);
-                    opt = option;
-                }
-
-                if (opt) {
-                    select.value = def;
-                }
-            }
-
-            // Trigger change to load subjects for that semester
-            const ev = new Event('change', { bubbles: true });
-            select.dispatchEvent(ev);
+        if (def && def !== 'all') {
+            ensureModalSemesterOption(select, def);
+            select.value = def;
+        } else {
+            select.value = '';
         }
     } catch (err) {
         console.error('Error setting default semester:', err);
@@ -973,11 +983,23 @@ function populateSemesters(select, semesters) {
 function onModalSemesterChange() {
     const semester = document.getElementById('modalSemesterFilter')?.value || '';
     const subjectSelect = document.getElementById('modalSubjectFilter');
+    const fixedSubject = String(window.defaultModalSubject || '').trim();
+    const shouldLockSubject = fixedSubject && fixedSubject !== 'all';
 
     if (!subjectSelect) return;
 
+    if (!semester) {
+        subjectSelect.innerHTML = '<option value="">Select Semester First</option>';
+        subjectSelect.disabled = true;
+        if (typeof updateModalActionsState === 'function') {
+            updateModalActionsState();
+        }
+        return;
+    }
+
     // Clear and show loading while fetching options
     subjectSelect.innerHTML = '<option value="">Loading...</option>';
+    subjectSelect.disabled = true;
 
     // Determine API endpoint
     let url = '';
@@ -999,6 +1021,7 @@ function onModalSemesterChange() {
             }
 
             subjectSelect.innerHTML = html;
+            subjectSelect.disabled = false;
 
             // Set default subject (if exam teaches a specific subject or full coverage)
             try {
@@ -1013,10 +1036,7 @@ function onModalSemesterChange() {
                             subjectSelect.value = defSub;
                         } else {
                             // If default subject isn't part of this semester list (e.g. targeted from exam), add it
-                            const added = document.createElement('option');
-                            added.value = defSub;
-                            added.textContent = 'Selected Subject';
-                            subjectSelect.appendChild(added);
+                            ensureModalSubjectOption(subjectSelect, defSub);
                             subjectSelect.value = defSub;
                         }
                     }
@@ -1027,13 +1047,19 @@ function onModalSemesterChange() {
                 console.error('Error setting default subject:', err);
             }
 
+            if (shouldLockSubject) {
+                ensureModalSubjectOption(subjectSelect, fixedSubject);
+                subjectSelect.value = fixedSubject;
+                subjectSelect.disabled = true;
+            }
+
             if (typeof updateModalActionsState === 'function') updateModalActionsState();
         })
         .catch(err => {
             console.error('Error loading subjects:', err);
             subjectSelect.innerHTML = '<option value="">Error loading subjects</option>';
+            subjectSelect.disabled = true;
         });
-}
 }
 
 /**
@@ -1290,6 +1316,8 @@ function resetUploadForm() {
     const subSelect = document.getElementById('modalSubjectFilter');
     if (semSelect) semSelect.innerHTML = '<option value="">Select Semester</option>';
     if (subSelect) subSelect.innerHTML = '<option value="">Select Subject</option>';
+    if (semSelect) semSelect.disabled = false;
+    if (subSelect) subSelect.disabled = false;
     document.getElementById('studentsMarksBody').innerHTML = '<tr><td colspan="11" class="px-3 py-4 text-center text-gray-500">Select Semester, then optionally select Subject to filter attendance by subject, then click "Load Students"</td></tr>';
     document.querySelectorAll('#componentMarksSection .subject-component-input').forEach(input => input.value = '');
     const fullMarksInput = document.getElementById('subjectFullMarks');

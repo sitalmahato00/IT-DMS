@@ -92,7 +92,7 @@
     'formAction' => route('admin.exam'),
     'filters' => [
         ['name' => 'search', 'type' => 'text', 'placeholder' => 'Search exam name...', 'value' => request('search'), 'label' => 'Search', 'onchange' => 'document.getElementById(\'filterForm\').submit()'],
-        ['name' => 'semester', 'type' => 'select', 'options' => ['all' => 'All Semesters'] + $semesters, 'value' => request('semester'), 'label' => 'Semester', 'onchange' => 'onSemesterFilterChange()'],
+        ['name' => 'semester', 'type' => 'select', 'options' => ['all' => 'All Semesters'] + ($activeSemesters ?? $semesters), 'value' => request('semester'), 'label' => 'Semester', 'onchange' => 'onSemesterFilterChange()'],
         ['name' => 'subject_id', 'type' => 'select', 'placeholder' => 'All Subjects', 'options' => ($subjectOptions ?? $subjects)->pluck('subject_name', 'id')->toArray(), 'value' => request('subject_id'), 'label' => 'Subject', 'onchange' => 'document.getElementById(\'filterForm\').submit()'],
         ['name' => 'exam_category', 'type' => 'select', 'placeholder' => 'All Categories', 'options' => ['assessment' => 'Assessment', 'ctevt' => 'CTEVT'], 'value' => request('exam_category'), 'label' => 'Category', 'onchange' => 'document.getElementById(\'filterForm\').submit()'],
         ['name' => 'status', 'type' => 'select', 'placeholder' => 'All Status', 'options' => ['published' => 'Published', 'draft' => 'Draft', 'archived' => 'Archived', 'faculty' => 'Faculty'], 'value' => request('status'), 'label' => 'Status', 'onchange' => 'document.getElementById(\'filterForm\').submit()'],
@@ -304,7 +304,7 @@
                                 <select name="semester" id="modalSemester" required class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" onchange="loadSubjectsForModal()">
                                 <option value="">Select Semester</option>
                                 <option value="all">All Semesters</option>
-                                @foreach($semesters as $key => $label)
+                                @foreach(($activeSemesters ?? $semesters) as $key => $label)
                                     <option value="{{ $key }}">{{ $label }}</option>
                                 @endforeach
                             </select>
@@ -1800,6 +1800,6 @@ function updateCreateExamPracticalFieldsVisibility() {
     });
 </script>
 <!-- Include shared edit exam modal -->
-@include('admin.partials.edit-exam-modal', ['academicYears' => $academicYears, 'semesters' => $semesters])
+@include('admin.partials.edit-exam-modal', ['academicYears' => $academicYears, 'semesters' => $semesters, 'activeSemesters' => ($activeSemesters ?? $semesters)])
 
 @endsection

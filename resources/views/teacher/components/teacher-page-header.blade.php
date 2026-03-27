@@ -79,7 +79,7 @@
 
         {{-- Export Button --}}
         @if($exportRoute)
-            <a href="{{ $exportRoute }}" class="inline-flex items-center gap-2 px-4 py-2 border border-green-300 dark:border-green-600 bg-white dark:bg-green-900/30 hover:bg-green-50 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 rounded-lg text-sm font-medium transition-colors shadow-sm">
+            <a href="{{ $exportRoute }}" class="inline-flex items-center gap-2 px-4 py-2 border border-red-300 dark:border-red-600 bg-white dark:bg-red-900/30 hover:bg-red-50 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg text-sm font-medium transition-colors shadow-sm">
                 <i class="bi bi-download"></i>
                 <span class="hidden sm:inline">{{ __('Export') }}</span>
             </a>

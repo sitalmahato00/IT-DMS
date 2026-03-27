@@ -74,11 +74,6 @@ class SemesterController extends Controller
 
         $validated['is_active'] = $request->boolean('is_active');
 
-        // If setting as active, deactivate others
-        if ($validated['is_active']) {
-            Semester::where('is_active', true)->update(['is_active' => false]);
-        }
-
         $semester = Semester::create($validated);
         $this->logActivity('Semester', 'Created semester: ' . $semester->name);
 
@@ -122,10 +117,6 @@ class SemesterController extends Controller
 
         $validated['is_active'] = $request->boolean('is_active');
 
-        if ($validated['is_active'] && !$semester->is_active) {
-            Semester::where('is_active', true)->update(['is_active' => false]);
-        }
-
         $semester->update($validated);
         $this->logActivity('Semester', 'Updated semester: ' . $semester->name);
 
@@ -153,18 +144,19 @@ class SemesterController extends Controller
     }
 
     /**
-     * Set as active semester.
+     * Toggle active status of a semester.
      */
     public function setActive(int $id)
     {
-        Semester::where('is_active', true)->update(['is_active' => false]);
         $semester = Semester::findOrFail($id);
-        $semester->update(['is_active' => true]);
-        $this->logActivity('Semester', "Set active semester: {$semester->name}");
+        $newActive = !$semester->is_active;
+        $semester->update(['is_active' => $newActive]);
+        $this->logActivity('Semester', ($newActive ? 'Activated' : 'Deactivated') . " semester: {$semester->name}");
 
         return response()->json([
             'success' => true,
-            'message' => "Semester '{$semester->name}' set as active.",
+            'message' => "Semester '{$semester->name}' " . ($newActive ? 'activated' : 'deactivated') . ".",
+            'is_active' => $newActive,
         ]);
     }
 

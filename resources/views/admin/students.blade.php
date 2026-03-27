@@ -1457,7 +1457,7 @@ function initiateStudentPrint() {
         showToast('Student ID not found', 'error');
         return;
     }
-    const url = @json(route('students.print-detail', ['id' => '__ID__'])).replace('__ID__', currentViewingStudentId);
+    const url = @json(route('admin.students.print-detail', ['id' => '__ID__'])).replace('__ID__', currentViewingStudentId);
     adminOpenPrintPreview(url, {
         title: 'Print Student',
     });

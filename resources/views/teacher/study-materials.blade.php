@@ -10,7 +10,7 @@
             <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ __('Study Materials') }}</h1>
             <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ __('Upload and manage study materials for your subjects.') }}</p>
         </div>
-        <a href="{{ route('teacher.study-materials.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition font-medium">
+        <a href="{{ route('teacher.study-materials.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition font-medium">
             <i class="bi bi-upload"></i> {{ __('Upload Material') }}
         </a>
     </div>
@@ -35,7 +35,7 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Subjects') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $subjects->count() ?? 0 }}</p>
                 </div>
-                <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400">
+                <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400">
                     <i class="bi bi-book text-xl"></i>
                 </div>
             </div>
@@ -72,7 +72,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Semester') }}</label>
-                    <select name="semester" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="semester" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="">{{ __('All Semesters') }}</option>
                         @if(isset($semesters) && is_array($semesters))
                             @foreach($semesters as $sem)
@@ -86,7 +86,7 @@
 
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Subject') }}</label>
-                    <select name="subject" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="subject" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="">{{ __('All Subjects') }}</option>
                         @if($subjects->isNotEmpty())
                             @foreach($subjects as $subject)
@@ -100,12 +100,12 @@
 
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Search') }}</label>
-                    <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Material Title') }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Material Title') }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                 </div>
 
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Sort By') }}</label>
-                    <select name="sort" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="sort" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>{{ __('Latest') }}</option>
                         <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>{{ __('Oldest') }}</option>
                         <option value="popular" {{ request('sort') == 'popular' ? 'selected' : '' }}>{{ __('Most Downloaded') }}</option>
@@ -114,7 +114,7 @@
 
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Per Page') }}</label>
-                    <select name="per_page" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="per_page" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
                         <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
                         <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
@@ -124,7 +124,7 @@
 
             <div class="flex items-center gap-2 justify-between flex-wrap pt-2">
                 <div class="flex gap-2 flex-wrap">
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-colors font-medium shadow-sm">
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors font-medium shadow-sm">
                         <i class="bi bi-funnel"></i> {{ __('Filter') }}
                     </button>
                     <a href="{{ route('teacher.study-materials') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium">
@@ -176,7 +176,7 @@
                                 {{ $material['file_size'] ?? '0 KB' }}
                             </td>
                             <td class="px-4 py-4 text-center">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
                                     {{ $material['download_count'] ?? 0 }}
                                 </span>
                             </td>
@@ -184,7 +184,7 @@
                                 {{ $material['created_at'] ?? 'N/A' }}
                             </td>
                             <td class="px-4 py-4 text-center">
-                                <a href="{{ route('teacher.study-materials.download', $material['id']) }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-green-700 bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 rounded transition">
+                                <a href="{{ route('teacher.study-materials.download', $material['id']) }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 rounded transition">
                                     <i class="bi bi-download"></i> {{ __('Download') }}
                                 </a>
                             </td>

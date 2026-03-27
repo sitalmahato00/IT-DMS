@@ -31,12 +31,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Title') }} <span class="text-red-500">*</span></label>
-                    <input id="title" name="title" type="text" value="{{ old('title') }}" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="{{ __('Notice title') }}">
+                    <input id="title" name="title" type="text" value="{{ old('title') }}" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="{{ __('Notice title') }}">
                 </div>
 
                 <div>
                     <label for="audience" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Audience') }} <span class="text-red-500">*</span></label>
-                    <select id="audience" name="audience" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select id="audience" name="audience" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="all" {{ old('audience', 'all') === 'all' ? 'selected' : '' }}>{{ __('All') }}</option>
                         <option value="students" {{ old('audience') === 'students' ? 'selected' : '' }}>{{ __('Students') }}</option>
                         <option value="faculty" {{ old('audience') === 'faculty' ? 'selected' : '' }}>{{ __('Faculty') }}</option>
@@ -46,7 +46,7 @@
 
                 <div>
                     <label for="subject_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Subject') }}</label>
-                    <select id="subject_id" name="subject_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select id="subject_id" name="subject_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="">{{ __('General Notice (All Subjects)') }}</option>
                         @foreach($subjects as $subject)
                             <option value="{{ $subject['id'] }}" {{ (string) old('subject_id') === (string) $subject['id'] ? 'selected' : '' }}>
@@ -58,22 +58,22 @@
 
                 <div>
                     <label for="semester" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Semester') }}</label>
-                    <input id="semester" name="semester" type="text" value="{{ old('semester') }}" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="{{ __('Optional') }}">
+                    <input id="semester" name="semester" type="text" value="{{ old('semester') }}" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="{{ __('Optional') }}">
                 </div>
             </div>
 
             <div>
                 <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Message') }} <span class="text-red-500">*</span></label>
-                <textarea id="message" name="message" rows="6" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="{{ __('Write the notice details...') }}">{{ old('message') }}</textarea>
+                <textarea id="message" name="message" rows="6" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="{{ __('Write the notice details...') }}">{{ old('message') }}</textarea>
             </div>
 
             <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                <input type="checkbox" name="is_important" value="1" {{ old('is_important') ? 'checked' : '' }} class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                <input type="checkbox" name="is_important" value="1" {{ old('is_important') ? 'checked' : '' }} class="rounded border-gray-300 text-red-600 focus:ring-red-500">
                 {{ __('Mark as important') }}
             </label>
 
             <div class="flex items-center gap-2 pt-2">
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition font-medium">
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition font-medium">
                     <i class="bi bi-send"></i> {{ __('Publish Notice') }}
                 </button>
                 <a href="{{ route('teacher.notices') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium">

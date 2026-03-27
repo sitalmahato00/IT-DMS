@@ -31,7 +31,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="subject_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Subject') }} <span class="text-red-500">*</span></label>
-                    <select id="subject_id" name="subject_id" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select id="subject_id" name="subject_id" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="">{{ __('Select Subject') }}</option>
                         @foreach($subjects as $subject)
                             <option value="{{ $subject['id'] }}" {{ (string) old('subject_id') === (string) $subject['id'] ? 'selected' : '' }}>
@@ -43,12 +43,12 @@
 
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Title') }} <span class="text-red-500">*</span></label>
-                    <input id="title" name="title" type="text" value="{{ old('title') }}" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="{{ __('Material title') }}">
+                    <input id="title" name="title" type="text" value="{{ old('title') }}" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="{{ __('Material title') }}">
                 </div>
 
                 <div>
                     <label for="document_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Document Type') }} <span class="text-red-500">*</span></label>
-                    <select id="document_type" name="document_type" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select id="document_type" name="document_type" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500">
                         @foreach($documentTypes as $value => $label)
                             <option value="{{ $value }}" {{ old('document_type', 'lecture_notes') === $value ? 'selected' : '' }}>{{ __($label) }}</option>
                         @endforeach
@@ -57,7 +57,7 @@
 
                 <div>
                     <label for="visibility" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Visibility') }} <span class="text-red-500">*</span></label>
-                    <select id="visibility" name="visibility" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select id="visibility" name="visibility" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="all" {{ old('visibility', 'all') === 'all' ? 'selected' : '' }}>{{ __('All') }}</option>
                         <option value="students" {{ old('visibility') === 'students' ? 'selected' : '' }}>{{ __('Students') }}</option>
                         <option value="faculty" {{ old('visibility') === 'faculty' ? 'selected' : '' }}>{{ __('Faculty') }}</option>
@@ -67,17 +67,17 @@
 
             <div>
                 <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Description') }}</label>
-                <textarea id="description" name="description" rows="4" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="{{ __('Optional description about this material...') }}">{{ old('description') }}</textarea>
+                <textarea id="description" name="description" rows="4" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="{{ __('Optional description about this material...') }}">{{ old('description') }}</textarea>
             </div>
 
             <div>
                 <label for="file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('File') }} <span class="text-red-500">*</span></label>
-                <input id="file" name="file" type="file" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500">
+                <input id="file" name="file" type="file" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500">
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('Allowed types: PDF, Office docs, images, ZIP/RAR (max 20MB)') }}</p>
             </div>
 
             <div class="flex items-center gap-2 pt-2">
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition font-medium">
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition font-medium">
                     <i class="bi bi-upload"></i> {{ __('Upload Material') }}
                 </button>
                 <a href="{{ route('teacher.study-materials') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium">

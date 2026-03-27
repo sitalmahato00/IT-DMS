@@ -18,7 +18,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Semester') }}</label>
-                    <select name="semester" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="semester" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="">{{ __('All Semesters') }}</option>
                         @foreach($semesters as $semester)
                             <option value="{{ $semester }}" {{ $selectedSemester == $semester ? 'selected' : '' }}>
@@ -29,7 +29,7 @@
                 </div>
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Subject') }}</label>
-                    <select name="subject" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="subject" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="">{{ __('All Subjects') }}</option>
                         @foreach($subjects as $subject)
                             <option value="{{ $subject['id'] }}" {{ $selectedSubject == $subject['id'] ? 'selected' : '' }}>
@@ -40,7 +40,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-colors font-medium">
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors font-medium">
                     <i class="bi bi-funnel"></i> {{ __('Filter') }}
                 </button>
                 <a href="{{ route('teacher.reports') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium">
@@ -70,7 +70,7 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Attendance Rate') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $attendancePercentage }}%</p>
                 </div>
-                <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400">
+                <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400">
                     <i class="bi bi-check-circle text-xl"></i>
                 </div>
             </div>
@@ -225,9 +225,9 @@
                     </div>
                 </a>
 
-                <a href="{{ route('teacher.students') }}" class="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition">
-                    <div class="w-10 h-10 bg-green-100 dark:bg-green-900/40 rounded-full flex items-center justify-center">
-                        <i class="bi bi-people text-green-600 dark:text-green-400"></i>
+                <a href="{{ route('teacher.students') }}" class="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition">
+                    <div class="w-10 h-10 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center">
+                        <i class="bi bi-people text-red-600 dark:text-red-400"></i>
                     </div>
                     <div>
                         <p class="font-medium text-gray-900 dark:text-white">{{ __('Students') }}</p>

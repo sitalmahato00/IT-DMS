@@ -23,7 +23,7 @@
     <!-- Global Loader -->
     <div id="globalLoader" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
         <div class="bg-white rounded-lg shadow-lg p-8 flex flex-col items-center gap-4">
-            <div class="animate-spin w-12 h-12 border-4 border-t-green-600 border-gray-200 rounded-full"></div>
+            <div class="animate-spin w-12 h-12 border-4 border-t-red-600 border-gray-200 rounded-full"></div>
             <p class="text-sm text-gray-700 font-medium">{{ __('Loading') }}...</p>
         </div>
     </div>

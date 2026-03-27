@@ -9,7 +9,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('styles')
 </head>
-<body class="font-sans antialiased bg-gray-50">
+<body class="admin-panel font-sans antialiased bg-gray-50">
     <!-- Department Logo Background for All Pages -->
     <div class="fixed inset-0 pointer-events-none opacity-10 z-0 flex items-center justify-center">
         @if(isset($departmentLogoUrl))

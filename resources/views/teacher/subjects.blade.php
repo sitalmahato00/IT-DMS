@@ -7,7 +7,7 @@
     <!-- Global Loader Overlay -->
     <div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-sm hidden flex items-center justify-center">
         <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
             <p id="loaderText" class="text-gray-600 font-medium">Loading...</p>
         </div>
     </div>
@@ -22,7 +22,7 @@
             <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ __('View and manage your assigned subjects.') }}</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ route('teacher.subjects.export') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition font-medium">
+            <a href="{{ route('teacher.subjects.export') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition font-medium">
                 <i class="bi bi-download"></i> {{ __('Export CSV') }}
             </a>
         </div>
@@ -37,7 +37,7 @@
                 <!-- Semester Filter -->
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Semester') }}</label>
-                    <select name="semester" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="semester" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="">{{ __('All Semesters') }}</option>
                         @foreach(($availableSemesters ?? []) as $sem)
                             <option value="{{ $sem }}" {{ request('semester') == $sem ? 'selected' : '' }}>{{ __('Semester ') . $sem }}</option>
@@ -48,13 +48,13 @@
                 <!-- Search -->
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Search') }}</label>
-                    <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Subject Name or Code') }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Subject Name or Code') }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                 </div>
 
                 <!-- Per Page -->
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Per Page') }}</label>
-                    <select name="per_page" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="per_page" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
                         <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
                         <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
@@ -66,7 +66,7 @@
             <!-- Action Buttons -->
             <div class="flex items-center gap-2 justify-between flex-wrap pt-2">
                 <div class="flex gap-2 flex-wrap">
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-colors font-medium shadow-sm">
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors font-medium shadow-sm">
                         <i class="bi bi-funnel"></i> {{ __('Filter') }}
                     </button>
                     <a href="{{ route('teacher.subjects') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium">
@@ -88,7 +88,7 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Total Subjects') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $subjectAssignments->count() ?? 0 }}</p>
                 </div>
-                <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400">
+                <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400">
                     <i class="bi bi-book text-xl"></i>
                 </div>
             </div>
@@ -164,7 +164,7 @@
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                                 <td class="px-4 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0">
+                                        <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400 flex-shrink-0">
                                             <i class="bi bi-book"></i>
                                         </div>
                                         <div>
@@ -206,7 +206,7 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-4 text-center">
-                                    <a href="{{ route('teacher.subjects.show', $assignment['assignment_id']) }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition-colors">
+                                    <a href="{{ route('teacher.subjects.show', $assignment['assignment_id']) }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors">
                                         <i class="bi bi-eye"></i> {{ __('View') }}
                                     </a>
                                 </td>

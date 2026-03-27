@@ -10,7 +10,7 @@
             <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ __('Notices') }}</h1>
             <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ __('View and manage notices for your students.') }}</p>
         </div>
-        <a href="{{ route('teacher.notices.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition font-medium">
+        <a href="{{ route('teacher.notices.create') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition font-medium">
             <i class="bi bi-plus-lg"></i> {{ __('Add Notice') }}
         </a>
     </div>
@@ -35,7 +35,7 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Recent') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $recentCount ?? 0 }}</p>
                 </div>
-                <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400">
+                <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400">
                     <i class="bi bi-clock-history text-xl"></i>
                 </div>
             </div>
@@ -60,7 +60,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Subject') }}</label>
-                    <select name="subject" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="subject" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="">{{ __('All Subjects') }}</option>
                         @if(isset($subjects) && $subjects->isNotEmpty())
                             @foreach($subjects as $subject)
@@ -74,12 +74,12 @@
 
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Search') }}</label>
-                    <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Notice Title') }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Notice Title') }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                 </div>
 
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Sort By') }}</label>
-                    <select name="sort" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="sort" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>{{ __('Latest') }}</option>
                         <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>{{ __('Oldest') }}</option>
                     </select>
@@ -87,7 +87,7 @@
 
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Per Page') }}</label>
-                    <select name="per_page" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="per_page" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
                         <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
                         <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
@@ -97,7 +97,7 @@
 
             <div class="flex items-center gap-2 justify-between flex-wrap pt-2">
                 <div class="flex gap-2 flex-wrap">
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-colors font-medium shadow-sm">
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors font-medium shadow-sm">
                         <i class="bi bi-funnel"></i> {{ __('Filter') }}
                     </button>
                     <a href="{{ route('teacher.notices') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium">

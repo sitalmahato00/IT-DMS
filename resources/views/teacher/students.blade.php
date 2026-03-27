@@ -7,7 +7,7 @@
     <!-- Global Loader Overlay -->
     <div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-sm hidden flex items-center justify-center">
         <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
             <p id="loaderText" class="text-gray-600 font-medium">Loading...</p>
         </div>
     </div>
@@ -18,12 +18,12 @@
     <!-- View Student Modal -->
     <div id="viewStudentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" onclick="if(event.target===this) closeViewStudentModal()">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-auto">
-            <div class="px-6 py-4 border-b-2 border-green-700 flex items-center justify-between sticky top-0 bg-green-600 text-white">
+            <div class="px-6 py-4 border-b-2 border-red-700 flex items-center justify-between sticky top-0 bg-red-600 text-white">
                 <div>
                     <h3 class="text-lg font-semibold">{{ __('View Student') }}</h3>
-                    <p class="text-sm text-green-100">{{ __('Student information and details') }}</p>
+                    <p class="text-sm text-red-100">{{ __('Student information and details') }}</p>
                 </div>
-                <button type="button" onclick="event.preventDefault(); closeViewStudentModal(); return false;" class="text-green-100 hover:text-white">✕</button>
+                <button type="button" onclick="event.preventDefault(); closeViewStudentModal(); return false;" class="text-red-100 hover:text-white">✕</button>
             </div>
             <div class="p-6">
                 <div class="flex gap-8">
@@ -119,7 +119,7 @@
             <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ __('View and manage students enrolled in your subjects.') }}</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ route('teacher.students.export') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition font-medium">
+            <a href="{{ route('teacher.students.export') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition font-medium">
                 <i class="bi bi-download"></i> {{ __('Export CSV') }}
             </a>
         </div>
@@ -133,13 +133,13 @@
                 <!-- Search -->
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Search') }}</label>
-                    <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Name, Email, Roll No') }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Name, Email, Roll No') }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                 </div>
 
                 <!-- Semester Filter (dynamic) -->
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Semester') }}</label>
-                    <select name="semester" id="semesterFilter" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="semester" id="semesterFilter" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="">{{ __('All Semesters') }}</option>
                         @if(!empty($availableSemesters))
                             @foreach($availableSemesters as $sem)
@@ -152,7 +152,7 @@
                 <!-- Subject Filter (dynamic) -->
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Subject') }}</label>
-                    <select name="subject" id="subjectFilter" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="subject" id="subjectFilter" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="">{{ __('All Subjects') }}</option>
                         @if($subjects->isNotEmpty())
                             @foreach($subjects as $subject)
@@ -173,7 +173,7 @@
                 <!-- Per Page -->
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Per Page') }}</label>
-                    <select name="per_page" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <select name="per_page" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                         <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
                         <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
                         <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
@@ -185,7 +185,7 @@
             <!-- Action Buttons -->
             <div class="flex items-center gap-2 justify-between flex-wrap pt-2">
                 <div class="flex gap-2 flex-wrap">
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700 transition-colors font-medium shadow-sm">
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors font-medium shadow-sm">
                         <i class="bi bi-funnel"></i> {{ __('Filter') }}
                     </button>
                     <a href="{{ route('teacher.students') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium">
@@ -219,7 +219,7 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Subjects') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $subjects->count() }}</p>
                 </div>
-                <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400">
+                <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400">
                     <i class="bi bi-book text-xl"></i>
                 </div>
             </div>
@@ -327,7 +327,7 @@
                                 </td>
                                 <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
                                     @if($student->is_alumni)
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-sm font-medium bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
                                             <i class="bi bi-mortarboard text-sm"></i>
                                             {{ __('Graduate') }}
                                         </span>
@@ -423,7 +423,7 @@
         
         // Show Graduate if alumni, otherwise show semester
         if (student.is_alumni) {
-            document.getElementById('view_semester').innerHTML = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-sm font-medium bg-green-100 text-green-700"><i class="bi bi-mortarboard text-sm"></i> Graduate</span>';
+            document.getElementById('view_semester').innerHTML = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-sm font-medium bg-red-100 text-red-700"><i class="bi bi-mortarboard text-sm"></i> Graduate</span>';
         } else {
             document.getElementById('view_semester').textContent = student.semester || '—';
         }

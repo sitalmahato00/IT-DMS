@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class TeacherNotificationsController extends Controller
@@ -17,8 +17,11 @@ class TeacherNotificationsController extends Controller
         $user = auth()->user();
         
         if (!$user) {
+            $emptyNotifications = new LengthAwarePaginator([], 0, 25);
+            $emptyNotifications->withPath($request->url());
+
             return view('teacher.notifications', [
-                'notifications' => collect([]),
+                'notifications' => $emptyNotifications,
                 'unreadCount' => 0,
                 'readCount' => 0,
             ]);
@@ -56,13 +59,26 @@ class TeacherNotificationsController extends Controller
         $notifications = $notificationsQuery
             ->paginate($perPage)
             ->withQueryString()
-            ->map(function ($notification) {
+            ->through(function ($notification) {
                 $data = json_decode($notification->data, true) ?? [];
+
+                $title = $data['title']
+                    ?? $data['heading']
+                    ?? 'Notification';
+
+                $message = $data['message']
+                    ?? $data['body']
+                    ?? $data['text']
+                    ?? '';
+
+                $type = $data['type']
+                    ?? class_basename((string) $notification->type);
+
                 return [
                     'id' => $notification->id,
-                    'title' => $data['title'] ?? 'Notification',
-                    'message' => $data['message'] ?? '',
-                    'type' => $data['type'] ?? 'general',
+                    'title' => $title,
+                    'message' => $message,
+                    'type' => $type,
                     'created_at' => \Carbon\Carbon::parse($notification->created_at)->format('M d, Y H:i'),
                     'read_at' => $notification->read_at,
                 ];

@@ -18,6 +18,7 @@
     ];
 
     $editExamDefaultCategory = 'assessment';
+    $editSemesterOptions = $activeSemesters ?? $semesters ?? [];
 @endphp
 
 <!-- Edit Exam Modal -->
@@ -59,8 +60,7 @@
                             <select name="semester" id="editSemester" required onchange="loadSubjectsForEditExam()" class="w-full px-2 py-1.5 border border-gray-300 rounded text-xs">
                                 <option value="">Select Semester</option>
                                 <option value="all">All Semesters</option>
-                                @php $semesters = ['first'=>'First','second'=>'Second','third'=>'Third','fourth'=>'Fourth','fifth'=>'Fifth','sixth'=>'Sixth']; @endphp
-                                @foreach($semesters as $key => $label)
+                                @foreach($editSemesterOptions as $key => $label)
                                     <option value="{{ $key }}">{{ $label }}</option>
                                 @endforeach
                             </select>
@@ -201,6 +201,33 @@ function normalizeSemesterValue(raw) {
     };
     return map[v] || v;
 }
+
+function ensureEditSemesterOption(select, rawValue) {
+    if (!select) return;
+
+    const value = normalizeSemesterValue(rawValue);
+    if (!value || value === 'all') return;
+
+    const existing = Array.from(select.options).find(option => option.value === value);
+    if (existing) return;
+
+    const labelMap = {
+        first: 'First',
+        second: 'Second',
+        third: 'Third',
+        fourth: 'Fourth',
+        fifth: 'Fifth',
+        sixth: 'Sixth',
+        seventh: 'Seventh',
+        eighth: 'Eighth',
+    };
+
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = labelMap[value] || value;
+    select.appendChild(option);
+}
+
     function handleEditExamCategoryChange() {
         const select = el('editExamCategory');
         const category = select?.value || EDIT_EXAM_DEFAULT_CATEGORY;
@@ -383,6 +410,7 @@ function openEditExamModal(examId) {
                 
                 // Set semester
                 const semester = normalizeSemesterValue(exam.semester || 'all') || 'all';
+                ensureEditSemesterOption(el('editSemester'), semester);
                 el('editSemester').value = semester;
                 
                 // Load subjects and select the exam's subject
@@ -421,13 +449,6 @@ function loadSubjectsForEditExam(selectedSubjectId) {
     const semester = el('editSemester').value;
     const subjectSelect = el('editSubject');
     
-    // If 'all' selected, keep subject dropdown disabled with placeholder
-    if (semester === 'all') {
-        subjectSelect.innerHTML = '<option value="">Select semester first</option>';
-        subjectSelect.disabled = true;
-        return;
-    }
-    
     // If no semester selected show placeholder and disable
     if (!semester || semester === '') {
         subjectSelect.innerHTML = '<option value="">Select semester first</option>';
@@ -444,7 +465,6 @@ function loadSubjectsForEditExam(selectedSubjectId) {
         .then(response => response.json())
         .then(data => {
             subjectSelect.innerHTML = '<option value="">Select Subject</option><option value="all">All Subjects</option>';
-            
             let hasSubjects = false;
             
             if (data.grouped) {
