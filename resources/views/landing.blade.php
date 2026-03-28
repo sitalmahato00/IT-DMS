@@ -1577,8 +1577,9 @@
                 </div>
 
                 <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center" role="dialog" aria-modal="true">
-                    <div class="absolute inset-0 bg-gray-950/70" @click="open=false" aria-hidden="true"></div>
+                    <div class="absolute inset-0 bg-gray-950/70" aria-hidden="true"></div>
                     <div class="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-gradient-to-br from-white via-red-50/80 to-red-100/60 shadow-xl ring-1 ring-red-100 dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-red-950/20 dark:to-slate-950 dark:ring-red-900/30">
+                        <div class="h-1 w-full bg-gradient-to-r from-red-500 to-red-600"></div>
                         <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-5 dark:border-gray-800">
                             <div class="min-w-0">
                                 <div class="text-xs font-semibold text-gray-500 dark:text-gray-400" x-text="notice?.date || ''"></div>
