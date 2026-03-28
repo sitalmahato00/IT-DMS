@@ -26,11 +26,23 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // Teachers (3)
+        // Teachers (15)
         $teachers = [
             ['name' => 'Dr. Ram Shrestha', 'email' => 'ram@dit.edu.np', 'phone' => '+977-9800000101', 'department' => 'Computer Engineering'],
             ['name' => 'Prof. Sita Sharma', 'email' => 'sita@dit.edu.np', 'phone' => '+977-9800000102', 'department' => 'Computer Engineering'],
             ['name' => 'Mr. Hari Karki', 'email' => 'hari@dit.edu.np', 'phone' => '+977-9800000103', 'department' => 'Computer Engineering'],
+            ['name' => 'Dr. Priya Poudel', 'email' => 'priya@dit.edu.np', 'phone' => '+977-9800000104', 'department' => 'Computer Engineering'],
+            ['name' => 'Mr. Rajesh Singh', 'email' => 'rajesh@dit.edu.np', 'phone' => '+977-9800000105', 'department' => 'Computer Engineering'],
+            ['name' => 'Ms. Neha Verma', 'email' => 'neha@dit.edu.np', 'phone' => '+977-9800000106', 'department' => 'Computer Engineering'],
+            ['name' => 'Prof. Anil Khadka', 'email' => 'anil@dit.edu.np', 'phone' => '+977-9800000107', 'department' => 'Computer Engineering'],
+            ['name' => 'Dr. Sunita Rai', 'email' => 'sunita@dit.edu.np', 'phone' => '+977-9800000108', 'department' => 'Computer Engineering'],
+            ['name' => 'Mr. Bikram Thapa', 'email' => 'bikram@dit.edu.np', 'phone' => '+977-9800000109', 'department' => 'Computer Engineering'],
+            ['name' => 'Ms. Ananya Das', 'email' => 'ananya@dit.edu.np', 'phone' => '+977-9800000110', 'department' => 'Computer Engineering'],
+            ['name' => 'Prof. Deepak Nepal', 'email' => 'deepak@dit.edu.np', 'phone' => '+977-9800000111', 'department' => 'Computer Engineering'],
+            ['name' => 'Dr. Harshita Gupta', 'email' => 'harshita@dit.edu.np', 'phone' => '+977-9800000112', 'department' => 'Computer Engineering'],
+            ['name' => 'Mr. Vikram Joshi', 'email' => 'vikram@dit.edu.np', 'phone' => '+977-9800000113', 'department' => 'Computer Engineering'],
+            ['name' => 'Ms. Pooja Sharma', 'email' => 'pooja@dit.edu.np', 'phone' => '+977-9800000114', 'department' => 'Computer Engineering'],
+            ['name' => 'Prof. Suresh Adhikari', 'email' => 'suresh@dit.edu.np', 'phone' => '+977-9800000115', 'department' => 'Computer Engineering'],
         ];
 
         foreach ($teachers as $t) {
@@ -41,17 +53,17 @@ class UserSeeder extends Seeder
                     'role' => 'teacher',
                 ])
             );
-            // Will be linked in TeacherSeeder
         }
 
-        // Parents (5)
-        $parents = [
-            ['name' => 'Parent 1', 'email' => 'parent1@dit.edu.np', 'phone' => '+977-9800000201'],
-            ['name' => 'Parent 2', 'email' => 'parent2@dit.edu.np', 'phone' => '+977-9800000202'],
-            ['name' => 'Parent 3', 'email' => 'parent3@dit.edu.np', 'phone' => '+977-9800000203'],
-            ['name' => 'Parent 4', 'email' => 'parent4@dit.edu.np', 'phone' => '+977-9800000204'],
-            ['name' => 'Parent 5', 'email' => 'parent5@dit.edu.np', 'phone' => '+977-9800000205'],
-        ];
+        // Parents (20)
+        $parents = [];
+        for ($i = 1; $i <= 20; $i++) {
+            $parents[] = [
+                'name' => "Parent {$i}",
+                'email' => "parent{$i}@dit.edu.np",
+                'phone' => "+977-980000020{$i}"
+            ];
+        }
 
         foreach ($parents as $p) {
             User::updateOrCreate(
@@ -63,9 +75,9 @@ class UserSeeder extends Seeder
             );
         }
 
-        // Students (10)
+        // Students (50)
         $student_emails = [];
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 50; $i++) {
             $email = "student{$i}@dit.edu.np";
             $student_emails[] = $email;
             User::updateOrCreate(
@@ -75,7 +87,7 @@ class UserSeeder extends Seeder
                     'email' => $email,
                     'password' => Hash::make('password'),
                     'role' => 'student',
-                    'phone' => "+977-980000030{$i}",
+                    'phone' => "+977-9800000300" . str_pad($i, 2, '0', STR_PAD_LEFT),
                 ]
             );
         }

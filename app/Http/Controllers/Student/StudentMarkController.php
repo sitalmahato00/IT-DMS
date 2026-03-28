@@ -37,7 +37,12 @@ class StudentMarkController extends Controller
                 // Get assessment marks
                 $assessmentMarks = $student->getAssessmentMarks($subject->id, 'assessment');
                 $ctevtMarks = $student->getExamMarkForSubject($subject->id, 'ctevt');
-                
+                $primaryMarks = ($assessmentMarks->full ?? 0) > 0 ? $assessmentMarks : (((isset($ctevtMarks->full) ? $ctevtMarks->full : 0) > 0) ? $ctevtMarks : null);
+                $fullMarks = $primaryMarks && ($primaryMarks->full ?? 0) > 0 ? (float) $primaryMarks->full : 0;
+                $obtainedMarks = $primaryMarks && ($primaryMarks->obtained ?? 0) > 0 ? (float) $primaryMarks->obtained : 0;
+                $percentage = $fullMarks > 0 ? round(($obtainedMarks / $fullMarks) * 100, 2) : null;
+                $status = $percentage === null ? 'pending' : (($primaryMarks->is_pass ?? false) ? 'pass' : 'fail');
+                 
                 return [
                     'id' => $subject->id,
                     'name' => $subject->subject_name,
@@ -47,6 +52,10 @@ class StudentMarkController extends Controller
                     'teacher' => $primaryTeacher ? $primaryTeacher->name : 'TBA',
                     'assessment_marks' => $assessmentMarks,
                     'ctevt_marks' => $ctevtMarks,
+                    'full_marks' => $fullMarks,
+                    'obtained_marks' => $obtainedMarks,
+                    'percentage' => $percentage,
+                    'status' => $status,
                 ];
             });
         

@@ -18,7 +18,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Total Exams') }}</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $exams->count() ?? 0 }}</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $stats['total'] ?? ($exams->total() ?? $exams->count() ?? 0) }}</p>
                 </div>
                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
                     <i class="bi bi-file-earmark-text text-xl"></i>
@@ -84,7 +84,7 @@
                         <option value="">{{ __('All Subjects') }}</option>
                         @if($subjects->isNotEmpty())
                             @foreach($subjects as $subject)
-                                <option value="{{ $subject['id'] }}" {{ request('subject') == $subject['id'] ? 'selected' : '' }}>
+                                <option value="{{ $subject['id'] }}" {{ (string) ($selectedSubject ?? request('subject', request('subject_id'))) === (string) $subject['id'] ? 'selected' : '' }}>
                                     {{ $subject['code'] }} - {{ $subject['name'] }}
                                 </option>
                             @endforeach
@@ -98,12 +98,18 @@
                         <option value="">{{ __('All Status') }}</option>
                         <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>{{ __('Upcoming') }}</option>
                         <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>{{ __('Completed') }}</option>
+                        <option value="marks_filled" {{ request('status') == 'marks_filled' ? 'selected' : '' }}>{{ __('Marks Filled') }}</option>
+                        <option value="marks_not_filled" {{ request('status') == 'marks_not_filled' ? 'selected' : '' }}>{{ __('Marks Not Filled') }}</option>
+                        <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>{{ __('Published') }}</option>
+                        <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>{{ __('Draft') }}</option>
+                        <option value="archived" {{ request('status') == 'archived' ? 'selected' : '' }}>{{ __('Archived') }}</option>
+                        <option value="faculty" {{ request('status') == 'faculty' ? 'selected' : '' }}>{{ __('Faculty') }}</option>
                     </select>
                 </div>
 
                 <div class="flex flex-col">
                     <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Search') }}</label>
-                    <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Exam Name') }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <input type="text" name="q" value="{{ request('q', request('search')) }}" placeholder="{{ __('Exam Name') }}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
                 </div>
 
                 <div class="flex flex-col">
@@ -149,43 +155,52 @@
                         @foreach($exams as $exam)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                             <td class="px-4 py-4">
+                                @php
+                                    $assessmentPrefix = $exam->formatted_assessment ? $exam->formatted_assessment . ' - ' : '';
+                                @endphp
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
                                         <i class="bi bi-file-earmark-text"></i>
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-900 dark:text-white">
-{{ $exam->formatted_assessment ?? ($exam['formatted_assessment'] ?? '') }} - {{ $exam['exam_name'] }}
-</p>
+                                            {{ $assessmentPrefix }}{{ $exam->exam_name }}
+                                        </p>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                                {{ $exam['subject_code'] ?? '' }} - {{ $exam['subject_name'] ?? '' }}
+                                {{ $exam->subject?->subject_code ?? '—' }} - {{ $exam->subject?->subject_name ?? __('Unassigned') }}
                             </td>
                             <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                                {{ $exam['exam_date'] ?? '-' }}
+                                {{ $exam->exam_date ? $exam->exam_date->format('Y-m-d') : '-' }}
                             </td>
                             <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                                {{ $exam['exam_date_bs'] ?? '-' }}
+                                {{ $exam->exam_date_bs ?? '-' }}
                             </td>
                             <td class="px-4 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                                {{ data_get($exam, 'full_marks', data_get($exam, 'total_marks', 0)) }}
+                                {{ $exam->full_marks ?? 0 }}
                             </td>
                             <td class="px-4 py-4">
                                 @php
-                                    $status = $exam['status'] ?? 'upcoming';
-                                    $statusClass = $status === 'completed' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300';
+                                    $status = $exam->status ?? 'draft';
+                                    $statusClass = match($status) {
+                                        'published' => 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+                                        'draft' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
+                                        'archived' => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200',
+                                        'faculty' => 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
+                                        default => 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+                                    };
                                 @endphp
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClass }}">
-                                    {{ ucfirst($status) }}
+                                    {{ $exam->formatted_status ?? ucfirst($status) }}
                                 </span>
                             </td>
                             <td class="px-4 py-4 text-center">
-                                <a href="{{ route('teacher.exams.show', $exam['id']) }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 rounded transition" title="Upload Marks">
+                                <a href="{{ route('teacher.exams.show', $exam->id) }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 rounded transition" title="Upload Marks">
                                     <i class="bi bi-cloud-upload"></i> {{ __('Upload Marks') }}
                                 </a>
-                                <a href="{{ route('teacher.marks', ['subject_id' => $exam['subject_id'] ?? '', 'category' => $exam['exam_category'] ?? 'assessment', 'assessment_id' => $exam['id'] ?? '']) }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 rounded transition mt-1 block">
+                                <a href="{{ route('teacher.marks', ['subject_id' => $exam->subject_id ?? '', 'category' => $exam->exam_category ?? 'assessment', 'assessment_id' => $exam->id]) }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 rounded transition mt-1 block">
                                     <i class="bi bi-eye"></i> {{ __('View Marks') }}
                                 </a>
                             </td>

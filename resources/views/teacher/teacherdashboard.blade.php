@@ -292,14 +292,11 @@
     let attendanceChartDataByPeriod = {};
     let barCanvas = null;
     let barNoData = null;
-    let attendancePresentCountEl = null;
-    let attendancePresentLabelEl = null;
     let labelColor = '#4b5563';
     let gridColor = 'rgba(229, 231, 235, 0.9)';
 
     const attendanceTranslations = {
         presentPercent: @json(__('Present %')),
-        averageLabel: @json(__('Average Present %')),
     };
 
     function changeAttendancePeriod(period) {
@@ -341,14 +338,6 @@
         }
     }
 
-    function sumValues(values) {
-        if (!Array.isArray(values)) {
-            return 0;
-        }
-
-        return values.reduce((total, value) => total + Number(value || 0), 0);
-    }
-
     function hasAttendanceDataForPeriod(period, data) {
         if (!data || !Array.isArray(data.labels) || data.labels.length === 0) {
             return false;
@@ -372,18 +361,6 @@
         }];
     }
 
-    function updateAttendanceSummary(period, data) {
-        if (!attendancePresentCountEl || !attendancePresentLabelEl) {
-            return;
-        }
-
-        const presentValues = Array.isArray(data.present) ? data.present : [];
-        const totalPercent = sumValues(presentValues);
-        const averagePercent = presentValues.length > 0 ? (totalPercent / presentValues.length).toFixed(1) : '0.0';
-        attendancePresentCountEl.textContent = `${averagePercent}%`;
-        attendancePresentLabelEl.textContent = attendanceTranslations.averageLabel;
-    }
-
     function renderAttendanceBarChart(period) {
         if (!barCanvas) {
             return;
@@ -401,13 +378,6 @@
             if (attendanceBarChart) {
                 attendanceBarChart.destroy();
                 attendanceBarChart = null;
-            }
-
-            if (attendancePresentCountEl) {
-                attendancePresentCountEl.textContent = '0';
-            }
-            if (attendancePresentLabelEl) {
-                attendancePresentLabelEl.textContent = attendanceTranslations.averageLabel;
             }
             return;
         }
@@ -470,7 +440,6 @@
             }
         });
 
-        updateAttendanceSummary(period, data);
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -489,8 +458,6 @@
 
         barCanvas = document.getElementById('attendanceBarChart');
         barNoData = document.getElementById('attendanceBarNoData');
-        attendancePresentCountEl = document.getElementById('attendancePresentCount');
-        attendancePresentLabelEl = document.getElementById('attendancePresentLabel');
 
         changeAttendancePeriod('semester');
 

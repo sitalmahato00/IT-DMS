@@ -3,6 +3,11 @@
 @section('title', __('My Subjects'))
 
 @section('content')
+@php
+    $subjectListQuery = request()->except('page');
+    $subjectsExportUrl = route('teacher.subjects.export', $subjectListQuery);
+    $subjectsPrintUrl = route('teacher.subjects.print', $subjectListQuery);
+@endphp
 <div class="space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif">
     <!-- Global Loader Overlay -->
     <div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-sm hidden flex items-center justify-center">
@@ -22,7 +27,10 @@
             <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ __('View and manage your assigned subjects.') }}</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ route('teacher.subjects.export') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition font-medium">
+            <button type="button" onclick='teacherOpenPrintPreview(@json($subjectsPrintUrl), { title: @json(__('Print Subjects')) })' class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium">
+                <i class="bi bi-printer"></i> {{ __('Print') }}
+            </button>
+            <a href="{{ $subjectsExportUrl }}" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition font-medium">
                 <i class="bi bi-download"></i> {{ __('Export CSV') }}
             </a>
         </div>

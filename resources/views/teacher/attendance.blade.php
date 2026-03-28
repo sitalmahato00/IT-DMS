@@ -4,14 +4,6 @@
 
 @section('content')
 <div class="space-y-4">
-    <!-- Global Loader Overlay -->
-    <div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-            <p id="loaderText" class="text-gray-600 dark:text-gray-400 font-medium">Loading...</p>
-        </div>
-    </div>
-
     <!-- Toast Notification -->
     <div id="toast" class="hidden fixed top-4 right-4 z-50"></div>
 
@@ -66,9 +58,10 @@
                     </span>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <a href="{{ route('teacher.students.export') }}?{{ http_build_query(request()->query()) }}" 
+                    <a href="{{ route('teacher.attendance.print') }}?{{ http_build_query(request()->query()) }}"
+                        target="_blank"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-medium hover:bg-blue-700 transition-colors shadow-sm">
-                        <i class="bi bi-download"></i> {{ __('Export') }}
+                        <i class="bi bi-printer"></i> {{ __('Print') }}
                     </a>
                 </div>
             </div>

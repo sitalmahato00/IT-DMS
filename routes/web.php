@@ -80,11 +80,13 @@ Route::middleware(['auth', 'verified', 'role:teacher'])->prefix('teacher')->name
     // Teacher pages - using dynamic controllers
     Route::get('/subjects', [\App\Http\Controllers\Teacher\TeacherSubjectController::class, 'index'])->name('subjects');
     Route::get('/subjects/export', [\App\Http\Controllers\Teacher\TeacherSubjectController::class, 'export'])->name('subjects.export');
+    Route::get('/subjects/print', [\App\Http\Controllers\Teacher\TeacherSubjectController::class, 'print'])->name('subjects.print');
     Route::get('/subjects/{id}', [\App\Http\Controllers\Teacher\TeacherSubjectController::class, 'show'])->name('subjects.show');
     Route::get('/students', [\App\Http\Controllers\Teacher\TeacherStudentController::class, 'index'])->name('students');
     // Load subjects for a specific semester for dynamic subject loading in filters
     Route::get('/students/subjects-by-semester', [\App\Http\Controllers\Teacher\TeacherStudentController::class, 'subjectsBySemester'])->name('students.subjects-by-semester');
     Route::get('/students/export', [\App\Http\Controllers\Teacher\TeacherStudentController::class, 'export'])->name('students.export');
+    Route::get('/students/print', [\App\Http\Controllers\Teacher\TeacherStudentController::class, 'print'])->name('students.print');
     Route::get('/attendance', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'index'])->name('attendance');
     Route::post('/attendance/students', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'getStudentsForAttendance'])->name('attendance.students');
     Route::post('/attendance', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'store'])->name('attendance.store');
@@ -138,9 +140,9 @@ Route::middleware(['auth', 'verified', 'role:parent'])->prefix('parent')->name('
 });
 
 // Student-facing dashboard
-Route::get('/student', function () {
-    return view('student.studentdashboard');
-})->middleware(['auth', 'verified', 'role:student'])->name('student.dashboard');
+Route::get('/student', [\App\Http\Controllers\Student\StudentDashboardController::class, 'index'])
+    ->middleware(['auth', 'verified', 'role:student'])
+    ->name('student.dashboard');
 
 // Parent-facing dashboard
 Route::get('/parent', function () {

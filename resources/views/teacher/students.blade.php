@@ -3,6 +3,11 @@
 @section('title', __('My Students'))
 
 @section('content')
+@php
+    $studentListQuery = request()->except('page');
+    $studentsExportUrl = route('teacher.students.export', $studentListQuery);
+    $studentsPrintUrl = route('teacher.students.print', $studentListQuery);
+@endphp
 <div class="space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif">
     <!-- Global Loader Overlay -->
     <div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-sm hidden flex items-center justify-center">
@@ -16,7 +21,7 @@
     <div id="toast" class="hidden fixed top-4 right-4 z-50"></div>
 
     <!-- View Student Modal -->
-    <div id="viewStudentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" onclick="if(event.target===this) closeViewStudentModal()">
+    <div id="viewStudentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-auto">
             <div class="px-6 py-4 border-b-2 border-red-700 flex items-center justify-between sticky top-0 bg-red-600 text-white">
                 <div>
@@ -119,7 +124,10 @@
             <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ __('View and manage students enrolled in your subjects.') }}</p>
         </div>
         <div class="flex items-center gap-3">
-            <a href="{{ route('teacher.students.export') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition font-medium">
+            <button type="button" onclick='teacherOpenPrintPreview(@json($studentsPrintUrl), { title: @json(__('Print Students')) })' class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium">
+                <i class="bi bi-printer"></i> {{ __('Print') }}
+            </button>
+            <a href="{{ $studentsExportUrl }}" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition font-medium">
                 <i class="bi bi-download"></i> {{ __('Export CSV') }}
             </a>
         </div>
@@ -386,48 +394,21 @@
         @endif
     </div>
 </div>
+@endsection
 
-    <script>
-    // Fetch subjects when semester changes (dynamic load)
-    document.addEventListener('DOMContentLoaded', function() {
-        const semSel = document.getElementById('semesterFilter');
-        const subjSel = document.getElementById('subjectFilter');
-        if (semSel && subjSel) {
-            semSel.addEventListener('change', function() {
-                const sem = this.value;
-                const url = '{{ route("teacher.students.subjects-by-semester") }}?semester=' + (sem || '');
-                fetch(url)
-                    .then(res => res.json())
-                    .then(data => {
-                        const subjects = data.subjects || [];
-                        // Clear existing options except the first
-                        while (subjSel.options.length > 1) subjSel.remove(1);
-                        subjects.forEach(function(s) {
-                            const opt = document.createElement('option');
-                            opt.value = s.id;
-                            opt.text = s.code + ' - ' + s.name;
-                            subjSel.add(opt);
-                        });
-                        // Reset selection to none
-                        subjSel.value = '';
-                    });
-            });
-        }
-    });
-
-    // View student function
+@section('scripts')
+<script>
     function viewStudent(student) {
         document.getElementById('view_name').textContent = student.name || '—';
         document.getElementById('view_email').textContent = student.email || '—';
         document.getElementById('view_phone').textContent = student.phone || '—';
-        
-        // Show Graduate if alumni, otherwise show semester
+
         if (student.is_alumni) {
             document.getElementById('view_semester').innerHTML = '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-sm font-medium bg-red-100 text-red-700"><i class="bi bi-mortarboard text-sm"></i> Graduate</span>';
         } else {
             document.getElementById('view_semester').textContent = student.semester || '—';
         }
-        
+
         document.getElementById('view_course').textContent = student.department || '—';
         document.getElementById('view_roll_no').textContent = student.student_id || '—';
         document.getElementById('view_dob').textContent = student.date_of_birth || '—';
@@ -440,8 +421,7 @@
         document.getElementById('view_role').textContent = student.role ? (student.role.charAt(0).toUpperCase() + student.role.slice(1)) : '—';
         document.getElementById('view_emergency_contact').textContent = student.emergency_contact || '—';
         document.getElementById('view_bio').textContent = student.bio || '—';
-        
-        // Handle photo
+
         const viewAvatarImg = document.getElementById('viewStudentAvatarImg');
         const viewInitial = document.getElementById('viewStudentInitial');
         if (student.profile_photo_path) {
@@ -452,7 +432,7 @@
             viewAvatarImg.style.display = 'none';
             viewInitial.style.display = 'flex';
         }
-        
+
         document.getElementById('viewStudentModal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
@@ -462,22 +442,6 @@
         document.body.style.overflow = 'auto';
     }
 
-    // Close on Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeViewStudentModal();
-        }
-    });
-
-    // Close modal on background click
-    document.getElementById('viewStudentModal')?.addEventListener('click', function(e) {
-        if (e.target === this) closeViewStudentModal();
-    });
-</script>
-@endsection
-
-@section('scripts')
-<script>
     document.addEventListener('DOMContentLoaded', function () {
         const semesterSelect = document.getElementById('semesterFilter');
         const subjectSelect = document.getElementById('subjectFilter');
@@ -522,6 +486,21 @@
 
         rebuildSubjectOptions();
         semesterSelect.addEventListener('change', rebuildSubjectOptions);
+
+        const studentModal = document.getElementById('viewStudentModal');
+        if (studentModal) {
+            studentModal.addEventListener('click', function (event) {
+                if (event.target === this) {
+                    closeViewStudentModal();
+                }
+            });
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeViewStudentModal();
+        }
     });
 </script>
 @endsection

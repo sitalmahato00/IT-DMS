@@ -135,9 +135,6 @@
                         <i class="bi bi-eye mr-1"></i>View Details
                     </button>
 
-                    <button onclick="exportMarks()" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 font-medium transition-colors">
-                        <i class="bi bi-download mr-1"></i>Export
-                    </button>
                 </div>
             </div>
         </div>
@@ -196,7 +193,7 @@
                         ->where('status', 'present')
                         ->count();
                     $attendancePercentage = $attendance > 0 ? round(($present / $attendance) * 100, 1) : 0;
-                    $attendanceClass = $attendancePercentage >= 75 ? 'bg-green-100 text-green-700' : ($attendancePercentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-blue-700');
+                    $attendanceClass = $attendancePercentage >= 75 ? 'bg-green-100 text-green-700' : ($attendancePercentage >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700');
                     
                     // Check if this mark uses subject-specific marks (different from exam defaults)
                     $isSubjectSpecific = $mark->full_marks != $exam->full_marks || $mark->passing_marks != $exam->passing_marks;
@@ -244,7 +241,7 @@
                             @elseif($isPassed)
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700"><i class="bi bi-check-circle mr-1"></i> Passed</span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-blue-700"><i class="bi bi-x-circle mr-1"></i> Failed</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700"><i class="bi bi-x-circle mr-1"></i> Failed</span>
                             @endif
                         </td>
                         <td class="px-4 py-4 text-center text-sm">
@@ -252,7 +249,7 @@
                                 <button data-mark-id="{{ $mark->id }}" class="btn-edit-mark inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 rounded transition" title="Edit Mark">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button onclick="deleteMark({{ $mark->id }})" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-red-100 hover:bg-red-200 rounded transition" title="Delete Mark">
+                                <button onclick="deleteMark({{ $mark->id }})" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 hover:bg-red-200 rounded transition" title="Delete Mark">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
@@ -429,7 +426,7 @@
             
             <!-- Actions (sticky footer) -->
             <div class="sticky bottom-0 left-0 right-0 bg-white px-5 py-3 border-t flex justify-between items-center">
-                <button id="loadStudentsBtn" type="button" onclick="loadStudents()" class="px-3 py-1.5 text-xs bg-red-100 text-blue-700 rounded hover:bg-red-200" disabled>
+                <button id="loadStudentsBtn" type="button" onclick="loadStudents()" class="px-3 py-1.5 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200" disabled>
                     <i class="bi bi-people mr-1"></i>Load Students
                 </button>
                 <div class="flex gap-2">
@@ -594,8 +591,6 @@
     </div>
 </div>
 
-@include('admin.partials.edit-exam-modal')
-
 <script>
 // ============= Route URLs (from Blade) =============
 const ROUTES = {
@@ -608,6 +603,7 @@ const EXAM_COMPONENT_DEFINITIONS = @json($examComponentDefinitions);
 const EXAM_DATA = @json($exam->toArray());
 const DEFAULT_EXAM_FULL_MARKS = {{ $exam->full_marks ?? 0 }};
 const DEFAULT_EXAM_PASSING_MARKS = {{ $exam->passing_marks ?? 0 }};
+const STUDENT_TABLE_COLSPAN = EXAM_CATEGORY === 'ctevt' ? 11 : 8;
 
 
 
@@ -840,7 +836,16 @@ function closeViewMarksModal() {
 let _cachedSemesters = null;
 
 // Defaults for modal - prefill but editable
-window.defaultModalSemester = '{{ $exam->semester ?? '' }}';
+window.defaultModalSemester = @json(match(strtolower((string) ($exam->semester ?? ''))) {
+    'first' => '1',
+    'second' => '2',
+    'third' => '3',
+    'fourth' => '4',
+    'fifth' => '5',
+    'sixth' => '6',
+    'all' => '',
+    default => (string) ($exam->semester ?? ''),
+});
 window.defaultModalSubject = '{{ $exam->subject_id ?? '' }}';
 
 function loadAvailableSemesters() {
@@ -859,7 +864,6 @@ function loadAvailableSemesters() {
             return res.json();
         })
         .then(data => {
-            console.log('Fetched semesters data from backend:', data);
             if (data.success && data.years && Array.isArray(data.years)) {
                 // Collect all unique semesters from all years
                 const allSemesters = [];
@@ -878,7 +882,6 @@ function loadAvailableSemesters() {
                 });
                 
                 _cachedSemesters = allSemesters;
-                console.log('Cached semesters:', _cachedSemesters);
                 populateSemesters(select, allSemesters);
             } else {
                 select.innerHTML = '<option value="">No semesters available</option>';
@@ -1109,8 +1112,6 @@ function updateStudentMarksDisplay() {
         }
         updateStudentRowStats(row);
     });
-
-    console.log('Updated student marks display:', { fullMarks, passingMarks, subjectId });
     updateAllStudentRowStats();
 }
 
@@ -1184,19 +1185,15 @@ function loadStudents() {
     const subjectId = document.getElementById('modalSubjectFilter')?.value || '';
     const examId = {{ $exam->id }};
     
-    console.log('======== Load Students Called ========');
-    console.log('Semester:', semester);
-    console.log('Subject ID:', subjectId);
-    
     // Require semester to be selected
     if (!semester) {
         const tbody = document.getElementById('studentsMarksBody');
-        tbody.innerHTML = '<tr><td colspan="11" class="px-3 py-4 text-center text-orange-500">Please select Semester to load students</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="${STUDENT_TABLE_COLSPAN}" class="px-3 py-4 text-center text-orange-500">Please select Semester to load students</td></tr>`;
         return;
     }
     
     const tbody = document.getElementById('studentsMarksBody');
-    tbody.innerHTML = '<tr><td colspan="11" class="px-3 py-4 text-center text-gray-500">Loading...</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="${STUDENT_TABLE_COLSPAN}" class="px-3 py-4 text-center text-gray-500">Loading...</td></tr>`;
     
     const params = new URLSearchParams({
         semester: semester,
@@ -1204,15 +1201,11 @@ function loadStudents() {
     });
     
     const url = `${ROUTES.studentsWithMarks}?${params}`;
-    console.log('Fetching from URL:', url);
-    
+
     fetch(url)
         .then(res => res.json())
         .then(data => {
-            console.log('Students data received:', data);
             if (data.success) {
-                console.log('Students count:', data.students ? data.students.length : 0);
-
                 // Prefill subject marks fields at load-time, especially for CTEVT
                 const fullMarksInput = document.getElementById('subjectFullMarks');
                 const passingMarksInput = document.getElementById('subjectPassingMarks');
@@ -1237,12 +1230,12 @@ function loadStudents() {
                 }
             } else {
                 console.error('Backend returned error:', data.message);
-                tbody.innerHTML = `<tr><td colspan="11" class="px-3 py-4 text-center text-blue-500">Error: ${data.message || 'Failed to load students'}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="${STUDENT_TABLE_COLSPAN}" class="px-3 py-4 text-center text-red-500">Error: ${data.message || 'Failed to load students'}</td></tr>`;
             }
         })
         .catch(err => {
             console.error('Error loading students:', err);
-            tbody.innerHTML = '<tr><td colspan="11" class="px-3 py-4 text-center text-blue-500">Error loading students. Check console for details.</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="${STUDENT_TABLE_COLSPAN}" class="px-3 py-4 text-center text-red-500">Error loading students. Check console for details.</td></tr>`;
         });
 }
 
@@ -1250,7 +1243,7 @@ function renderStudentMarksTable(students, existingMarks = {}, subjectFullMarks 
     const tbody = document.getElementById('studentsMarksBody');
 
     if (!students || students.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" class="px-3 py-4 text-center text-gray-500">No students found</td></tr>';
+        tbody.innerHTML = `<tr><td colspan="${STUDENT_TABLE_COLSPAN}" class="px-3 py-4 text-center text-gray-500">No students found</td></tr>`;
         return;
     }
 
@@ -1295,7 +1288,7 @@ function resetUploadForm() {
     const subSelect = document.getElementById('modalSubjectFilter');
     if (semSelect) semSelect.innerHTML = '<option value="">Select Semester</option>';
     if (subSelect) subSelect.innerHTML = '<option value="">Select Subject</option>';
-    document.getElementById('studentsMarksBody').innerHTML = '<tr><td colspan="11" class="px-3 py-4 text-center text-gray-500">Select Semester, then optionally select Subject to filter attendance by subject, then click "Load Students"</td></tr>';
+    document.getElementById('studentsMarksBody').innerHTML = `<tr><td colspan="${STUDENT_TABLE_COLSPAN}" class="px-3 py-4 text-center text-gray-500">Select Semester, then optionally select Subject to filter attendance by subject, then click "Load Students"</td></tr>`;
     document.querySelectorAll('#componentMarksSection .subject-component-input').forEach(input => input.value = '');
     const fullMarksInput = document.getElementById('subjectFullMarks');
     const passingMarksInput = document.getElementById('subjectPassingMarks');
@@ -1345,7 +1338,6 @@ function deleteMark(id) {
 function openEditMarkModal(id) {
     // Use teacher route for editing marks
     const url = `/teacher/exams/marks/${id}/edit`;
-    console.debug('Opening edit modal, fetching', url);
     fetch(url)
         .then(res => {
             if (!res.ok) throw new Error('Network response was not ok: ' + res.status);
@@ -1357,7 +1349,6 @@ function openEditMarkModal(id) {
         })
         .then(data => {
             if (data.success && data.mark) {
-                console.debug('Edit mark data received:', data.mark);
                 document.getElementById('editMarkId').value = data.mark.id;
                 document.getElementById('editMarkStudent').textContent = data.mark.student_name || 'N/A';
                 document.getElementById('editMarkRoll').textContent = data.mark.roll_no || '-';
@@ -1368,14 +1359,12 @@ function openEditMarkModal(id) {
                 if (!modal) {
                     console.error('editMarkModal element not found');
                 } else {
-                    console.debug('Preparing to show modal, current classes:', modal.className);
                     modal.classList.remove('hidden');
                     modal.removeAttribute('hidden');
                     try {
                         // Move modal to document.body to avoid parent CSS collapsing it
                         if (modal.parentNode !== document.body) {
                             document.body.appendChild(modal);
-                            console.debug('Moved editMarkModal to document.body');
                         }
 
                         // Force fullscreen fixed positioning so it can't collapse
@@ -1397,10 +1386,6 @@ function openEditMarkModal(id) {
                                     input.focus();
                                     input.scrollIntoView({ block: 'center', inline: 'nearest' });
                                 }
-                                // Debug computed style and rect
-                                console.debug('Modal computed style after move:', window.getComputedStyle(modal));
-                                const rect = modal.getBoundingClientRect();
-                                console.debug('Modal rect after move:', rect);
                             } catch (err) {
                                 console.error('Error during modal post-show actions:', err);
                             }
@@ -1490,7 +1475,7 @@ async function submitEditMarkForm(e) {
                 // Status (11th column)
                 const statusCell = row.querySelector('td:nth-child(11)');
                 if (statusCell) {
-                    statusCell.innerHTML = data.mark.is_passed ? '<span class="text-green-600 text-xs"><i class="bi bi-check-circle"></i> Passed</span>' : '<span class="text-blue-600 text-xs"><i class="bi bi-x-circle"></i> Failed</span>';
+                    statusCell.innerHTML = data.mark.is_passed ? '<span class="text-green-600 text-xs"><i class="bi bi-check-circle"></i> Passed</span>' : '<span class="text-red-600 text-xs"><i class="bi bi-x-circle"></i> Failed</span>';
                 }
             }
             closeEditMarkModal();
@@ -1503,14 +1488,6 @@ async function submitEditMarkForm(e) {
     }
 }
 
-function exportMarks() {
-    // Dynamically construct the export URL
-    const examId = {{ $exam->id }};
-    const url = `/admin/exam/${examId}/export-marks`;
-    // For now, this is a placeholder - implement actual export in controller
-    showErrorMessage('Export functionality is being implemented');
-}
-
 // ============= Filter Functions =============
 
 function applyMarksFilters() {
@@ -1519,7 +1496,6 @@ function applyMarksFilters() {
     const year = document.getElementById('filterYear')?.value || '';
     const semester = document.getElementById('filterSemester')?.value || '';
     const subject = document.getElementById('filterSubject')?.value || '';
-    console.debug('applyMarksFilters', { searchTerm, year, semester, subject });
     
     const rows = document.querySelectorAll('.mark-row');
     
@@ -1639,7 +1615,7 @@ function showSuccessMessage(msg) {
 
 function showErrorMessage(msg) {
     const el = document.createElement('div');
-    el.className = 'fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded shadow-lg z-50';
+    el.className = 'fixed bottom-4 right-4 bg-red-600 text-white px-4 py-2 rounded shadow-lg z-50';
     el.textContent = 'Error: ' + msg;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 3000);
@@ -1701,71 +1677,123 @@ document.addEventListener('DOMContentLoaded', () => {
         const form = e.target;
         const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         
-        try {
-            // Get form data
-            const formData = new FormData(form);
-            
-            // Build marks array from form inputs - now using proper array format
-            const marksArray = [];
-            for (let [key, value] of formData.entries()) {
-                // Match keys like marks[1][student_id], marks[1][marks_obtained], marks[1][subject_id]
-                if (key.startsWith('marks[') && key.includes('][')) {
-                    const match = key.match(/marks\[(\d+)\]\[(\w+)\]/);
-                    if (match) {
-                        const studentId = parseInt(match[1]);
-                        const fieldName = match[2];
-                        
-                        // Find or create entry for this student
-                        let existingEntry = marksArray.find(m => m.student_id === studentId);
-                        if (!existingEntry) {
-                            existingEntry = { student_id: studentId };
-                            marksArray.push(existingEntry);
-                        }
-                        
-                        // Set the field value
-                        if (fieldName === 'marks_obtained' && value) {
-                            existingEntry.marks_obtained = parseFloat(value);
-                        } else if (fieldName === 'subject_id' && value) {
-                            existingEntry.subject_id = parseInt(value);
-                        } else if (fieldName === 'student_id' && value) {
-                            existingEntry.student_id = parseInt(value);
-                        }
-                    }
-                }
+    try {
+        const formData = new FormData(form);
+        const marksArray = [];
+        const numericFields = new Set([
+            'marks_obtained',
+            'full_marks',
+            'passing_marks',
+            'theory_internal_marks',
+            'theory_external_marks',
+            'practical_internal_marks',
+            'practical_external_marks',
+            'theory_internal_full_marks',
+            'theory_external_full_marks',
+            'practical_internal_full_marks',
+            'practical_external_full_marks',
+            'theory_internal_pass_marks',
+            'theory_external_pass_marks',
+            'practical_internal_pass_marks',
+            'practical_external_pass_marks'
+        ]);
+
+        for (const [key, value] of formData.entries()) {
+            if (!key.startsWith('marks[') || !key.includes('][')) {
+                continue;
             }
-            
-            // Extract subject_id from modal filter
-            const subjectId = document.getElementById('modalSubjectFilter')?.value;
-            const subjectFullMarks = document.getElementById('subjectFullMarks')?.value;
-            const subjectPassingMarks = document.getElementById('subjectPassingMarks')?.value;
-            
-            // Filter out entries without marks_obtained
-            const validMarks = marksArray.filter(m => m.marks_obtained !== undefined && !isNaN(m.marks_obtained));
-            
-            if (validMarks.length === 0) {
-                showErrorMessage('Please enter marks for at least one student');
-                return;
+
+            const match = key.match(/marks\[(\d+)\]\[(\w+)\]/);
+            if (!match) {
+                continue;
             }
-            
-            // Add subject_id and full_marks/passing_marks to each mark entry
-            validMarks.forEach(mark => {
-                if (subjectId) {
-                    mark.subject_id = parseInt(subjectId);
+
+            const studentId = parseInt(match[1], 10);
+            const fieldName = match[2];
+            let existingEntry = marksArray.find(mark => mark.student_id === studentId);
+
+            if (!existingEntry) {
+                existingEntry = { student_id: studentId };
+                marksArray.push(existingEntry);
+            }
+
+            if (fieldName === 'student_id' || fieldName === 'subject_id') {
+                if (value !== '') {
+                    existingEntry[fieldName] = parseInt(value, 10);
                 }
+                continue;
+            }
+
+            if (numericFields.has(fieldName)) {
+                if (value !== '') {
+                    existingEntry[fieldName] = parseFloat(value);
+                }
+                continue;
+            }
+
+            if (value !== '') {
+                existingEntry[fieldName] = value;
+            }
+        }
+
+        const subjectId = document.getElementById('modalSubjectFilter')?.value;
+        const subjectFullMarks = document.getElementById('subjectFullMarks')?.value;
+        const subjectPassingMarks = document.getElementById('subjectPassingMarks')?.value;
+        const ctevtComponentDefaults = {};
+
+        if (EXAM_CATEGORY === 'ctevt') {
+            document.querySelectorAll('#componentMarksSection [data-component-category="ctevt"]').forEach((input) => {
+                const component = input.dataset.component;
+                const valueType = input.dataset.valueType;
+                const parsedValue = parseFloat(input.value || '0');
+
+                if (!component || !valueType || Number.isNaN(parsedValue)) {
+                    return;
+                }
+
+                const suffix = valueType === 'max' ? 'full_marks' : 'pass_marks';
+                ctevtComponentDefaults[`${component}_${suffix}`] = parsedValue;
+            });
+        }
+
+        const validMarks = marksArray.filter((mark) => {
+            if (EXAM_CATEGORY === 'ctevt') {
+                return [
+                    'theory_internal_marks',
+                    'theory_external_marks',
+                    'practical_internal_marks',
+                    'practical_external_marks',
+                    'marks_obtained',
+                ].some((field) => mark[field] !== undefined && !Number.isNaN(mark[field]));
+            }
+
+            return mark.marks_obtained !== undefined && !Number.isNaN(mark.marks_obtained);
+        });
+
+        if (validMarks.length === 0) {
+            showErrorMessage('Please enter marks for at least one student');
+            return;
+        }
+
+        validMarks.forEach(mark => {
+            if (subjectId) {
+                mark.subject_id = parseInt(subjectId);
+            }
                 if (subjectFullMarks) {
                     mark.full_marks = parseFloat(subjectFullMarks);
                 }
-                if (subjectPassingMarks) {
-                    mark.passing_marks = parseFloat(subjectPassingMarks);
-                }
-            });
-            
-            console.log('Submitting marks:', validMarks);
-            
-            // Send as JSON
-            const res = await fetch(form.action, {
-                method: 'POST',
-                headers: {
+            if (subjectPassingMarks) {
+                mark.passing_marks = parseFloat(subjectPassingMarks);
+            }
+
+            if (EXAM_CATEGORY === 'ctevt') {
+                Object.assign(mark, ctevtComponentDefaults);
+            }
+        });
+
+        const res = await fetch(form.action, {
+            method: 'POST',
+            headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': token,
                     'X-Requested-With': 'XMLHttpRequest'
@@ -1784,58 +1812,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 showErrorMessage(data.message || 'Error uploading marks');
             }
         } catch (err) {
-            console.error('Error:', err);
             showErrorMessage('Error uploading marks: ' + err.message);
         }
     });
-    
-    // Close modals on edit exam modal click
-    const editExamModal = document.getElementById('editExamModal');
-    if (editExamModal) {
-        editExamModal.addEventListener('click', (e) => {
-            if (e.target.id === 'editExamModal') {
-                closeEditExamModal();
-            }
-        });
-    }
-    
-    // Handle Edit Exam Form submission
-    const editExamForm = document.getElementById('editExamForm');
-    if (editExamForm) {
-        editExamForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const url = e.target.action;
-            const formData = new FormData(e.target);
-            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-            
-            try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': token,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: formData
-                });
-                
-                if (res.ok) {
-                    closeEditExamModal();
-                    window.location.reload();
-                } else {
-                    const data = await res.json();
-                    const errorsEl = document.getElementById('editExamErrors');
-                    if (errorsEl) {
-                        errorsEl.innerHTML = data.message || 'Error updating exam';
-                    } else {
-                        showErrorMessage(data.message || 'Error updating exam');
-                    }
-                }
-            } catch (error) {
-                console.error(error);
-                showErrorMessage('Error updating exam');
-            }
-        });
-    }
 });
 document.addEventListener('input', function(e) {
     if (e.target.matches('.student-component-input') || e.target.matches('.marks-obtained-input')) {

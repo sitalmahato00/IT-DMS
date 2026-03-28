@@ -3,15 +3,12 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\Teacher;
 use App\Models\Subject;
 use App\Models\SubjectTeacher;
 use App\Models\Notice;
 use App\Models\Attendance;
 use App\Models\Exam;
-use App\Models\ExamMark;
 use App\Support\TeacherSubjectRoster;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

@@ -11,29 +11,160 @@ use App\Models\Student;
 use App\Models\ExamMark;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Support\TeacherSubjectRoster;
 use App\Traits\LogsActivity;
-use Carbon\Carbon;
 
 class TeacherExamsController extends Controller
 {
     use LogsActivity;
+
     private function getTeacherSubjectIds()
     {
         $user = auth()->user();
         $teacher = $user->teacher;
-        
+
         if (!$teacher) {
             return [];
         }
-        
-        return SubjectTeacher::where('teacher_id', $teacher->id)
+
+        $teacherIds = array_values(array_unique(array_filter([
+            $teacher->id,
+            $user->id,
+        ])));
+
+        $subjectIds = SubjectTeacher::whereIn('teacher_id', $teacherIds)
             ->pluck('subject_id')
+            ->map(fn ($subjectId) => (int) $subjectId)
             ->toArray();
+
+        if (Schema::hasColumn('subjects', 'teacher_id')) {
+            $subjectIds = array_merge(
+                $subjectIds,
+                Subject::where('teacher_id', $teacher->id)
+                    ->pluck('id')
+                    ->map(fn ($subjectId) => (int) $subjectId)
+                    ->toArray()
+            );
+        }
+
+        return array_values(array_unique(array_filter($subjectIds)));
+    }
+
+    private function normalizeSemesterValue($semester): ?string
+    {
+        if ($semester === null || $semester === '') {
+            return null;
+        }
+
+        $normalized = strtolower(trim((string) $semester));
+        $numberToKey = [
+            '1' => 'first',
+            '2' => 'second',
+            '3' => 'third',
+            '4' => 'fourth',
+            '5' => 'fifth',
+            '6' => 'sixth',
+        ];
+
+        return $numberToKey[$normalized] ?? $normalized;
+    }
+
+    private function getSemesterFilterCandidates(string $semester): array
+    {
+        $normalized = $this->normalizeSemesterValue($semester);
+        $keyToNumber = [
+            'first' => '1',
+            'second' => '2',
+            'third' => '3',
+            'fourth' => '4',
+            'fifth' => '5',
+            'sixth' => '6',
+        ];
+
+        return array_values(array_unique(array_filter([
+            strtolower(trim($semester)),
+            $normalized,
+            $normalized ? ($keyToNumber[$normalized] ?? null) : null,
+        ])));
+    }
+
+    private function getSemesterLabel(?string $semester): string
+    {
+        $labels = [
+            'all' => 'All Semesters',
+            'first' => 'First Semester',
+            'second' => 'Second Semester',
+            'third' => 'Third Semester',
+            'fourth' => 'Fourth Semester',
+            'fifth' => 'Fifth Semester',
+            'sixth' => 'Sixth Semester',
+        ];
+
+        $normalized = $this->normalizeSemesterValue($semester) ?? 'all';
+
+        return $labels[$normalized] ?? ucfirst($normalized);
+    }
+
+    private function getTeacherSubjects(array $subjectIds)
+    {
+        if (empty($subjectIds)) {
+            return collect();
+        }
+
+        return Subject::whereIn('id', $subjectIds)
+            ->orderBy('subject_name')
+            ->get(['id', 'subject_name', 'subject_code', 'semester'])
+            ->map(function (Subject $subject) {
+                return [
+                    'id' => $subject->id,
+                    'name' => $subject->subject_name,
+                    'code' => $subject->subject_code,
+                    'semester' => $this->normalizeSemesterValue($subject->semester),
+                ];
+            })
+            ->values();
+    }
+
+    private function getEmptyIndexViewData(Request $request, $subjects = null): array
+    {
+        $subjects = $subjects ? collect($subjects)->values() : collect();
+
+        $allowedPerPage = [10, 25, 50];
+        $perPage = (int) $request->query('per_page', 10);
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 10;
+        }
+
+        $semesterOptions = [
+            '' => 'All Exams (All + Semester-specific)',
+            'all' => 'All Semesters',
+        ];
+
+        foreach ($subjects->pluck('semester')->filter()->unique()->values() as $semester) {
+            $semesterOptions[$semester] = $this->getSemesterLabel($semester);
+        }
+
+        return [
+            'exams' => new LengthAwarePaginator(collect(), 0, $perPage),
+            'subjects' => $subjects,
+            'semesterOptions' => $semesterOptions,
+            'selectedSemester' => (string) $request->query('semester', ''),
+            'selectedSubject' => (string) $request->query('subject', $request->query('subject_id', '')),
+            'stats' => [
+                'total' => 0,
+                'published' => 0,
+                'draft' => 0,
+                'archived' => 0,
+                'faculty' => 0,
+                'upcoming' => 0,
+                'completed' => 0,
+            ],
+            'upcomingCount' => 0,
+            'completedCount' => 0,
+        ];
     }
 
     /**
@@ -44,104 +175,46 @@ class TeacherExamsController extends Controller
         try {
             $user = auth()->user();
             $teacher = $user->teacher;
-            
+
             if (!$teacher) {
-                return view('teacher.exams', [
-                    'exams' => collect([]),
-                    'subjects' => collect([]),
-                    'selectedSubject' => null,
-                ]);
+                return view('teacher.exams', $this->getEmptyIndexViewData($request));
             }
-            
+
             $subjectIds = $this->getTeacherSubjectIds();
-            
+            $subjects = $this->getTeacherSubjects($subjectIds);
+
             if (empty($subjectIds)) {
-                return view('teacher.exams', [
-                    'exams' => collect([]),
-                    'subjects' => collect([]),
-                    'selectedSubject' => null,
-                ]);
+                return view('teacher.exams', $this->getEmptyIndexViewData($request, $subjects));
             }
-            
-            // Debug: Log the request parameters
-            Log::info('Teacher exams index called with params:', [
-                'subject' => $request->get('subject', ''),
-                'semester' => $request->get('semester', ''),
-                'search' => $request->get('q', '')
-            ]);
-            
-            $subject = $request->get('subject', '');
-            $semester = $request->get('semester', '');
-            $selectedSemester = $semester;
-            $search = $request->get('q', '');
-            $academic_year = $request->get('academic_year', '');
-            $exam_category = $request->get('exam_category', '');
-            $status = $request->get('status', '');
-            
-            // Get unique semesters from assignments
-            $assignedSemesters = SubjectTeacher::where('teacher_id', $teacher->id)
-                ->whereNotNull('semester')
-                ->distinct()
-                ->pluck('semester')
-                ->sort()
-                ->values()
-                ->toArray();
-            
-            // Prepare semester options, include explicit "all" for all-semester exams and optional "" for no filter
-            $semesterOptions = array_merge(['' => 'All Exams (All + Semester-specific)', 'all' => 'All Semesters'], array_combine($assignedSemesters, $assignedSemesters));
-            
-            // Get subjects for dropdown
-            $subjects = SubjectTeacher::where('teacher_id', $teacher->id)
-                ->with('subject')
-                ->get()
-                ->map(function ($st) {
-                    return [
-                        'id' => $st->subject->id,
-                        'name' => $st->subject->subject_name,
-                        'code' => $st->subject->subject_code,
-                    ];
-                });
-            
+
+            $selectedSubject = (string) $request->query('subject', $request->query('subject_id', ''));
+            $selectedSemester = (string) $request->query('semester', '');
+            $search = trim((string) $request->query('q', $request->query('search', '')));
+            $academicYear = trim((string) $request->query('academic_year', ''));
+            $status = trim((string) $request->query('status', ''));
+
+            $semesterOptions = [
+                '' => 'All Exams (All + Semester-specific)',
+                'all' => 'All Semesters',
+            ];
+
+            foreach ($subjects->pluck('semester')->filter()->unique()->values() as $semester) {
+                $semesterOptions[$semester] = $this->getSemesterLabel($semester);
+            }
+
             // Get exams for teacher's subjects
             $examsQuery = Exam::whereIn('subject_id', $subjectIds)
-                ->with(['subject'])
-                ->select('*', 'assessment_number');
-            
-            // Apply filters - use filled() to properly handle empty string values
-            if ($request->filled('academic_year') && $request->academic_year) {
-                $examsQuery = $examsQuery->forYear($request->academic_year);
+                ->with('subject');
+
+            if ($academicYear !== '') {
+                $examsQuery->forYear($academicYear);
             }
-            
-            // Handle semester filter - convert text to number or handle 'all' or empty
-            // Empty string '' means show all exams (all semesters + all semester-specific)
-            // 'all' means show ONLY exams where semester = 'all' (exams that apply to all semesters)
-            if ($request->filled('semester') && $request->semester) {
-                if ($request->semester === 'all') {
-                    // Show only exams where semester = 'all' (exams that apply to all semesters)
+
+            if ($selectedSemester !== '') {
+                if ($selectedSemester === 'all') {
                     $examsQuery = $examsQuery->where('semester', 'all');
                 } else {
-                    // Support both stored formats: "first" and "1" (legacy)
-                    $requested = strtolower((string) $request->semester);
-                    $keyToNumber = [
-                        'first' => '1',
-                        'second' => '2',
-                        'third' => '3',
-                        'fourth' => '4',
-                        'fifth' => '5',
-                        'sixth' => '6',
-                    ];
-                    $numberToKey = array_flip($keyToNumber);
-
-                    $numericSemester = $keyToNumber[$requested] ?? $requested;
-                    $textSemester = $numberToKey[$requested] ?? $requested;
-
-                    $candidates = array_values(array_unique(array_filter([
-                        $requested,
-                        $numericSemester,
-                        $textSemester,
-                    ])));
-
-                    // Include all-semester exams also when a specific assigned semester is selected
+                    $candidates = $this->getSemesterFilterCandidates($selectedSemester);
                     $examsQuery = $examsQuery->where(function ($q) use ($candidates) {
                         $q->whereIn('semester', $candidates)
                           ->orWhere('semester', 'all')
@@ -149,117 +222,63 @@ class TeacherExamsController extends Controller
                     });
                 }
             }
-            // If empty string, don't filter - show all exams
-            
-            if ($request->filled('subject_id') && $request->subject_id) {
-                $examsQuery = $examsQuery->where('subject_id', $request->subject_id);
+
+            if ($selectedSubject !== '') {
+                $examsQuery = $examsQuery->where('subject_id', (int) $selectedSubject);
             }
-            
-            if ($request->filled('exam_category') && $request->exam_category) {
-                $examsQuery = $examsQuery->where('exam_category', $request->exam_category);
-            }
-            
-            if ($request->filled('status') && $request->status) {
-                $status = $request->status;
-                
-                // Handle marks_filled and marks_not_filled status filters
+
+            if ($status !== '') {
                 if ($status === 'marks_filled') {
-                    // Get exams that have at least one mark entry
                     $examsQuery->whereHas('marks', function ($q) {
                         $q->whereNotNull('marks_obtained');
                     });
                 } elseif ($status === 'marks_not_filled') {
-                    // Get exams that have no mark entries or all marks are null
                     $examsQuery->whereDoesntHave('marks', function ($q) {
                         $q->whereNotNull('marks_obtained');
                     });
                 } elseif ($status === 'upcoming') {
-                    // Get exams with future exam dates
                     $examsQuery->where('exam_date', '>', now()->toDateString());
                 } elseif ($status === 'completed') {
-                    // Get exams with past exam dates
                     $examsQuery->where('exam_date', '<', now()->toDateString());
                 } else {
-                    // Standard status filter (published, draft, archived, faculty)
                     $examsQuery = $examsQuery->where('status', $status);
                 }
             }
-            
-            if ($request->filled('search') && $request->search) {
-                $search = $request->search;
-                $examsQuery = $examsQuery->where(function($q) use ($search) {
+
+            if ($search !== '') {
+                $examsQuery = $examsQuery->where(function ($q) use ($search) {
                     $q->where('exam_name', 'like', "%{$search}%")
                       ->orWhere('exam_name_ne', 'like', "%{$search}%");
                 });
             }
-            
-            // Order by created_at descending (newest first)
+
             $examsQuery = $examsQuery->orderBy('created_at', 'desc');
-            
-            // Validate per_page - only allow safe values
+
             $allowedPerPage = [10, 25, 50];
             $perPage = (int) $request->query('per_page', 10);
             if (!in_array($perPage, $allowedPerPage, true)) {
                 $perPage = 10;
             }
-            // normalize request param so pagination links use a sanitized value
+
             $request->merge(['per_page' => $perPage]);
-            
+
             $exams = $examsQuery->paginate($perPage)->appends($request->all());
-            
-            // Get filter data
-            $academicYears = $this->getAcademicYears();
-            $semesters = $this->getSemesters();
-            $allSubjects = Subject::whereIn('id', $subjectIds)->get();
-            
             $stats = $this->getStatistics($subjectIds);
-            
-            // Semester cards data (for UI grouping/navigation)
-            $semesterCards = $this->buildSemesterCards($request, $subjectIds);
-            [$selectedSemesterLabel, $selectedSemesterSubjects] = $this->getSelectedSemesterSubjects($request, $subjectIds);
-            
-            if ($request->ajax()) {
-                $tableRows = view('teacher.partials.exams_table_rows', compact('exams'))->render();
-                $tableFooter = view('teacher.partials.exams_table_footer', compact('exams'))->render();
-                $statsHtml = view('teacher.partials.exams_stats', compact('stats'))->render();
-                
-                return response()->json([
-                    'success' => true,
-                    'table_rows' => $tableRows,
-                    'table_footer' => $tableFooter,
-                    'stats' => $statsHtml,
-                ]);
-            }
-            
-            return view('teacher.exams', compact(
-                'exams',
-                'academicYears',
-                'semesterOptions',
-                'semesters',
-                'subjects',
-                'stats',
-                'semesterCards',
-                'selectedSemester',
-                'selectedSemesterLabel',
-                'selectedSemesterSubjects'
-            ));
+
+            return view('teacher.exams', [
+                'exams' => $exams,
+                'subjects' => $subjects,
+                'semesterOptions' => $semesterOptions,
+                'selectedSemester' => $selectedSemester,
+                'selectedSubject' => $selectedSubject,
+                'stats' => $stats,
+                'upcomingCount' => $stats['upcoming'] ?? 0,
+                'completedCount' => $stats['completed'] ?? 0,
+            ]);
         } catch (\Exception $e) {
             Log::error('Error loading teacher exams: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to load exams: ' . $e->getMessage());
         }
-    }
-    
-    /**
-     * Get academic years for filter dropdown
-     */
-    private function getAcademicYears()
-    {
-        return Exam::select('academic_year')
-            ->whereNotNull('academic_year')
-            ->distinct()
-            ->orderByDesc('academic_year')
-            ->pluck('academic_year')
-            ->toArray();
     }
     
     /**
@@ -321,81 +340,6 @@ class TeacherExamsController extends Controller
     }
     
     /**
-     * Build semester cards data for UI grouping/navigation
-     */
-    private function buildSemesterCards(Request $request, array $subjectIds)
-    {
-        $semesterCards = [];
-        
-        // Add "All" semester card
-        $allCount = Exam::whereIn('subject_id', $subjectIds)
-            ->where(function($query) {
-                $query->where('semester', 'all')
-                      ->orWhereNull('semester');
-            })
-            ->count();
-            
-        $semesterCards['all'] = [
-            'label' => 'All Semesters',
-            'count' => $allCount,
-            'selected' => $request->semester === 'all' || empty($request->semester),
-        ];
-        
-        // Add specific semester cards
-        $semesterNames = [
-            'first' => 'First Semester',
-            'second' => 'Second Semester',
-            'third' => 'Third Semester',
-            'fourth' => 'Fourth Semester',
-            'fifth' => 'Fifth Semester',
-            'sixth' => 'Sixth Semester',
-        ];
-        
-        foreach ($semesterNames as $key => $name) {
-            $count = Exam::whereIn('subject_id', $subjectIds)
-                ->where('semester', $key)
-                ->count();
-                
-            $semesterCards[$key] = [
-                'label' => $name,
-                'count' => $count,
-                'selected' => $request->semester === $key,
-            ];
-        }
-        
-        return $semesterCards;
-    }
-    
-    /**
-     * Get selected semester label and subjects for display
-     */
-    private function getSelectedSemesterSubjects(Request $request, array $subjectIds)
-    {
-        $semester = $request->get('semester', '');
-        $selectedSemesterLabel = 'All Semesters';
-        $selectedSemesterSubjects = collect([]);
-        
-        if (!empty($semester) && $semester !== 'all') {
-            $selectedSemesterLabel = ucfirst($semester) . ' Semester';
-            
-            // Get subjects for the selected semester
-            $selectedSemesterSubjects = Subject::whereIn('id', $subjectIds)
-                ->where('semester', $semester)
-                ->orderBy('subject_name')
-                ->get(['id', 'subject_name', 'subject_code']);
-        } elseif (empty($semester) || $semester === 'all') {
-            $selectedSemesterLabel = 'All Semesters';
-            
-            // Get all subjects (no semester filter)
-            $selectedSemesterSubjects = Subject::whereIn('id', $subjectIds)
-                ->orderBy('subject_name')
-                ->get(['id', 'subject_name', 'subject_code']);
-        }
-        
-        return [$selectedSemesterLabel, $selectedSemesterSubjects];
-    }
-    
-    /**
      * Get students for exam entry
      */
     public function getExamStudents(Request $request, $examId)
@@ -422,8 +366,8 @@ class TeacherExamsController extends Controller
 
         // Get students enrolled in this subject
         $students = DB::table('subject_students')
-            ->join('users', 'subject_students.student_id', '=', 'users.id')
-            ->leftJoin('students', 'users.id', '=', 'students.user_id')
+            ->join('students', 'subject_students.student_id', '=', 'students.id')
+            ->join('users', 'students.user_id', '=', 'users.id')
             ->where('subject_students.subject_id', $exam->subject_id)
             ->select(
                 'students.id as student_id',
@@ -439,7 +383,7 @@ class TeacherExamsController extends Controller
         $existingMarks = DB::table('exam_marks')
             ->where('exam_id', $examId)
             ->where('subject_id', $exam->subject_id)
-            ->pluck('marks', 'student_id');
+            ->pluck('marks_obtained', 'student_id');
 
         // Merge with existing marks
         $students = $students->map(function ($student) use ($existingMarks) {
@@ -469,14 +413,12 @@ class TeacherExamsController extends Controller
                 return redirect()->route('teacher.exams')->with('error', 'Exam is not assigned to your subjects.');
             }
 
-            $exam->load(['subject', 'marks.student.user']);
+            $exam->load(['subject', 'marks.student.user', 'marks.subject']);
 
-            $totalStudents = $exam->marks()->count();
-            $averageMarks = $exam->marks()->avg('marks_obtained') ?? 0;
-            $passCount = $exam->marks()->where('percentage', '>=', 35)->count();
-            $passRate = $totalStudents > 0 ? round(($passCount / $totalStudents) * 100, 2) : 0;
-
-            $subjects = Subject::whereIn('id', $subjectIds)->orderBy('subject_name')->get();
+            $totalStudents = $exam->subject_id
+                ? TeacherSubjectRoster::studentCountForSubject((int) $exam->subject_id)
+                : $exam->marks()->distinct('student_id')->count('student_id');
+            $averageMarks = $exam->marks()->avg('percentage') ?? 0;
             $semesters = $this->getSemesters();
             $activeExamCategory = in_array($exam->exam_category, ['assessment', 'ctevt']) ? $exam->exam_category : 'assessment';
 
@@ -484,8 +426,6 @@ class TeacherExamsController extends Controller
                 'exam',
                 'totalStudents',
                 'averageMarks',
-                'passRate',
-                'subjects',
                 'semesters',
                 'activeExamCategory'
             ));
@@ -573,7 +513,8 @@ class TeacherExamsController extends Controller
         $query = Subject::whereIn('id', $subjectIds);
 
         if (!$isAll) {
-            $query->where('semester', $semester);
+            $candidates = $this->getSemesterFilterCandidates($semester);
+            $query->whereIn('semester', $candidates);
         }
 
         $subjects = $query->select(['id', 'subject_name', 'subject_code', 'semester'])->orderBy('subject_name')->get();
@@ -592,6 +533,9 @@ class TeacherExamsController extends Controller
         }
 
         $subjectIds = $this->getTeacherSubjectIds();
+        if ($exam->subject_id && !in_array((int) $exam->subject_id, $subjectIds, true)) {
+            return response()->json(['success' => false, 'message' => 'Exam is not assigned to you'], 403);
+        }
 
         $subjectId = $request->get('subject_id') ?: $exam->subject_id;
         if ($subjectId) {
@@ -621,15 +565,16 @@ class TeacherExamsController extends Controller
 
         $semester = (string)$request->get('semester', '');
         if ($semester && strtolower($semester) !== 'all') {
-            $studentQuery->where('semester', $semester);
+            $studentQuery->whereIn('semester', $this->getSemesterFilterCandidates($semester));
         }
 
-        $students = $studentQuery->get()->map(function ($student) {
+        $attendanceSubjectId = $subjectId ?: $exam->subject_id;
+        $students = $studentQuery->get()->map(function ($student) use ($attendanceSubjectId) {
             return (object)[
                 'id' => $student->id,
                 'student_name' => $student->user->name ?? 'Unknown',
                 'roll_no' => $student->roll_no ?? '-',
-                'attendance_percentage' => $student->attendance_percentage ?? 0,
+                'attendance_percentage' => $student->getAttendancePercentage($attendanceSubjectId),
             ];
         });
 
@@ -648,6 +593,18 @@ class TeacherExamsController extends Controller
                 'percentage' => $mark->percentage,
                 'grade' => $mark->grade,
                 'subject_id' => $mark->subject_id,
+                'theory_internal_marks' => $mark->theory_internal_marks,
+                'theory_external_marks' => $mark->theory_external_marks,
+                'practical_internal_marks' => $mark->practical_internal_marks,
+                'practical_external_marks' => $mark->practical_external_marks,
+                'theory_internal_full_marks' => $mark->theory_internal_full_marks,
+                'theory_external_full_marks' => $mark->theory_external_full_marks,
+                'practical_internal_full_marks' => $mark->practical_internal_full_marks,
+                'practical_external_full_marks' => $mark->practical_external_full_marks,
+                'theory_internal_pass_marks' => $mark->theory_internal_pass_marks,
+                'theory_external_pass_marks' => $mark->theory_external_pass_marks,
+                'practical_internal_pass_marks' => $mark->practical_internal_pass_marks,
+                'practical_external_pass_marks' => $mark->practical_external_pass_marks,
             ];
         }
 
@@ -667,21 +624,41 @@ class TeacherExamsController extends Controller
     {
         $teacher = auth()->user()->teacher;
         if (!$teacher) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Teacher profile not found.'], 404);
+            }
+
             return back()->with('error', 'Teacher profile not found.');
         }
 
         $subjectIds = $this->getTeacherSubjectIds();
         if ($exam->subject_id && !in_array($exam->subject_id, $subjectIds, true)) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Exam is not assigned to your subjects.'], 403);
+            }
+
             return back()->with('error', 'Exam is not assigned to your subjects.');
         }
 
         $validated = $request->validate([
             'marks' => 'required|array|min:1',
             'marks.*.student_id' => 'required|exists:students,id',
-            'marks.*.marks_obtained' => 'required|numeric|min:0',
+            'marks.*.marks_obtained' => 'nullable|numeric|min:0',
             'marks.*.full_marks' => 'nullable|numeric|min:0',
             'marks.*.passing_marks' => 'nullable|numeric|min:0',
             'marks.*.subject_id' => 'nullable|exists:subjects,id',
+            'marks.*.theory_internal_marks' => 'nullable|numeric|min:0',
+            'marks.*.theory_external_marks' => 'nullable|numeric|min:0',
+            'marks.*.practical_internal_marks' => 'nullable|numeric|min:0',
+            'marks.*.practical_external_marks' => 'nullable|numeric|min:0',
+            'marks.*.theory_internal_full_marks' => 'nullable|numeric|min:0',
+            'marks.*.theory_external_full_marks' => 'nullable|numeric|min:0',
+            'marks.*.practical_internal_full_marks' => 'nullable|numeric|min:0',
+            'marks.*.practical_external_full_marks' => 'nullable|numeric|min:0',
+            'marks.*.theory_internal_pass_marks' => 'nullable|numeric|min:0',
+            'marks.*.theory_external_pass_marks' => 'nullable|numeric|min:0',
+            'marks.*.practical_internal_pass_marks' => 'nullable|numeric|min:0',
+            'marks.*.practical_external_pass_marks' => 'nullable|numeric|min:0',
             'description' => 'nullable|string|max:1000',
         ]);
 
@@ -689,17 +666,73 @@ class TeacherExamsController extends Controller
         try {
             $createdCount = 0;
             $updatedCount = 0;
+            $isCtevt = $exam->exam_category === 'ctevt';
 
             foreach ($validated['marks'] as $markData) {
-                $studentId = $markData['student_id'];
-                $marksObtained = $markData['marks_obtained'];
-                $subjectId = $markData['subject_id'] ?? $exam->subject_id;
-
-                $fullMarks = $markData['full_marks'] ?? $exam->full_marks;
-                $passingMarks = $markData['passing_marks'] ?? $exam->passing_marks;
+                $studentId = (int) $markData['student_id'];
+                $subjectId = isset($markData['subject_id']) ? (int) $markData['subject_id'] : $exam->subject_id;
 
                 if ($subjectId && !in_array($subjectId, $subjectIds, true)) {
                     continue;
+                }
+
+                if ($isCtevt) {
+                    $componentMarks = [
+                        'theory_internal_marks' => (float) ($markData['theory_internal_marks'] ?? 0),
+                        'theory_external_marks' => (float) ($markData['theory_external_marks'] ?? 0),
+                        'practical_internal_marks' => (float) ($markData['practical_internal_marks'] ?? 0),
+                        'practical_external_marks' => (float) ($markData['practical_external_marks'] ?? 0),
+                    ];
+
+                    $componentFullMarks = [
+                        'theory_internal_full_marks' => (float) ($markData['theory_internal_full_marks'] ?? $exam->theory_internal_max_marks ?? 0),
+                        'theory_external_full_marks' => (float) ($markData['theory_external_full_marks'] ?? $exam->theory_external_max_marks ?? 0),
+                        'practical_internal_full_marks' => (float) ($markData['practical_internal_full_marks'] ?? $exam->practical_internal_max_marks ?? 0),
+                        'practical_external_full_marks' => (float) ($markData['practical_external_full_marks'] ?? $exam->practical_external_max_marks ?? 0),
+                    ];
+
+                    $componentPassingMarks = [
+                        'theory_internal_pass_marks' => (float) ($markData['theory_internal_pass_marks'] ?? $exam->theory_internal_pass_marks ?? 0),
+                        'theory_external_pass_marks' => (float) ($markData['theory_external_pass_marks'] ?? $exam->theory_external_pass_marks ?? 0),
+                        'practical_internal_pass_marks' => (float) ($markData['practical_internal_pass_marks'] ?? $exam->practical_internal_pass_marks ?? 0),
+                        'practical_external_pass_marks' => (float) ($markData['practical_external_pass_marks'] ?? $exam->practical_external_pass_marks ?? 0),
+                    ];
+
+                    foreach ($componentMarks as $field => $value) {
+                        $fullField = str_replace('_marks', '_full_marks', $field);
+                        $componentFull = (float) ($componentFullMarks[$fullField] ?? 0);
+
+                        if ($componentFull > 0 && $value > $componentFull) {
+                            throw ValidationException::withMessages([
+                                'marks' => "Component marks cannot exceed {$componentFull} for {$field}.",
+                            ]);
+                        }
+                    }
+
+                    $marksObtained = array_sum($componentMarks);
+                    if ($marksObtained <= 0 && isset($markData['marks_obtained'])) {
+                        $marksObtained = (float) $markData['marks_obtained'];
+                    }
+
+                    $fullMarks = array_sum($componentFullMarks);
+                    if ($fullMarks <= 0) {
+                        $fullMarks = (float) ($markData['full_marks'] ?? $exam->full_marks ?? 0);
+                    }
+
+                    $passingMarks = array_sum($componentPassingMarks);
+                    if ($passingMarks <= 0) {
+                        $passingMarks = (float) ($markData['passing_marks'] ?? $exam->passing_marks ?? 0);
+                    }
+                } else {
+                    $marksObtained = (float) ($markData['marks_obtained'] ?? 0);
+                    $fullMarks = (float) ($markData['full_marks'] ?? $exam->full_marks ?? 0);
+                    $passingMarks = (float) ($markData['passing_marks'] ?? $exam->passing_marks ?? 0);
+
+                    if ($fullMarks > 0 && $marksObtained > $fullMarks) {
+                        throw ValidationException::withMessages([
+                            'marks' => "Obtained marks cannot exceed full marks ({$fullMarks}).",
+                        ]);
+                    }
                 }
 
                 $percentage = $fullMarks > 0 ? round(($marksObtained / $fullMarks) * 100, 2) : 0;
@@ -710,32 +743,35 @@ class TeacherExamsController extends Controller
                     ->where('subject_id', $subjectId)
                     ->first();
 
+                $payload = [
+                    'marks_obtained' => $marksObtained,
+                    'full_marks' => $fullMarks,
+                    'passing_marks' => $passingMarks,
+                    'percentage' => $percentage,
+                    'grade' => $grade,
+                    'graded_by' => auth()->id(),
+                    'graded_at' => now(),
+                    'remarks' => $request->input('description'),
+                ];
+
+                if ($isCtevt) {
+                    $payload = array_merge(
+                        $payload,
+                        $componentMarks,
+                        $componentFullMarks,
+                        $componentPassingMarks
+                    );
+                }
+
                 if ($existing) {
-                    $existing->update([
-                        'marks_obtained' => $marksObtained,
-                        'full_marks' => $fullMarks,
-                        'passing_marks' => $passingMarks,
-                        'percentage' => $percentage,
-                        'grade' => $grade,
-                        'graded_by' => auth()->id(),
-                        'graded_at' => now(),
-                        'remarks' => $request->input('description'),
-                    ]);
+                    $existing->update($payload);
                     $updatedCount++;
                 } else {
-                    ExamMark::create([
+                    ExamMark::create(array_merge([
                         'exam_id' => $exam->id,
                         'subject_id' => $subjectId,
                         'student_id' => $studentId,
-                        'marks_obtained' => $marksObtained,
-                        'full_marks' => $fullMarks,
-                        'passing_marks' => $passingMarks,
-                        'percentage' => $percentage,
-                        'grade' => $grade,
-                        'graded_by' => auth()->id(),
-                        'graded_at' => now(),
-                        'remarks' => $request->input('description'),
-                    ]);
+                    ], $payload));
                     $createdCount++;
                 }
             }
@@ -745,12 +781,51 @@ class TeacherExamsController extends Controller
             }
 
             DB::commit();
-            return back()->with('success', "Marks uploaded successfully! Created: {$createdCount}, Updated: {$updatedCount}");
+            $message = "Marks uploaded successfully. Created: {$createdCount}, Updated: {$updatedCount}";
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'created' => $createdCount,
+                    'updated' => $updatedCount,
+                ]);
+            }
+
+            return back()->with('success', $message);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => collect($e->errors())->flatten()->first() ?? 'Validation failed.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
+            throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error uploading marks (teacher): ' . $e->getMessage());
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to upload marks: ' . $e->getMessage(),
+                ], 500);
+            }
+
             return back()->with('error', 'Failed to upload marks: ' . $e->getMessage());
         }
+    }
+
+    public function uploadMarksAjax(Request $request, Exam $exam)
+    {
+        $request->headers->set('Accept', 'application/json');
+        $request->headers->set('X-Requested-With', 'XMLHttpRequest');
+
+        return $this->uploadMarks($request, $exam);
     }
 
     private function calculateGrade($marks, $fullMarks)
@@ -771,6 +846,11 @@ class TeacherExamsController extends Controller
     public function getSubjectMarks(Exam $exam, $subjectId)
     {
         try {
+            $subjectIds = $this->getTeacherSubjectIds();
+            if (!in_array((int) $subjectId, $subjectIds, true)) {
+                return response()->json(['success' => false, 'message' => 'Subject not assigned to you'], 403);
+            }
+
             $subject = Subject::find($subjectId);
             if (!$subject) {
                 return response()->json(['success' => false, 'message' => 'Subject not found'], 404);
@@ -919,4 +999,3 @@ class TeacherExamsController extends Controller
         }
     }
 }
-
