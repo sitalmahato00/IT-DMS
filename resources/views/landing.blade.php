@@ -191,7 +191,7 @@
         }
 
         .landing-shell {
-            max-width: 86rem;
+            width: 100%;
         }
 
         .landing-section {
@@ -473,9 +473,9 @@
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.16);
             border-radius: 1.75rem;
-            background: linear-gradient(180deg, rgba(30, 41, 59, 0.52) 0%, rgba(51, 65, 85, 0.46) 62%, rgba(107, 33, 49, 0.4) 100%);
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.28) 0%, rgba(51, 65, 85, 0.24) 62%, rgba(107, 33, 49, 0.18) 100%);
             box-shadow: 0 18px 40px rgba(15, 23, 42, 0.24);
-            backdrop-filter: blur(14px);
+            backdrop-filter: blur(8px);
             padding: 1rem 1.1rem;
             animation: heroCardFloat 8.5s ease-in-out infinite;
         }
@@ -483,19 +483,19 @@
         .landing-hero-card:nth-child(2) { animation-delay: 1.3s; }
 
         .dark .landing-hero-card {
-            background: linear-gradient(180deg, rgba(16, 24, 40, 0.88) 0%, rgba(11, 18, 32, 0.94) 100%);
+            background: linear-gradient(180deg, rgba(16, 24, 40, 0.52) 0%, rgba(11, 18, 32, 0.58) 100%);
             border-color: rgba(148, 163, 184, 0.12);
             box-shadow: 0 20px 44px rgba(2, 6, 23, 0.38);
         }
 
         .landing-hero-card-ghost {
-            background: rgba(15, 23, 42, 0.34);
+            background: rgba(15, 23, 42, 0.18);
             border-color: rgba(255, 255, 255, 0.18);
             box-shadow: 0 20px 42px rgba(15, 23, 42, 0.2);
         }
 
         .dark .landing-hero-card-ghost {
-            background: rgba(15, 23, 42, 0.54);
+            background: rgba(15, 23, 42, 0.28);
             border-color: rgba(255, 255, 255, 0.12);
         }
 
