@@ -206,6 +206,12 @@
             background: var(--landing-surface-soft);
             box-shadow: var(--landing-shadow);
             padding: clamp(1.5rem, 2.5vw, 2.5rem);
+            transition: transform 220ms ease, box-shadow 220ms ease;
+        }
+
+        .landing-stage:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 28px 60px rgba(2, 6, 23, 0.35);
         }
 
         .landing-stage::before {
@@ -285,12 +291,22 @@
             background: var(--landing-surface);
             box-shadow: var(--landing-shadow);
             backdrop-filter: blur(14px);
+            transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+        }
+
+        .landing-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35);
         }
 
         .dark .landing-panel {
             background: linear-gradient(180deg, rgba(14, 23, 41, 0.94) 0%, rgba(11, 18, 32, 0.98) 100%);
             border-color: rgba(148, 163, 184, 0.12);
             box-shadow: 0 18px 40px rgba(2, 6, 23, 0.3);
+        }
+
+        .dark .landing-panel:hover {
+            box-shadow: 0 22px 50px rgba(2, 6, 23, 0.45);
         }
 
         .landing-panel::before {
@@ -920,12 +936,12 @@
 
                         <aside class="landing-hero-rail lg:-mt-4">
                             <div class="landing-hero-card landing-hero-card-ghost">
-                                <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+                                <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/95">
                                     {{ $locale === 'ne' ? 'विभाग प्रोफाइल' : 'Department Snapshot' }}
                                 </div>
                                 <div class="mt-4 landing-hero-meta">
                                     <div class="landing-hero-meta-item landing-hero-meta-item-ghost">
-                                        <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75">
+                                        <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/95">
                                             {{ $locale === 'ne' ? 'स्थान' : 'Location' }}
                                         </div>
                                         <div class="mt-2 text-sm font-semibold text-white">
@@ -933,7 +949,7 @@
                                         </div>
                                     </div>
                                     <div class="landing-hero-meta-item landing-hero-meta-item-ghost">
-                                        <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75">
+                                        <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/95">
                                             {{ $locale === 'ne' ? 'सम्पर्क' : 'Connect' }}
                                         </div>
                                         <div class="mt-2 space-y-1 text-sm font-medium text-white/95">
@@ -950,7 +966,7 @@
                                     </div>
                                     <div class="grid grid-cols-2 gap-3">
                                         <div class="landing-hero-meta-item landing-hero-meta-item-ghost">
-                                            <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75">
+                                            <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/95">
                                                 {{ $locale === 'ne' ? 'स्थापना' : 'Established' }}
                                             </div>
                                             <div class="mt-2 text-sm font-semibold text-white">
@@ -958,7 +974,7 @@
                                             </div>
                                         </div>
                                         <div class="landing-hero-meta-item landing-hero-meta-item-ghost">
-                                            <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75">
+                                            <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/95">
                                                 {{ $locale === 'ne' ? 'दर्ता' : 'Register' }}
                                             </div>
                                             <div class="mt-2 text-sm font-semibold text-white">
@@ -1752,7 +1768,7 @@
                             @endif
                             <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-gray-950/70 via-gray-950/35 to-transparent p-4">
                                 <div class="truncate text-sm font-semibold text-white">{{ $g->title }}</div>
-                                <div class="mt-1 text-xs font-medium text-white/80">{{ $g->category_text }}</div>
+                                <div class="mt-1 text-xs font-medium text-white/95">{{ $g->category_text }}</div>
                             </div>
                         </a>
                     @empty
