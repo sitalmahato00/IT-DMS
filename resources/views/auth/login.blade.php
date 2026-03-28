@@ -14,8 +14,12 @@
         : ['Information', 'Technology'];
 
     $heroSummary = $locale === 'ne'
-        ? 'आफ्नो विभागीय पोर्टल, उपस्थिती, नतिजा, सूचना र अध्ययन सामग्रीमा सुरक्षित रूपमा पहुँच गर्नुहोस्।'
-        : 'Secure access to your department portal, attendance, results, notices, and study materials.';
+        ? 'विभागीय पोर्टलमा सुरक्षित पहुँच'
+        : 'Secure access to your department portal';
+
+    $heroDescription = $locale === 'ne'
+        ? 'उपस्थिति, नतिजा, सूचना, अध्ययन सामग्री, र विभागीय अपडेटहरू एउटै प्रणालीमार्फत पहुँच गर्नुहोस्।'
+        : 'Access attendance, results, notices, study materials, and department updates through one connected system.';
 
     $addressInfo = $addressText ?: ($locale === 'ne' ? 'काठमाडौँ, नेपाल' : 'Kathmandu, Nepal');
     $phoneInfo = $department?->phone ?: ($locale === 'ne' ? 'फोन नम्बर एडमिन सेटिङबाट राख्नुहोस्।' : 'Set the phone number from admin settings.');
@@ -66,8 +70,11 @@
                     <h1 class="auth-hero-title">
                         {{ $titleLines[0] }}<br>{{ $titleLines[1] }}
                     </h1>
-                    <p class="auth-hero-text">
+                    <p class="auth-hero-summary">
                         {{ $heroSummary }}
+                    </p>
+                    <p class="auth-hero-text">
+                        {{ $heroDescription }}
                     </p>
 
                     <div class="auth-info-list" aria-label="{{ $locale === 'ne' ? 'सम्पर्क जानकारी' : 'Department contact information' }}">

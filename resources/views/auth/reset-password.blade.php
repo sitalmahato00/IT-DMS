@@ -1,176 +1,195 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - IT Department Management System (IT-DMS)</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-100">
-    <div class="flex h-screen">
-        <!-- Left Side - Red Section -->
-        <div class="hidden md:flex md:w-1/2 bg-red-900 text-white flex-col justify-between p-12">
-            <div></div>
-            <div class="text-center">
-                <!-- Icon -->
-                <div class="flex justify-center mb-8">
-                    <div class="w-24 h-24 bg-red-800 rounded-full flex items-center justify-center border-4 border-red-700">
-                        <i class="bi bi-lock-fill text-white" style="font-size: 3rem;"></i>
+@php
+    $locale = app()->getLocale();
+    $homeUrl = route('home');
+    $department = \App\Models\Department::first();
+    $departmentName = $department
+        ? (($locale === 'ne' && !empty($department->name_nepali)) ? $department->name_nepali : $department->name)
+        : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Information Technology');
+    $departmentShort = $department?->short_name ?: ($locale === 'ne' ? 'आईटी' : 'IT');
+    $departmentLogoUrl = $department?->getLogoUrl() ?? asset('images/default-logo.svg');
+    $addressText = $department
+        ? (($locale === 'ne' && !empty($department->address_nepali)) ? $department->address_nepali : $department->address)
+        : null;
+    $addressInfo = $addressText ?: ($locale === 'ne' ? 'काठमाडौँ, नेपाल' : 'Kathmandu, Nepal');
+@endphp
+
+@extends('layouts.public')
+
+@push('head')
+    @include('auth.partials.brand-theme')
+@endpush
+
+@section('content')
+    <div class="auth-page">
+        <div class="auth-shell">
+            {{-- LEFT: Hero panel --}}
+            <section class="auth-hero">
+                <div class="auth-hero-content">
+                    <div class="auth-brand">
+                        <div class="auth-brand-mark">
+                            <img src="{{ $departmentLogoUrl }}" alt="{{ $departmentName }} logo" class="auth-brand-logo" />
+                        </div>
+                        <div class="auth-brand-copy">
+                            <span class="auth-brand-kicker">{{ $departmentShort }}</span>
+                            <div class="auth-brand-title">{{ $departmentName }} {{ $locale === 'ne' ? 'व्यवस्थापन प्रणाली' : 'Management System' }}</div>
+                        </div>
+                    </div>
+
+                    <h1 class="auth-hero-title">
+                        {{ $locale === 'ne' ? 'नयाँ' : 'New' }}<br>{{ $locale === 'ne' ? 'पासवर्ड' : 'Password' }}
+                    </h1>
+                    <p class="auth-hero-summary">
+                        {{ $locale === 'ne' ? 'आफ्नो खाता सुरक्षित गर्नुहोस्' : 'Secure your account' }}
+                    </p>
+                    <p class="auth-hero-text">
+                        {{ $locale === 'ne'
+                            ? 'तपाईंको IT-DMS खाता र शैक्षिक अभिलेखहरू सुरक्षित राख्न बलियो पासवर्ड बनाउनुहोस्।'
+                            : 'Create a strong password to protect your IT-DMS account and keep your academic records safe.' }}
+                    </p>
+
+                    <div class="auth-info-list">
+                        <div class="auth-info-item">
+                            <span class="auth-info-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                                </svg>
+                            </span>
+                            <span>{{ $locale === 'ne' ? 'कम्तीमा ८ अक्षर' : 'Minimum 8 characters' }}</span>
+                        </div>
+                        <div class="auth-info-item">
+                            <span class="auth-info-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <rect x="5.25" y="10.25" width="13.5" height="9" rx="2" stroke-width="1.8"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8.25 10.25V8a3.75 3.75 0 0 1 7.5 0v2.25"/>
+                                </svg>
+                            </span>
+                            <span>{{ $locale === 'ne' ? 'अंक र विशेष चिह्न समावेश गर्नुहोस्' : 'Include numbers & special characters' }}</span>
+                        </div>
                     </div>
                 </div>
-                <!-- Text -->
-                <h2 class="text-4xl font-bold mb-6">
-                    Secure Your<br>Account
-                </h2>
-                <p class="text-red-100 text-sm leading-relaxed max-w-xs mx-auto">
-                    Create a strong password to protect your IT-DMS account and keep your academic records safe.
-                </p>
-            </div>
-            <div></div>
-        </div>
+            </section>
 
-        <!-- Right Side - Reset Password Form -->
-        <div class="w-full md:w-1/2 bg-white flex flex-col justify-center items-center p-8 relative overflow-y-auto pt-16">
-            <div class="w-full max-w-md relative">
-                <!-- Logo/Icon -->
-                <div class="flex justify-center mb-8">
-                    <div class="w-16 h-16 bg-red-600 rounded-lg flex items-center justify-center">
-                        <i class="bi bi-lock-fill text-white" style="font-size: 1.75rem;"></i>
+            {{-- RIGHT: Reset password form --}}
+            <section class="auth-side" x-data="{ showPassword: false, showConfirm: false }">
+                <div class="auth-stack">
+                    @if ($errors->any())
+                        <div class="auth-alert" role="alert">
+                            @foreach ($errors->all() as $error)
+                                <div>{{ $error }}</div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <div class="auth-card">
+                        <div class="auth-panel-intro">
+                            <div class="auth-panel-logo-wrap" aria-hidden="true">
+                                <img src="{{ $departmentLogoUrl }}" alt="" class="auth-panel-logo" />
+                            </div>
+                            <div class="auth-panel-copy">
+                                <h2 class="auth-panel-title">{{ $departmentName }}</h2>
+                                <p class="auth-panel-subtitle">{{ $locale === 'ne' ? 'IT विभाग व्यवस्थापन प्रणाली' : 'IT Department Management System' }}</p>
+                                <p class="auth-panel-meta">{{ $addressInfo }}</p>
+                            </div>
+                        </div>
+
+                        <div class="auth-divider"></div>
+
+                        <div class="auth-form-intro">
+                            <h3 class="auth-form-title">{{ $locale === 'ne' ? 'नयाँ पासवर्ड' : 'Create New Password' }}</h3>
+                            <p class="auth-form-text">
+                                {{ $locale === 'ne'
+                                    ? 'आफ्नो खाताको लागि नयाँ बलियो पासवर्ड बनाउनुहोस्।'
+                                    : 'Enter a strong new password to reset your account access.' }}
+                            </p>
+                        </div>
+
+                        <form method="POST" action="{{ route('password.store') }}">
+                            @csrf
+                            <input type="hidden" name="token" value="{{ $request->route('token') }}" />
+
+                            {{-- Email (readonly) --}}
+                            <div class="auth-field">
+                                <label for="email" class="auth-label">{{ $locale === 'ne' ? 'इमेल ठेगाना' : 'Email Address' }}</label>
+                                <div class="auth-input-wrap">
+                                    <span class="auth-input-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3.75 7.5 12 13.5l8.25-6" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.5 6.75h15A1.5 1.5 0 0 1 21 8.25v7.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 15.75v-7.5a1.5 1.5 0 0 1 1.5-1.5Z" />
+                                        </svg>
+                                    </span>
+                                    <input id="email" class="auth-input" type="email" name="email"
+                                        value="{{ old('email', $request->email) }}" readonly
+                                        style="background:#f9fafb; color:#6b7280;" />
+                                </div>
+                            </div>
+
+                            {{-- New Password --}}
+                            <div class="auth-field">
+                                <label for="password" class="auth-label">{{ $locale === 'ne' ? 'नयाँ पासवर्ड' : 'New Password' }}</label>
+                                <div class="auth-input-wrap">
+                                    <span class="auth-input-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <rect x="5.25" y="10.25" width="13.5" height="9" rx="2" stroke-width="1.8"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8.25 10.25V8a3.75 3.75 0 0 1 7.5 0v2.25"/>
+                                        </svg>
+                                    </span>
+                                    <input id="password" class="auth-input" name="password" required
+                                        x-bind:type="showPassword ? 'text' : 'password'"
+                                        autocomplete="new-password"
+                                        placeholder="{{ $locale === 'ne' ? 'नयाँ पासवर्ड लेख्नुहोस्' : 'Enter new password' }}" />
+                                    <button type="button" class="auth-toggle" @click="showPassword = !showPassword">
+                                        <svg x-show="!showPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.036 12.322a1 1 0 0 1 0-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 0 1 0 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                        <svg x-show="showPassword" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m3 3 18 18M10.73 5.08A10.45 10.45 0 0 1 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 0 1 0 .644 10.48 10.48 0 0 1-4.043 5.146M6.61 6.61A10.48 10.48 0 0 0 2.036 11.678a1 1 0 0 0 0 .644C3.423 16.49 7.36 19.5 12 19.5c1.855 0 3.598-.48 5.11-1.322M9.88 9.88A3 3 0 1 0 14.12 14.12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Confirm Password --}}
+                            <div class="auth-field">
+                                <label for="password_confirmation" class="auth-label">{{ $locale === 'ne' ? 'पासवर्ड पुष्टि' : 'Confirm Password' }}</label>
+                                <div class="auth-input-wrap">
+                                    <span class="auth-input-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <rect x="5.25" y="10.25" width="13.5" height="9" rx="2" stroke-width="1.8"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8.25 10.25V8a3.75 3.75 0 0 1 7.5 0v2.25"/>
+                                        </svg>
+                                    </span>
+                                    <input id="password_confirmation" class="auth-input" name="password_confirmation" required
+                                        x-bind:type="showConfirm ? 'text' : 'password'"
+                                        autocomplete="new-password"
+                                        placeholder="{{ $locale === 'ne' ? 'पासवर्ड दोहोर्याउनुहोस्' : 'Confirm new password' }}" />
+                                    <button type="button" class="auth-toggle" @click="showConfirm = !showConfirm">
+                                        <svg x-show="!showConfirm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.036 12.322a1 1 0 0 1 0-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 0 1 0 .644C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.964-7.178Z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                        <svg x-show="showConfirm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m3 3 18 18M10.73 5.08A10.45 10.45 0 0 1 12 4.5c4.638 0 8.573 3.007 9.963 7.178a1 1 0 0 1 0 .644 10.48 10.48 0 0 1-4.043 5.146M6.61 6.61A10.48 10.48 0 0 0 2.036 11.678a1 1 0 0 0 0 .644C3.423 16.49 7.36 19.5 12 19.5c1.855 0 3.598-.48 5.11-1.322M9.88 9.88A3 3 0 1 0 14.12 14.12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="auth-submit full" style="margin-top:1.25rem;">
+                                {{ $locale === 'ne' ? 'पासवर्ड रिसेट गर्नुहोस्' : 'Reset Password' }}
+                            </button>
+
+                            <a href="{{ route('login') }}" class="auth-secondary-action">
+                                {{ $locale === 'ne' ? 'लगइनमा फर्कनुहोस्' : 'Back to Sign In' }}
+                            </a>
+
+                            <p class="auth-footer-note">
+                                &copy; {{ date('Y') }} {{ $departmentName }}. {{ $locale === 'ne' ? 'सर्वाधिकार सुरक्षित।' : 'All rights reserved.' }}
+                            </p>
+                        </form>
                     </div>
                 </div>
-
-                <!-- Heading -->
-                <h1 class="text-2xl font-bold text-center text-gray-900 mb-1">Create New Password</h1>
-                <p class="text-center text-sm text-gray-600 mb-6">Enter a strong password to reset your account</p>
-
-                <!-- Form -->
-                <form method="POST" action="{{ route('password.store') }}" class="space-y-6">
-                    @csrf
-
-                    <!-- Password Reset Token -->
-                    <input type="hidden" name="token" value="{{ $request->route('token') }}">
-
-                    <!-- Email Address (Read-only) -->
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                        <div class="relative">
-                            <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                            <input 
-                                id="email" 
-                                type="email" 
-                                name="email" 
-                                value="{{ old('email', $request->email) }}"
-                                readonly
-                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                            />
-                        </div>
-                    </div>
-
-                    <!-- Password -->
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                        <div class="relative">
-                            <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                            </svg>
-                            <input 
-                                id="password" 
-                                type="password" 
-                                name="password"
-                                placeholder="Enter new password"
-                                required
-                                class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent transition"
-                            />
-                            <button type="button" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none" onclick="togglePasswordVisibility('password')" id="togglePassword">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        @if ($errors->has('password'))
-                            <p class="text-red-600 text-sm mt-2">{{ $errors->first('password') }}</p>
-                        @endif
-                    </div>
-
-                    <!-- Confirm Password -->
-                    <div>
-                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-                        <div class="relative">
-                            <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                            </svg>
-                            <input 
-                                id="password_confirmation" 
-                                type="password" 
-                                name="password_confirmation"
-                                placeholder="Confirm your password"
-                                required
-                                class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent transition"
-                            />
-                            <button type="button" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none" onclick="togglePasswordVisibility('password_confirmation')" id="toggleConfirm">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        @if ($errors->has('password_confirmation'))
-                            <p class="text-red-600 text-sm mt-2">{{ $errors->first('password_confirmation') }}</p>
-                        @endif
-                    </div>
-
-                    <!-- Password Requirements -->
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <p class="text-xs font-semibold text-blue-900 mb-2">Password Requirements:</p>
-                        <ul class="text-xs text-blue-800 space-y-1">
-                            <li>• At least 8 characters long</li>
-                            <li>• Mix of uppercase and lowercase letters</li>
-                            <li>• Include numbers and special characters</li>
-                        </ul>
-                    </div>
-
-                    <!-- Reset Button -->
-                    <button 
-                        type="submit"
-                        class="w-full bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition duration-200"
-                    >
-                        Reset Password
-                    </button>
-
-                    <!-- Back to Login Link -->
-                    <a 
-                        href="{{ route('login') }}"
-                        class="w-full block text-center text-sm text-red-600 hover:text-red-700 font-medium"
-                    >
-                        ← Back to Login
-                    </a>
-                </form>
-            </div>
-
-            <!-- Footer -->
-            <p class="text-center text-xs text-gray-500 w-full pb-6 mt-8">
-                © 2026 IT Department Management System (IT-DMS). All rights reserved.
-            </p>
+            </section>
         </div>
     </div>
-
-    <script>
-        function togglePasswordVisibility(fieldId) {
-            const field = document.getElementById(fieldId);
-            const button = fieldId === 'password' ? document.getElementById('togglePassword') : document.getElementById('toggleConfirm');
-            
-            if (field.type === 'password') {
-                field.type = 'text';
-                button.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-4.803m5.604-1.159a3 3 0 112.251 5.724M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>';
-            } else {
-                field.type = 'password';
-                button.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>';
-            }
-        }
-    </script>
-</body>
-</html>
+@endsection

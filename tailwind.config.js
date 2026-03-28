@@ -20,16 +20,17 @@ export default {
             },
             colors: {
                 red: {
-                    50: '#ffe5ea',
-                    100: '#ffc6cf',
-                    200: '#ffa3b3',
-                    300: '#ff7f98',
-                    400: '#ff5c7e',
-                    500: '#ff3862',
-                    600: '#FF0037',
-                    700: '#D90033',
-                    800: '#B2002F',
-                    900: '#8C002B',
+                    50:  '#fff1f2',
+                    100: '#ffe4e6',
+                    200: '#fecdd3',
+                    300: '#fda4af',
+                    400: '#fb7185',
+                    500: '#f43f5e',
+                    600: '#dc2626',   /* ← system primary red  */
+                    700: '#b91c1c',   /* ← system dark red     */
+                    800: '#991b1b',   /* ← system deeper red   */
+                    900: '#7f1d1d',   /* ← system maroon/hero  */
+                    950: '#450a0a',
                 },
             },
         },
