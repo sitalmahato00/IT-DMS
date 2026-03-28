@@ -2124,6 +2124,94 @@
                     }));
                 });
             </script>
+            <!-- Non-dismissible Info Modal -->
+            <div x-data="infoModal()" x-show="open" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="info-modal fixed inset-0 z-[1000] flex items-center justify-center p-4"
+                 role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                
+                <!-- Backdrop - STRICTLY non-dismissible -->
+                <div class="info-backdrop absolute inset-0 bg-gray-950/75 backdrop-blur-md transition-opacity" 
+                     @click.away @keydown.esc @keydown.window.esc.prevent 
+                     @click.away="false" @keydown.esc.prevent @keydown.window.esc.prevent></div>
+                
+                <!-- Modal Content -->
+                <div class="info-content relative m-auto w-full max-w-md rounded-3xl bg-white/98 dark:bg-slate-900/95 p-6 shadow-2xl ring-1 ring-[var(--landing-border-strong)] backdrop-blur-xl drop-shadow-2xl sm:p-8 max-h-[90vh] overflow-y-auto border border-white/20 dark:border-slate-800/50">
+                    <!-- Header -->
+                    <div class="flex items-start justify-between border-b border-gray-200/80 dark:border-slate-700 pb-4">
+                        <div>
+
+                                {{ $locale === 'ne' ? 'स्वागत छ' : 'Welcome' }}
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-700 dark:text-gray-300 font-medium">
+                                {{ $locale === 'ne' ? 'आईटी विभाग डिजिटल पोर्टलमा' : 'to IT Department Digital Portal' }}
+                            </p>
+                        </div>
+                        <button type="button" 
+                                @click="close()"
+                                class="ml-2 flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-800"
+                                aria-label="{{ $locale === 'ne' ? 'बन्द गर्नुहोस्' : 'Close' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Body -->
+                    <div class="mt-4 text-sm leading-6 text-gray-800 dark:text-gray-200 max-h-[40vh] overflow-y-auto">
+                        <p class="font-medium drop-shadow-sm">{{ $locale === 'ne' ? 'यो एकीकृत प्लेटफर्ममा तपाईंले पाठ्यक्रम, सूचना, स्रोतहरू, शिक्षक विवरण र अन्य सेवाहरू पाउन सक्नुहुन्छ। पहिलो पटकको लागि स्वागत छ!' : 'This unified platform provides access to courses, notices, resources, faculty details, and more department services. Welcome on your first visit!' }}</p>
+                        <ul class="mt-4 space-y-2 pl-4">
+                            <li class="flex items-start gap-2">
+                                <span class="mt-0.5 h-2 w-2 flex-shrink-0 rounded-full bg-red-500"></span>
+                                <span>{{ $locale === 'ne' ? 'पाठ्यक्रम ब्राउज गर्नुहोस्' : 'Browse curriculum' }}</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="mt-0.5 h-2 w-2 flex-shrink-0 rounded-full bg-red-500"></span>
+                                <span>{{ $locale === 'ne' ? 'नयाँ सूचना जाँच्नुहोस्' : 'Check latest notices' }}</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="mt-0.5 h-2 w-2 flex-shrink-0 rounded-full bg-red-500"></span>
+                                <span>{{ $locale === 'ne' ? 'स्रोतहरू डाउनलोड गर्नुहोस्' : 'Download resources' }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <div class="mt-6 flex justify-end gap-3 border-t border-[var(--landing-border)] pt-4">
+                        <button type="button" 
+                                @click="close()"
+                                class="rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/20 hover:from-red-600 hover:to-red-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-red-400 transition-all duration-200">
+                            {{ $locale === 'ne' ? 'सम्झना भयो, बन्द गर्नुहोस्' : 'Got it, Close' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener('alpine:init', () => {
+                    Alpine.data('infoModal', () => ({
+                        open: true,
+                        close() {
+                            this.open = false;
+                        },
+                        init() {
+                            // Prevent ALL esc/backdrop auto-close - STRICTLY X only
+                            document.addEventListener('keydown', (e) => {
+                                if (e.key === 'Escape') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    return false;
+                                }
+                            }, { capture: true });
+                        }
+                    }));
+                });
+            </script>
         </main>
     </div>
 @endsection

@@ -4,14 +4,17 @@
     html, body {
         height: 100dvh !important;
         overflow: hidden !important;
-        background-color: #ffffff !important;
+        background-image: url('/images/loginbg.jpeg') !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-attachment: fixed !important;
     }
 
     .min-h-screen {
         height: 100dvh !important;
         min-height: unset !important;
         overflow: hidden !important;
-        background-color: #ffffff !important;
+        background: transparent !important;
     }
 
     .min-h-screen > main {
@@ -23,7 +26,7 @@
     .auth-page {
         height: 100dvh;
         overflow: hidden;
-        background: #ffffff;
+        background: transparent;
     }
 
     .auth-shell {
@@ -41,35 +44,11 @@
         overflow: hidden;
         height: 100%;
         padding: clamp(3rem, 6vw, 5.5rem);
-        background: linear-gradient(145deg, #7f1d1d 0%, #991b1b 18%, #b91c1c 42%, #dc2626 72%, #ef4444 100%);
+        background: transparent;
         color: #fff;
     }
 
-    /* Dot texture + diagonal sheen */
-    .auth-hero::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background:
-            radial-gradient(circle, rgba(255,255,255,0.18) 1px, transparent 1px) 0 0 / 20px 20px,
-            linear-gradient(148deg, transparent 52%, rgba(255,255,255,0.07) 52%, rgba(255,255,255,0.07) 58%, transparent 58%),
-            linear-gradient(22deg, rgba(127,29,29,0.22) 0%, transparent 55%);
-        opacity: 0.85;
-        pointer-events: none;
-    }
-
-    /* White diagonal triangle that creates the split edge */
-    .auth-hero::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        right: -1px;
-        width: 42%;
-        height: 100%;
-        background: #fff8f8;
-        clip-path: polygon(100% 0, 0 100%, 100% 100%);
-        pointer-events: none;
-    }
+    /* No hero overlays - pure image */
 
     .auth-hero-content {
         position: relative;
@@ -206,7 +185,7 @@
         justify-content: center;
         height: 100%;
         padding: 1.25rem 2rem;
-        background: #ffffff;
+        background: transparent;
         overflow-y: auto;  /* scrolls internally — page stays fixed */
     }
 
@@ -597,8 +576,7 @@
             min-height: 100vh;
             align-items: flex-start;
             padding: 3rem 1.25rem 2rem;
-            background:
-                linear-gradient(180deg, #b91c1c 0%, #dc2626 14%, #ffffff 14%);
+            background: transparent;
         }
 
         .auth-side::before {
