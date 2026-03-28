@@ -308,7 +308,45 @@ IT-DMS/
 
 ---
 
-## 📦 Key Dependencies
+## � Recent Updates & Improvements (March 2026)
+
+### Database Migrations Standardization
+✅ **All 27 migration files** now follow proper Laravel naming convention:
+- **Format**: `YYYY_MM_DD_HHMMSS_description.php`
+- **Consistency**: All migrations use base date `2024-01-01`
+- **Sequential Ordering**: Files numbered `000001` through `000027` based on dependency order
+- **Execution Order**: Ensures tables are created in correct dependency sequence
+
+**Migration Execution Order:**
+1. Core users (Users, Teachers, Parents)
+2. Academic core (Students, Subjects, Semesters, Colleges)
+3. Relationships (Subject-Teacher mappings, Elective enrollments)
+4. Schedules (Timetable slots)
+5. Academic records (Attendance, Exams, Marks)
+6. Content (Notices, Study materials, Gallery)
+7. System (Audit logs, Laravel defaults)
+
+**Benefits:**
+- Prevents foreign key constraint violations
+- Ensures clean database initialization
+- Simplifies migration management and debugging
+- Follows Laravel best practices
+
+### Admin Interface Improvements
+✅ **Removed duplicate "Academic Structure" menu item**
+- Consolidated redundant pages in admin sidebar
+- Single "Subjects" entry for course management
+- Removed unused `$isAcademicStructure` conditional logic
+- Cleaner navigation for non-technical users
+- Improved maintainability of sidebar components
+
+**Changed Routes:**
+- ❌ Removed: `/admin/courses?view=structure` (duplicate)
+- ✅ Kept: `/admin/courses` (primary subjects management)
+
+---
+
+## �📦 Key Dependencies
 
 ### Laravel Packages
 | Package | Version | Purpose |
@@ -550,9 +588,12 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ## ✨ Version
 
-**Current Version**: 1.0.0  
-**Last Updated**: March 2026  
+**Current Version**: 1.1.0  
+**Last Updated**: March 28, 2026  
 **Status**: Production Ready
 
-**Project cleaned**: Temporary files removed, documentation consolidated (2026).
+### Version History
+- **v1.1.0** (March 28, 2026): Database migrations standardized, admin UI improvements, duplicate page removal
+- **v1.0.0** (March 2026): Initial release with complete academic management system
+
 *Maintained by IT Department Development Team*
