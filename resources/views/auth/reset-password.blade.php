@@ -111,7 +111,7 @@
                             <div class="auth-field">
                                 <label for="email" class="auth-label">{{ $locale === 'ne' ? 'इमेल ठेगाना' : 'Email Address' }}</label>
                                 <div class="auth-input-wrap">
-                                    <span class="auth-input-icon">
+                                    <span class="auth-input-icon" aria-hidden="true">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3.75 7.5 12 13.5l8.25-6" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.5 6.75h15A1.5 1.5 0 0 1 21 8.25v7.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 15.75v-7.5a1.5 1.5 0 0 1 1.5-1.5Z" />
@@ -127,7 +127,7 @@
                             <div class="auth-field">
                                 <label for="password" class="auth-label">{{ $locale === 'ne' ? 'नयाँ पासवर्ड' : 'New Password' }}</label>
                                 <div class="auth-input-wrap">
-                                    <span class="auth-input-icon">
+                                    <span class="auth-input-icon" aria-hidden="true">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                             <rect x="5.25" y="10.25" width="13.5" height="9" rx="2" stroke-width="1.8"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8.25 10.25V8a3.75 3.75 0 0 1 7.5 0v2.25"/>
@@ -153,7 +153,7 @@
                             <div class="auth-field">
                                 <label for="password_confirmation" class="auth-label">{{ $locale === 'ne' ? 'पासवर्ड पुष्टि' : 'Confirm Password' }}</label>
                                 <div class="auth-input-wrap">
-                                    <span class="auth-input-icon">
+                                    <span class="auth-input-icon" aria-hidden="true">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                             <rect x="5.25" y="10.25" width="13.5" height="9" rx="2" stroke-width="1.8"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8.25 10.25V8a3.75 3.75 0 0 1 7.5 0v2.25"/>

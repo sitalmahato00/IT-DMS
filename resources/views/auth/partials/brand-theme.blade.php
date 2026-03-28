@@ -10,6 +10,8 @@
         background-attachment: fixed !important;
     }
 
+
+
     .min-h-screen {
         height: 100dvh !important;
         min-height: unset !important;
@@ -33,7 +35,7 @@
         display: grid;
         height: 100%;
         overflow: hidden;
-        grid-template-columns: minmax(0, 1.15fr) minmax(400px, 0.85fr);
+        grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.65fr);
     }
 
     /* ─── LEFT HERO PANEL ────────────────────────────── */
@@ -43,10 +45,11 @@
         align-items: center;
         overflow: hidden;
         height: 100%;
-        padding: clamp(3rem, 6vw, 5.5rem);
+        padding: clamp(2rem, 5vw, 4rem);
         background: transparent;
         color: #fff;
     }
+
 
     /* No hero overlays - pure image */
 
@@ -107,30 +110,33 @@
     /* Big heading */
     .auth-hero-title {
         margin: 0;
-        font-size: clamp(2.8rem, 5vw, 4.2rem);
+        font-size: clamp(2.3rem, 4vw, 3.5rem);
         font-weight: 800;
         line-height: 1.05;
         letter-spacing: -0.04em;
         color: #fff;
     }
 
+
     /* Bold subtitle line */
     .auth-hero-summary {
-        margin-top: 1.4rem;
-        font-size: 1.1rem;
+        margin-top: 1rem;
+        font-size: 1rem;
         font-weight: 700;
-        line-height: 1.45;
+        line-height: 1.35;
         color: #fff;
     }
 
+
     /* Lighter description */
     .auth-hero-text {
-        margin-top: 0.6rem;
-        max-width: 26rem;
-        font-size: 0.97rem;
-        line-height: 1.75;
+        margin-top: 0.4rem;
+        max-width: 24rem;
+        font-size: 0.9rem;
+        line-height: 1.55;
         color: rgba(255, 255, 255, 0.80);
     }
+
 
     /* Contact info cards */
     .auth-info-list {
@@ -184,7 +190,7 @@
         align-items: center;
         justify-content: center;
         height: 100%;
-        padding: 1.25rem 2rem;
+        padding: 1rem 1.5rem;
         background: transparent;
         overflow-y: auto;  /* scrolls internally — page stays fixed */
     }
@@ -204,11 +210,11 @@
 
     .auth-stack {
         width: 100%;
-        max-width: 34rem;
+        max-width: 28rem;
         display: flex;
         flex-direction: column;
         align-items: stretch;
-        gap: 0.9rem;
+        gap: 0.75rem;
         position: relative;
         z-index: 1;
     }
@@ -219,13 +225,12 @@
         position: relative;
         z-index: 1;
         background: #ffffff;
-        border: 1px solid rgba(220, 38, 38, 0.15);
         border-radius: 1.4rem;
-        box-shadow:
-            0 2px 12px rgba(0, 0, 0, 0.05),
-            0 12px 40px rgba(127, 29, 29, 0.09);
-        padding: 1.35rem 1.6rem 1.25rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 1rem 1.25rem 0.9rem;
+        margin-top: -0.25rem;
     }
+
 
     /* Alert / status banners */
     .auth-alert {
@@ -249,85 +254,97 @@
     }
 
     /* ─── CARD HEADER (logo + name + address) ─────────── */
-    .auth-panel-intro {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
+        .auth-panel-intro {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            text-align: center;
+            margin-bottom: 0.25rem;
+            padding-top: 0.75rem;
+        }
 
-    .auth-panel-logo-wrap {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 4rem;
-        height: 4rem;
-        border-radius: 9999px;
-        background: linear-gradient(160deg, #fff 0%, #fff5f5 100%);
-        box-shadow:
-            inset 0 0 0 1px rgba(220, 38, 38, 0.15),
-            0 6px 18px rgba(127, 29, 29, 0.08);
-        flex-shrink: 0;
-    }
+        .auth-panel-logo-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 3.8rem;
+            height: 3.8rem;
+            border-radius: 9999px;
+            background: linear-gradient(160deg, #fff 0%, #fff5f5 100%);
+            box-shadow:
+                inset 0 0 0 1px rgba(220, 38, 38, 0.2),
+                0 8px 24px rgba(127, 29, 29, 0.12);
+            flex-shrink: 0;
+            margin-bottom: 0.25rem;
+        }
 
     .auth-panel-logo {
-        width: 2.4rem;
-        height: 2.4rem;
+        width: 2.6rem;
+        height: 2.6rem;
         object-fit: contain;
     }
 
     .auth-panel-copy {
         min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.3rem;
     }
 
-    .auth-panel-title {
-        margin: 0;
-        font-size: 1.4rem;
-        font-weight: 700;
-        line-height: 1.1;
-        letter-spacing: -0.025em;
-        color: #18181b;
-    }
+        .auth-panel-title {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 700;
+            line-height: 1.15;
+            letter-spacing: -0.025em;
+            color: #27272a;
+        }
 
     .auth-panel-subtitle {
-        margin: 0.2rem 0 0;
-        color: #6b7280;
-        font-size: 0.82rem;
+        margin: 0;
+        color: #78716b;
+        font-size: 0.85rem;
         font-weight: 500;
+        line-height: 1.4;
     }
 
     .auth-panel-meta {
-        margin: 0.3rem 0 0;
-        color: #4b5563;
-        font-size: 0.82rem;
+        margin: 0;
+        color: #8b7969;
+        font-size: 0.81rem;
+        line-height: 1.4;
     }
 
     /* Gradient divider */
     .auth-divider {
         width: 100%;
         height: 1px;
-        margin: 0.85rem 0 1rem;
-        background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.25), transparent);
+        margin: 0.8rem 0 1rem;
+        background: transparent;
     }
 
     /* ─── FORM INTRO ───────────────────────────────────── */
     .auth-form-intro {
-        margin-bottom: 0.85rem;
+        margin-bottom: 1.2rem;
+        text-align: center;
     }
 
     .auth-form-title {
         margin: 0;
-        font-size: 1.55rem;
+        font-size: 1.7rem;
         font-weight: 700;
-        line-height: 1.1;
-        letter-spacing: -0.03em;
-        color: #18181b;
+        line-height: 1.2;
+        letter-spacing: -0.025em;
+        color: #27272a;
     }
 
     .auth-form-text {
-        margin: 0.35rem 0 0;
-        color: #6b7280;
-        font-size: 0.86rem;
-        line-height: 1.55;
+        margin: 0.5rem 0 0;
+        color: #78716b;
+        font-size: 0.88rem;
+        line-height: 1.5;
     }
 
     /* ─── FORM FIELDS ──────────────────────────────────── */
@@ -337,10 +354,10 @@
 
     .auth-label {
         display: block;
-        margin-bottom: 0.45rem;
-        font-size: 0.86rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.87rem;
         font-weight: 600;
-        color: #3f3f46;
+        color: #27272a;
     }
 
     .auth-input-wrap {
@@ -369,13 +386,13 @@
     .auth-input {
         width: 100%;
         min-height: 2.75rem;
-        border: 1px solid #e5c4c4;
+        border: 1px solid #f0e6e6;
         border-radius: 0.75rem;
-        background: #fff;
+        background: #fafaf8;
         padding: 0.55rem 3rem 0.55rem 1rem;
         font-size: 0.94rem;
-        color: #0f172a;
-        transition: border-color 180ms ease, box-shadow 180ms ease;
+        color: #27272a;
+        transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
     }
 
     .auth-input-wrap .auth-input-icon + .auth-input {
@@ -385,8 +402,8 @@
     .auth-input:focus {
         outline: none;
         border-color: #dc2626;
-        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
-        background: #fffdfd;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        background: #fff;
     }
 
     .auth-input::placeholder {
@@ -428,7 +445,7 @@
         align-items: center;
         gap: 0.5rem;
         font-size: 0.88rem;
-        color: #52525b;
+        color: #6b7280;
         cursor: pointer;
     }
 
@@ -495,22 +512,23 @@
     }
 
     .auth-secondary-action {
-        border: 1px solid #e5e7eb;
-        background: #f9fafb;
-        color: #27272a;
+        border: 1px solid #e8e0df;
+        background: #f5f3f2;
+        color: #4b4641;
+        font-weight: 600;
     }
 
     .auth-secondary-action:hover {
-        background: #fdf2f2;
-        border-color: #fecaca;
-        color: #991b1b;
+        background: #ede5e3;
+        border-color: #d9d0cc;
+        color: #27272a;
     }
 
     .auth-support-note {
-        margin: 0.5rem 0 0;
+        margin: 0.7rem 0 0;
         text-align: center;
-        color: #52525b;
-        font-size: 0.86rem;
+        color: #78716b;
+        font-size: 0.85rem;
     }
 
     .auth-back-link {
@@ -528,10 +546,10 @@
     }
 
     .auth-footer-note {
-        margin: 0.6rem 0 0;
+        margin: 0.8rem 0 0;
         text-align: center;
-        color: #9ca3af;
-        font-size: 0.75rem;
+        color: #a39690;
+        font-size: 0.74rem;
     }
 
     .auth-helper-links {
@@ -575,8 +593,9 @@
         .auth-side {
             min-height: 100vh;
             align-items: flex-start;
-            padding: 3rem 1.25rem 2rem;
-            background: transparent;
+            padding: 1.25rem 1rem 1.25rem;
+        background: transparent;
+
         }
 
         .auth-side::before {
@@ -635,16 +654,52 @@
     /* ─── FORCE LIGHT THEME ON AUTH PAGES ─────────────── */
     html.dark .auth-page,
     html.dark .auth-side {
-        background: #ffffff !important;
+        background-image: url('/images/loginbg.jpeg') !important;
+        background-size: cover !important;
+    }
+    html.dark * {
+        color-scheme: light !important;
+    }
+
+    html.dark .auth-side {
+        background-image: url('/images/loginbg.jpeg') !important;
+        background-size: cover !important;
     }
 
     html.dark .auth-card {
-        background: #ffffff !important;
-        border-color: rgba(220, 38, 38, 0.15) !important;
-        box-shadow:
-            0 2px 12px rgba(0, 0, 0, 0.05),
-            0 12px 40px rgba(127, 29, 29, 0.09) !important;
+        background: #1f1b24 !important;
+        border-color: rgba(148, 163, 184, 0.3) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
+        color: #ffffff !important;
     }
+
+    html.dark .auth-panel-title,
+    html.dark .auth-form-title,
+    html.dark .auth-label {
+        color: #f8fafc !important;
+    }
+
+    html.dark .auth-form-text,
+    html.dark .auth-panel-subtitle,
+    html.dark .auth-panel-meta {
+        color: #cbd5e1 !important;
+    }
+
+    html.dark .auth-input {
+        background: #374151 !important;
+        border-color: #4b5563 !important;
+        color: #f9fafb !important;
+    }
+
+    html.dark .auth-input::placeholder {
+        color: #9ca3af !important;
+    }
+
+    html.dark .auth-remember,
+    html.dark .auth-footer-note {
+        color: #d1d5db !important;
+    }
+
 
     html.dark .auth-panel-title,
     html.dark .auth-form-title {
@@ -688,4 +743,71 @@
     html.dark .auth-link:hover {
         color: #991b1b !important;
     }
+
+    /* ─── THEME TOGGLE BUTTON ─────────────────────────── */
+    .auth-theme-toggle {
+        display: none !important;
+    }
+
+
+
+    .auth-theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+    }
+
+    .auth-theme-toggle svg {
+        width: 1.4rem;
+        height: 1.4rem;
+    }
+
+    .auth-theme-toggle .sun-icon {
+        display: none;
+    }
+
+    html.dark .auth-theme-toggle .moon-icon {
+        display: none;
+    }
+
+    html.dark .auth-theme-toggle .sun-icon {
+        display: block;
+    }
 </style>
+
+<!-- Theme Toggle Button -->
+<button id="authThemeToggle" class="auth-theme-toggle" title="Toggle Dark Mode" aria-label="Toggle Dark Mode">
+    <svg class="moon-icon" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+    </svg>
+    <svg class="sun-icon" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v2a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.536l1.414 1.414a1 1 0 001.414-1.414l-1.414-1.414a1 1 0 00-1.414 1.414zm2.828-2.828l1.414-1.414a1 1 0 00-1.414-1.414l-1.414 1.414a1 1 0 001.414 1.414zm4.242-4.242l1.414 1.414a1 1 0 01-1.414 1.414l-1.414-1.414a1 1 0 011.414-1.414zM3.464 3.464a1 1 0 00-1.414 1.414l1.414 1.414a1 1 0 001.414-1.414L3.464 3.464zm2.828 2.828l-1.414-1.414a1 1 0 00-1.414 1.414l1.414 1.414a1 1 0 001.414-1.414zm0 5.656l-1.414 1.414a1 1 0 01-1.414-1.414l1.414-1.414a1 1 0 011.414 1.414zM10 15a1 1 0 011 1v2a1 1 0 11-2 0v-2a1 1 0 011-1z" clip-rule="evenodd"></path>
+    </svg>
+</button>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeToggle = document.getElementById('authThemeToggle');
+        
+        // Initialize theme from localStorage
+        const isDarkMode = localStorage.getItem('theme') === 'dark';
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        // Toggle theme
+        themeToggle.addEventListener('click', function() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            
+            if (isDark) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+    });
+</script>

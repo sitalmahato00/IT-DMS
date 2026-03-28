@@ -1,131 +1,191 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot Password - IT Department Management System (IT-DMS)</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-100">
-    <div class="flex h-screen">
-        <!-- Left Side - Red Section -->
-        <div class="hidden md:flex md:w-1/2 bg-red-900 text-white flex-col justify-between p-12">
-            <div></div>
-            <div class="text-center">
-                <!-- Icon -->
-                <div class="flex justify-center mb-8">
-                    <div class="w-24 h-24 bg-red-800 rounded-full flex items-center justify-center border-4 border-red-700">
-                        <i class="bi bi-calendar-check text-white" style="font-size: 3rem;"></i>
+@php
+    $locale = app()->getLocale();
+    $homeUrl = route('home');
+    $department = \App\Models\Department::first();
+    $departmentName = $department
+        ? (($locale === 'ne' && !empty($department->name_nepali)) ? $department->name_nepali : $department->name)
+        : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Information Technology');
+    $departmentShort = $department?->short_name ?: ($locale === 'ne' ? 'आईटी' : 'IT');
+    $departmentLogoUrl = $department?->getLogoUrl() ?? asset('images/default-logo.svg');
+    $addressText = $department
+        ? (($locale === 'ne' && !empty($department->address_nepali)) ? $department->address_nepali : $department->address)
+        : null;
+    $addressInfo = $addressText ?: ($locale === 'ne' ? 'काठमाडौँ, नेपाल' : 'Kathmandu, Nepal');
+    $phoneInfo = $department?->phone ?: ($locale === 'ne' ? 'फोन नम्बर एडमिन सेटिङबाट राख्नुहोस्।' : 'Set the phone number from admin settings.');
+    $emailInfo = $department?->email ?: ($locale === 'ne' ? 'इमेल एडमिन सेटिङबाट राख्नुहोस्।' : 'Set the email from admin settings.');
+    
+    $titleLines = $locale === 'ne' ? ['पासवर्ड', 'बिर्सनुभयो?'] : ['Forgot', 'Password?'];
+    
+    $heroSummary = $locale === 'ne' ? 'खाता पुन:प्राप्त गर्नुहोस्' : 'Recover your account';
+    $heroDescription = $locale === 'ne' 
+        ? 'पासवर्ड बिर्सनुभयो? चिन्ता नगर्नुहोस्। तपाईंको इमेलमा रिसेट लिङ्क पठाउनुहोस्।'
+        : 'Forgot your password? No problem. Send a reset link to your email address.';
+    
+    $contactItems = [
+        ['icon' => 'location', 'text' => $addressInfo],
+        ['icon' => 'phone', 'text' => $phoneInfo],
+        ['icon' => 'email', 'text' => $emailInfo],
+    ];
+@endphp
+
+@extends('layouts.public')
+
+@push('head')
+    @include('auth.partials.brand-theme')
+    <title>{{ $locale === 'ne' ? 'पासवर्ड बिर्सनुभयो?' : 'Forgot Password' }} - {{ $departmentName }}</title>
+@endpush
+
+@section('content')
+<div class="auth-page">
+    <div class="auth-shell">
+        {{-- LEFT HERO PANEL --}}
+        <section class="auth-hero">
+            <div class="auth-hero-content">
+                <div class="auth-brand">
+                    <div class="auth-brand-mark">
+                        <img src="{{ $departmentLogoUrl }}" alt="{{ $departmentName }} logo" class="auth-brand-logo" />
+                    </div>
+                    <div class="auth-brand-copy">
+                        <span class="auth-brand-kicker">{{ $departmentShort }}</span>
+                        <div class="auth-brand-title">{{ $departmentName }} {{ $locale === 'ne' ? 'व्यवस्थापन प्रणाली' : 'Management System' }}</div>
                     </div>
                 </div>
-                <!-- Text -->
-                <h2 class="text-4xl font-bold mb-6">
-                    Department<br>Management System
-                </h2>
-                <p class="text-red-100 text-sm leading-relaxed max-w-xs mx-auto">
-                    Streamline academic operations with our comprehensive management platform designed for modern educational institutions.
-                </p>
+
+                <h1 class="auth-hero-title">
+                    {{ $titleLines[0] }}<br>{{ $titleLines[1] }}
+                </h1>
+                <p class="auth-hero-summary">{{ $heroSummary }}</p>
+                <p class="auth-hero-text">{{ $heroDescription }}</p>
+
+                <div class="auth-info-list">
+                    @foreach($contactItems as $item)
+                        <div class="auth-info-item">
+                            <span class="auth-info-icon">
+                                @if($item['icon'] === 'location')
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 21s6-4.35 6-10a6 6 0 1 0-12 0c0 5.65 6 10 6 10Z"/>
+                                        <circle cx="12" cy="11" r="2.25" stroke-width="1.8"/>
+                                    </svg>
+                                @elseif($item['icon'] === 'phone')
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 4.75h3.1l1.1 4.41-1.73 1.73a15.04 15.04 0 0 0 5.64 5.64l1.73-1.73 4.41 1.1V19A1.75 1.75 0 0 1 17.5 20.75h-.5C9.96 20.75 4.25 15.04 4.25 8v-.5A1.75 1.75 0 0 1 6 5.75"/>
+                                    </svg>
+                                @else
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3.75 7.5 12 13.5l8.25-6"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.5 6.75h15A1.5 1.5 0 0 1 21 8.25v7.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 15.75v-7.5a1.5 1.5 0 0 1 1.5-1.5Z"/>
+                                    </svg>
+                                @endif
+                            </span>
+                            <span>{{ $item['text'] }}</span>
+                        </div>
+                    @endforeach
+                </div>
             </div>
-            <div></div>
-        </div>
+        </section>
 
-        <!-- Right Side - Reset Password Form -->
-        <div class="w-full md:w-1/2 bg-white flex flex-col justify-center items-center p-8 relative overflow-y-auto pt-16">
-            <div class="w-full max-w-md relative">
-                <!-- Logo/Icon -->
-                <div class="flex justify-center mb-8">
-                    <div class="w-16 h-16 bg-red-600 rounded-lg flex items-center justify-center">
-                        <i class="bi bi-calendar-check text-white" style="font-size: 1.75rem;"></i>
-                    </div>
-                </div>
-
-                <!-- Heading -->
-                <h1 class="text-2xl font-bold text-center text-gray-900 mb-1">Reset Password</h1>
-                <p class="text-center text-sm text-gray-600 mb-6">Enter your email address to receive a password reset link</p>
-
-                <!-- Session Status -->
+        {{-- RIGHT FORM PANEL --}}
+        <section class="auth-side">
+            <div class="auth-stack">
                 @if (session('status'))
-                    <div class="mb-4 p-3 bg-green-50 border border-green-300 rounded-lg text-center">
-                        <p class="text-green-700 text-sm font-medium">{{ session('status') }}</p>
+                    <div class="auth-status">
+                        {{ session('status') }}
+                        <p class="text-xs mt-1 text-green-700" id="countdown-note">Next attempt in: <span id="countdown" class="font-mono font-semibold">00:05</span></p>
+                        <script>
+                            let timeLeft = 5;
+                            function updateCountdown() {
+                                const display = String(timeLeft).padStart(2, '0');
+                                document.getElementById('countdown').textContent = '00:' + display;
+                                if (timeLeft > 0) {
+                                    timeLeft--;
+                                    setTimeout(updateCountdown, 1000);
+                                }
+                            }
+                            updateCountdown();
+                        </script>
                     </div>
                 @endif
 
-                <!-- Form -->
-                <form method="POST" action="{{ route('password.email') }}" class="space-y-6">
-                    @csrf
+                @if ($errors->any())
+                    <div class="auth-alert" role="alert">
+                        @foreach ($errors->all() as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
+                    </div>
+                @endif
 
-                    <!-- Email Address -->
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                        <div class="relative">
-                            <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                            <input 
-                                id="email" 
-                                type="email" 
-                                name="email" 
-                                value="{{ old('email') }}"
-                                placeholder="Enter your email address"
-                                required 
-                                autofocus
-                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent transition"
-                            />
+                <div class="auth-card">
+                    <div class="auth-panel-intro">
+                        <div class="auth-panel-logo-wrap" aria-hidden="true">
+                            <img src="{{ $departmentLogoUrl }}" alt="" class="auth-panel-logo" />
                         </div>
-                        @if ($errors->has('email'))
-                            <p class="text-red-600 text-sm mt-2">{{ $errors->first('email') }}</p>
-                        @endif
-
-                        <!-- Countdown Timer (shown when status message appears) -->
-                        @if (session('status'))
-                            <p class="text-center text-xs text-gray-500 mt-2">Next attempt in: <span id="countdown" class="font-mono font-semibold text-gray-700">00:05</span></p>
-                            <script>
-                                let timeLeft = 5;
-                                function updateCountdown() {
-                                    const display = String(timeLeft).padStart(2, '0');
-                                    document.getElementById('countdown').textContent = '00:' + display;
-                                    if (timeLeft > 0) {
-                                        timeLeft--;
-                                        setTimeout(updateCountdown, 1000);
-                                    }
-                                }
-                                updateCountdown();
-                            </script>
-                        @endif
+                        <div class="auth-panel-copy">
+                            <h2 class="auth-panel-title">{{ $departmentName }}</h2>
+                            <p class="auth-panel-subtitle">{{ $locale === 'ne' ? 'IT विभाग व्यवस्थापन प्रणाली' : 'IT Department Management System' }}</p>
+                            <p class="auth-panel-meta">{{ $addressInfo }}</p>
+                        </div>
                     </div>
 
-                    <!-- Send Reset Link Button -->
-                    <button 
-                        type="submit"
-                        class="w-full bg-red-600 text-white font-semibold py-3 rounded-lg hover:bg-red-700 transition duration-200"
-                    >
-                        Send Password Reset Link
-                    </button>
+                    <div class="auth-divider"></div>
 
-                    <!-- Back to Login Link -->
-                    <a 
-                        href="{{ route('login') }}"
-                        class="w-full block text-center bg-gray-200 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-300 transition duration-200"
-                    >
-                        Back to Login
-                    </a>
+                    <div class="auth-form-intro">
+                        <h3 class="auth-form-title">{{ $locale === 'ne' ? 'पासवर्ड रिसेट लिङ्क पठाउनुहोस्' : 'Send Password Reset Link' }}</h3>
+                        <p class="auth-form-text">
+                            {{ $locale === 'ne'
+                                ? 'तपाईंको इमेल ठेगाना लेख्नुहोस्। हामी तपाईंको खाता रिसेट गर्न लिङ्क पठाउँछौँ।'
+                                : 'Enter your email address and we will send you a link to reset your password.' }}
+                        </p>
+                    </div>
 
-                    <!-- Back to Home Button -->
-                    <a 
-                        href="/" 
-                        class="w-full block text-center px-6 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-300"
-                    >
-                        ← Back to Home
-                    </a>
-                </form>
+                    <form method="POST" action="{{ route('password.email') }}">
+                        @csrf
+
+                        <div class="auth-field">
+                            <label for="email" class="auth-label">{{ $locale === 'ne' ? 'इमेल ठेगाना' : 'Email Address' }}</label>
+                            <div class="auth-input-wrap">
+                                <span class="auth-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3.75 7.5 12 13.5l8.25-6"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4.5 6.75h15A1.5 1.5 0 0 1 21 8.25v7.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 15.75v-7.5a1.5 1.5 0 0 1 1.5-1.5Z"/>
+                                    </svg>
+                                </span>
+                                <input
+                                    id="email"
+                                    class="auth-input"
+                                    type="email"
+                                    name="email"
+                                    value="{{ old('email') }}"
+                                    required
+                                    autofocus
+                                    autocomplete="username"
+                                    placeholder="{{ $locale === 'ne' ? 'example@campus.edu.np' : 'example@campus.edu.np' }}"
+                                />
+                            </div>
+                            @error('email')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <button type="submit" class="auth-submit full">
+                            {{ $locale === 'ne' ? 'रिसेट लिङ्क पठाउनुहोस्' : 'Send Password Reset Link' }}
+                        </button>
+
+                        <a href="{{ route('login') }}" class="auth-secondary-action">
+                            {{ $locale === 'ne' ? 'साइन इनमा फर्कनुहोस्' : 'Back to Sign In' }}
+                        </a>
+
+                        <a href="{{ $homeUrl }}" class="auth-back-link">
+                            &#8592; {{ $locale === 'ne' ? 'मुख्य पृष्ठमा फर्कनुहोस्' : 'Back to Home' }}
+                        </a>
+
+                        <p class="auth-footer-note">
+                            &copy; {{ date('Y') }} {{ $departmentName }}. {{ $locale === 'ne' ? 'सर्वाधिकार सुरक्षित।' : 'All rights reserved.' }}
+                        </p>
+                    </form>
+                </div>
             </div>
-
-            <!-- Footer -->
-            <p class="text-center text-xs text-gray-500 w-full pb-6 mt-8">
-                © 2026 IT Department Management System (IT-DMS). All rights reserved.
-            </p>
-        </div>
+        </section>
     </div>
-</body>
-</html>
+</div>
+@endsection
+

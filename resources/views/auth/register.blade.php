@@ -105,10 +105,6 @@
 
                         <div class="auth-form-intro">
                             <h3 class="auth-form-title">{{ $locale === 'ne' ? 'नयाँ खाता' : 'Create Account' }}</h3>
-                            <p class="auth-form-text">
-                                {{ $locale === 'ne'
-                                    ? 'विभागीय पोर्टलको सेवाहरूमा पहुँचका लागि खाता बनाउनुहोस्।'
-                                    : 'Fill in your details to create an account and access the department portal.' }}
                             </p>
                         </div>
 
