@@ -6,8 +6,7 @@
     $isParents = request()->routeIs('admin.parents*');
     $isAlumni = request()->routeIs('admin.alumni-students*');
 
-    $isAcademicStructure = request()->routeIs('admin.courses*') && request('view') === 'structure';
-    $isSubjects = request()->routeIs('admin.courses*') && request('view') !== 'structure';
+    $isSubjects = request()->routeIs('admin.courses*');
     $isSemesters = request()->routeIs('admin.semesters*');
     $isElectives = request()->routeIs('admin.electives*');
 
@@ -32,7 +31,7 @@
 
     $activeGroup = match (true) {
         $isStudents || $isTeachers || $isParents || $isAlumni => 'users',
-        $isAcademicStructure || $isSemesters || $isSubjects || $isElectives => 'academics',
+        $isSemesters || $isSubjects || $isElectives => 'academics',
         $isTimetable => 'schedule',
         $isAttendance => 'attendance',
         $isDocuments || $isNotifications || $isGallery => 'resources',
@@ -110,10 +109,6 @@
                 <i :class="activeGroup === 'academics' ? 'bi-chevron-down' : 'bi-chevron-right'" class="bi text-base"></i>
             </button>
             <div class="collapsible-section space-y-0.5 overflow-hidden transition-all duration-300" x-show="activeGroup === 'academics'" x-collapse>
-                <a href="{{ route('admin.courses', ['view' => 'structure']) }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isAcademicStructure ? 'bg-red-600 text-white' : 'text-slate-600 hover:text-[#FF0037] hover:bg-red-500/10' }}">
-                    <i class="bi bi-diagram-3 text-base flex-shrink-0"></i>
-                    <span class="sidebar-label">{{ __('Academic Structure') }}</span>
-                </a>
                 <a href="{{ route('admin.semesters') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isSemesters ? 'bg-red-600 text-white' : 'text-slate-600 hover:text-[#FF0037] hover:bg-red-500/10' }}">
                     <i class="bi bi-calendar3 text-base flex-shrink-0"></i>
                     <span class="sidebar-label">{{ __('Semesters') }}</span>
