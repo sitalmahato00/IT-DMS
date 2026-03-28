@@ -37,6 +37,15 @@
         ? (($locale === 'ne' && !empty($department->description_nepali)) ? $department->description_nepali : $department->description)
         : null;
 
+    $heroDescriptionSource = $aboutText ?: ($locale === 'ne'
+        ? 'यो विभागले व्यावहारिक प्रयोगशाला, अद्यावधिक पाठ्यक्रम, शिक्षक मार्गदर्शन र डिजिटल स्रोतहरूमार्फत विद्यार्थीलाई भविष्यको प्रविधि संसारका लागि तयार पार्छ।'
+        : 'The department combines practical labs, updated coursework, faculty mentorship, and accessible digital resources to prepare students for modern technology careers and real-world problem solving.');
+
+    $heroDescription = Str::limit(
+        preg_replace('/\s+/u', ' ', trim(strip_tags((string) $heroDescriptionSource))),
+        $locale === 'ne' ? 220 : 260
+    );
+
     $addressText = $department
         ? (($locale === 'ne' && !empty($department->address_nepali)) ? $department->address_nepali : $department->address)
         : null;
@@ -89,8 +98,8 @@
         ? (($locale === 'ne' && !empty($department->programs_content_nepali)) ? $department->programs_content_nepali : $department->programs_content)
         : null;
 
-    $defaultProgramsImage = asset('images/hero-image.jpg');
-    $programsImageUrl = $department?->getProgramsImageUrl() ?: $defaultProgramsImage;
+    $programsImageUrl = $department?->getProgramsImageUrl();
+    $hasProgramsImage = filled($programsImageUrl);
 
     $subjectPayload = ($subjects ?? collect())->map(function ($s) {
         $teachers = collect($s->teachers ?? [])
@@ -151,33 +160,137 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <style>
         :root {
-            --landing-bg: linear-gradient(180deg, #fff5f5 0%, #fff1f2 26%, #fff8f8 58%, #fffdfd 100%);
-            --landing-red: #dc2626;
-            --landing-red-deep: #b91c1c;
-            --landing-red-soft: #fca5a5;
-            --landing-surface: rgba(255, 255, 255, 0.82);
-            --landing-border: rgba(255, 255, 255, 0.65);
-            --landing-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+            --landing-bg: linear-gradient(180deg, #f8fafc 0%, #fff4f7 16%, #f8fafc 48%, #ffffff 100%);
+            --landing-red: #FF0037;
+            --landing-red-deep: #D90033;
+            --landing-red-soft: #ffd9e3;
+            --landing-surface: rgba(255, 255, 255, 0.97);
+            --landing-surface-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 250, 252, 0.99) 58%, rgba(255, 246, 248, 0.99) 100%);
+            --landing-surface-muted: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+            --landing-border: rgba(255, 0, 55, 0.12);
+            --landing-border-strong: rgba(255, 0, 55, 0.22);
+            --landing-shadow: 0 24px 56px rgba(15, 23, 42, 0.08);
+            --landing-shadow-soft: 0 14px 34px rgba(15, 23, 42, 0.06);
+            --landing-text-soft: #6b7280;
         }
 
         .dark {
             --landing-bg: linear-gradient(180deg, #020617 0%, #111827 35%, #0f172a 100%);
-            --landing-surface: rgba(15, 23, 42, 0.78);
+            --landing-surface: rgba(15, 23, 42, 0.84);
+            --landing-surface-soft: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(17, 24, 39, 0.9) 100%);
+            --landing-surface-muted: rgba(15, 23, 42, 0.88);
             --landing-border: rgba(148, 163, 184, 0.14);
+            --landing-border-strong: rgba(248, 113, 113, 0.26);
             --landing-shadow: 0 26px 70px rgba(2, 6, 23, 0.55);
+            --landing-shadow-soft: 0 18px 40px rgba(2, 6, 23, 0.32);
+            --landing-text-soft: #94a3b8;
+        }
+
+        .landing-page {
+            overflow-x: clip;
         }
 
         .landing-shell {
-            max-width: 100%;
+            max-width: 86rem;
+        }
+
+        .landing-section {
+            position: relative;
+        }
+
+        .landing-stage {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--landing-border);
+            border-radius: 2rem;
+            background: var(--landing-surface-soft);
+            box-shadow: var(--landing-shadow);
+            padding: clamp(1.5rem, 2.5vw, 2.5rem);
+        }
+
+        .landing-stage::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at top right, rgba(255, 0, 55, 0.12), transparent 34%),
+                radial-gradient(circle at bottom left, rgba(251, 146, 60, 0.08), transparent 28%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.74), transparent 30%);
+            background-size: 140% 140%, 120% 120%, auto;
+            animation: stageGlow 18s ease-in-out infinite alternate;
+        }
+
+        .dark .landing-stage {
+            background: linear-gradient(180deg, rgba(8, 15, 30, 0.96) 0%, rgba(11, 18, 32, 0.98) 52%, rgba(17, 24, 39, 0.98) 100%);
+            border-color: rgba(255, 0, 55, 0.12);
+            box-shadow: 0 26px 54px rgba(2, 6, 23, 0.42);
+        }
+
+        .dark .landing-stage::before {
+            background:
+                radial-gradient(circle at top right, rgba(255, 0, 55, 0.14), transparent 32%),
+                radial-gradient(circle at bottom left, rgba(251, 146, 60, 0.04), transparent 26%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 18%);
+            opacity: 0.95;
+        }
+
+        .landing-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.875rem;
+            border: 1px solid var(--landing-border);
+            border-radius: 1.5rem;
+            background: var(--landing-surface-muted);
+            box-shadow: var(--landing-shadow-soft);
+            padding: 1rem;
+        }
+
+        .dark .landing-toolbar {
+            background: linear-gradient(180deg, rgba(18, 27, 45, 0.94) 0%, rgba(10, 17, 30, 0.98) 100%);
+            border-color: rgba(148, 163, 184, 0.12);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 34px rgba(2, 6, 23, 0.28);
+        }
+
+        .landing-input,
+        .landing-select {
+            border-radius: 1rem;
+            border: 1px solid rgba(170, 23, 37, 0.16);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 10px 24px rgba(15, 23, 42, 0.04);
+        }
+
+        .landing-input:focus,
+        .landing-select:focus {
+            border-color: #ef4444;
+            --tw-ring-color: rgb(248 113 113 / 0.25);
+        }
+
+        .dark .landing-input,
+        .dark .landing-select {
+            border-color: rgba(248, 113, 113, 0.18);
+            background: rgba(15, 23, 42, 0.88);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+
+        .landing-subtle {
+            color: var(--landing-text-soft);
         }
 
         .landing-panel {
             position: relative;
             overflow: hidden;
             border: 1px solid var(--landing-border);
+            border-radius: 1.5rem;
             background: var(--landing-surface);
             box-shadow: var(--landing-shadow);
-            backdrop-filter: blur(16px);
+            backdrop-filter: blur(14px);
+        }
+
+        .dark .landing-panel {
+            background: linear-gradient(180deg, rgba(14, 23, 41, 0.94) 0%, rgba(11, 18, 32, 0.98) 100%);
+            border-color: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 18px 40px rgba(2, 6, 23, 0.3);
         }
 
         .landing-panel::before {
@@ -185,12 +298,71 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 42%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.38), transparent 32%);
+        }
+
+        .dark .landing-panel::before {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 18%);
+        }
+
+        .landing-panel.lift-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 250, 252, 0.99) 60%, rgba(255, 246, 248, 0.99) 100%);
+            border-color: rgba(255, 0, 55, 0.12);
+            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.06);
+        }
+
+        .dark .landing-panel.lift-card {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(17, 24, 39, 0.95) 62%, rgba(69, 10, 10, 0.25) 100%);
+            border-color: rgba(248, 113, 113, 0.14);
         }
 
         .landing-grid-accent {
             position: relative;
+            overflow: hidden;
         }
+
+        .landing-hero-stat {
+            animation: heroStatFloat 7.5s ease-in-out infinite;
+        }
+
+        .landing-hero-stat-card {
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(18px);
+        }
+
+        .landing-hero-stat-card--students {
+            background: linear-gradient(180deg, rgba(255, 0, 55, 0.7) 0%, rgba(190, 24, 93, 0.5) 58%, rgba(30, 41, 59, 0.42) 100%);
+        }
+
+        .landing-hero-stat-card--faculty {
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0.68) 0%, rgba(30, 64, 175, 0.5) 58%, rgba(30, 41, 59, 0.42) 100%);
+        }
+
+        .landing-hero-stat-card--subjects {
+            background: linear-gradient(180deg, rgba(217, 119, 6, 0.72) 0%, rgba(194, 65, 12, 0.52) 58%, rgba(30, 41, 59, 0.42) 100%);
+        }
+
+        .landing-hero-stat-card--labs {
+            background: linear-gradient(180deg, rgba(5, 150, 105, 0.7) 0%, rgba(13, 148, 136, 0.5) 58%, rgba(30, 41, 59, 0.42) 100%);
+        }
+
+        .landing-hero-stat-number {
+            color: #ffffff;
+            text-shadow: 0 10px 24px rgba(15, 23, 42, 0.28);
+        }
+
+        .landing-hero-stat-label {
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .dark .landing-hero-stat-card {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .landing-hero-stat:nth-child(2) { animation-delay: 0.9s; }
+        .landing-hero-stat:nth-child(3) { animation-delay: 1.8s; }
+        .landing-hero-stat:nth-child(4) { animation-delay: 2.7s; }
 
         .landing-grid-accent::after {
             content: "";
@@ -199,11 +371,11 @@
             pointer-events: none;
             border-radius: inherit;
             background-image:
-                linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+                linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
             background-size: 24px 24px;
             mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.38), transparent 82%);
-            opacity: 0.45;
+            opacity: 0.35;
         }
 
         .section-chip {
@@ -216,10 +388,20 @@
             font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
+            color: #b42318;
+            background: rgba(255, 244, 241, 0.95);
+            box-shadow: inset 0 0 0 1px rgba(180, 35, 24, 0.12);
+        }
+
+        .dark .section-chip {
+            color: #ff9ab0;
+            background: rgba(255, 0, 55, 0.12);
+            box-shadow: inset 0 0 0 1px rgba(255, 0, 55, 0.24);
         }
 
         .section-title {
-            letter-spacing: -0.03em;
+            letter-spacing: -0.04em;
+            line-height: 1.05;
         }
 
         .float-orb {
@@ -244,8 +426,8 @@
         }
 
         .lift-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 24px 48px rgba(15, 23, 42, 0.14);
+            transform: translateY(-4px);
+            box-shadow: 0 22px 44px rgba(102, 14, 24, 0.12);
         }
 
         .dark .lift-card:hover {
@@ -281,6 +463,141 @@
             overflow: hidden;
         }
 
+        .landing-hero-rail {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .landing-hero-card {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 1.75rem;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.52) 0%, rgba(51, 65, 85, 0.46) 62%, rgba(107, 33, 49, 0.4) 100%);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.24);
+            backdrop-filter: blur(14px);
+            padding: 1rem 1.1rem;
+            animation: heroCardFloat 8.5s ease-in-out infinite;
+        }
+
+        .landing-hero-card:nth-child(2) { animation-delay: 1.3s; }
+
+        .dark .landing-hero-card {
+            background: linear-gradient(180deg, rgba(16, 24, 40, 0.88) 0%, rgba(11, 18, 32, 0.94) 100%);
+            border-color: rgba(148, 163, 184, 0.12);
+            box-shadow: 0 20px 44px rgba(2, 6, 23, 0.38);
+        }
+
+        .landing-hero-card-ghost {
+            background: rgba(15, 23, 42, 0.34);
+            border-color: rgba(255, 255, 255, 0.18);
+            box-shadow: 0 20px 42px rgba(15, 23, 42, 0.2);
+        }
+
+        .dark .landing-hero-card-ghost {
+            background: rgba(15, 23, 42, 0.54);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .landing-hero-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 26%);
+        }
+
+        .dark .landing-hero-card::before {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 20%);
+        }
+
+        .landing-hero-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            border-radius: 1rem;
+            background: linear-gradient(180deg, rgba(51, 65, 85, 0.54) 0%, rgba(30, 41, 59, 0.72) 100%);
+            padding: 0.82rem 1rem;
+            transition: transform 180ms ease, background-color 180ms ease;
+        }
+
+        .landing-hero-link:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(180deg, rgba(71, 85, 105, 0.58) 0%, rgba(30, 41, 59, 0.78) 100%);
+        }
+
+        .dark .landing-hero-link {
+            background: linear-gradient(180deg, rgba(33, 41, 59, 0.74) 0%, rgba(16, 24, 40, 0.92) 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+
+        .dark .landing-hero-link:hover {
+            background: linear-gradient(180deg, rgba(49, 60, 82, 0.86) 0%, rgba(18, 27, 45, 0.96) 100%);
+        }
+
+        .landing-hero-meta {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .landing-hero-meta-item {
+            border-radius: 1rem;
+            background: linear-gradient(180deg, rgba(51, 65, 85, 0.48) 0%, rgba(30, 41, 59, 0.68) 100%);
+            padding: 0.8rem 1rem 0.9rem;
+        }
+
+        .landing-hero-meta-item-ghost {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .dark .landing-hero-meta-item {
+            background: linear-gradient(180deg, rgba(33, 41, 59, 0.74) 0%, rgba(16, 24, 40, 0.92) 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+
+        .dark .landing-hero-meta-item-ghost {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .landing-hero-slide {
+            animation: heroKenBurns 20s ease-in-out infinite;
+        }
+
+        .landing-brand-button {
+            background-image: linear-gradient(90deg, #FF0037 0%, #D90033 100%) !important;
+            box-shadow: 0 16px 30px rgba(255, 0, 55, 0.22);
+        }
+
+        .landing-brand-button:hover {
+            background-image: linear-gradient(90deg, #ff2757 0%, #e00035 100%) !important;
+        }
+
+        .landing-hero-secondary {
+            border-color: rgba(255, 255, 255, 0.24);
+            background: rgba(15, 23, 42, 0.42);
+        }
+
+        .landing-hero-copy > * {
+            text-shadow: 0 10px 24px rgba(2, 6, 23, 0.34);
+        }
+
+        .dark .landing-hero-copy > * {
+            text-shadow: 0 10px 28px rgba(2, 6, 23, 0.5);
+        }
+
+        .landing-hero-rail {
+            align-content: start;
+        }
+
+        .dark .landing-hero-card,
+        .dark .landing-hero-link,
+        .dark .landing-hero-meta-item {
+            border-color: rgba(248, 113, 113, 0.14);
+        }
+
         @keyframes floatOrb {
             0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
             50% { transform: translate3d(0, -14px, 0) scale(1.05); }
@@ -296,11 +613,43 @@
                 transform: translateY(0);
             }
         }
+
+        @keyframes stageGlow {
+            0% { background-position: 0% 0%, 100% 100%, 0 0; }
+            100% { background-position: 100% 10%, 0% 90%, 0 0; }
+        }
+
+        @keyframes heroCardFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes heroStatFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        @keyframes heroKenBurns {
+            0%, 100% { transform: scale(1.02); }
+            50% { transform: scale(1.08); }
+        }
+
+        @media (max-width: 1023px) {
+            .landing-stage {
+                border-radius: 1.5rem;
+                padding: 1.25rem;
+            }
+
+            .landing-hero-card,
+            .landing-hero-stat {
+                animation: none;
+            }
+        }
     </style>
 @endpush
 
 @section('content')
-    <div class="relative text-gray-900 dark:text-gray-100" style="background: var(--landing-bg);">
+    <div class="landing-page relative text-gray-900 dark:text-gray-100" style="background: var(--landing-bg);">
         <div class="pointer-events-none absolute inset-0 overflow-x-clip">
             <div class="float-orb left-[-5rem] top-28 h-36 w-36 bg-red-300/60 dark:bg-red-500/20"></div>
             <div class="float-orb right-[-3rem] top-[34rem] h-40 w-40 bg-red-200/55 [animation-delay:1.2s] dark:bg-red-400/20"></div>
@@ -358,7 +707,7 @@
                     <div class="flex items-center gap-3">
                         <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3">
                             <div class="relative">
-                                <img src="{{ $departmentLogoUrl }}" alt="{{ $departmentName }} logo" class="h-11 w-11 rounded-xl bg-white/10 object-contain ring-1 ring-white/20 shadow-lg shadow-red-900/15">
+                                <img src="{{ $departmentLogoUrl }}" alt="{{ $departmentName }} logo" class="h-11 w-11 rounded-xl bg-white object-contain ring-1 ring-gray-200 shadow-lg shadow-red-900/15">
                                 <span class="absolute -right-1 -top-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-white text-[8px] font-bold text-red-700 shadow-sm">IT</span>
                             </div>
                             <div class="min-w-0 leading-tight">
@@ -409,6 +758,78 @@
                                 </svg>
                             </button>
 
+                            <!-- Mobile Menu Button -->
+                            <div x-data="{ mobileMenuOpen: false }" class="relative xl:hidden">
+                                <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="inline-flex items-center justify-center rounded-xl border border-white/20 bg-slate-950/60 p-1.5 text-white shadow-sm hover:bg-slate-950/75 focus:outline-none focus:ring-2 focus:ring-white/40">
+                                    <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+                                        <path d="M3 12h18M3 6h18M3 18h18" />
+                                    </svg>
+                                    <svg x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hidden h-5 w-5">
+                                        <path d="M18 6L6 18M6 6l12 12" />
+                                    </svg>
+                                </button>
+
+                                <!-- Dropdown Menu -->
+                                <div x-show="mobileMenuOpen" @click.outside="mobileMenuOpen = false" x-transition class="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-white/20 bg-gradient-to-b from-slate-950 to-slate-900 shadow-2xl">
+                                    <div class="space-y-1 p-3">
+                                        <!-- Navigation Links -->
+                                        <a href="#about" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
+                                            {{ $locale === 'ne' ? 'बारेमा' : 'About' }}
+                                        </a>
+                                        <a href="#programs" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
+                                            {{ $locale === 'ne' ? 'कार्यक्रम' : 'Programs' }}
+                                        </a>
+                                        <a href="#curriculum" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
+                                            {{ $locale === 'ne' ? 'पाठ्यक्रम' : 'Curriculum' }}
+                                        </a>
+                                        <a href="#faculty" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
+                                            {{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}
+                                        </a>
+                                        <a href="#notices" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
+                                            {{ $locale === 'ne' ? 'सूचना' : 'News & Events' }}
+                                        </a>
+                                        <a href="#resources" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
+                                            {{ $locale === 'ne' ? 'स्रोत' : 'Resources' }}
+                                        </a>
+                                        <a href="#contact" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
+                                            {{ $locale === 'ne' ? 'सम्पर्क' : 'Contact' }}
+                                        </a>
+
+                                        <div class="border-t border-white/10 pt-3">
+                                            <!-- Quick Contact -->
+                                            <a href="#contact" @click="mobileMenuOpen = false" class="flex items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/8 px-3 py-2 text-xs font-semibold text-white/90 transition hover:bg-white/12">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                                    <path d="M1.5 6.75A2.25 2.25 0 0 1 3.75 4.5h16.5A2.25 2.25 0 0 1 22.5 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 17.25V6.75Zm2.25-.75a.75.75 0 0 0-.75.75v.243l7.5 4.5 7.5-4.5V6.75a.75.75 0 0 0-.75-.75H3.75Zm15.75 3.006-7.114 4.268a1.5 1.5 0 0 1-1.542 0L4.5 9.006v8.244c0 .414.336.75.75.75h15a.75.75 0 0 0 .75-.75V9.006Z"/>
+                                                </svg>
+                                                <span>{{ $locale === 'ne' ? 'छिटो सम्पर्क' : 'Quick Contact' }}</span>
+                                            </a>
+
+                                            <!-- Language Selector Mobile -->
+                                            <form method="POST" action="{{ route('language.switch') }}" class="mt-3 block sm:hidden">
+                                                @csrf
+                                                <label class="sr-only" for="localeSelectMobile">{{ $locale === 'ne' ? 'भाषा' : 'Language' }}</label>
+                                                <select id="localeSelectMobile" name="locale" onchange="this.form.submit()" class="w-full rounded-lg border border-white/20 bg-slate-950/60 px-3 py-2 text-xs text-white shadow-sm focus:border-white/40 focus:ring-white/30">
+                                                    @foreach (config('locales.supported') as $code => $label)
+                                                        <option value="{{ $code }}" @selected($code === $locale)>{{ $label }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </form>
+
+                                            <!-- Auth Button Mobile -->
+                                            @auth
+                                                <a href="{{ route('dashboard') }}" @click="mobileMenuOpen = false" class="shine-button mt-3 block w-full rounded-lg bg-white px-4 py-2 text-center text-xs font-semibold text-red-700 shadow-sm transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-white/40">
+                                                    {{ $locale === 'ne' ? 'ड्यासबोर्ड' : 'Dashboard' }}
+                                                </a>
+                                            @else
+                                                <a href="{{ route('login') }}" @click="mobileMenuOpen = false" class="shine-button mt-3 block w-full rounded-lg bg-slate-950 px-4 py-2 text-center text-xs font-semibold text-white shadow-sm ring-1 ring-white/10 transition hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-white/40">
+                                                    {{ $locale === 'ne' ? 'लगइन' : 'Login' }}
+                                                </a>
+                                            @endauth
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             @auth
                                 <a href="{{ route('dashboard') }}" class="shine-button hidden rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-red-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-white/40 sm:inline-flex">
                                     {{ $locale === 'ne' ? 'ड्यासबोर्ड' : 'Dashboard' }}
@@ -429,67 +850,150 @@
                 <div class="absolute inset-0 -z-10">
                     <div class="relative h-full w-full">
                         <template x-for="(src, idx) in slides" :key="src">
-                            <img :src="src" alt="" class="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+                            <img :src="src" alt="" class="landing-hero-slide absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
                                  :class="idx === active ? 'opacity-100' : 'opacity-0'" />
                         </template>
-                        <div class="absolute inset-0 bg-gradient-to-r from-gray-950/80 via-gray-950/55 to-gray-950/20"></div>
-                        <div class="absolute inset-0 bg-gradient-to-t from-gray-950/60 via-transparent to-transparent"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/72 to-slate-950/46"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/78 via-slate-950/12 to-transparent"></div>
+                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_22%_22%,rgba(2,6,23,0.12),transparent_26%),radial-gradient(circle_at_78%_18%,rgba(255,255,255,0.08),transparent_20%)]"></div>
                     </div>
                 </div>
 
-                <div class="landing-shell mx-auto w-full px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-                    <div class="max-w-4xl">
-                        <p class="section-chip stagger-rise bg-white/12 text-white ring-1 ring-white/15">
-                            <span class="h-2.5 w-2.5 rounded-full bg-red-400 shadow-[0_0_18px_rgba(248,113,113,0.95)]"></span>
-                            {{ $locale === 'ne' ? 'विभागीय पोर्टल' : 'Department Portal' }}
-                        </p>
+                <div class="landing-shell mx-auto w-full px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
+                    <div class="grid gap-6 lg:grid-cols-[minmax(0,1.08fr)_20rem] lg:items-start">
+                        <div class="landing-hero-copy max-w-4xl">
+                            <p class="section-chip stagger-rise bg-white/12 text-white ring-1 ring-white/15">
+                                <span class="h-2.5 w-2.5 rounded-full bg-red-400 shadow-[0_0_18px_rgba(248,113,113,0.95)]"></span>
+                                {{ $locale === 'ne' ? 'विभागीय पोर्टल' : 'Department Portal' }}
+                            </p>
 
-                        <h1 class="section-title stagger-rise mt-6 text-3xl font-bold text-white sm:text-5xl lg:text-6xl">
-                            {{ $departmentName }}
-                        </h1>
-                        <p class="stagger-rise mt-5 max-w-3xl text-base leading-relaxed text-white/85 sm:text-lg">
-                            {{ $tagline }}
-                        </p>
+                            <h1 class="section-title stagger-rise mt-6 text-3xl font-bold text-white sm:text-5xl lg:text-6xl">
+                                {{ $departmentName }}
+                            </h1>
+                            <p class="stagger-rise mt-5 max-w-3xl text-base leading-relaxed text-white/90 sm:text-lg">
+                                {{ $tagline }}
+                            </p>
+                            <p class="stagger-rise mt-4 max-w-3xl text-sm leading-7 text-white/80 sm:text-base">
+                                {{ $heroDescription }}
+                            </p>
 
-                        <div class="stagger-rise mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                            <a href="#programs" class="shine-button inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-500 via-red-600 to-red-700 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-900/20 transition duration-200 hover:-translate-y-0.5 hover:from-red-400 hover:via-red-500 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
-                                <span>{{ $locale === 'ne' ? 'कार्यक्रम हेर्नुहोस्' : 'Explore Programs' }}</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                                    <path fill-rule="evenodd" d="M12.72 6.72a.75.75 0 0 0-1.06 1.06L14.94 12l-3.28 4.22a.75.75 0 1 0 1.14.98l3.75-4.83a.75.75 0 0 0 0-.98l-3.75-4.83z" clip-rule="evenodd" />
-                                </svg>
-                            </a>
-                            <a href="#curriculum" class="shine-button inline-flex items-center justify-center gap-2 rounded-xl bg-white/12 px-6 py-3 text-sm font-semibold text-white ring-1 ring-white/20 transition duration-200 hover:-translate-y-0.5 hover:bg-white/18 focus:outline-none focus:ring-2 focus:ring-white/40">
-                                <span>{{ $locale === 'ne' ? 'विषयहरू ब्राउज' : 'Browse Subjects' }}</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                                    <path fill-rule="evenodd" d="M12.72 6.72a.75.75 0 0 0-1.06 1.06L14.94 12l-3.28 4.22a.75.75 0 1 0 1.14.98l3.75-4.83a.75.75 0 0 0 0-.98l-3.75-4.83z" clip-rule="evenodd" />
-                                </svg>
-                            </a>
-                            <a href="#contact" class="shine-button inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-red-700 shadow-lg shadow-red-900/10 transition duration-200 hover:-translate-y-0.5 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200">
-                                <span>{{ $locale === 'ne' ? 'सम्पर्क गर्नुहोस्' : 'Contact Us' }}</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                                    <path fill-rule="evenodd" d="M12.72 6.72a.75.75 0 0 0-1.06 1.06L14.94 12l-3.28 4.22a.75.75 0 1 0 1.14.98l3.75-4.83a.75.75 0 0 0 0-.98l-3.75-4.83z" clip-rule="evenodd" />
-                                </svg>
-                            </a>
+                            <div class="stagger-rise mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                                <a href="#programs" class="landing-brand-button shine-button inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-300">
+                                    <span>{{ $locale === 'ne' ? 'कार्यक्रम हेर्नुहोस्' : 'Explore Programs' }}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                        <path fill-rule="evenodd" d="M12.72 6.72a.75.75 0 0 0-1.06 1.06L14.94 12l-3.28 4.22a.75.75 0 1 0 1.14.98l3.75-4.83a.75.75 0 0 0 0-.98l-3.75-4.83z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                                <a href="#curriculum" class="landing-hero-secondary shine-button inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white ring-1 ring-white/20 transition duration-200 hover:-translate-y-0.5 hover:bg-white/18 focus:outline-none focus:ring-2 focus:ring-white/40">
+                                    <span>{{ $locale === 'ne' ? 'विषयहरू ब्राउज' : 'Browse Subjects' }}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                        <path fill-rule="evenodd" d="M12.72 6.72a.75.75 0 0 0-1.06 1.06L14.94 12l-3.28 4.22a.75.75 0 1 0 1.14.98l3.75-4.83a.75.75 0 0 0 0-.98l-3.75-4.83z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                                <a href="#contact" class="shine-button inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-red-700 shadow-lg shadow-red-900/10 transition duration-200 hover:-translate-y-0.5 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200">
+                                    <span>{{ $locale === 'ne' ? 'सम्पर्क गर्नुहोस्' : 'Contact Us' }}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                        <path fill-rule="evenodd" d="M12.72 6.72a.75.75 0 0 0-1.06 1.06L14.94 12l-3.28 4.22a.75.75 0 1 0 1.14.98l3.75-4.83a.75.75 0 0 0 0-.98l-3.75-4.83z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                            </div>
+
+                            <div class="mt-7 grid grid-cols-2 gap-4 sm:mt-8 sm:grid-cols-4">
+                                <div class="landing-hero-stat landing-hero-stat-card landing-hero-stat-card--students landing-grid-accent stagger-rise rounded-3xl p-3.5 sm:p-4">
+                                    <div class="landing-hero-stat-number text-2xl font-bold">{{ number_format((int) ($stats['students'] ?? 0)) }}</div>
+                                    <div class="landing-hero-stat-label mt-1 text-xs font-medium">{{ $locale === 'ne' ? 'विद्यार्थी' : 'Students' }}</div>
+                                </div>
+                                <div class="landing-hero-stat landing-hero-stat-card landing-hero-stat-card--faculty landing-grid-accent stagger-rise rounded-3xl p-3.5 sm:p-4">
+                                    <div class="landing-hero-stat-number text-2xl font-bold">{{ number_format((int) ($stats['teachers'] ?? 0)) }}</div>
+                                    <div class="landing-hero-stat-label mt-1 text-xs font-medium">{{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</div>
+                                </div>
+                                <div class="landing-hero-stat landing-hero-stat-card landing-hero-stat-card--subjects landing-grid-accent stagger-rise rounded-3xl p-3.5 sm:p-4">
+                                    <div class="landing-hero-stat-number text-2xl font-bold">{{ number_format((int) ($stats['subjects'] ?? 0)) }}</div>
+                                    <div class="landing-hero-stat-label mt-1 text-xs font-medium">{{ $locale === 'ne' ? 'विषय' : 'Subjects' }}</div>
+                                </div>
+                                <div class="landing-hero-stat landing-hero-stat-card landing-hero-stat-card--labs landing-grid-accent stagger-rise rounded-3xl p-3.5 sm:p-4">
+                                    <div class="landing-hero-stat-number text-2xl font-bold">{{ number_format((int) ($stats['labs'] ?? 0)) }}</div>
+                                    <div class="landing-hero-stat-label mt-1 text-xs font-medium">{{ $locale === 'ne' ? 'ल्याब' : 'Labs' }}</div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                            <div class="landing-grid-accent stagger-rise rounded-3xl bg-gradient-to-br from-red-500/30 to-red-300/15 p-4 ring-1 ring-white/15 backdrop-blur-sm">
-                                <div class="text-2xl font-bold text-white">{{ number_format((int) ($stats['students'] ?? 0)) }}</div>
-                                <div class="mt-1 text-xs font-medium text-white/75">{{ $locale === 'ne' ? 'विद्यार्थी' : 'Students' }}</div>
+                        <aside class="landing-hero-rail lg:-mt-4">
+                            <div class="landing-hero-card landing-hero-card-ghost">
+                                <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/80">
+                                    {{ $locale === 'ne' ? 'विभाग प्रोफाइल' : 'Department Snapshot' }}
+                                </div>
+                                <div class="mt-4 landing-hero-meta">
+                                    <div class="landing-hero-meta-item landing-hero-meta-item-ghost">
+                                        <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75">
+                                            {{ $locale === 'ne' ? 'स्थान' : 'Location' }}
+                                        </div>
+                                        <div class="mt-2 text-sm font-semibold text-white">
+                                            {{ $addressText ?: ($locale === 'ne' ? 'विभागीय कार्यालय' : 'Department Office') }}
+                                        </div>
+                                    </div>
+                                    <div class="landing-hero-meta-item landing-hero-meta-item-ghost">
+                                        <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75">
+                                            {{ $locale === 'ne' ? 'सम्पर्क' : 'Connect' }}
+                                        </div>
+                                        <div class="mt-2 space-y-1 text-sm font-medium text-white/95">
+                                            @if (!empty($department?->email))
+                                                <div>{{ $department->email }}</div>
+                                            @endif
+                                            @if (!empty($department?->phone))
+                                                <div>{{ $department->phone }}</div>
+                                            @endif
+                                            @if (empty($department?->email) && empty($department?->phone))
+                                                <div>{{ $locale === 'ne' ? 'सम्पर्क विवरण छिट्टै' : 'Contact details coming soon' }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="landing-hero-meta-item landing-hero-meta-item-ghost">
+                                            <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75">
+                                                {{ $locale === 'ne' ? 'स्थापना' : 'Established' }}
+                                            </div>
+                                            <div class="mt-2 text-sm font-semibold text-white">
+                                                {{ $department?->established_year ?: 'N/A' }}
+                                            </div>
+                                        </div>
+                                        <div class="landing-hero-meta-item landing-hero-meta-item-ghost">
+                                            <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/75">
+                                                {{ $locale === 'ne' ? 'दर्ता' : 'Register' }}
+                                            </div>
+                                            <div class="mt-2 text-sm font-semibold text-white">
+                                                {{ $department?->registration_number ?: 'N/A' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="landing-grid-accent stagger-rise rounded-3xl bg-gradient-to-br from-red-600/30 to-red-300/15 p-4 ring-1 ring-white/15 backdrop-blur-sm">
-                                <div class="text-2xl font-bold text-white">{{ number_format((int) ($stats['teachers'] ?? 0)) }}</div>
-                                <div class="mt-1 text-xs font-medium text-white/75">{{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</div>
+
+                            <div class="landing-hero-card">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="text-sm font-semibold text-white">
+                                        {{ $locale === 'ne' ? 'छिटो पहुँच' : 'Quick Access' }}
+                                    </div>
+                                    <span class="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/90 ring-1 ring-white/10">
+                                        {{ $locale === 'ne' ? '३ लिंक' : '3 links' }}
+                                    </span>
+                                </div>
+                                <div class="mt-4 grid gap-3">
+                                    <a href="#notices" class="landing-hero-link">
+                                        <span class="text-sm font-semibold text-white">{{ $locale === 'ne' ? 'सूचना तथा अपडेट' : 'Notices & Updates' }}</span>
+                                        <span class="text-white/90">01</span>
+                                    </a>
+                                    <a href="#resources" class="landing-hero-link">
+                                        <span class="text-sm font-semibold text-white">{{ $locale === 'ne' ? 'स्रोत तथा सामग्री' : 'Resources & Materials' }}</span>
+                                        <span class="text-white/90">02</span>
+                                    </a>
+                                    <a href="{{ route('gallery.index') }}" class="landing-hero-link">
+                                        <span class="text-sm font-semibold text-white">{{ $locale === 'ne' ? 'ग्यालरी' : 'Gallery' }}</span>
+                                        <span class="text-white/90">03</span>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="landing-grid-accent stagger-rise rounded-3xl bg-gradient-to-br from-red-400/30 to-red-200/15 p-4 ring-1 ring-white/15 backdrop-blur-sm">
-                                <div class="text-2xl font-bold text-white">{{ number_format((int) ($stats['subjects'] ?? 0)) }}</div>
-                                <div class="mt-1 text-xs font-medium text-white/75">{{ $locale === 'ne' ? 'विषय' : 'Subjects' }}</div>
-                            </div>
-                            <div class="landing-grid-accent stagger-rise rounded-3xl bg-gradient-to-br from-red-700/30 to-red-400/15 p-4 ring-1 ring-white/15 backdrop-blur-sm">
-                                <div class="text-2xl font-bold text-white">{{ number_format((int) ($stats['labs'] ?? 0)) }}</div>
-                                <div class="mt-1 text-xs font-medium text-white/75">{{ $locale === 'ne' ? 'ल्याब' : 'Labs' }}</div>
-                            </div>
-                        </div>
+                        </aside>
                     </div>
                 </div>
 
@@ -528,9 +1032,9 @@
 
     
 
-            <section id="about" class="w-full px-4 py-16 sm:px-6 lg:px-8">
-                <div class="landing-shell mx-auto grid w-full gap-10 lg:grid-cols-12 lg:items-start">
-                    <div class="lg:col-span-7">
+            <section id="about" class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8">
+                <div class="landing-shell mx-auto w-full landing-stage">
+                    <div>
                         <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
                             <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
                             {{ $locale === 'ne' ? 'परिचय' : 'Introduction' }}
@@ -538,8 +1042,8 @@
                         <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
                             {{ $locale === 'ne' ? 'विभागको परिचय' : 'About the Department' }}
                         </h2>
-                        <div class="landing-panel mt-5 overflow-hidden rounded-[2rem] p-5 dark:bg-slate-950/80" style="height: 500px;">
-                            <div class="whitespace-pre-wrap text-sm font-bold leading-7 text-gray-700 dark:text-gray-300 overflow-hidden">
+                        <div class="landing-panel mt-5 rounded-[2rem] p-6 dark:bg-slate-950/80">
+                            <div class="whitespace-pre-wrap text-sm leading-7 text-gray-700 dark:text-gray-300">
                                 {{ $aboutText ?: ($locale === 'ne'
                                     ? 'यो विभागले विद्यार्थी, शिक्षक र अभिभावकका लागि एकीकृत सूचना प्रणालीमार्फत शैक्षिक व्यवस्थापनलाई डिजिटल बनाउँछ।'
                                     : 'This department portal brings academics, resources, and communication together for students, faculty, and parents.') }}
@@ -570,85 +1074,34 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="lg:col-span-5">
-                        <div class="landing-panel rounded-[2rem] bg-gradient-to-br from-white/90 via-red-50/70 to-white p-6 dark:from-slate-950/90 dark:via-slate-900 dark:to-slate-950">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ $locale === 'ne' ? 'छिटो पहुँच' : 'Quick Access' }}</h3>
-                            <div class="mt-5 grid gap-3">
-                                <a href="#notices" class="landing-panel lift-card flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-700 ring-1 ring-red-100 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-                                            <path d="M2.25 6.75A2.25 2.25 0 0 1 4.5 4.5h15A2.25 2.25 0 0 1 21.75 6.75v10.5A2.25 2.25 0 0 1 19.5 19.5h-15a2.25 2.25 0 0 1-2.25-2.25V6.75Zm2.25-.75a.75.75 0 0 0-.75.75v.243l7.5 4.5 7.5-4.5V6.75a.75.75 0 0 0-.75-.75h-15Zm15.75 3.006-7.114 4.268a1.5 1.5 0 0 1-1.542 0L4.5 9.006v8.244c0 .414.336.75.75.75h15a.75.75 0 0 0 .75-.75V9.006Z"/>
-                                        </svg>
-                                    </span>
-                                    <span>{{ $locale === 'ne' ? 'सूचना बोर्ड' : 'Notice Board' }}</span>
-                                </a>
-                                <a href="#resources" class="landing-panel lift-card flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-700 ring-1 ring-red-100 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-                                            <path d="M6.75 2.25A2.25 2.25 0 0 0 4.5 4.5v15A2.25 2.25 0 0 0 6.75 21.75h10.5A2.25 2.25 0 0 0 19.5 19.5V7.5a.75.75 0 0 0-.22-.53l-4.5-4.5a.75.75 0 0 0-.53-.22H6.75Zm7.5 1.81L17.69 7.5h-2.94a.5.5 0 0 1-.5-.5V4.06Z"/>
-                                        </svg>
-                                    </span>
-                                    <span>{{ $locale === 'ne' ? 'दस्तावेज/स्रोत' : 'Documents & Resources' }}</span>
-                                </a>
-                                <a href="{{ route('gallery.index') }}" class="landing-panel lift-card flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-700 ring-1 ring-red-100 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-                                            <path d="M1.5 6.75A2.25 2.25 0 0 1 3.75 4.5h16.5A2.25 2.25 0 0 1 22.5 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 17.25V6.75ZM4.5 7.5a.75.75 0 0 0-.75.75v.5l4.286 3.214a.75.75 0 0 0 .9 0L13.5 8.25l4.564 3.709a.75.75 0 0 0 .936-.012L21 10.28V8.25a.75.75 0 0 0-.75-.75h-15.75Z"/>
-                                        </svg>
-                                    </span>
-                                    <span>{{ $locale === 'ne' ? 'ग्यालरी' : 'Gallery' }}</span>
-                                </a>
-                                @auth
-                                    <a href="{{ route('dashboard') }}" class="shine-button flex items-center gap-3 rounded-2xl bg-gradient-to-r from-red-500 via-red-600 to-red-700 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:from-red-400 hover:via-red-500 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-                                                <path d="M11.25 3.75a.75.75 0 0 1 1.5 0v7.5h7.5a.75.75 0 0 1 0 1.5h-7.5v7.5a.75.75 0 0 1-1.5 0v-7.5h-7.5a.75.75 0 0 1 0-1.5h7.5v-7.5Z"/>
-                                            </svg>
-                                        </span>
-                                        <span>{{ $locale === 'ne' ? 'ड्यासबोर्ड खोल्नुहोस्' : 'Open Dashboard' }}</span>
-                                    </a>
-                                @else
-                                    <a href="{{ route('login') }}" class="shine-button flex items-center gap-3 rounded-2xl bg-gradient-to-r from-red-500 via-red-600 to-red-700 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:from-red-400 hover:via-red-500 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-500">
-                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-                                                <path fill-rule="evenodd" d="M7.5 3.75A3.75 3.75 0 0 1 11.25 0h1.5A3.75 3.75 0 0 1 16.5 3.75V9a.75.75 0 0 1-1.5 0V3.75c0-1.243-1.007-2.25-2.25-2.25h-1.5C10.007 1.5 9 2.507 9 3.75V9a.75.75 0 0 1-1.5 0V3.75Zm-6 9A2.25 2.25 0 0 1 3.75 10.5h16.5A2.25 2.25 0 0 1 22.5 12.75v7.5A3.75 3.75 0 0 1 18.75 24H5.25A3.75 3.75 0 0 1 1.5 20.25v-7.5Zm7.5 3a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5h-6Z" clip-rule="evenodd"/>
-                                            </svg>
-                                        </span>
-                                        <span>{{ $locale === 'ne' ? 'लगइन गरेर सुरु गर्नुहोस्' : 'Sign in to continue' }}</span>
-                                    </a>
-                                @endauth
-                            </div>
-
-                            @if (!empty($addressText) || !empty($department?->phone) || !empty($department?->email))
-                                <div class="mt-6 border-t border-gray-200 pt-5 text-sm text-gray-700 dark:border-gray-800 dark:text-gray-300">
-                                    <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $locale === 'ne' ? 'सम्पर्क' : 'Contact' }}</div>
-                                    <div class="mt-2 space-y-1">
-                                        @if (!empty($addressText))
-                                            <div>{{ $addressText }}</div>
-                                        @endif
-                                        @if (!empty($department?->phone))
-                                            <div>{{ $department->phone }}</div>
-                                        @endif
-                                        @if (!empty($department?->email))
-                                            <div>
-                                                <a class="text-red-700 hover:underline dark:text-red-400" href="mailto:{{ $department->email }}">{{ $department->email }}</a>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
                 </div>
             </section>
 
-            <section id="programs" class="w-full px-4 py-16 sm:px-6 lg:px-8">
-                <div class="landing-shell mx-auto w-full">
+            <section id="programs" class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8">
+                <div class="landing-shell mx-auto w-full landing-stage">
                     <div class="grid gap-10 lg:grid-cols-12 lg:items-center">
                         <div class="lg:col-span-5">
                             <div class="landing-panel rounded-[2rem]">
-                                <img src="{{ $programsImageUrl ?: asset('images/hero-image.jpg') }}" alt="{{ $programsTitle ?: ($locale === 'ne' ? 'कार्यक्रम तस्वीर' : 'Program image') }}" class="h-72 w-full object-cover sm:h-80" onerror="this.onerror=null;this.src='{{ asset('images/hero-image.jpg') }}';" />
+                                @if ($hasProgramsImage)
+                                    <img src="{{ $programsImageUrl }}" alt="{{ $programsTitle ?: ($locale === 'ne' ? 'कार्यक्रम तस्वीर' : 'Program image') }}" class="h-72 w-full object-cover sm:h-80" />
+                                @else
+                                    <div class="flex h-72 items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-red-950/70 px-6 text-center sm:h-80">
+                                        <div class="max-w-sm">
+                                            <p class="section-chip mx-auto bg-white/10 text-white ring-1 ring-white/15">
+                                                <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-400"></span>
+                                                {{ $locale === 'ne' ? 'कार्यक्रम फोटो' : 'Programs Photo' }}
+                                            </p>
+                                            <h3 class="mt-5 text-xl font-semibold text-white sm:text-2xl">
+                                                {{ $programsTitle ?: ($locale === 'ne' ? 'शैक्षिक कार्यक्रम' : 'Academic Programs') }}
+                                            </h3>
+                                            <p class="mt-3 text-sm leading-6 text-white/75">
+                                                {{ $locale === 'ne'
+                                                    ? 'एडमिन सेटिङबाट कार्यक्रम फोटो अपलोड गरेपछि यहाँ देखाइनेछ।'
+                                                    : 'This area will show the Academic Programs photo from admin settings once it is uploaded.' }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="lg:col-span-7">
@@ -683,14 +1136,14 @@
                 </div>
             </section>
 
-            <section id="curriculum" class="w-full px-4 py-16 sm:px-6 lg:px-8" x-data="subjectCatalog({
+            <section id="curriculum" class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8" x-data="subjectCatalog({
                 initialSemester: @js($defaultSemester),
                 maxItems: @js($subjectPreviewMax),
                 indexUrl: @js(route('subjects.index')),
                 subjects: @js($subjectPayload),
                 locale: @js($locale),
             })">
-                <div class="landing-shell mx-auto w-full">
+                <div class="landing-shell mx-auto w-full landing-stage">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                             <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
@@ -700,23 +1153,26 @@
                             <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
                                 {{ $locale === 'ne' ? 'हाम्रा पाठ्यक्रम' : 'Our Courses' }}
                             </h2>
-                        <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
-                            {{ $locale === 'ne' ? 'सेमेस्टर अनुसार विषयहरू हेर्नुहोस्।' : 'Browse semester-wise course highlights.' }}
-                        </p>
+                            <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                                {{ $locale === 'ne' ? 'सेमेस्टर अनुसार विषयहरू हेर्नुहोस्।' : 'Browse semester-wise course highlights.' }}
+                            </p>
+                        </div>
                     </div>
-                </div>
 
-                <div class="mt-6 flex flex-wrap items-center gap-2">
-                    @foreach ($semesterSummary->take(4) as $sem => $meta)
-                        @continue(empty($sem))
-                        <button type="button"
-                            class="rounded-xl border px-4 py-2 text-sm font-semibold shadow-sm transition duration-200 focus:outline-none focus:ring-2 focus:ring-red-500"
-                            :class="String(semester) === @js((string) $sem) ? 'border-red-600 bg-red-600 text-white shadow-red-900/10 dark:border-red-400 dark:bg-red-400 dark:text-gray-950' : 'border-white/60 bg-white/80 text-gray-700 hover:-translate-y-0.5 hover:bg-white dark:border-gray-800 dark:bg-slate-950/80 dark:text-gray-200 dark:hover:bg-slate-900'"
-                            @click="semester=@js((string) $sem); query=''; openId=null;">
-                            {{ $locale === 'ne' ? "{$sem} सेमेस्टर" : "Semester {$sem}" }}
-                        </button>
-                    @endforeach
-                </div>
+                    <div class="landing-toolbar mt-6 flex-col lg:flex-row lg:items-center lg:justify-between">
+                        <div class="text-sm font-medium text-gray-600 dark:text-gray-300" x-text="resultText"></div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            @foreach ($semesterSummary->take(4) as $sem => $meta)
+                                @continue(empty($sem))
+                                <button type="button"
+                                    class="rounded-xl border px-4 py-2 text-sm font-semibold shadow-sm transition duration-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    :class="String(semester) === @js((string) $sem) ? 'border-red-600 bg-red-600 text-white shadow-red-900/10 dark:border-red-400 dark:bg-red-400 dark:text-gray-950' : 'border-white/60 bg-white/80 text-gray-700 hover:-translate-y-0.5 hover:bg-white dark:border-gray-800 dark:bg-slate-950/80 dark:text-gray-200 dark:hover:bg-slate-900'"
+                                    @click="semester=@js((string) $sem); query=''; openId=null;">
+                                    {{ $locale === 'ne' ? "{$sem} सेमेस्टर" : "Semester {$sem}" }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
 
                 <div class="mt-8 grid gap-6 md:grid-cols-3">
                     <template x-for="s in visibleSubjects" :key="s.id">
@@ -931,8 +1387,8 @@
                 --}}
             </section>
 
-            <section id="faculty" class="w-full px-4 py-16 sm:px-6 lg:px-8">
-                <div class="landing-shell mx-auto w-full">
+            <section id="faculty" class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8">
+                <div class="landing-shell mx-auto w-full landing-stage">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                             <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
@@ -970,7 +1426,7 @@
                                         $leaderMeta = $leaderDept ?: ($leader->email ?: null);
                                     @endphp
                                     <div class="landing-panel lift-card overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-red-50 via-white to-red-100 dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-red-950/25 dark:to-slate-950">
-                                        <div class="flex h-64 items-center justify-center bg-gradient-to-br from-red-300 via-red-400 to-red-600 dark:from-red-900/50 dark:via-red-800/40 dark:to-red-950/40">
+                                        <div class="flex h-52 items-center justify-center bg-gradient-to-br from-slate-100 via-rose-100 to-red-200 dark:from-red-900/50 dark:via-red-800/40 dark:to-red-950/40 sm:h-56">
                                             @if (!empty($leaderPhoto))
                                                 <img src="{{ $leaderPhoto }}" alt="{{ $leaderName }}" class="h-full w-full object-cover" />
                                             @else
@@ -1003,7 +1459,7 @@
                                 $expertiseText = $t->bio ?: ($t->department ?: ($t->user?->department ?: null));
                             @endphp
                             <div class="landing-panel lift-card overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-red-50 via-white to-red-100 dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-red-950/25 dark:to-slate-950">
-                                <div class="flex h-64 items-center justify-center bg-gradient-to-br from-red-200 via-red-300 to-red-500 dark:from-red-900/45 dark:via-red-800/35 dark:to-red-950/35">
+                                <div class="flex h-52 items-center justify-center bg-gradient-to-br from-slate-100 via-rose-100 to-red-200 dark:from-red-900/45 dark:via-red-800/35 dark:to-red-950/35 sm:h-56">
                                     @if (!empty($photoUrl))
                                         <img src="{{ $photoUrl }}" alt="{{ $name }}" class="h-full w-full object-cover" />
                                     @else
@@ -1012,7 +1468,7 @@
                                         </div>
                                     @endif
                                 </div>
-                                <div class="border-t border-red-100 bg-gradient-to-br from-red-100 via-red-50 to-white p-5 dark:border-red-900/30 dark:bg-gradient-to-br dark:from-red-950/35 dark:via-slate-950 dark:to-slate-950">
+                                <div class="border-t border-red-100 bg-gradient-to-br from-red-100 via-red-50 to-white p-4 dark:border-red-900/30 dark:bg-gradient-to-br dark:from-red-950/35 dark:via-slate-950 dark:to-slate-950">
                                     <div class="truncate text-sm font-bold text-gray-900 dark:text-gray-100">{{ $name }}</div>
                                     <div class="mt-1 text-xs font-semibold text-gray-600 dark:text-gray-300">{{ $titleText }}</div>
                                     <div class="mt-2 text-xs text-gray-600 dark:text-gray-300">
@@ -1040,8 +1496,8 @@
                 </div>
             </section>
 
-            <section id="notices" class="w-full px-4 py-16 sm:px-6 lg:px-8" x-data="{ open: false, notice: null }">
-                <div class="landing-shell mx-auto w-full">
+            <section id="notices" class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8" x-data="{ open: false, notice: null }">
+                <div class="landing-shell mx-auto w-full landing-stage">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                         <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
@@ -1129,9 +1585,9 @@
                 </div>
             </section>
 
-            <section id="resources" class="w-full px-4 py-16 sm:px-6 lg:px-8" x-data="documentRepo({ documents: @js($documentPayload), locale: @js($locale) })">
-                <div class="landing-shell mx-auto w-full">
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <section id="resources" class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8" x-data="documentRepo({ documents: @js($documentPayload), locale: @js($locale) })">
+                <div class="landing-shell mx-auto w-full landing-stage">
+                    <div class="flex flex-col gap-3">
                         <div>
                             <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
                                 <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
@@ -1144,60 +1600,42 @@
                                 {{ $locale === 'ne' ? 'सिलेबस, नोट्स, गाइड र अन्य सामग्री।' : 'Syllabus, notes, guides, and other materials.' }}
                             </p>
                         </div>
-                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                            <label class="sr-only" for="docSearch">{{ $locale === 'ne' ? 'दस्तावेज खोज' : 'Search documents' }}</label>
-                            <input id="docSearch" type="search" x-model.trim="query" placeholder="{{ $locale === 'ne' ? 'शीर्षक/विषय खोज्नुहोस्…' : 'Search by title or subject…' }}"
-                                class="w-full rounded-xl border-gray-300 bg-white px-4 py-2 text-sm shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 sm:w-72" />
 
-                            <label class="sr-only" for="docType">{{ $locale === 'ne' ? 'प्रकार' : 'Type' }}</label>
-                            <select id="docType" x-model="type"
-                                class="w-full rounded-xl border-gray-300 bg-white px-4 py-2 text-sm shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 sm:w-52">
-                                <option value="all">{{ $locale === 'ne' ? 'सबै प्रकार' : 'All types' }}</option>
-                                <template x-for="t in types" :key="t.value">
-                                    <option :value="t.value" x-text="t.label"></option>
-                                </template>
-                            </select>
-                            <a href="{{ route('public.resources.index') }}" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-500 to-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
-                                <span>{{ $locale === 'ne' ? 'सबै स्रोत हेर्नुहोस्' : 'View all resources' }}</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                                    <path fill-rule="evenodd" d="M13.28 5.97a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 1 1-1.06-1.06l3.97-3.97H4.5a.75.75 0 0 1 0-1.5h12.75l-3.97-3.97a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                                </svg>
-                            </a>
+                        <div class="landing-toolbar lg:items-center lg:justify-between">
+                            <div class="text-sm font-medium text-gray-600 dark:text-gray-300" x-text="resultText"></div>
+                            <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                <label class="sr-only" for="docSearch">{{ $locale === 'ne' ? 'दस्तावेज खोज' : 'Search documents' }}</label>
+                                <input id="docSearch" type="search" x-model.trim="query" placeholder="{{ $locale === 'ne' ? 'शीर्षक/विषय खोज्नुहोस्…' : 'Search by title or subject…' }}"
+                                    class="landing-input w-full px-4 py-2 text-sm text-gray-900 focus:border-red-500 focus:ring-red-500 dark:text-gray-100 sm:w-72" />
+
+                                <label class="sr-only" for="docType">{{ $locale === 'ne' ? 'प्रकार' : 'Type' }}</label>
+                                <select id="docType" x-model="type"
+                                    class="landing-select w-full px-4 py-2 text-sm text-gray-900 focus:border-red-500 focus:ring-red-500 dark:text-gray-100 sm:w-52">
+                                    <option value="all">{{ $locale === 'ne' ? 'सबै प्रकार' : 'All types' }}</option>
+                                    <template x-for="t in types" :key="t.value">
+                                        <option :value="t.value" x-text="t.label"></option>
+                                    </template>
+                                </select>
+                                <a href="{{ route('public.resources.index') }}" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-500 to-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                                    <span>{{ $locale === 'ne' ? 'सबै स्रोत हेर्नुहोस्' : 'View all resources' }}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                        <path fill-rule="evenodd" d="M13.28 5.97a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 1 1-1.06-1.06l3.97-3.97H4.5a.75.75 0 0 1 0-1.5h12.75l-3.97-3.97a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                    </svg>
+                                </a>
+                            </div>
                         </div>
                     </div>
 
                     <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         <template x-for="d in filtered" :key="d.id">
-                            <div class="landing-panel lift-card overflow-hidden rounded-[1.75rem] border-l-4 bg-gradient-to-br from-white via-red-50/80 to-red-100/60 transition duration-300 dark:bg-gradient-to-br dark:from-slate-950/90 dark:via-red-950/20 dark:to-slate-950"
+                            <div class="landing-panel lift-card rounded-[1.75rem] border-l-4 bg-gradient-to-br from-white via-red-50/80 to-red-100/60 p-6 transition duration-300 dark:bg-gradient-to-br dark:from-slate-950/90 dark:via-red-950/20 dark:to-slate-950"
                                  :class="[
                                      d.type === 'syllabus' ? 'border-l-red-500 dark:border-l-red-400' : 
                                      d.type === 'notes' ? 'border-l-red-400 dark:border-l-red-300' : 
                                      d.type === 'guide' ? 'border-l-red-600 dark:border-l-red-500' : 
                                      'border-l-red-300 dark:border-l-red-400'
                                  ]">
-                                <div class="flex h-48 items-center justify-center transition duration-300" 
-                                     :class="[
-                                         d.type === 'syllabus' ? 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20' : 
-                                         d.type === 'notes' ? 'bg-gradient-to-br from-red-50 to-white dark:from-red-950/20 dark:to-red-900/10' : 
-                                         d.type === 'guide' ? 'bg-gradient-to-br from-red-100 to-red-50 dark:from-red-950/30 dark:to-red-900/20' : 
-                                         'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/20 dark:to-red-900/15'
-                                     ]">
-                                    <div class="flex flex-col items-center justify-center gap-3"
-                                         :class="[
-                                             d.type === 'syllabus' ? 'text-red-400 dark:text-red-500' : 
-                                            d.type === 'notes' ? 'text-red-400 dark:text-red-400' : 
-                                            d.type === 'guide' ? 'text-red-600 dark:text-red-500' : 
-                                            'text-red-300 dark:text-red-300'
-                                         ]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-20 w-20">
-                                            <path d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 .621-.504 1.125-1.125 1.125H1.5V5.25a3.75 3.75 0 0 1 4.125-3.75Z" />
-                                            <path fill-rule="evenodd" d="M23.25 7.5a.75.75 0 0 1-.75.75H.75a.75.75 0 0 1-.75-.75v-8a.75.75 0 0 1 .75-.75h22.5a.75.75 0 0 1 .75.75v8Zm-3-5.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" clip-rule="evenodd" />
-                                            <path fill-rule="evenodd" d="M.75 14.25a.75.75 0 0 0 .75.75h22.5a.75.75 0 0 0 .75-.75v-6a.75.75 0 0 0-.75-.75H1.5a.75.75 0 0 0-.75.75v6Zm22.5 6a.75.75 0 0 0 .75-.75v-2a.75.75 0 0 0-.75-.75H1.5a.75.75 0 0 0-.75.75v2a.75.75 0 0 0 .75.75h22.5Z" clip-rule="evenodd" />
-                                        </svg>
-                                        <span class="text-xs font-semibold uppercase tracking-wide" x-text="d.type_label"></span>
-                                    </div>
-                                </div>
-                                <div class="p-5">
+                                <div class="flex h-full flex-col">
                                     <div class="flex flex-wrap items-center gap-2">
                                         <span class="rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide transition duration-200"
                                               :class="[
@@ -1211,14 +1649,17 @@
                                             <span class="text-xs font-medium text-gray-500 dark:text-gray-400" x-text="d.size"></span>
                                         </template>
                                     </div>
-                                    <div class="mt-3 line-clamp-2 text-sm font-bold text-gray-900 dark:text-gray-100" x-text="d.title"></div>
+                                    <div class="mt-4 line-clamp-2 text-base font-bold text-gray-900 dark:text-gray-100" x-text="d.title"></div>
                                     <template x-if="d.subject">
-                                        <div class="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                                        <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                                             <span class="font-medium text-gray-900 dark:text-gray-200" x-text="d.subject"></span>
                                         </div>
                                     </template>
-                                    <div class="mt-2 text-xs text-gray-500 dark:text-gray-400" x-text="uploadedText(d.uploaded_at)"></div>
-                                    <div class="mt-4 flex items-center gap-2">
+                                    <template x-if="d.description">
+                                        <div class="mt-3 line-clamp-2 text-sm text-gray-600 dark:text-gray-300" x-text="d.description"></div>
+                                    </template>
+                                    <div class="mt-3 text-xs text-gray-500 dark:text-gray-400" x-text="uploadedText(d.uploaded_at)"></div>
+                                    <div class="mt-6 flex items-center gap-2">
                                         <template x-if="d.url">
                                             <a :href="d.url" target="_blank" rel="noopener" class="shine-button flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-red-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:from-red-400 hover:to-red-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-400">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5">
@@ -1259,8 +1700,8 @@
                 </div>
             </section>
 
-            <section class="w-full px-4 py-16 sm:px-6 lg:px-8">
-                <div class="landing-shell mx-auto w-full">
+            <section class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8">
+                <div class="landing-shell mx-auto w-full landing-stage">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                             <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
@@ -1322,27 +1763,54 @@
                 </div>
             </section>
 
-            <section id="contact" class="w-full px-4 py-16 sm:px-6 lg:px-8">
-                <div class="landing-shell mx-auto w-full">
-                    <div>
-                        <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
-                            <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
-                            {{ $locale === 'ne' ? 'सम्पर्क' : 'Contact' }}
-                        </p>
-                        <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
-                            {{ $locale === 'ne' ? 'सम्पर्क तथा सहयोग' : 'Contact & Support' }}
-                        </h2>
-                        <p class="mt-3 max-w-3xl text-sm leading-7 text-gray-700 dark:text-gray-300">
-                            {{ $locale === 'ne'
-                                ? 'कुनै प्रश्न, सुझाव वा सहयोगका लागि हामीलाई सम्पर्क गर्नुहोस्।'
-                                : 'Reach out for questions, suggestions, or support.' }}
-                        </p>
+            <section id="contact" class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8">
+                <div class="landing-shell mx-auto w-full landing-stage">
+                    <div class="grid gap-8 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start">
+                        <div>
+                            <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
+                                <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                                {{ $locale === 'ne' ? 'सम्पर्क' : 'Contact' }}
+                            </p>
+                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+                                {{ $locale === 'ne' ? 'सम्पर्क तथा सहयोग' : 'Contact & Support' }}
+                            </h2>
+                            <p class="mt-3 text-sm leading-7 text-gray-700 dark:text-gray-300">
+                                {{ $locale === 'ne'
+                                    ? 'कुनै प्रश्न, सुझाव वा सहयोगका लागि हामीलाई सम्पर्क गर्नुहोस्।'
+                                    : 'Reach out for questions, suggestions, or support.' }}
+                            </p>
 
-                        <div class="landing-panel mt-8 overflow-hidden rounded-[2rem] bg-white/85 dark:bg-slate-950/80">
+                            <div class="mt-8 grid gap-4">
+                                <div class="landing-panel lift-card rounded-[1.75rem] p-6 dark:bg-slate-950/80">
+                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'इमेल' : 'Email' }}</div>
+                                    <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                        @if (!empty($department?->email))
+                                            <a class="text-red-700 hover:underline dark:text-red-400" href="mailto:{{ $department->email }}">{{ $department->email }}</a>
+                                        @else
+                                            <span class="text-gray-500 dark:text-gray-400">support@example.edu</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="landing-panel lift-card rounded-[1.75rem] p-6 dark:bg-slate-950/80">
+                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'फोन' : 'Phone' }}</div>
+                                    <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                        {{ $department?->phone ?: '+977-000-0000000' }}
+                                    </div>
+                                </div>
+                                <div class="landing-panel lift-card rounded-[1.75rem] p-6 dark:bg-slate-950/80">
+                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'ठेगाना' : 'Address' }}</div>
+                                    <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                        {{ $addressText ?: ($locale === 'ne' ? 'विभागीय कार्यालय' : 'Department office') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="landing-panel overflow-hidden rounded-[2rem] bg-white/85 dark:bg-slate-950/80">
                             @if (!empty($lat) && !empty($lng))
                                 <div class="relative">
                                     <div id="departmentMap"
-                                        class="h-[22rem] w-full sm:h-[26rem] lg:h-[32rem]"
+                                        class="h-[22rem] w-full sm:h-[26rem] lg:h-[34rem]"
                                         data-lat="{{ (float) $lat }}"
                                         data-lng="{{ (float) $lng }}"
                                         data-name="{{ e($departmentName) }}"
@@ -1379,35 +1847,10 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="flex h-[22rem] items-center justify-center bg-gray-100 text-sm text-gray-600 dark:bg-gray-900 dark:text-gray-300 sm:h-[26rem] lg:h-[32rem]">
+                                <div class="flex h-[22rem] items-center justify-center bg-gray-100 text-sm text-gray-600 dark:bg-gray-900 dark:text-gray-300 sm:h-[26rem] lg:h-[34rem]">
                                     {{ $locale === 'ne' ? 'नक्सा डेटा उपलब्ध छैन' : 'Map data not available' }}
                                 </div>
                             @endif
-                        </div>
-
-                        <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            <div class="landing-panel lift-card rounded-[1.75rem] p-6 dark:bg-slate-950/80">
-                                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'इमेल' : 'Email' }}</div>
-                                <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    @if (!empty($department?->email))
-                                        <a class="text-red-700 hover:underline dark:text-red-400" href="mailto:{{ $department->email }}">{{ $department->email }}</a>
-                                    @else
-                                        <span class="text-gray-500 dark:text-gray-400">support@example.edu</span>
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="landing-panel lift-card rounded-[1.75rem] p-6 dark:bg-slate-950/80">
-                                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'फोन' : 'Phone' }}</div>
-                                <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ $department?->phone ?: '+977-000-0000000' }}
-                                </div>
-                            </div>
-                            <div class="landing-panel lift-card rounded-[1.75rem] p-6 dark:bg-slate-950/80">
-                                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'ठेगाना' : 'Address' }}</div>
-                                <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                    {{ $addressText ?: ($locale === 'ne' ? 'विभागीय कार्यालय' : 'Department office') }}
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1418,7 +1861,7 @@
                     <div class="grid gap-8 md:grid-cols-12">
                         <div class="md:col-span-5">
                             <div class="flex items-center gap-3">
-                                <img src="{{ $departmentLogoUrl }}" alt="" class="h-10 w-10 rounded-lg bg-white/5 object-contain ring-1 ring-white/10">
+                                <img src="{{ $departmentLogoUrl }}" alt="" class="h-10 w-10 rounded-lg bg-white object-contain ring-1 ring-gray-300 dark:ring-gray-800">
                                 <div>
                                     <div class="text-sm font-semibold text-white">{{ $departmentName }}</div>
                                     <div class="mt-1 text-xs text-white/70">{{ config('app.name', 'IT-DMS') }}</div>
