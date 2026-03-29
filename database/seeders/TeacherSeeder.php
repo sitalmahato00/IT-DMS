@@ -13,38 +13,68 @@ class TeacherSeeder extends Seeder
      */
     public function run(): void
     {
-        $teacherEmails = [
-            'hellogoog94@gmail.com',
-            'anita.sharma@itdms.local',
-            'pradeep.kumar@itdms.local',
-            'meera.dhital@itdms.local',
-            'rakesh.singh@itdms.local',
+        // Main teachers - your real users
+        $mainTeachers = [
+            [
+                'email' => 'hellogoog94@gmail.com',
+                'teacher_code' => 'TCH001',
+                'qualification' => 'M.Sc. Computer Science',
+                'gender' => 'Male',
+                'bio' => 'Specialized in Database Management and Web Technologies',
+                'is_primary' => true,
+            ],
         ];
 
-        $teacherData = [
-            ['teacher_code' => 'TCH001', 'qualification' => 'M.Sc. Computer Science', 'gender' => 'Male'],
-            ['teacher_code' => 'TCH002', 'qualification' => 'M.Tech. Software Engineering', 'gender' => 'Female'],
-            ['teacher_code' => 'TCH003', 'qualification' => 'Ph.D. Computer Science', 'gender' => 'Male'],
-            ['teacher_code' => 'TCH004', 'qualification' => 'M.Sc. Information Technology', 'gender' => 'Female'],
-            ['teacher_code' => 'TCH005', 'qualification' => 'B.E. Computer Engineering', 'gender' => 'Male'],
+        // Additional teachers for better data distribution
+        $additionalTeachers = [
+            [
+                'email' => 'anita.sharma@itdms.local',
+                'teacher_code' => 'TCH002',
+                'qualification' => 'M.Tech. Software Engineering',
+                'gender' => 'Female',
+                'bio' => 'Expert in Software Engineering and Project Management',
+            ],
+            [
+                'email' => 'pradeep.kumar@itdms.local',
+                'teacher_code' => 'TCH003',
+                'qualification' => 'Ph.D. Computer Science',
+                'gender' => 'Male',
+                'bio' => 'Research focused on Data Structures and Algorithms',
+            ],
+            [
+                'email' => 'meera.dhital@itdms.local',
+                'teacher_code' => 'TCH004',
+                'qualification' => 'M.Sc. Information Technology',
+                'gender' => 'Female',
+                'bio' => 'Specialized in Web Technologies and Networking',
+            ],
+            [
+                'email' => 'rakesh.singh@itdms.local',
+                'teacher_code' => 'TCH005',
+                'qualification' => 'B.E. Computer Engineering',
+                'gender' => 'Male',
+                'bio' => 'Expert in Practical Programming and Development',
+            ],
         ];
 
-        foreach ($teacherEmails as $index => $email) {
-            $user = User::where('email', $email)->first();
+        $allTeachers = array_merge($mainTeachers, $additionalTeachers);
+
+        foreach ($allTeachers as $teacherData) {
+            $user = User::where('email', $teacherData['email'])->first();
 
             if ($user) {
                 Teacher::firstOrCreate(
                     ['user_id' => $user->id],
                     [
                         'user_id' => $user->id,
-                        'teacher_code' => $teacherData[$index]['teacher_code'],
-                        'qualification' => $teacherData[$index]['qualification'],
+                        'teacher_code' => $teacherData['teacher_code'],
+                        'qualification' => $teacherData['qualification'],
                         'phone' => $user->phone,
-                        'gender' => $teacherData[$index]['gender'],
+                        'gender' => $teacherData['gender'],
                         'department' => 'IT',
                         'status' => 'active',
                         'address' => 'Kathmandu, Nepal',
-                        'bio' => 'Faculty Member - IT Department',
+                        'bio' => $teacherData['bio'],
                     ]
                 );
             }

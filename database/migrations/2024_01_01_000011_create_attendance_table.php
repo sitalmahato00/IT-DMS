@@ -16,11 +16,12 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
             $table->foreignId('teacher_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('subject_id')->nullable()->constrained('subjects')->onDelete('set null');
+            $table->string('attendance_type', 20)->default('class')->index();
             $table->date('date');
             $table->string('date_bs', 20)->nullable();
             $table->string('academic_year', 10)->nullable();
             $table->string('academic_year_bs', 10)->nullable();
-$table->enum('status', ['present', 'absent', 'late', 'excused', 'leave'])->default('present');
+            $table->enum('status', ['present', 'absent', 'late', 'excused', 'leave'])->default('present');
             $table->text('remarks')->nullable();
             $table->timestamps();
 

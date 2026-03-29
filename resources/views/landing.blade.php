@@ -1,4 +1,4 @@
-@php
+    @php
     use Illuminate\Support\Facades\Storage;
     use Illuminate\Support\Str;
 
@@ -10,6 +10,11 @@
 
     $departmentShort = $department?->short_name ?: ($locale === 'ne' ? 'आईटी' : 'IT');
     $departmentLogoUrl = $department?->getLogoUrl() ?? asset('images/default-logo.svg');
+    $heroTitle = trim((string) Str::of($departmentName)->replace([' Department', ' विभाग'], ''));
+
+    if (blank($heroTitle)) {
+        $heroTitle = $departmentShort ?: $departmentName;
+    }
 
     $heroSlides = collect($department?->hero_images ?? [])
         ->filter()
@@ -24,6 +29,15 @@
             return asset('storage/' . ltrim((string) $path, '/'));
         })
         ->values();
+
+    $referenceHeroRelativePath = 'images/landing-hero-reference.jpeg';
+
+    if (is_file(public_path($referenceHeroRelativePath))) {
+        $heroSlides = collect([asset($referenceHeroRelativePath)])
+            ->merge($heroSlides)
+            ->unique()
+            ->values();
+    }
 
     if ($heroSlides->isEmpty()) {
         $heroSlides = collect([asset('images/hero-image.jpg')]);
@@ -49,6 +63,25 @@
     $addressText = $department
         ? (($locale === 'ne' && !empty($department->address_nepali)) ? $department->address_nepali : $department->address)
         : null;
+
+    $heroDepartmentLine = $locale === 'ne'
+        ? $departmentName
+        : 'Department of ' . $heroTitle;
+
+    $heroHeadlinePrimary = $heroTitle;
+    $heroHeadlineSecondary = null;
+
+    $heroSupportingText = $locale === 'ne'
+        ? 'अत्याधुनिक प्रविधि, व्यावहारिक सिकाइ र उद्योगमुखी शिक्षामार्फत हामी भविष्यका नवप्रवर्तकहरूलाई सशक्त बनाउँछौं। हाम्रो विभागले सृजनशीलता, समालोचनात्मक सोच र वास्तविक समस्या समाधान गर्ने क्षमता विकास गर्न मद्दत गर्दछ।'
+        : 'Empowering future innovators through cutting-edge technology, practical learning, and industry-focused education. Our department fosters creativity, critical thinking, and real-world problem-solving to prepare students for the digital future.';
+
+    $heroNavItems = [
+        ['href' => '#home', 'label' => $locale === 'ne' ? 'होम' : 'Home'],
+        ['href' => '#programs', 'label' => $locale === 'ne' ? 'कार्यक्रम' : 'Programs'],
+        ['href' => '#curriculum', 'label' => $locale === 'ne' ? 'विषयहरू' : 'Subjects'],
+        ['href' => '#curriculum', 'label' => $locale === 'ne' ? 'ल्याब' : 'Labs'],
+        ['href' => '#contact', 'label' => $locale === 'ne' ? 'सम्पर्क' : 'Contact'],
+    ];
 
     $mapLabel = $department?->map_label ?: ($locale === 'ne' ? 'स्थान' : 'Location');
     $mapEmbedUrl = null;
@@ -335,42 +368,368 @@
             overflow: hidden;
         }
 
+        .landing-hero-shell {
+            min-height: clamp(24.5rem, 56vh, 33rem);
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .landing-hero-layout {
+            display: grid;
+            width: 100%;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .landing-hero-shadow-left {
+            background:
+                linear-gradient(90deg, rgba(2, 6, 23, 0.94) 0%, rgba(2, 6, 23, 0.88) 26%, rgba(2, 6, 23, 0.64) 48%, rgba(2, 6, 23, 0.24) 74%, rgba(2, 6, 23, 0.04) 100%),
+                radial-gradient(circle at 14% 28%, rgba(15, 23, 42, 0.46), transparent 36%);
+        }
+
+        .landing-hero-floor-shadow {
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.08) 0%, rgba(2, 6, 23, 0.64) 100%);
+        }
+
+        .landing-hero-content {
+            max-width: 41rem;
+        }
+
+        .landing-hero-copy {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100%;
+        }
+
+        .landing-hero-heading {
+            max-width: none;
+            letter-spacing: -0.065em;
+            line-height: 0.94;
+        }
+
+        .landing-hero-tagline {
+            color: rgba(255, 255, 255, 0.92);
+            text-shadow: 0 8px 22px rgba(2, 6, 23, 0.34);
+        }
+
+        .landing-hero-department-line {
+            color: rgba(255, 255, 255, 0.96);
+            text-shadow: 0 8px 22px rgba(2, 6, 23, 0.34);
+        }
+
+        .landing-hero-support-copy {
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 8px 22px rgba(2, 6, 23, 0.28);
+        }
+
+        .landing-hero-kicker,
+        .landing-hero-support {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.9rem;
+        }
+
+        .landing-hero-kicker::before,
+        .landing-hero-support::before {
+            content: "";
+            width: 4px;
+            flex: 0 0 4px;
+            align-self: stretch;
+            border-radius: 9999px;
+            background: linear-gradient(180deg, #ff0037 0%, #ff7b8e 100%);
+            box-shadow: 0 0 18px rgba(255, 0, 55, 0.38);
+        }
+
+        .landing-hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+        }
+
+        .landing-hero-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.85rem;
+            min-width: 11.75rem;
+            border-radius: 1rem;
+            padding: 0.74rem 0.95rem;
+            font-size: 0.88rem;
+            font-weight: 700;
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.22);
+            transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, color 180ms ease;
+            backdrop-filter: blur(14px);
+        }
+
+        .landing-hero-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 24px 36px rgba(15, 23, 42, 0.24);
+        }
+
+        .landing-hero-action-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.58rem;
+        }
+
+        .landing-hero-action--primary {
+            background: linear-gradient(90deg, #ff2454 0%, #db0d42 100%);
+            color: #ffffff;
+        }
+
+        .landing-hero-action--secondary {
+            background: rgba(255, 255, 255, 0.96);
+            color: #1d4ed8;
+        }
+
+        .landing-hero-action--contact {
+            background: rgba(255, 255, 255, 0.96);
+            color: #e11d48;
+        }
+
+        .landing-hero-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
         .landing-hero-stat {
             animation: heroStatFloat 7.5s ease-in-out infinite;
         }
 
         .landing-hero-stat-card {
+            min-height: 6rem;
             border: 1px solid rgba(255, 255, 255, 0.14);
-            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+            border-radius: 1.2rem;
+            padding: 0.72rem 0.85rem 0.8rem;
+            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.24);
             backdrop-filter: blur(18px);
+            transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease, filter 200ms ease;
+            will-change: transform;
+        }
+
+        .landing-hero-stat-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.28);
+            box-shadow: 0 24px 42px rgba(15, 23, 42, 0.34);
+            filter: saturate(1.06) brightness(1.05);
         }
 
         .landing-hero-stat-card--students {
-            background: linear-gradient(180deg, rgba(255, 0, 55, 0.7) 0%, rgba(190, 24, 93, 0.5) 58%, rgba(30, 41, 59, 0.42) 100%);
+            background: linear-gradient(180deg, rgba(235, 28, 74, 0.94) 0%, rgba(187, 24, 78, 0.88) 100%);
         }
 
         .landing-hero-stat-card--faculty {
-            background: linear-gradient(180deg, rgba(37, 99, 235, 0.68) 0%, rgba(30, 64, 175, 0.5) 58%, rgba(30, 41, 59, 0.42) 100%);
+            background: linear-gradient(180deg, rgba(51, 83, 227, 0.94) 0%, rgba(31, 69, 198, 0.88) 100%);
         }
 
         .landing-hero-stat-card--subjects {
-            background: linear-gradient(180deg, rgba(217, 119, 6, 0.72) 0%, rgba(194, 65, 12, 0.52) 58%, rgba(30, 41, 59, 0.42) 100%);
+            background: linear-gradient(180deg, rgba(245, 131, 31, 0.95) 0%, rgba(221, 103, 24, 0.88) 100%);
         }
 
         .landing-hero-stat-card--labs {
-            background: linear-gradient(180deg, rgba(5, 150, 105, 0.7) 0%, rgba(13, 148, 136, 0.5) 58%, rgba(30, 41, 59, 0.42) 100%);
+            background: linear-gradient(180deg, rgba(26, 176, 82, 0.94) 0%, rgba(17, 142, 71, 0.88) 100%);
+        }
+
+        .landing-hero-stat-icon {
+            color: rgba(255, 255, 255, 0.84);
+        }
+
+        .landing-hero-stat-body {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.38rem;
+            margin-top: 0.72rem;
         }
 
         .landing-hero-stat-number {
             color: #ffffff;
+            font-size: clamp(1.55rem, 1.95vw, 1.9rem);
+            line-height: 0.95;
+            font-weight: 800;
             text-shadow: 0 10px 24px rgba(15, 23, 42, 0.28);
         }
 
         .landing-hero-stat-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.96rem;
+            line-height: 1.1;
+            font-weight: 500;
+            padding-bottom: 0.12rem;
+        }
+
+        .landing-hero-stat-card:hover .landing-hero-stat-icon,
+        .landing-hero-stat-card:hover .landing-hero-stat-number,
+        .landing-hero-stat-card:hover .landing-hero-stat-label {
+            color: #ffffff;
+        }
+
+        .landing-hero-rail {
+            display: grid;
+            gap: 0.8rem;
+            width: 100%;
+            max-width: 17rem;
+            justify-self: end;
+            align-self: start;
+        }
+
+        .landing-hero-panel {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 1.3rem;
+            background: linear-gradient(180deg, rgba(57, 45, 34, 0.58) 0%, rgba(32, 26, 21, 0.72) 100%);
+            box-shadow: 0 20px 34px rgba(15, 23, 42, 0.24);
+            backdrop-filter: blur(18px);
+            padding: 0.9rem;
+        }
+
+        .landing-hero-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 26%);
+        }
+
+        .landing-hero-panel-title {
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.96);
+        }
+
+        .landing-hero-panel-stack {
+            display: grid;
+            gap: 0.6rem;
+            margin-top: 0.75rem;
+        }
+
+        .landing-hero-panel-item {
+            display: flex;
+            gap: 0.72rem;
+            align-items: flex-start;
+            border-radius: 0.9rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.72rem 0.78rem;
+        }
+
+        .landing-hero-panel-icon {
+            color: rgba(255, 255, 255, 0.88);
+            flex: 0 0 auto;
+        }
+
+        .landing-hero-panel-label {
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .landing-hero-panel-text {
+            margin-top: 0.28rem;
+            font-size: 0.82rem;
+            line-height: 1.45;
             color: rgba(255, 255, 255, 0.82);
         }
 
+        .landing-hero-panel-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.7rem;
+        }
+
+        .landing-hero-panel-mini {
+            border-radius: 0.9rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.72rem 0.7rem;
+            text-align: center;
+        }
+
+        .landing-hero-panel-mini-value {
+            margin-top: 0.35rem;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .landing-hero-quick-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .landing-hero-quick-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.03em;
+        }
+
+        .landing-hero-quick-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            border-radius: 9999px;
+            padding: 0.28rem 0.7rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .landing-hero-quick-links {
+            display: grid;
+            gap: 0.65rem;
+            margin-top: 0.95rem;
+        }
+
+        .landing-hero-quick-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 0.85rem 0.95rem;
+            transition: transform 180ms ease, background-color 180ms ease;
+        }
+
+        .landing-hero-quick-link:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.11);
+        }
+
+        .landing-hero-quick-link-left {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.72rem;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .landing-hero-quick-link-index {
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 1.35rem;
+            line-height: 1;
+            font-weight: 500;
+        }
+
         .dark .landing-hero-stat-card {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .dark .landing-hero-panel {
+            background: linear-gradient(180deg, rgba(43, 33, 27, 0.58) 0%, rgba(19, 18, 22, 0.78) 100%);
             border-color: rgba(255, 255, 255, 0.12);
         }
 
@@ -477,121 +836,8 @@
             overflow: hidden;
         }
 
-        .landing-hero-rail {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .landing-hero-card {
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.22);
-            border-radius: 1.75rem;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(226, 232, 240, 0.12) 100%);
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
-            backdrop-filter: blur(14px);
-            padding: 1rem 1.1rem;
-            animation: heroCardFloat 8.5s ease-in-out infinite;
-        }
-
-        .landing-hero-card:nth-child(2) { animation-delay: 1.3s; }
-
-        .dark .landing-hero-card {
-            background: linear-gradient(180deg, rgba(16, 24, 40, 0.52) 0%, rgba(11, 18, 32, 0.58) 100%);
-            border-color: rgba(148, 163, 184, 0.12);
-            box-shadow: 0 20px 44px rgba(2, 6, 23, 0.38);
-        }
-
-        .landing-hero-card-ghost {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.22);
-            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
-        }
-
-        .dark .landing-hero-card-ghost {
-            background: rgba(15, 23, 42, 0.28);
-            border-color: rgba(255, 255, 255, 0.12);
-        }
-
-        .landing-hero-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 26%);
-        }
-
-        .dark .landing-hero-card::before {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 20%);
-        }
-
-        .landing-hero-link {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
-            border-radius: 1rem;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(226, 232, 240, 0.12) 100%);
-            padding: 0.82rem 1rem;
-            transition: transform 180ms ease, background-color 180ms ease;
-        }
-
-        .landing-hero-link:hover {
-            transform: translateY(-2px);
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(226, 232, 240, 0.16) 100%);
-        }
-
-        .dark .landing-hero-link {
-            background: linear-gradient(180deg, rgba(33, 41, 59, 0.74) 0%, rgba(16, 24, 40, 0.92) 100%);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-        }
-
-        .dark .landing-hero-link:hover {
-            background: linear-gradient(180deg, rgba(49, 60, 82, 0.86) 0%, rgba(18, 27, 45, 0.96) 100%);
-        }
-
-        .landing-hero-meta {
-            display: grid;
-            gap: 0.75rem;
-        }
-
-        .landing-hero-meta-item {
-            border-radius: 1rem;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(226, 232, 240, 0.12) 100%);
-            padding: 0.8rem 1rem 0.9rem;
-        }
-
-        .landing-hero-meta-item-ghost {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .dark .landing-hero-meta-item {
-            background: linear-gradient(180deg, rgba(33, 41, 59, 0.74) 0%, rgba(16, 24, 40, 0.92) 100%);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-        }
-
-        .dark .landing-hero-meta-item-ghost {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.05);
-        }
-
         .landing-hero-slide {
             animation: heroKenBurns 20s ease-in-out infinite;
-        }
-
-        .landing-brand-button {
-            background-image: linear-gradient(90deg, #FF0037 0%, #D90033 100%) !important;
-            box-shadow: 0 16px 30px rgba(255, 0, 55, 0.22);
-        }
-
-        .landing-brand-button:hover {
-            background-image: linear-gradient(90deg, #ff2757 0%, #e00035 100%) !important;
-        }
-
-        .landing-hero-secondary {
-            border-color: rgba(255, 255, 255, 0.24);
-            background: rgba(15, 23, 42, 0.42);
         }
 
         .landing-hero-copy > * {
@@ -600,16 +846,6 @@
 
         .dark .landing-hero-copy > * {
             text-shadow: 0 10px 28px rgba(2, 6, 23, 0.5);
-        }
-
-        .landing-hero-rail {
-            align-content: start;
-        }
-
-        .dark .landing-hero-card,
-        .dark .landing-hero-link,
-        .dark .landing-hero-meta-item {
-            border-color: rgba(248, 113, 113, 0.14);
         }
 
         .landing-header-nav-link {
@@ -721,9 +957,56 @@
                 padding: 1.25rem;
             }
 
-            .landing-hero-card,
+            .landing-hero-shell {
+                min-height: auto;
+                align-items: flex-start;
+            }
+
+            .landing-hero-heading {
+                max-width: 100%;
+            }
+
+            .landing-hero-copy {
+                min-height: auto;
+                justify-content: flex-start;
+            }
+
+            .landing-hero-stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .landing-hero-rail {
+                max-width: 100%;
+            }
+
             .landing-hero-stat {
                 animation: none;
+            }
+        }
+
+        @media (max-width: 639px) {
+            .landing-hero-action {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .landing-hero-stat-label {
+                font-size: 1.05rem;
+            }
+
+            .landing-hero-panel-mini-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .landing-hero-layout {
+                grid-template-columns: minmax(0, 1fr) 17rem;
+            }
+
+            .landing-hero-heading {
+                white-space: nowrap;
+                font-size: clamp(3.45rem, 4vw, 4.1rem);
             }
         }
     </style>
@@ -743,185 +1026,220 @@
         <x-header />
 
         <main id="content">
-            <section class="relative isolate overflow-hidden bg-slate-950" x-data="heroSlider({ slides: @js($heroSlides->values()->all()) })">
+            <section id="home" class="relative isolate overflow-hidden bg-slate-950" x-data="heroSlider({ slides: @js($heroSlides->values()->all()) })">
                 <div class="absolute inset-0 -z-10">
                     <div class="relative h-full w-full">
                         <template x-for="(src, idx) in slides" :key="src">
-                            <img :src="src" alt="" class="landing-hero-slide absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+                            <img :src="src" alt="" class="landing-hero-slide absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700"
                                  :class="idx === active ? 'opacity-100' : 'opacity-0'" />
                         </template>
-                        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/72 to-slate-950/46"></div>
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/78 via-slate-950/12 to-transparent"></div>
-                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_22%_22%,rgba(2,6,23,0.12),transparent_26%),radial-gradient(circle_at_78%_18%,rgba(255,255,255,0.08),transparent_20%)]"></div>
+                        <div class="landing-hero-shadow-left absolute inset-0"></div>
+                        <div class="landing-hero-floor-shadow absolute inset-0"></div>
+                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_78%_16%,rgba(255,255,255,0.18),transparent_22%),radial-gradient(circle_at_20%_24%,rgba(15,23,42,0.34),transparent_38%)]"></div>
                     </div>
                 </div>
 
-                <div class="landing-shell mx-auto w-full px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
-                    <div class="grid gap-6 lg:grid-cols-[minmax(0,1.08fr)_20rem] lg:items-start">
-                        <div class="landing-hero-copy max-w-4xl">
-                            <p class="section-chip stagger-rise bg-white/12 text-white ring-1 ring-white/15">
-                                <span class="h-2.5 w-2.5 rounded-full bg-red-400 shadow-[0_0_18px_rgba(248,113,113,0.95)]"></span>
-                                {{ $locale === 'ne' ? 'विभागीय पोर्टल' : 'Department Portal' }}
-                            </p>
-
-                            <h1 class="section-title stagger-rise mt-6 text-3xl font-bold text-white sm:text-5xl lg:text-6xl">
-                                {{ $departmentName }}
+                <div class="landing-shell landing-hero-shell mx-auto w-full px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-10">
+                    <div class="landing-hero-layout">
+                        <div class="landing-hero-copy landing-hero-content">
+                            <h1 class="landing-hero-heading stagger-rise text-4xl font-black text-white drop-shadow-[0_10px_24px_rgba(0,0,0,0.35)] sm:text-5xl">
+                                <span>{{ $heroHeadlinePrimary }}</span>
                             </h1>
-                            <p class="stagger-rise mt-5 max-w-3xl text-base leading-relaxed text-white/90 sm:text-lg">
+
+                            <p class="landing-hero-tagline stagger-rise mt-3 max-w-xl text-base leading-snug sm:text-lg lg:text-[0.98rem]">
                                 {{ $tagline }}
                             </p>
-                            <p class="stagger-rise mt-4 max-w-3xl text-sm leading-7 text-white/80 sm:text-base">
-                                {{ $heroDescription }}
-                            </p>
 
-                            <div class="stagger-rise mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                                <a href="#programs" class="landing-brand-button shine-button inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-300">
-                                    <span>{{ $locale === 'ne' ? 'कार्यक्रम हेर्नुहोस्' : 'Explore Programs' }}</span>
+                            <div class="landing-hero-kicker landing-hero-department-line stagger-rise mt-2.5 max-w-xl text-sm font-medium sm:text-base">
+                                <span>{{ $heroDepartmentLine }}</span>
+                            </div>
+
+                            <div class="landing-hero-actions stagger-rise mt-4 sm:mt-5">
+                                <a href="#programs" class="landing-hero-action landing-hero-action--primary shine-button focus:outline-none focus:ring-2 focus:ring-red-300">
+                                    <span class="landing-hero-action-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                            <path d="M3.75 6.75A.75.75 0 0 1 4.5 6h15a.75.75 0 0 1 0 1.5h-15a.75.75 0 0 1-.75-.75Zm0 5.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.5a.75.75 0 0 1-.75-.75Zm0 5.25a.75.75 0 0 1 .75-.75h15a.75.75 0 0 1 0 1.5h-15a.75.75 0 0 1-.75-.75Z" />
+                                        </svg>
+                                        <span>{{ $locale === 'ne' ? 'कार्यक्रम हेर्नुहोस्' : 'Explore Programs' }}</span>
+                                    </span>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                                        <path fill-rule="evenodd" d="M12.72 6.72a.75.75 0 0 0-1.06 1.06L14.94 12l-3.28 4.22a.75.75 0 1 0 1.14.98l3.75-4.83a.75.75 0 0 0 0-.98l-3.75-4.83z" clip-rule="evenodd" />
+                                        <path fill-rule="evenodd" d="M9.97 5.97a.75.75 0 0 1 1.06 0l5.5 5.5a.75.75 0 0 1 0 1.06l-5.5 5.5a.75.75 0 1 1-1.06-1.06L14.94 12 9.97 7.03a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
                                     </svg>
                                 </a>
-                                <a href="#curriculum" class="landing-hero-secondary shine-button inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white ring-1 ring-white/20 transition duration-200 hover:-translate-y-0.5 hover:bg-white/18 focus:outline-none focus:ring-2 focus:ring-white/40">
-                                    <span>{{ $locale === 'ne' ? 'विषयहरू ब्राउज' : 'Browse Subjects' }}</span>
+
+                                <a href="#curriculum" class="landing-hero-action landing-hero-action--secondary shine-button focus:outline-none focus:ring-2 focus:ring-white/60">
+                                    <span class="landing-hero-action-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                            <path d="M4.5 4.5A1.5 1.5 0 0 0 3 6v12a1.5 1.5 0 0 0 1.5 1.5h12A1.5 1.5 0 0 0 18 18V6a1.5 1.5 0 0 0-1.5-1.5h-12Zm1.5 3a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 6 7.5Zm0 3.75a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1-.75-.75Zm.75 3a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5Zm13.5-8.25a.75.75 0 0 0-.75.75v10.5a.75.75 0 0 0 1.5 0V6.75a.75.75 0 0 0-.75-.75Z" />
+                                        </svg>
+                                        <span>{{ $locale === 'ne' ? 'विषयहरू ब्राउज' : 'Browse Subjects' }}</span>
+                                    </span>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                                        <path fill-rule="evenodd" d="M12.72 6.72a.75.75 0 0 0-1.06 1.06L14.94 12l-3.28 4.22a.75.75 0 1 0 1.14.98l3.75-4.83a.75.75 0 0 0 0-.98l-3.75-4.83z" clip-rule="evenodd" />
+                                        <path fill-rule="evenodd" d="M9.97 5.97a.75.75 0 0 1 1.06 0l5.5 5.5a.75.75 0 0 1 0 1.06l-5.5 5.5a.75.75 0 1 1-1.06-1.06L14.94 12 9.97 7.03a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
                                     </svg>
                                 </a>
-                                <a href="#contact" class="shine-button inline-flex items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-red-700 shadow-lg shadow-red-900/10 transition duration-200 hover:-translate-y-0.5 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200">
-                                    <span>{{ $locale === 'ne' ? 'सम्पर्क गर्नुहोस्' : 'Contact Us' }}</span>
+
+                                <a href="#contact" class="landing-hero-action landing-hero-action--contact shine-button focus:outline-none focus:ring-2 focus:ring-white/60">
+                                    <span class="landing-hero-action-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                            <path d="M1.5 6.75A2.25 2.25 0 0 1 3.75 4.5h16.5a2.25 2.25 0 0 1 2.25 2.25v10.5a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 17.25V6.75Zm2.03-.75a.75.75 0 0 0-.48 1.33l8.47 6.97a.75.75 0 0 0 .96 0l8.47-6.97A.75.75 0 0 0 20.47 6H3.53Z" />
+                                        </svg>
+                                        <span>{{ $locale === 'ne' ? 'सम्पर्क गर्नुहोस्' : 'Contact Us' }}</span>
+                                    </span>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                                        <path fill-rule="evenodd" d="M12.72 6.72a.75.75 0 0 0-1.06 1.06L14.94 12l-3.28 4.22a.75.75 0 1 0 1.14.98l3.75-4.83a.75.75 0 0 0 0-.98l-3.75-4.83z" clip-rule="evenodd" />
+                                        <path fill-rule="evenodd" d="M9.97 5.97a.75.75 0 0 1 1.06 0l5.5 5.5a.75.75 0 0 1 0 1.06l-5.5 5.5a.75.75 0 1 1-1.06-1.06L14.94 12 9.97 7.03a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
                                     </svg>
                                 </a>
                             </div>
 
-                            <div class="mt-7 grid grid-cols-2 gap-4 sm:mt-8 sm:grid-cols-4">
-                                <div class="landing-hero-stat landing-hero-stat-card landing-hero-stat-card--students landing-grid-accent stagger-rise rounded-3xl p-3.5 sm:p-4">
-                                    <div class="landing-hero-stat-number text-2xl font-bold">{{ number_format((int) ($stats['students'] ?? 0)) }}</div>
-                                    <div class="landing-hero-stat-label mt-1 text-xs font-medium">{{ $locale === 'ne' ? 'विद्यार्थी' : 'Students' }}</div>
+                            <div class="landing-hero-stats-grid mt-5">
+                                <div class="landing-hero-stat landing-hero-stat-card landing-hero-stat-card--students stagger-rise">
+                                    <div class="landing-hero-stat-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                            <path d="M7.5 6a2.25 2.25 0 1 1 0 4.5A2.25 2.25 0 0 1 7.5 6Zm9 0a2.25 2.25 0 1 1 0 4.5A2.25 2.25 0 0 1 16.5 6ZM3.75 17.25a3.75 3.75 0 0 1 7.5 0v.75h-7.5v-.75Zm9 0a3.75 3.75 0 0 1 7.5 0v.75h-7.5v-.75Z" />
+                                        </svg>
+                                    </div>
+                                    <div class="landing-hero-stat-body">
+                                        <div class="landing-hero-stat-number">{{ number_format((int) ($stats['students'] ?? 0)) }}</div>
+                                        <div class="landing-hero-stat-label">{{ $locale === 'ne' ? 'विद्यार्थी' : 'Students' }}</div>
+                                    </div>
                                 </div>
-                                <div class="landing-hero-stat landing-hero-stat-card landing-hero-stat-card--faculty landing-grid-accent stagger-rise rounded-3xl p-3.5 sm:p-4">
-                                    <div class="landing-hero-stat-number text-2xl font-bold">{{ number_format((int) ($stats['teachers'] ?? 0)) }}</div>
-                                    <div class="landing-hero-stat-label mt-1 text-xs font-medium">{{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</div>
+
+                                <div class="landing-hero-stat landing-hero-stat-card landing-hero-stat-card--faculty stagger-rise">
+                                    <div class="landing-hero-stat-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                            <path d="M12 3 1.5 8.25 12 13.5l8.625-4.313V15H22.5V8.25L12 3Zm-6 11.25V18a1.5 1.5 0 0 0 .75 1.299c1.29.744 3.123 1.201 5.25 1.201s3.96-.457 5.25-1.201A1.5 1.5 0 0 0 18 18v-3.75L12 17.25 6 14.25Z" />
+                                        </svg>
+                                    </div>
+                                    <div class="landing-hero-stat-body">
+                                        <div class="landing-hero-stat-number">{{ number_format((int) ($stats['teachers'] ?? 0)) }}</div>
+                                        <div class="landing-hero-stat-label">{{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</div>
+                                    </div>
                                 </div>
-                                <div class="landing-hero-stat landing-hero-stat-card landing-hero-stat-card--subjects landing-grid-accent stagger-rise rounded-3xl p-3.5 sm:p-4">
-                                    <div class="landing-hero-stat-number text-2xl font-bold">{{ number_format((int) ($stats['subjects'] ?? 0)) }}</div>
-                                    <div class="landing-hero-stat-label mt-1 text-xs font-medium">{{ $locale === 'ne' ? 'विषय' : 'Subjects' }}</div>
+
+                                <div class="landing-hero-stat landing-hero-stat-card landing-hero-stat-card--subjects stagger-rise">
+                                    <div class="landing-hero-stat-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                            <path d="M5.25 4.5A2.25 2.25 0 0 0 3 6.75v10.5A2.25 2.25 0 0 0 5.25 19.5h4.125a2.25 2.25 0 0 1 2.25 2.25V7.125A2.625 2.625 0 0 0 9 4.5H5.25Zm8.625 0a2.625 2.625 0 0 0-2.625 2.625V21.75a2.25 2.25 0 0 1 2.25-2.25h4.125A2.25 2.25 0 0 0 19.875 17.25V6.75A2.25 2.25 0 0 0 17.625 4.5H13.875Z" />
+                                        </svg>
+                                    </div>
+                                    <div class="landing-hero-stat-body">
+                                        <div class="landing-hero-stat-number">{{ number_format((int) ($stats['subjects'] ?? 0)) }}</div>
+                                        <div class="landing-hero-stat-label">{{ $locale === 'ne' ? 'विषय' : 'Subjects' }}</div>
+                                    </div>
                                 </div>
-                                <div class="landing-hero-stat landing-hero-stat-card landing-hero-stat-card--labs landing-grid-accent stagger-rise rounded-3xl p-3.5 sm:p-4">
-                                    <div class="landing-hero-stat-number text-2xl font-bold">{{ number_format((int) ($stats['labs'] ?? 0)) }}</div>
-                                    <div class="landing-hero-stat-label mt-1 text-xs font-medium">{{ $locale === 'ne' ? 'ल्याब' : 'Labs' }}</div>
+
+                                <div class="landing-hero-stat landing-hero-stat-card landing-hero-stat-card--labs stagger-rise">
+                                    <div class="landing-hero-stat-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                                            <path d="M9 3.75A.75.75 0 0 1 9.75 3h4.5a.75.75 0 0 1 0 1.5h-.75v3.69l4.94 8.478A2.25 2.25 0 0 1 16.5 20.25h-9a2.25 2.25 0 0 1-1.94-3.382L10.5 8.19V4.5h-.75A.75.75 0 0 1 9 3.75Zm1.45 8.01-3.59 6.158a.75.75 0 0 0 .64 1.132h9a.75.75 0 0 0 .64-1.132l-3.59-6.158h-3.1Z" />
+                                        </svg>
+                                    </div>
+                                    <div class="landing-hero-stat-body">
+                                        <div class="landing-hero-stat-number">{{ number_format((int) ($stats['labs'] ?? 0)) }}</div>
+                                        <div class="landing-hero-stat-label">{{ $locale === 'ne' ? 'ल्याब' : 'Labs' }}</div>
+                                    </div>
                                 </div>
+                            </div>
+
+                            <div class="landing-hero-support landing-hero-support-copy stagger-rise mt-4 max-w-3xl text-sm leading-relaxed">
+                                <p>{{ $heroSupportingText }}</p>
                             </div>
                         </div>
 
-                        <aside class="landing-hero-rail lg:-mt-4">
-                            <div class="landing-hero-card landing-hero-card-ghost">
-                                <div class="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/95">
-                                    {{ $locale === 'ne' ? 'विभाग प्रोफाइल' : 'Department Snapshot' }}
-                                </div>
-                                <div class="mt-4 landing-hero-meta">
-                                    <div class="landing-hero-meta-item landing-hero-meta-item-ghost">
-                                        <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/95">
-                                            {{ $locale === 'ne' ? 'स्थान' : 'Location' }}
+                        <aside class="landing-hero-rail">
+                            <div class="landing-hero-panel stagger-rise">
+                                <div class="landing-hero-panel-title">{{ $locale === 'ne' ? 'विभागीय झलक' : 'Department Snapshot' }}</div>
+                                <div class="landing-hero-panel-stack">
+                                    <div class="landing-hero-panel-item">
+                                        <div class="landing-hero-panel-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                                <path fill-rule="evenodd" d="M11.54 22.351a.75.75 0 0 0 .92 0c4.884-3.73 7.29-7.15 7.29-10.601a7.75 7.75 0 1 0-15.5 0c0 3.45 2.406 6.87 7.29 10.6ZM12 12.75a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd" />
+                                            </svg>
                                         </div>
-                                        <div class="mt-2 text-sm font-semibold text-white">
-                                            {{ $addressText ?: ($locale === 'ne' ? 'विभागीय कार्यालय' : 'Department Office') }}
-                                        </div>
-                                    </div>
-                                    <div class="landing-hero-meta-item landing-hero-meta-item-ghost">
-                                        <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/95">
-                                            {{ $locale === 'ne' ? 'सम्पर्क' : 'Connect' }}
-                                        </div>
-                                        <div class="mt-2 space-y-1 text-sm font-medium text-white/95">
-                                            @if (!empty($department?->email))
-                                                <div>{{ $department->email }}</div>
-                                            @endif
-                                            @if (!empty($department?->phone))
-                                                <div>{{ $department->phone }}</div>
-                                            @endif
-                                            @if (empty($department?->email) && empty($department?->phone))
-                                                <div>{{ $locale === 'ne' ? 'सम्पर्क विवरण छिट्टै' : 'Contact details coming soon' }}</div>
-                                            @endif
+                                        <div>
+                                            <div class="landing-hero-panel-label">{{ $locale === 'ne' ? 'स्थान' : 'Location' }}</div>
+                                            <div class="landing-hero-panel-text">{{ $addressText ?: ($locale === 'ne' ? 'विभागीय कार्यालय' : 'Department Office') }}</div>
                                         </div>
                                     </div>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div class="landing-hero-meta-item landing-hero-meta-item-ghost">
-                                            <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/95">
-                                                {{ $locale === 'ne' ? 'स्थापना' : 'Established' }}
-                                            </div>
-                                            <div class="mt-2 text-sm font-semibold text-white">
-                                                {{ $department?->established_year ?: 'N/A' }}
+
+                                    <div class="landing-hero-panel-item">
+                                        <div class="landing-hero-panel-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                                <path d="M21.75 18.75a.75.75 0 0 1-.75.75h-2.386a2.25 2.25 0 0 1-1.591-.659l-2.256-2.256a2.25 2.25 0 0 1-.659-1.591V12.75a.75.75 0 0 1 .75-.75h1.173a.75.75 0 0 0 .724-.555l.638-2.39a.75.75 0 0 0-.196-.718l-2.315-2.315a.75.75 0 0 0-.86-.154l-2.305 1.153a.75.75 0 0 1-.848-.14L8.598 4.591a2.25 2.25 0 0 0-1.591-.659H4.5a.75.75 0 0 0-.75.75c0 9.113 7.387 16.5 16.5 16.5a.75.75 0 0 0 .75-.75v-1.682Z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="landing-hero-panel-label">{{ $locale === 'ne' ? 'सम्पर्क' : 'Connect' }}</div>
+                                            <div class="landing-hero-panel-text">
+                                                @if (!empty($department?->email))
+                                                    {{ $department->email }}
+                                                @elseif (!empty($department?->phone))
+                                                    {{ $department->phone }}
+                                                @else
+                                                    {{ $locale === 'ne' ? 'सम्पर्क विवरण छिट्टै' : 'Contact details coming soon' }}
+                                                @endif
                                             </div>
                                         </div>
-                                        <div class="landing-hero-meta-item landing-hero-meta-item-ghost">
-                                            <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/95">
-                                                {{ $locale === 'ne' ? 'दर्ता' : 'Register' }}
-                                            </div>
-                                            <div class="mt-2 text-sm font-semibold text-white">
-                                                {{ $department?->registration_number ?: 'N/A' }}
-                                            </div>
+                                    </div>
+
+                                    <div class="landing-hero-panel-mini-grid">
+                                        <div class="landing-hero-panel-mini">
+                                            <div class="landing-hero-panel-label">{{ $locale === 'ne' ? 'स्थापना' : 'Established' }}</div>
+                                            <div class="landing-hero-panel-mini-value">{{ $department?->established_year ?: 'N/A' }}</div>
+                                        </div>
+                                        <div class="landing-hero-panel-mini">
+                                            <div class="landing-hero-panel-label">{{ $locale === 'ne' ? 'दर्ता' : 'Register' }}</div>
+                                            <div class="landing-hero-panel-mini-value">{{ $department?->registration_number ?: 'N/A' }}</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="landing-hero-card">
-                                <div class="flex items-center justify-between gap-3">
-                                    <div class="text-sm font-semibold text-white">
-                                        {{ $locale === 'ne' ? 'छिटो पहुँच' : 'Quick Access' }}
+                            <div class="landing-hero-panel stagger-rise">
+                                <div class="landing-hero-quick-head">
+                                    <div class="landing-hero-quick-title">{{ $locale === 'ne' ? 'छिटो पहुँच' : 'Quick Access' }}</div>
+                                    <div class="landing-hero-quick-pill">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5">
+                                            <path d="M11.25 4.5a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 .53 1.28l-9.75 9.75a.75.75 0 1 1-1.06-1.06l9.22-9.22H12a.75.75 0 0 1-.75-.75Zm-6 3A2.25 2.25 0 0 0 3 9.75v9A2.25 2.25 0 0 0 5.25 21h9a2.25 2.25 0 0 0 2.25-2.25v-4.5a.75.75 0 0 0-1.5 0v4.5a.75.75 0 0 1-.75.75h-9a.75.75 0 0 1-.75-.75v-9A.75.75 0 0 1 5.25 9h4.5a.75.75 0 0 0 0-1.5h-4.5Z" />
+                                        </svg>
+                                        <span>{{ $locale === 'ne' ? 'लिङ्क' : 'links' }}</span>
                                     </div>
-                                    <span class="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/90 ring-1 ring-white/10">
-                                        {{ $locale === 'ne' ? '३ लिंक' : '3 links' }}
-                                    </span>
                                 </div>
-                                <div class="mt-4 grid gap-3">
-                                    <a href="#notices" class="landing-hero-link">
-                                        <span class="text-sm font-semibold text-white">{{ $locale === 'ne' ? 'सूचना तथा अपडेट' : 'Notices & Updates' }}</span>
-                                        <span class="text-white/90">01</span>
+
+                                <div class="landing-hero-quick-links">
+                                    <a href="#notices" class="landing-hero-quick-link">
+                                        <span class="landing-hero-quick-link-left">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                                <path d="M12 3.75a6 6 0 0 0-6 6v2.386l-.97 1.94A1.5 1.5 0 0 0 6.372 16.5h11.256a1.5 1.5 0 0 0 1.341-2.424l-.969-1.94V9.75a6 6 0 0 0-6-6Zm0 17.25a2.25 2.25 0 0 0 2.122-1.5H9.878A2.25 2.25 0 0 0 12 21Z" />
+                                            </svg>
+                                            <span>{{ $locale === 'ne' ? 'सूचना तथा अपडेट' : 'Notices & Updates' }}</span>
+                                        </span>
+                                        <span class="landing-hero-quick-link-index">01</span>
                                     </a>
-                                    <a href="#resources" class="landing-hero-link">
-                                        <span class="text-sm font-semibold text-white">{{ $locale === 'ne' ? 'स्रोत तथा सामग्री' : 'Resources & Materials' }}</span>
-                                        <span class="text-white/90">02</span>
+
+                                    <a href="#resources" class="landing-hero-quick-link">
+                                        <span class="landing-hero-quick-link-left">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                                <path d="M4.5 3.75A2.25 2.25 0 0 0 2.25 6v12A2.25 2.25 0 0 0 4.5 20.25h15A2.25 2.25 0 0 0 21.75 18V9.31a2.25 2.25 0 0 0-.659-1.591l-3.81-3.81A2.25 2.25 0 0 0 15.69 3.25H4.5Zm10.5 1.72 3.53 3.53H15.75a.75.75 0 0 1-.75-.75V5.47Zm-6.75 6.78a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1-.75-.75Zm0 3a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75Z" />
+                                            </svg>
+                                            <span>{{ $locale === 'ne' ? 'स्रोत तथा सामग्री' : 'Resources & Materials' }}</span>
+                                        </span>
+                                        <span class="landing-hero-quick-link-index">02</span>
                                     </a>
-                                    <a href="{{ route('gallery.index') }}" class="landing-hero-link">
-                                        <span class="text-sm font-semibold text-white">{{ $locale === 'ne' ? 'ग्यालरी' : 'Gallery' }}</span>
-                                        <span class="text-white/90">03</span>
+
+                                    <a href="{{ route('gallery.index') }}" class="landing-hero-quick-link">
+                                        <span class="landing-hero-quick-link-left">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                                                <path d="M3.75 5.25A2.25 2.25 0 0 1 6 3h12a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 18 21H6a2.25 2.25 0 0 1-2.25-2.25V5.25Zm3.75 2.25a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm10.5 9-.01-1.125a1.5 1.5 0 0 0-.44-1.06l-2.5-2.5a1.5 1.5 0 0 0-2.121 0l-.689.689-1.19-1.19a1.5 1.5 0 0 0-2.122 0L6 14.25V16.5h12Z" />
+                                            </svg>
+                                            <span>{{ $locale === 'ne' ? 'ग्यालरी' : 'Gallery' }}</span>
+                                        </span>
+                                        <span class="landing-hero-quick-link-index">03</span>
                                     </a>
                                 </div>
                             </div>
                         </aside>
-                    </div>
-                </div>
-
-                <!-- Slider controls: arrows left/right, dots bottom center -->
-                <div x-show="slides.length > 1" class="pointer-events-none absolute inset-0">
-                    <div class="pointer-events-auto absolute left-4 right-4 top-1/2 flex -translate-y-1/2 items-center justify-between sm:left-6 sm:right-6 lg:left-10 lg:right-10">
-                        <button type="button"
-                                class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-red-600 ring-1 ring-white/25 backdrop-blur hover:bg-white/25 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                @click="prev()" aria-label="Previous slide">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-                                <path fill-rule="evenodd" d="M15.78 4.22a.75.75 0 0 1 0 1.06L9.06 12l6.72 6.72a.75.75 0 1 1-1.06 1.06l-7.25-7.25a.75.75 0 0 1 0-1.06l7.25-7.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd"/>
-                            </svg>
-                        </button>
-                        <button type="button"
-                                class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-red-600 ring-1 ring-white/25 backdrop-blur hover:bg-white/25 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                @click="next()" aria-label="Next slide">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-                                <path fill-rule="evenodd" d="M8.22 19.78a.75.75 0 0 1 0-1.06L14.94 12 8.22 5.28a.75.75 0 1 1 1.06-1.06l7.25 7.25a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0Z" clip-rule="evenodd"/>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div class="pointer-events-auto absolute bottom-6 left-1/2 -translate-x-1/2">
-                        <div class="flex items-center gap-2 rounded-full bg-black/20 px-3 py-2 ring-1 ring-white/15 backdrop-blur">
-                            <template x-for="(src, idx) in slides" :key="idx">
-                                <button type="button"
-                                        class="h-2.5 w-2.5 rounded-full ring-1 ring-white/60 transition"
-                                        :class="idx === active ? 'bg-red-500 ring-red-300' : 'bg-red-100 hover:bg-red-300'"
-                                        @click="go(idx)" :aria-label="`Slide ${idx+1}`"></button>
-                            </template>
-                        </div>
                     </div>
                 </div>
             </section>

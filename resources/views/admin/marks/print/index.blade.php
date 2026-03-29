@@ -60,6 +60,42 @@
             font-weight: 600;
             text-transform: uppercase;
         }
+        /* CTEVT specific table optimization */
+        .ctevt-table {
+            font-size: 8pt;
+        }
+        .ctevt-table th,
+        .ctevt-table td {
+            padding: 4px 6px;
+            text-align: center;
+        }
+        .ctevt-table th:nth-child(1),
+        .ctevt-table td:nth-child(1) {
+            text-align: center;
+            width: 3%;
+        }
+        .ctevt-table th:nth-child(2),
+        .ctevt-table td:nth-child(2) {
+            text-align: left;
+            width: 12%;
+        }
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 10mm;
+            }
+            .print-preview {
+                max-width: 297mm;
+                padding: 10mm;
+            }
+            .ctevt-table {
+                font-size: 8pt;
+            }
+            .ctevt-table th,
+            .ctevt-table td {
+                padding: 3px 4px;
+            }
+        }
         .badge {
             padding: 2px 6px;
             border-radius: 999px;
@@ -172,7 +208,7 @@
         @else
             <div class="section-title">CTEVT Marks - {{ $subjectLabel }}</div>
             <div class="table-wrapper">
-                <table class="print-table">
+                <table class="print-table ctevt-table">
                     <thead>
                         <tr>
                             <th>Roll No</th>
