@@ -59,7 +59,10 @@ Route::middleware(['auth', 'verified', 'role:student'])->prefix('student')->name
     // Marks/Results
     Route::get('/marks', [\App\Http\Controllers\Student\StudentMarkController::class, 'index'])->name('marks');
     Route::get('/marks/{subjectId}', [\App\Http\Controllers\Student\StudentMarkController::class, 'show'])->name('marks.show');
-    
+
+    // Timetable
+    Route::get('/timetable', [\App\Http\Controllers\Student\StudentTimetableController::class, 'index'])->name('timetable');
+
     // NOTE: disabled routes pointing to missing controllers; recreate classes before enabling.
     // Route::get('/study-materials', [\App\Http\Controllers\Student\StudentStudyMaterialController::class, 'index'])->name('study-materials');
     // Route::get('/study-materials/download/{id}', [\App\Http\Controllers\Student\StudentStudyMaterialController::class, 'download'])->name('study-materials.download');

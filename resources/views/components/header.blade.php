@@ -58,6 +58,12 @@
         $quickContactUrl = 'mailto:' . $department->email;
     }
 
+    $topBarContactText = !empty($department?->phone)
+        ? $department->phone
+        : (!empty($department?->email)
+            ? $department->email
+            : ($locale === 'ne' ? 'सम्पर्क विवरण छिट्टै' : 'Contact details coming soon'));
+
     $headerStats = is_array($stats ?? null) ? $stats : null;
 
     if (!$headerStats) {
@@ -115,11 +121,20 @@
                 <span class="truncate">{{ $addressText }}</span>
             </div>
 
-            <div class="hidden items-center gap-4 whitespace-nowrap md:flex">
-                <span>{{ $departmentShort ?: $brandTitle }}</span>
-                <span>{{ number_format((int) ($headerStats['students'] ?? 0)) }} {{ $locale === 'ne' ? 'विद्यार्थी' : 'Students' }}</span>
-                <span>{{ number_format((int) ($headerStats['teachers'] ?? 0)) }} {{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</span>
-                <span>{{ number_format((int) ($headerStats['subjects'] ?? 0)) }} {{ $locale === 'ne' ? 'विषय' : 'Courses' }}</span>
+            <div class="hidden items-center gap-3 whitespace-nowrap md:flex">
+                <span class="uppercase tracking-[0.16em] text-white/80">{{ $locale === 'ne' ? 'सम्पर्क' : 'Contact' }}</span>
+                <a href="{{ $quickContactUrl }}" class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-white transition hover:bg-white/15">
+                    @if (!empty($department?->phone))
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                            <path d="M6.648 2.25A2.25 2.25 0 0 0 4.5 4.5c0 9.113 7.387 16.5 16.5 16.5a2.25 2.25 0 0 0 2.25-2.148l.248-3.705a2.25 2.25 0 0 0-1.54-2.278l-3.405-1.136a2.25 2.25 0 0 0-2.56.94l-.724 1.086a18.11 18.11 0 0 1-5.028-5.028l1.086-.724a2.25 2.25 0 0 0 .94-2.56L11.13 2.54A2.25 2.25 0 0 0 8.852 1l-2.204.148Z" />
+                        </svg>
+                    @else
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                            <path d="M1.5 6.75A2.25 2.25 0 0 1 3.75 4.5h16.5a2.25 2.25 0 0 1 2.25 2.25v10.5a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 17.25V6.75Zm2.03-.75a.75.75 0 0 0-.48 1.33l8.47 6.97a.75.75 0 0 0 .96 0l8.47-6.97A.75.75 0 0 0 20.47 6H3.53Z" />
+                        </svg>
+                    @endif
+                    <span>{{ $topBarContactText }}</span>
+                </a>
             </div>
         </div>
     </div>

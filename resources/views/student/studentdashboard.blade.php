@@ -150,54 +150,66 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <a href="{{ route('student.courses') }}" class="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4 hover:bg-red-100 dark:hover:bg-red-950/30 transition" data-student-search-item data-student-search-text="{{ __('Courses') }} {{ __('my courses subjects') }}">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center">
-                                    <i class="bi bi-journal-bookmark"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-900 dark:text-white">{{ __('Courses') }}</p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Open enrolled subjects') }}</p>
-                                </div>
-                            </div>
-                        </a>
+    <a href="{{ route('student.courses') }}" class="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4 hover:bg-red-100 dark:hover:bg-red-950/30 transition" data-student-search-item data-student-search-text="{{ __('Courses') }} {{ __('my courses subjects') }}">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center">
+                <i class="bi bi-journal-bookmark"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ __('Courses') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Open enrolled subjects') }}</p>
+            </div>
+        </div>
+    </a>
 
-                        <a href="{{ route('student.attendance') }}" class="rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/20 p-4 hover:bg-blue-100 dark:hover:bg-blue-950/30 transition" data-student-search-item data-student-search-text="{{ __('Attendance') }} {{ __('attendance records') }}">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">
-                                    <i class="bi bi-calendar-check"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-900 dark:text-white">{{ __('Attendance') }}</p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Review attendance history') }}</p>
-                                </div>
-                            </div>
-                        </a>
+    <a href="{{ route('student.attendance') }}" class="rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/20 p-4 hover:bg-blue-100 dark:hover:bg-blue-950/30 transition" data-student-search-item data-student-search-text="{{ __('Attendance') }} {{ __('attendance records') }}">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ __('Attendance') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Review attendance history') }}</p>
+            </div>
+        </div>
+    </a>
 
-                        <a href="{{ route('student.marks') }}" class="rounded-xl border border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-purple-950/20 p-4 hover:bg-purple-100 dark:hover:bg-purple-950/30 transition" data-student-search-item data-student-search-text="{{ __('Marks') }} {{ __('results examinations') }}">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center">
-                                    <i class="bi bi-clipboard-data"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-900 dark:text-white">{{ __('Marks') }}</p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('See published results') }}</p>
-                                </div>
-                            </div>
-                        </a>
+    <a href="{{ route('student.marks') }}" class="rounded-xl border border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-purple-950/20 p-4 hover:bg-purple-100 dark:hover:bg-purple-950/30 transition" data-student-search-item data-student-search-text="{{ __('Marks') }} {{ __('results examinations') }}">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center">
+                <i class="bi bi-clipboard-data"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ __('Marks') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('See published results') }}</p>
+            </div>
+        </div>
+    </a>
 
-                        <a href="{{ route('student.profile.edit') }}" class="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 p-4 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 transition" data-student-search-item data-student-search-text="{{ __('Profile') }} {{ __('profile settings account') }}">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
-                                    <i class="bi bi-person-gear"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-gray-900 dark:text-white">{{ __('Profile') }}</p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Update account details') }}</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+    <a href="{{ route('student.timetable') }}" class="rounded-xl border border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/20 p-4 hover:bg-indigo-100 dark:hover:bg-indigo-950/30 transition" data-student-search-item data-student-search-text="{{ __('Timetable') }} {{ __('class schedule') }}">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                <i class="bi bi-calendar3"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ __('Timetable') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('View your class schedule') }}</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="{{ route('student.profile.edit') }}" class="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 p-4 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 transition" data-student-search-item data-student-search-text="{{ __('Profile') }} {{ __('profile settings account') }}">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+                <i class="bi bi-person-gear"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-900 dark:text-white">{{ __('Profile') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Update account details') }}</p>
+            </div>
+        </div>
+    </a>
+</div>
                 </div>
             </div>
         </div>

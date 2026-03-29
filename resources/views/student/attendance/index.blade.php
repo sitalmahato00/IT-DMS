@@ -5,11 +5,11 @@
 @section('content')
 <div class="space-y-6">
     <!-- Welcome Banner -->
-    <div class="bg-gradient-to-r from-green-600 to-green-700 dark:from-green-800 dark:to-green-900 rounded-xl shadow-lg p-6 text-white">
+    <div class="bg-gradient-to-r from-red-600 to-red-700 dark:from-red-800 dark:to-red-900 rounded-xl shadow-lg p-6 text-white">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold mb-2">{{ __('Attendance Records') }}</h1>
-                <p class="text-green-100 text-base">{{ __('View your attendance across all enrolled subjects') }}</p>
+                <p class="text-red-100 text-base">{{ __('View your attendance across all enrolled subjects') }}</p>
             </div>
             <div class="text-5xl opacity-20">
                 <i class="bi bi-calendar-check"></i>
@@ -24,7 +24,7 @@
             
             <div class="flex items-center gap-6">
                 <div class="text-center">
-                    <div class="h-16 w-16 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center text-green-600 dark:text-green-400">
+                    <div class="h-16 w-16 bg-red-100 dark:bg-red-900 rounded-xl flex items-center justify-center text-red-600 dark:text-red-400">
                         <i class="bi bi-calendar-check text-3xl"></i>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
             
             <div class="mt-4">
                 <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                    <div class="bg-green-600 dark:bg-green-500 h-2.5 rounded-full" style="width: {{ $overallAttendance }}%"></div>
+                    <div class="bg-red-600 dark:bg-red-500 h-2.5 rounded-full" style="width: {{ $overallAttendance }}%"></div>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $overallAttendance }}% {{ __('of classes attended') }}</p>
             </div>
@@ -44,7 +44,7 @@
     </div>
 
     <!-- Subjects -->
-    @if($subjects->isEmpty())
+    @if(empty($subjects))
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
             <i class="bi bi-book text-4xl text-gray-400 mb-4"></i>
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('No Subjects Enrolled') }}</h3>
@@ -57,11 +57,11 @@
                 
                 <div class="space-y-4">
                     @foreach($subjects as $subject)
-                        <div class="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-4 border-green-400">
+                        <div class="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-4 border-red-400">
                             <div class="flex-1">
                                 <div class="flex items-start gap-3">
                                     <div class="flex-shrink-0">
-                                        <i class="bi bi-book text-green-600 dark:text-green-400 text-xl"></i>
+                                        <i class="bi bi-book text-red-600 dark:text-red-400 text-xl"></i>
                                     </div>
                                     <div>
                                         <h3 class="font-semibold text-gray-900 dark:text-white mb-1">{{ $subject['name'] }}</h3>
@@ -70,7 +70,7 @@
                                             <span>{{ $subject['code'] }}</span>
                                         </p>
                                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                            <i class="bi bi-person text-green-600 dark:text-green-400"></i>
+                                            <i class="bi bi-person text-red-600 dark:text-red-400"></i>
                                             {{ $subject['teacher'] }}
                                         </p>
                                     </div>

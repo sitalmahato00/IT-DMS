@@ -56,6 +56,11 @@ class DatabaseSeeder extends Seeder
             ExamSeeder::class,
         ]);
 
+        // Step 8.5: Core Subject Enrollment (depends on Students, Subjects)
+        $this->call([
+            SubjectStudentSeeder::class,
+        ]);
+
         // Step 9: Exam marks (depends on Exams, Students, Subjects)
         $this->call([
             ExamMarkSeeder::class,

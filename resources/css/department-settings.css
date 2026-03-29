@@ -1,0 +1,523 @@
+/**
+ * Department Settings Page - Enhanced CSS
+ * Add this to your main CSS file or import as separate stylesheet
+ * Works with Tailwind CSS
+ */
+
+/* ======================== ANIMATIONS ======================== */
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes pulse-light {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+.animate-slide-out {
+    animation: slideOut 0.3s ease-out;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.animate-fade-out {
+    animation: fadeOut 0.4s ease-out;
+}
+
+/* ======================== TAB STYLING ======================== */
+
+.tab-btn {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #2563eb, transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tab-btn.active::after {
+    opacity: 1;
+}
+
+.tab-content {
+    transition: opacity 0.3s ease;
+}
+
+.tab-content.hidden {
+    display: none;
+}
+
+/* ======================== FORM INPUTS ======================== */
+
+.field-input {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.field-input:focus {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.field-input:hover {
+    border-color: #bfdbfe;
+}
+
+.field-input.filled {
+    border-color: #60a5fa;
+}
+
+.field-input::placeholder {
+    color: #9ca3af;
+}
+
+/* Input focus state with smooth transition */
+.field-input:focus-visible {
+    outline: none;
+    ring: 2px;
+    ring-color: rgba(37, 99, 235, 0.5);
+}
+
+/* ======================== IMAGE UPLOAD ZONES ======================== */
+
+.upload-zone {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.upload-zone.drag-over {
+    background-color: #dbeafe;
+    border-color: #2563eb;
+    transform: scale(1.02);
+}
+
+.upload-zone .upload-icon {
+    transition: transform 0.3s ease;
+}
+
+.upload-zone:hover .upload-icon {
+    transform: translateY(-4px);
+}
+
+/* ======================== IMAGE PREVIEW ======================== */
+
+.image-preview {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+}
+
+.image-preview img {
+    transition: transform 0.3s ease;
+}
+
+.image-preview:hover img {
+    transform: scale(1.05);
+}
+
+.image-preview-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+    gap: 1rem;
+}
+
+.image-preview-container:hover .image-preview-overlay {
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 1;
+}
+
+/* ======================== TOAST ANIMATIONS ======================== */
+
+.toast {
+    animation: slideIn 0.3s ease-out;
+}
+
+.toast.removing {
+    animation: slideOut 0.3s ease-out;
+}
+
+.toast-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.toast-error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.toast-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.toast-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.toast-icon {
+    flex-shrink: 0;
+    animation: pulse-light 2s ease-in-out infinite;
+}
+
+/* ======================== BUTTON STYLES ======================== */
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #1f2937;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: #d1d5db;
+    color: #111827;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+    transform: translateY(-2px);
+}
+
+/* ======================== LOADING OVERLAY ======================== */
+
+.global-loader {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.global-loader.hidden {
+    animation: fadeOut 0.3s ease-out;
+    pointer-events: none;
+}
+
+.loader-spinner {
+    border: 4px solid rgba(37, 99, 235, 0.1);
+    border-top: 4px solid #2563eb;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loader-text {
+    font-weight: 500;
+    color: #4b5563;
+    margin-top: 1rem;
+}
+
+/* ======================== HEADER STYLING ======================== */
+
+.page-header {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+}
+
+.page-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: 5%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 50%;
+}
+
+.page-header-content {
+    position: relative;
+    z-index: 10;
+}
+
+/* ======================== CARD STYLING ======================== */
+
+.card {
+    background: white;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    border-bottom: 1px solid #f3f4f6;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-footer {
+    border-top: 1px solid #f3f4f6;
+    padding: 1.5rem;
+    background: #fafbfc;
+}
+
+/* ======================== SECTION DIVIDERS ======================== */
+
+.section-divider {
+    border-top: 1px solid #e5e7eb;
+    margin: 2rem 0;
+    position: relative;
+}
+
+.section-title {
+    position: relative;
+    padding-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 1.5rem;
+    background: linear-gradient(180deg, #2563eb 0%, transparent 100%);
+    border-radius: 2px;
+}
+
+.section-title .icon {
+    margin-right: 0.75rem;
+    color: #2563eb;
+}
+
+/* ======================== RESPONSIVE ADJUSTMENTS ======================== */
+
+@media (max-width: 768px) {
+    .page-header {
+        padding: 1.5rem 1rem;
+    }
+
+    .tab-btn {
+        padding: 1rem 0.75rem !important;
+        font-size: 0.875rem;
+    }
+
+    .field-input {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+
+    .image-preview {
+        min-height: 150px;
+    }
+
+    .card-header,
+    .card-body,
+    .card-footer {
+        padding: 1rem;
+    }
+
+    .toast {
+        max-width: 90vw;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .tab-nav {
+        font-size: 0.75rem;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* ======================== ACCESSIBILITY ======================== */
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+    .field-input {
+        border-width: 2px;
+    }
+
+    .btn-primary,
+    .btn-danger {
+        font-weight: 600;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+    .field-input {
+        background-color: #1f2937;
+        color: #f3f4f6;
+        border-color: #374151;
+    }
+
+    .field-input:focus {
+        background-color: #111827;
+    }
+
+    .upload-zone {
+        background-color: #111827;
+        border-color: #374151;
+    }
+
+    .card {
+        background-color: #1f2937;
+        border-color: #374151;
+        color: #f3f4f6;
+    }
+}
+
+/* ======================== UTILITY CLASSES ======================== */
+
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.text-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gap-sm { gap: 0.5rem; }
+.gap-md { gap: 1rem; }
+.gap-lg { gap: 1.5rem; }
+.gap-xl { gap: 2rem; }
+
+.shadow-sm { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+.shadow-md { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+.shadow-lg { box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1); }
+.shadow-xl { box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15); }

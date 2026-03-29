@@ -491,7 +491,7 @@
         .landing-hero-stats-grid {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 0.75rem;
+            gap: 1rem;
         }
 
         .landing-hero-stat {
@@ -539,7 +539,7 @@
         .landing-hero-stat-body {
             display: flex;
             align-items: flex-end;
-            gap: 0.38rem;
+            gap: 0.5rem;
             margin-top: 0.72rem;
         }
 
@@ -1100,7 +1100,7 @@
                                         </svg>
                                     </div>
                                     <div class="landing-hero-stat-body">
-                                        <div class="landing-hero-stat-number">{{ number_format((int) ($stats['students'] ?? 0)) }}</div>
+                                        <div class="landing-hero-stat-number">{{ number_format((int) ($stats['students'] ?? 0)) }}+</div>
                                         <div class="landing-hero-stat-label">{{ $locale === 'ne' ? 'विद्यार्थी' : 'Students' }}</div>
                                     </div>
                                 </div>
@@ -1112,7 +1112,7 @@
                                         </svg>
                                     </div>
                                     <div class="landing-hero-stat-body">
-                                        <div class="landing-hero-stat-number">{{ number_format((int) ($stats['teachers'] ?? 0)) }}</div>
+                                        <div class="landing-hero-stat-number">{{ number_format((int) ($stats['teachers'] ?? 0)) }}+</div>
                                         <div class="landing-hero-stat-label">{{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</div>
                                     </div>
                                 </div>
@@ -1124,7 +1124,7 @@
                                         </svg>
                                     </div>
                                     <div class="landing-hero-stat-body">
-                                        <div class="landing-hero-stat-number">{{ number_format((int) ($stats['subjects'] ?? 0)) }}</div>
+                                        <div class="landing-hero-stat-number">{{ number_format((int) ($stats['subjects'] ?? 0)) }}+</div>
                                         <div class="landing-hero-stat-label">{{ $locale === 'ne' ? 'विषय' : 'Subjects' }}</div>
                                     </div>
                                 </div>
@@ -1136,7 +1136,7 @@
                                         </svg>
                                     </div>
                                     <div class="landing-hero-stat-body">
-                                        <div class="landing-hero-stat-number">{{ number_format((int) ($stats['labs'] ?? 0)) }}</div>
+                                        <div class="landing-hero-stat-number">{{ number_format((int) ($stats['labs'] ?? 0)) }}+</div>
                                         <div class="landing-hero-stat-label">{{ $locale === 'ne' ? 'ल्याब' : 'Labs' }}</div>
                                     </div>
                                 </div>

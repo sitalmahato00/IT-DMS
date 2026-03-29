@@ -56,6 +56,23 @@ class AttendanceSeeder extends Seeder
                     // 70% class, 30% lab attendance
                     $attendanceType = rand(1, 10) <= 7 ? 'class' : 'lab';
 
+                    // Realistic time slots based on attendance type
+                    if ($attendanceType === 'class') {
+                        // Morning class: 8am - 11am, 11am - 2pm, 2pm - 4pm
+                        $classSlot = rand(1, 3);
+                        $times = [
+                            1 => ['08:00', '11:00'],
+                            2 => ['11:00', '14:00'],
+                            3 => ['14:00', '16:00'],
+                        ];
+                        $timeSlot = $times[$classSlot];
+                    } else {
+                        // Lab: flexible time with some variance
+                        $labStartHour = rand(8, 15);
+                        $labEndHour = $labStartHour + 2;
+                        $timeSlot = [sprintf('%02d:00', $labStartHour), sprintf('%02d:00', $labEndHour)];
+                    }
+
                     Attendance::firstOrCreate(
                         [
                             'student_id' => $student->id,
@@ -69,6 +86,8 @@ class AttendanceSeeder extends Seeder
                             'subject_id' => $subject->id,
                             'date' => $date,
                             'date_bs' => $date,
+                            'time_in' => $timeSlot[0],
+                            'time_out' => $timeSlot[1],
                             'attendance_type' => $attendanceType,
                             'academic_year' => '2080-2081',
                             'academic_year_bs' => '2080-2081',

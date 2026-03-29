@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('attendance_type', 20)->default('class')->index();
             $table->date('date');
             $table->string('date_bs', 20)->nullable();
+            $table->time('time_in')->nullable();
+            $table->time('time_out')->nullable();
             $table->string('academic_year', 10)->nullable();
             $table->string('academic_year_bs', 10)->nullable();
             $table->enum('status', ['present', 'absent', 'late', 'excused', 'leave'])->default('present');

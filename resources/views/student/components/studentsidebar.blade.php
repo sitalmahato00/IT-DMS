@@ -62,22 +62,10 @@
                 </a>
             </div>
 
-            <button type="button" @click="toggleGroup('schedule')" :class="activeGroup === 'schedule' ? 'text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900 shadow-sm' : 'text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900'" class="w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-150">
-                <span class="sidebar-section-label flex items-center gap-1.5">
-                    <i class="bi bi-calendar3 text-lg text-[#FF0037]"></i>
-                    <span>{{ __('Schedule') }}</span>
-                </span>
-                <i :class="activeGroup === 'schedule' ? 'bi-chevron-down' : 'bi-chevron-right'" class="bi text-base"></i>
-            </button>
-            <div class="collapsible-section space-y-0.5 overflow-hidden transition-all duration-300" x-show="activeGroup === 'schedule'" x-transition.opacity>
-                <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/60">
-                    <span class="sidebar-label flex items-center gap-2">
-                        <i class="bi bi-clock-history text-base flex-shrink-0"></i>
-                        <span>{{ __('Timetable') }}</span>
-                    </span>
-                    <span class="sidebar-label inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ __('Soon') }}</span>
-                </div>
-            </div>
+            <a href="{{ route('student.timetable') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ activeGroup === 'schedule' ? 'bg-red-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:text-[#FF0037] hover:bg-red-500/10' }}">
+    <i class="bi bi-calendar3 text-lg flex-shrink-0 text-[#FF0037]"></i>
+    <span class="sidebar-label">{{ __('Timetable') }}</span>
+</a>
 
             <button type="button" @click="toggleGroup('attendance')" :class="activeGroup === 'attendance' ? 'text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900 shadow-sm' : 'text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900'" class="w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-150">
                 <span class="sidebar-section-label flex items-center gap-1.5">
