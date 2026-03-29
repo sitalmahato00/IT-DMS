@@ -61,6 +61,7 @@ Route::middleware(['auth', 'verified', 'role:student'])->prefix('student')->name
     Route::get('/marks/{subjectId}', [\App\Http\Controllers\Student\StudentMarkController::class, 'show'])->name('marks.show');
 
     // Timetable
+    Route::get('/timetable/print', [\App\Http\Controllers\Student\StudentTimetableController::class, 'print'])->name('timetable.print');
     Route::get('/timetable', [\App\Http\Controllers\Student\StudentTimetableController::class, 'index'])->name('timetable');
 
     // NOTE: disabled routes pointing to missing controllers; recreate classes before enabling.
@@ -138,6 +139,7 @@ Route::middleware(['auth', 'verified', 'role:teacher'])->prefix('teacher')->name
     Route::get('/exams/marks/{mark}/edit', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'getMarkData'])->name('exams.marks.edit');
     Route::put('/exams/marks/{mark}', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'updateMark'])->name('exams.marks.update');
     Route::delete('/exams/marks/{id}', [\App\Http\Controllers\Teacher\TeacherExamsController::class, 'deleteMark'])->name('exams.mark.delete');
+    Route::get('/timetable/print', [\App\Http\Controllers\Teacher\TeacherTimetableController::class, 'print'])->name('timetable.print');
     Route::get('/timetable', [\App\Http\Controllers\Teacher\TeacherTimetableController::class, 'index'])->name('timetable');
     Route::get('/reports', [\App\Http\Controllers\Teacher\TeacherReportsController::class, 'index'])->name('reports');
     Route::get('/notifications', [\App\Http\Controllers\Teacher\TeacherNotificationsController::class, 'index'])->name('notifications');
@@ -224,6 +226,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/timetable/{id}', [\App\Http\Controllers\Admin\TimetableController::class, 'show'])->name('timetable.show');
     Route::put('/timetable/{id}', [\App\Http\Controllers\Admin\TimetableController::class, 'update'])->name('timetable.update');
     Route::delete('/timetable/{id}', [\App\Http\Controllers\Admin\TimetableController::class, 'destroy'])->name('timetable.destroy');
+    Route::post('/timetable/break-overrides', [\App\Http\Controllers\Admin\TimetableController::class, 'storeGapOverride'])->name('timetable.break-overrides.store');
     Route::post('/timetable/{id}/toggle', [\App\Http\Controllers\Admin\TimetableController::class, 'toggle'])->name('timetable.toggle');
     Route::post('/timetable/{id}/lock', [\App\Http\Controllers\Admin\TimetableController::class, 'lock'])->name('timetable.lock');
     Route::get('/timetable/data/by-semester', [\App\Http\Controllers\Admin\TimetableController::class, 'getBySemester'])->name('timetable.bySemester');

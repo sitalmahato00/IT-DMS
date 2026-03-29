@@ -2,6 +2,74 @@
 
 @section('title', __('Timetable & Scheduling'))
 
+@section('styles')
+    @include('shared.timetable.partials.routine-styles')
+    <style>
+        .routine-slot--interactive {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+            padding-top: 2rem;
+        }
+
+        .routine-slot--interactive:hover,
+        .routine-slot--interactive:focus-visible {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+            border-color: #94a3b8;
+            outline: none;
+        }
+
+        .routine-slot--conflict {
+            border-color: #f87171 !important;
+            box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.18);
+        }
+
+        .routine-slot--locked {
+            background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.03), rgba(15, 23, 42, 0.01));
+        }
+
+        .routine-slot__actions {
+            position: absolute;
+            top: 0.45rem;
+            right: 0.45rem;
+            display: flex;
+            gap: 0.35rem;
+        }
+
+        .routine-slot__actions button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.6rem;
+            height: 1.6rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #334155;
+            transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+        }
+
+        .routine-slot__actions button:hover {
+            background: #ffffff;
+            color: #dc2626;
+            border-color: #fca5a5;
+        }
+
+        .routine-break-slot {
+            border-style: dashed;
+            border-color: #cbd5e1;
+            background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        }
+
+        .routine-empty-slot {
+            border-style: dashed;
+            border-color: #cbd5e1;
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+        }
+    </style>
+@endsection
+
 @section('content')
 {{-- Page Header - Using standardized component --}}
 @include('admin.components.admin-page-header', [
@@ -12,244 +80,183 @@
     ]
 ])
 
-<div class="flex justify-end mb-4">
-    <form method="GET" class="flex items-center gap-2" id="filterForm">
-        <select name="semester" class="text-sm px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500" onchange="document.getElementById('filterForm').submit()">
-            @foreach($semesters as $sem)
-                <option value="{{ $sem }}" {{ (string) $semester === (string) $sem ? 'selected' : '' }}>
-                    {{ __('Semester') }} {{ $sem }}
-                </option>
-            @endforeach
-        </select>
-        <select name="section" class="text-sm px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500" onchange="document.getElementById('filterForm').submit()">
-            <option value="">{{ __('All Sections') }}</option>
-            @foreach($sections as $sec)
-                <option value="{{ $sec }}" {{ $section == $sec ? 'selected' : '' }}>
-                    {{ __('Section') }} {{ $sec }}
-                </option>
-            @endforeach
-        </select>
-    </form>
-</div>
+@php
+    $printUrl = route('admin.timetable.print', array_filter([
+        'semester' => $semester,
+        'section' => $section,
+    ], fn ($value) => filled($value)));
 
-{{-- Add Slot Button --}}
-<div class="flex justify-end mb-4">
-    <button onclick="openAddSlotModal()"
-        class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition shadow-sm">
-        <i class="bi bi-plus-circle"></i> Add Slot
-    </button>
-    
-    <div class="relative group ml-2">
-        <button class="inline-flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 text-sm rounded-lg transition">
-            <i class="bi bi-download"></i> Export
-            <i class="bi bi-chevron-down"></i>
-        </button>
-        <div class="absolute right-0 mt-1 w-40 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg hidden group-hover:block z-20">
-            <a href="{{ route('admin.timetable.print', ['semester' => $semester]) }}" onclick="adminOpenPrintPreview('{{ route('admin.timetable.print', ['semester' => $semester]) }}', { title: 'Print Timetable' }); return false;" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">
-                <i class="bi bi-printer mr-2"></i>Print
-            </a>
-            <a href="{{ route('admin.timetable.exportExcel', ['semester' => $semester]) }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700">
-                <i class="bi bi-file-earmark-excel mr-2"></i>Excel
-            </a>
-        </div>
-    </div>
-</div>
+    $sheetTitle = __('Class Routine');
+    $sheetHeading = __('Semester') . ' ' . $semester . (filled($section) ? ' / ' . __('Section') . ' ' . $section : '');
+    $institutionName = $college?->name ?? 'IT-DMS';
+    $departmentLine = $college?->short_name ?? __('Department');
+    $metaItems = [
+        ['label' => __('Prepared On'), 'value' => now()->format('Y-m-d')],
+        ['label' => __('Academic Year'), 'value' => now()->format('Y')],
+    ];
+    $summaryItems = [
+        ['label' => __('Role'), 'value' => __('Administrator')],
+        ['label' => __('Semester'), 'value' => $semester],
+        ['label' => __('Section'), 'value' => $section ?: __('All')],
+        ['label' => __('Slots'), 'value' => $slots->count()],
+    ];
+    $footerLeft = $slots->count() . ' ' . __('slots');
+    $timetableByDay = $slotsByDay;
+    $subjectAssignmentMap = $subjects->mapWithKeys(function ($subject) {
+        $primaryAssignment = $subject->teacherAssignments
+            ->sortBy(fn ($assignment) => $assignment->role === 'primary' ? 0 : 1)
+            ->first();
 
-{{-- Stats Cards - Using standardized component --}}
-@include('admin.components.admin-stats-cards', [
-    'cards' => [
-        ['title' => 'Total Slots', 'value' => $stats['total_slots'], 'icon' => 'bi-grid-3x3', 'color' => 'blue'],
-        ['title' => 'Theory', 'value' => $stats['theory_slots'], 'icon' => 'bi-book', 'color' => 'gray'],
-        ['title' => 'Practical', 'value' => $stats['practical_slots'], 'icon' => 'bi-laptop', 'color' => 'green'],
-        ['title' => 'Elective', 'value' => $stats['elective_slots'], 'icon' => 'bi-people', 'color' => 'purple'],
-        ['title' => 'Conflicts', 'value' => $stats['conflicts'], 'icon' => 'bi-exclamation-triangle', 'color' => $stats['conflicts'] > 0 ? 'red' : 'gray'],
-    ]
-])
+        return [
+            $subject->id => [
+                'teacher_id' => $primaryAssignment?->teacher_id,
+                'teacher_name' => $primaryAssignment?->teacher?->user?->name,
+                'lab_technician_id' => $subject->lab_technician_id,
+                'lab_technician_name' => $subject->labTechnician?->user?->name,
+                'has_lab' => (bool) $subject->has_lab,
+            ],
+        ];
+    })->all();
+@endphp
 
-<div class="space-y-4">
+<div class="routine-page space-y-6">
+    <section class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+            <div class="max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-red-700">
+                    <i class="bi bi-calendar2-week"></i>
+                    {{ __('Admin Routine') }}
+                </span>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 md:text-3xl">{{ __('Timetable routine sheet') }}</h1>
+                    <p class="mt-2 text-sm text-slate-600 md:text-base">
+                        {{ __('The admin timetable now uses the same formal class-routine layout used in the printable routine views.') }}
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-3 text-sm text-slate-600">
+                    <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
+                        <i class="bi bi-layers"></i>
+                        {{ __('Semester') }} {{ $semester }}
+                    </span>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
+                        <i class="bi bi-diagram-3"></i>
+                        {{ __('Section') }} {{ $section ?: __('All') }}
+                    </span>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                        {{ $slots->count() }} {{ __('visible slots') }}
+                    </span>
+                </div>
+            </div>
 
-    <!-- Legend -->
-    <div class="flex flex-wrap items-center gap-3 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 px-4 py-3">
-        <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Legend:</span>
-        <span class="px-2 py-1 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">Theory</span>
-        <span class="px-2 py-1 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">Practical</span>
-        <span class="px-2 py-1 rounded text-xs font-medium bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300">Tutorial</span>
-        <span class="px-2 py-1 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300">Elective</span>
-        @if($slots->whereNotNull('lab_group')->isNotEmpty())
-            @foreach($labGroups as $group)
-                @php $colors = ['A'=>'bg-rose','B'=>'bg-orange','C'=>'bg-amber','D'=>'bg-emerald']; @endphp
-                <span class="px-2 py-1 rounded text-xs font-medium {{ $colors[$group] ?? 'bg-gray' }}-100 dark:{{ $colors[$group] ?? 'bg-gray' }}-900 text-{{ $colors[$group] ?? 'gray' }}-700 dark:text-{{ $colors[$group] ?? 'gray' }}-300">Lab {{ $group }}</span>
-            @endforeach
-        @endif
-    </div>
-
-    <!-- Timetable Grid: Days as Columns -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700">
-            <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                Weekly Schedule — Semester {{ $semester }}
-            </h3>
-        </div>
-
-        @if($slots->isEmpty())
-            <div class="p-16 text-center">
-                <i class="bi bi-grid-3x3-gap text-5xl text-gray-200 dark:text-gray-600 block mb-4"></i>
-                <h3 class="text-base font-semibold text-gray-600 dark:text-gray-300 mb-2">No Classes Scheduled</h3>
-                <button onclick="openAddSlotModal()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg">
-                    <i class="bi bi-plus-circle"></i> Add First Slot
+            <div class="flex flex-wrap gap-3">
+                <button type="button" onclick="openAddSlotModal()" class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700">
+                    <i class="bi bi-plus-circle"></i>
+                    {{ __('Add Slot') }}
                 </button>
+                <button
+                    type="button"
+                    onclick="adminOpenPrintPreview('{{ $printUrl }}', { title: '{{ __('Routine Preview') }}', subtitle: '{{ __('A4 routine sheet') }}' })"
+                    class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+                >
+                    <i class="bi bi-eye"></i>
+                    {{ __('Preview') }}
+                </button>
+                <a
+                    href="{{ $printUrl }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+                >
+                    <i class="bi bi-printer"></i>
+                    {{ __('Print / New tab') }}
+                </a>
             </div>
-        @else
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm border-collapse">
-                    <thead class="bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
-                        <tr>
-                            <th class="px-2 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 w-20 bg-gray-100 dark:bg-slate-800">Time</th>
-                            @foreach($days as $day)
-                                <th class="px-2 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 min-w-[160px]">{{ ucfirst($day) }}</th>
-                            @endforeach
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
-                        @php
-                            // Get unique time slots from data
-                            $allTimeSlots = [];
-                            foreach($slots as $slot) {
-                                $key = $slot->start_time;
-                                if(!isset($allTimeSlots[$key])) {
-                                    $allTimeSlots[$key] = [
-                                        'start' => $slot->start_time,
-                                        'end' => $slot->end_time,
-                                    ];
-                                }
-                            }
-                            ksort($allTimeSlots);
-                        @endphp
-                        @foreach($allTimeSlots as $timeSlot)
-                        <tr>
-                            <td class="px-2 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-800 border-r dark:border-slate-700">
-                                <div class="flex flex-col items-center">
-                                    <span>{{ \Carbon\Carbon::parse($timeSlot['start'])->format('g:i A') }}</span>
-                                    <span class="text-[10px] font-normal text-gray-400 dark:text-gray-500">to</span>
-                                    <span>{{ \Carbon\Carbon::parse($timeSlot['end'])->format('g:i A') }}</span>
-                                </div>
-                            </td>
-                            @foreach($days as $day)
-                                @php
-                                    $daySlots = $slotsByDay[$day] ?? collect();
-                                    $timeSlots = $daySlots->filter(function($s) use ($timeSlot) {
-                                        return $s->start_time == $timeSlot['start'];
-                                    });
-                                    
-                                    // Separate theory/other from practical lab groups
-                                    $theorySlots = $timeSlots->filter(function($s) { return is_null($s->lab_group); });
-                                    $labSlots = $timeSlots->filter(function($s) { return !is_null($s->lab_group); });
-                                @endphp
-                                <td class="px-1 py-1 border-r border-gray-100 dark:border-slate-700 min-h-[70px] align-top dark:bg-slate-800/30">
-                                    @if($timeSlots->isNotEmpty())
-                                        <div class="flex flex-col gap-1">
-                                        {{-- Theory slots (stacked) --}}
-                                        @foreach($theorySlots as $slot)
-                                            @php
-                                                $colors = [
-                                                    'theory' => 'bg-blue-100 dark:bg-blue-900 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
-                                                    'practical' => 'bg-green-100 dark:bg-green-900 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
-                                                    'tutorial' => 'bg-amber-100 dark:bg-amber-900 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
-                                                    'elective' => 'bg-purple-100 dark:bg-purple-900 border-purple-200 dark:border-purple-800 text-purple-800 dark:text-purple-200'
-                                                ];
-                                                $color = $colors[$slot->slot_type] ?? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200';
-                                                
-                                                // Check conflict
-                                                $hasConflict = $conflicts->contains(function($c) use ($slot) {
-                                                    return $c['slot1_id'] === $slot->id || $c['slot2_id'] === $slot->id;
-                                                });
-                                            @endphp
-                                            <div onclick="editSlot({{ $slot->id }})" 
-                                                class="group p-1.5 pr-16 rounded border text-xs cursor-pointer hover:shadow-md transition relative {{ $color }}
-                                                {{ $hasConflict ? 'ring-2 ring-red-500' : '' }}
-                                                {{ $slot->is_locked ? 'opacity-70' : '' }}">
-                                                <div class="absolute top-1 right-1 z-10 flex items-center gap-1">
-                                                    <button type="button" onclick="viewSlot(event, {{ $slot->id }})" class="inline-flex h-5 w-5 items-center justify-center rounded bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-blue-600" title="View slot">
-                                                        <i class="bi bi-eye text-[10px]"></i>
-                                                    </button>
-                                                    <button type="button" onclick="editSlot({{ $slot->id }}, event)" class="inline-flex h-5 w-5 items-center justify-center rounded bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-amber-600" title="Edit slot">
-                                                        <i class="bi bi-pencil-square text-[10px]"></i>
-                                                    </button>
-                                                    <button type="button" onclick="deleteSlot(event, {{ $slot->id }})" class="inline-flex h-5 w-5 items-center justify-center rounded bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-red-600" title="Delete slot">
-                                                        <i class="bi bi-trash text-[10px]"></i>
-                                                    </button>
-                                                </div>
-                                                @if($hasConflict)
-                                                    <span class="absolute -top-1 -left-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[8px]">!</span>
-                                                @endif
-                                                @if($slot->is_locked)
-                                                    <span class="absolute top-1 left-3 text-gray-400"><i class="bi bi-lock-fill text-[8px]"></i></span>
-                                                @endif
-                                                <span class="font-semibold block truncate">{{ $slot->subject->subject_name ?? '—' }}</span>
-                                                <span class="text-[10px] truncate block">{{ $slot->teacher->user->name ?? '' }}</span>
-                                                <span class="text-[9px] truncate block opacity-70">{{ $slot->room }}</span>
-                                            </div>
-                                        @endforeach
-                                        
-                                        {{-- Lab slots: side by side in same cell --}}
-                                        @if($labSlots->isNotEmpty())
-                                            <div class="flex gap-1">
-                                                @foreach($labSlots as $slot)
-                                                    @php
-                                                        $labColors = [
-                                                            'A' => 'bg-rose-100 border-rose-200 text-rose-800',
-                                                            'B' => 'bg-orange-100 border-orange-200 text-orange-800',
-                                                            'C' => 'bg-amber-100 border-amber-200 text-amber-800',
-                                                            'D' => 'bg-emerald-100 border-emerald-200 text-emerald-800',
-                                                            'E' => 'bg-cyan-100 border-cyan-200 text-cyan-800',
-                                                            'F' => 'bg-pink-100 border-pink-200 text-pink-800',
-                                                        ];
-                                                        $color = $labColors[$slot->lab_group] ?? 'bg-green-100';
-                                                        
-                                                        $hasConflict = $conflicts->contains(function($c) use ($slot) {
-                                                            return $c['slot1_id'] === $slot->id || $c['slot2_id'] === $slot->id;
-                                                        });
-                                                    @endphp
-                                                    <div onclick="editSlot({{ $slot->id }})" 
-                                                        class="group flex-1 p-1 pr-10 rounded border text-[10px] cursor-pointer hover:shadow-md transition relative {{ $color }}
-                                                        {{ $hasConflict ? 'ring-2 ring-red-500' : '' }}
-                                                        {{ $slot->is_locked ? 'opacity-70' : '' }}">
-                                                        <div class="absolute top-0.5 right-0.5 z-10 flex items-center gap-0.5">
-                                                            <button type="button" onclick="viewSlot(event, {{ $slot->id }})" class="inline-flex h-4 w-4 items-center justify-center rounded bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-blue-600" title="View slot">
-                                                                <i class="bi bi-eye text-[8px]"></i>
-                                                            </button>
-                                                            <button type="button" onclick="editSlot({{ $slot->id }}, event)" class="inline-flex h-4 w-4 items-center justify-center rounded bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-amber-600" title="Edit slot">
-                                                                <i class="bi bi-pencil-square text-[8px]"></i>
-                                                            </button>
-                                                            <button type="button" onclick="deleteSlot(event, {{ $slot->id }})" class="inline-flex h-4 w-4 items-center justify-center rounded bg-white/90 text-slate-600 shadow-sm transition hover:bg-white hover:text-red-600" title="Delete slot">
-                                                                <i class="bi bi-trash text-[8px]"></i>
-                                                            </button>
-                                                        </div>
-                                                        @if($hasConflict)
-                                                            <span class="absolute -top-1 -left-1 w-3 h-3 bg-red-500 text-white rounded-full flex items-center justify-center text-[6px]">!</span>
-                                                        @endif
-                                                        @if($slot->is_locked)
-                                                            <span class="absolute top-0.5 left-2.5 text-gray-400"><i class="bi bi-lock-fill text-[6px]"></i></span>
-                                                        @endif
-                                                        <span class="block text-[9px] font-bold">Lab {{ $slot->lab_group }}</span>
-                                                        <span class="font-semibold block truncate">{{ $slot->subject->subject_name ?? '—' }}</span>
-                                                        <span class="text-[8px] truncate block">{{ $slot->teacher->user->name ?? '' }}</span>
-                                                        <span class="text-[7px] truncate block opacity-70">{{ $slot->room }}</span>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                        </div>
-                                    @endif
-                                </td>
-                            @endforeach
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+        </div>
+
+        <form id="filterForm" method="GET" action="{{ route('admin.timetable') }}" class="mt-6 grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto_auto]">
+            <div>
+                <label for="semester" class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    {{ __('Semester') }}
+                </label>
+                <select id="semester" name="semester" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200">
+                    @foreach($semesters as $sem)
+                        <option value="{{ $sem }}" {{ (string) $semester === (string) $sem ? 'selected' : '' }}>
+                            {{ __('Semester') }} {{ $sem }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
-        @endif
-    </div>
+
+            <div>
+                <label for="section" class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    {{ __('Section') }}
+                </label>
+                <select id="section" name="section" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200">
+                    <option value="">{{ __('All Sections') }}</option>
+                    @foreach($sections as $sec)
+                        <option value="{{ $sec }}" {{ (string) $section === (string) $sec ? 'selected' : '' }}>
+                            {{ __('Section') }} {{ $sec }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label for="day" class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    {{ __('Day') }}
+                </label>
+                <select id="day" name="day" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200">
+                    <option value="">{{ __('All Days') }}</option>
+                    @foreach($days as $dayName)
+                        <option value="{{ $dayName }}" {{ (string) $day === (string) $dayName ? 'selected' : '' }}>
+                            {{ __(ucfirst($dayName)) }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-700">
+                <i class="bi bi-funnel"></i>
+                {{ __('Apply') }}
+            </button>
+
+            <a href="{{ route('admin.timetable') }}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                <i class="bi bi-arrow-clockwise"></i>
+                {{ __('Reset') }}
+            </a>
+        </form>
+    </section>
+
+    @if($slots->isEmpty())
+        <section class="rounded-[28px] border border-yellow-200 bg-yellow-50 p-6 shadow-sm">
+            <div class="flex items-start gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-100 text-yellow-700">
+                    <i class="bi bi-exclamation-triangle text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-yellow-900">{{ __('No timetable slots found') }}</h2>
+                    <p class="mt-2 text-sm text-yellow-800">
+                        {{ __('There are no active slots for the current filters. Adjust the filters or add a new slot.') }}
+                    </p>
+                </div>
+            </div>
+        </section>
+    @else
+        <section class="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm">
+            <div class="mb-4 flex items-center justify-between gap-4 px-2">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900">{{ __('Interactive routine sheet') }}</h2>
+                    <p class="mt-1 text-sm text-slate-600">{{ __('Click any slot to view its details, or use the inline buttons in the slot card to view, edit, or delete it.') }}</p>
+                </div>
+                <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-600">
+                    {{ $slots->count() }} {{ __('slots on screen') }}
+                </span>
+            </div>
+
+            @include('admin.partials.routine-sheet-interactive')
+        </section>
+    @endif
 </div>
 
 <!-- Modal -->
@@ -296,7 +303,7 @@
             </div>
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">{{ __('Subject') }} *</label>
-                <select id="slotSubject" required class="w-full px-3 py-2 border rounded-lg text-sm">
+                <select id="slotSubject" required class="w-full px-3 py-2 border rounded-lg text-sm" onchange="handleSubjectSelection(true)">
                     <option value="">-- Select --</option>
                     @foreach($subjects as $subject)
                         <option value="{{ $subject->id }}">{{ $subject->subject_name }}</option>
@@ -338,6 +345,17 @@
                 <label class="block text-xs font-semibold text-gray-700 mb-1">{{ __('Remarks') }}</label>
                 <input type="text" id="slotRemarks" class="w-full px-3 py-2 border rounded-lg text-sm">
             </div>
+            <div id="labTechnicianSection" class="hidden">
+                <label class="block text-xs font-semibold text-gray-700 mb-1">{{ __('Assigned Lab Technician') }}</label>
+                <input type="hidden" id="slotAssignedLabTechId" value="">
+                <select id="slotAssignedLabTech" class="w-full px-3 py-2 border rounded-lg text-sm bg-gray-50 text-gray-700" disabled>
+                    <option value="">{{ __('-- Not assigned --') }}</option>
+                    @foreach($teachers as $teacher)
+                        <option value="{{ $teacher->id }}">{{ $teacher->user->name ?? '—' }}</option>
+                    @endforeach
+                </select>
+                <p class="mt-1 text-xs text-gray-500">{{ __('Loaded automatically from the selected subject when practical is chosen.') }}</p>
+            </div>
             <div id="conflictWarning" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">
                 <p id="conflictMessage" class="text-sm text-red-700"></p>
             </div>
@@ -361,6 +379,9 @@
 <script>
 const CSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 const SEMESTER = '{{ $semester }}';
+const CURRENT_SECTION = @json($section ?: '');
+const BREAK_OVERRIDE_STORE_URL = @json(route('admin.timetable.break-overrides.store'));
+const SUBJECT_ASSIGNMENTS = @json($subjectAssignmentMap);
 const SLOT_FIELD_IDS = [
     'slotDay',
     'slotType',
@@ -378,6 +399,40 @@ const SLOT_FIELD_IDS = [
 function toggleLabGroup() {
     const type = document.getElementById('slotType').value;
     document.getElementById('labGroupSection').classList.toggle('hidden', type !== 'practical');
+    document.getElementById('labTechnicianSection').classList.toggle('hidden', type !== 'practical');
+    handleSubjectSelection(false);
+}
+
+function handleSubjectSelection(syncTeacher = true) {
+    const subjectId = document.getElementById('slotSubject').value;
+    const teacherField = document.getElementById('slotTeacher');
+    const slotType = document.getElementById('slotType').value;
+    const labTechField = document.getElementById('slotAssignedLabTech');
+    const labTechIdField = document.getElementById('slotAssignedLabTechId');
+    const subjectMeta = subjectId ? SUBJECT_ASSIGNMENTS[String(subjectId)] : null;
+
+    if (syncTeacher) {
+        teacherField.value = subjectMeta?.teacher_id ? String(subjectMeta.teacher_id) : '';
+    }
+
+    if (labTechField) {
+        if (slotType === 'practical' && subjectMeta?.lab_technician_id) {
+            labTechField.value = String(subjectMeta.lab_technician_id);
+            if (labTechIdField) {
+                labTechIdField.value = String(subjectMeta.lab_technician_id);
+            }
+        } else if (slotType === 'practical') {
+            labTechField.value = '';
+            if (labTechIdField) {
+                labTechIdField.value = '';
+            }
+        } else {
+            labTechField.value = '';
+            if (labTechIdField) {
+                labTechIdField.value = '';
+            }
+        }
+    }
 }
 
 function setSlotModalReadOnly(readOnly) {
@@ -410,6 +465,7 @@ function populateSlotForm(slot) {
     document.getElementById('slotLocked').checked = Boolean(slot.is_locked);
     document.getElementById('conflictWarning').classList.add('hidden');
     toggleLabGroup();
+    handleSubjectSelection(false);
 }
 
 async function fetchSlot(id) {
@@ -441,6 +497,119 @@ function openAddSlotModal() {
     });
     setSlotModalReadOnly(false);
     document.getElementById('slotModal').classList.remove('hidden');
+}
+
+function openAddSlotModalForBreak(day, startTime, endTime, event = null) {
+    if (event) {
+        event.stopPropagation();
+    }
+
+    document.getElementById('slotModalTitle').textContent = 'Add Timetable Slot';
+    populateSlotForm({
+        id: '',
+        day_of_week: day || 'monday',
+        slot_type: 'theory',
+        subject_id: '',
+        teacher_id: '',
+        start_time: startTime || '',
+        end_time: endTime || '',
+        room: '',
+        lab_group: '',
+        section: '{{ $section }}' || '',
+        remarks: 'Created from break slot',
+        is_locked: false,
+    });
+    setSlotModalReadOnly(false);
+    document.getElementById('slotModal').classList.remove('hidden');
+}
+
+function editBreakSlot(day, startTime, endTime, event = null) {
+    if (event) {
+        event.stopPropagation();
+    }
+
+    document.getElementById('slotModalTitle').textContent = 'Edit Break Slot';
+    populateSlotForm({
+        id: '',
+        day_of_week: day || 'monday',
+        slot_type: 'theory',
+        subject_id: '',
+        teacher_id: '',
+        start_time: startTime || '',
+        end_time: endTime || '',
+        room: '',
+        lab_group: '',
+        section: '{{ $section }}' || '',
+        remarks: 'Edited from break slot',
+        is_locked: false,
+    });
+    setSlotModalReadOnly(false);
+    document.getElementById('slotModal').classList.remove('hidden');
+}
+
+function createEmptySlotMarkup(targetId, day, startTime, endTime) {
+    return `
+        <div
+            id="${targetId}"
+            class="routine-slot routine-slot--interactive routine-empty-slot"
+            onclick="openAddSlotModalForBreak('${day}', '${startTime}', '${endTime}', event)"
+            role="button"
+            tabindex="0"
+            title="Click to add a class in this empty slot"
+            onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); openAddSlotModalForBreak('${day}', '${startTime}', '${endTime}', event); }"
+        >
+            <div class="routine-slot__actions" onclick="event.stopPropagation()">
+                <button type="button" onclick="openAddSlotModalForBreak('${day}', '${startTime}', '${endTime}', event)" title="Add class">
+                    <i class="bi bi-plus-circle"></i>
+                </button>
+            </div>
+            <div class="routine-slot__title">Empty Slot</div>
+            <div class="routine-slot__meta">
+                <span>${day.charAt(0).toUpperCase() + day.slice(1)}</span>
+                <span>${startTime.substring(0, 5)} - ${endTime.substring(0, 5)}</span>
+                <span>No class assigned</span>
+            </div>
+            <div class="routine-slot__note">Add another class in this free period.</div>
+        </div>
+    `;
+}
+
+async function deleteBreakSlot(targetId, day, startTime, endTime, event = null) {
+    if (event) {
+        event.stopPropagation();
+    }
+
+    const res = await fetch(BREAK_OVERRIDE_STORE_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': CSRF,
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+            semester: SEMESTER,
+            section: CURRENT_SECTION || '',
+            day_of_week: day,
+            start_time: startTime,
+            end_time: endTime,
+        }),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok || !result.success) {
+        alert(result.message || 'Unable to remove break slot');
+        return;
+    }
+
+    const target = document.getElementById(targetId);
+    if (target) {
+        target.outerHTML = createEmptySlotMarkup(targetId, day, startTime, endTime);
+    }
+
+    if (typeof showToast === 'function') {
+        showToast(`Break removed for ${day} ${startTime.substring(0, 5)}-${endTime.substring(0, 5)}. You can add a class in the empty slot.`, 'success');
+    }
 }
 
 function closeSlotModal() {

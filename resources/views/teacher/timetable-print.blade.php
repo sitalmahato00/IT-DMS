@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ __('Admin Timetable') }} - {{ __('Semester') }} {{ $semester }}</title>
+    <title>{{ __('Teacher Routine') }} - {{ auth()->user()?->name ?? __('Teacher') }}</title>
     @include('shared.timetable.partials.routine-styles')
     <style>
         body {
@@ -63,8 +63,10 @@
 <body>
     @php
         $paperClass = 'routine-paper--compact';
-        $sheetTitle = __('Official Timetable');
-        $sheetHeading = __('Semester') . ' ' . $semester . (filled($section) ? ' / ' . __('Section') . ' ' . $section : '');
+        $sheetTitle = __('Teacher Routine');
+        $sheetHeading = $selectedSemester
+            ? __('Semester') . ' ' . $selectedSemester
+            : __('All Assigned Semesters');
         $institutionName = $college?->name ?? 'IT-DMS';
         $departmentLine = $college?->short_name ?? __('Department');
         $metaItems = [
@@ -72,17 +74,17 @@
             ['label' => __('Academic Year'), 'value' => now()->format('Y')],
         ];
         $summaryItems = [
-            ['label' => __('Role'), 'value' => __('Administrator')],
-            ['label' => __('Semester'), 'value' => $semester],
-            ['label' => __('Section'), 'value' => $section ?: __('All')],
-            ['label' => __('Slots'), 'value' => collect($slots ?? [])->count()],
+            ['label' => __('Teacher'), 'value' => auth()->user()?->name ?? __('Teacher')],
+            ['label' => __('Subjects'), 'value' => $totalSubjects],
+            ['label' => __('Slots'), 'value' => $totalSlots],
+            ['label' => __('Semester Filter'), 'value' => $selectedSemester ?: __('All')],
         ];
-        $footerLeft = collect($slots ?? [])->count() . ' ' . __('slots');
+        $footerLeft = collect($subjects ?? [])->count() . ' ' . __('subjects');
     @endphp
 
     <div class="routine-print-shell">
         <div class="routine-print-actions">
-            <a href="{{ route('admin.timetable', array_filter(['semester' => $semester, 'section' => $section], fn ($value) => filled($value))) }}">
+            <a href="{{ route('teacher.timetable', array_filter(['semester' => $selectedSemester], fn ($value) => filled($value))) }}">
                 {{ __('Back to timetable') }}
             </a>
             <button type="button" onclick="window.print()">{{ __('Print') }}</button>

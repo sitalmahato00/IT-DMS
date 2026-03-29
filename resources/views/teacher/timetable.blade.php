@@ -2,173 +2,129 @@
 
 @section('title', __('My Timetable'))
 
+@section('styles')
+    @include('shared.timetable.partials.routine-styles')
+@endsection
+
 @section('content')
-<div class="space-y-6">
-    <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ __('My Timetable') }}</h1>
-            <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ __('View your weekly class schedule for assigned subjects.') }}</p>
-        </div>
-    </div>
+@php
+    $printUrl = route('teacher.timetable.print', array_filter([
+        'semester' => $selectedSemester,
+    ], fn ($value) => filled($value)));
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <div class="flex items-center justify-between">
+    $sheetTitle = __('Teacher Routine');
+    $sheetHeading = $selectedSemester
+        ? __('Semester') . ' ' . $selectedSemester
+        : __('All Assigned Semesters');
+    $institutionName = $college?->name ?? 'IT-DMS';
+    $departmentLine = $college?->short_name ?? __('Department');
+    $metaItems = [
+        ['label' => __('Prepared On'), 'value' => now()->format('Y-m-d')],
+        ['label' => __('Academic Year'), 'value' => now()->format('Y')],
+    ];
+    $summaryItems = [
+        ['label' => __('Teacher'), 'value' => auth()->user()?->name ?? __('Teacher')],
+        ['label' => __('Subjects'), 'value' => $totalSubjects],
+        ['label' => __('Slots'), 'value' => $totalSlots],
+        ['label' => __('Semester Filter'), 'value' => $selectedSemester ?: __('All')],
+    ];
+    $footerLeft = collect($subjects ?? [])->count() . ' ' . __('subjects');
+@endphp
+
+<div class="routine-page space-y-6">
+    <section class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+            <div class="max-w-3xl space-y-3">
+                <span class="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-red-700">
+                    <i class="bi bi-calendar-week"></i>
+                    {{ __('Teacher Schedule') }}
+                </span>
                 <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Total Subjects') }}</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $totalSubjects }}</p>
+                    <h1 class="text-2xl font-bold text-slate-900 md:text-3xl">{{ __('My timetable routine') }}</h1>
+                    <p class="mt-2 text-sm text-slate-600 md:text-base">
+                        {{ __('Your assigned classes are arranged in the same formal routine sheet used for student schedules.') }}
+                    </p>
                 </div>
-                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
-                    <i class="bi bi-book text-xl"></i>
+                <div class="flex flex-wrap gap-3 text-sm text-slate-600">
+                    <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
+                        <i class="bi bi-person-workspace"></i>
+                        {{ auth()->user()?->name ?? __('Teacher') }}
+                    </span>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
+                        <i class="bi bi-journal-bookmark"></i>
+                        {{ $totalSubjects }} {{ __('subjects') }}
+                    </span>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1">
+                        <i class="bi bi-calendar3"></i>
+                        {{ $activeDays }} {{ __('active days') }}
+                    </span>
                 </div>
             </div>
-        </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Total Slots') }}</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $totalSlots }}</p>
-                </div>
-                <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400">
-                    <i class="bi bi-calendar3 text-xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Days') }}</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ collect($timetableByDay)->filter(fn($slots) => $slots->count() > 0)->count() }}</p>
-                </div>
-                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center text-purple-600 dark:text-purple-400">
-                    <i class="bi bi-calendar-week text-xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Semesters') }}</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ count($semesters) }}</p>
-                </div>
-                <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900 rounded-lg flex items-center justify-center text-amber-600 dark:text-amber-400">
-                    <i class="bi bi-layers text-xl"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <form method="GET" action="{{ route('teacher.timetable') }}" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="flex flex-col">
-                    <label class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">{{ __('Filter by Semester') }}</label>
-                    <select name="semester" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark:bg-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
-                        <option value="">{{ __('All Semesters') }}</option>
-                        @foreach($semesters as $semester)
-                            <option value="{{ $semester }}" {{ $selectedSemester == $semester ? 'selected' : '' }}>
-                                {{ __('Semester') }} {{ $semester }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors font-medium">
-                    <i class="bi bi-funnel"></i> {{ __('Filter') }}
+            <div class="flex flex-wrap gap-3">
+                <button
+                    type="button"
+                    onclick="teacherOpenPrintPreview('{{ $printUrl }}', { title: '{{ __('Routine Preview') }}', subtitle: '{{ __('A4 routine sheet') }}' })"
+                    class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+                >
+                    <i class="bi bi-eye"></i>
+                    {{ __('Preview') }}
                 </button>
-                <a href="{{ route('teacher.timetable') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium">
-                    <i class="bi bi-arrow-clockwise"></i> {{ __('Reset') }}
+                <a
+                    href="{{ $printUrl }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+                >
+                    <i class="bi bi-printer"></i>
+                    {{ __('Print / New tab') }}
                 </a>
             </div>
-        </form>
-    </div>
+        </div>
 
-    <!-- Timetable by Day -->
-    <div class="space-y-4">
-        @foreach($days as $day)
-            @php
-                $daySlots = $timetableByDay[$day] ?? collect();
-            @endphp
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div class="px-5 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 flex items-center justify-between">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
-                        <i class="bi bi-calendar-event mr-2"></i>{{ __(ucfirst($day)) }}
-                    </h3>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ $daySlots->count() }} {{ __('classes') }}</span>
-                </div>
-                
-                @if($daySlots->count() > 0)
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-sm">
-                            <thead class="bg-gray-50 dark:bg-gray-700/50">
-                                <tr>
-                                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Time') }}</th>
-                                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Subject') }}</th>
-                                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Room') }}</th>
-                                    <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Semester') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                                @foreach($daySlots as $slot)
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                                        <td class="px-5 py-4">
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-gray-900 dark:text-white font-medium">{{ \Carbon\Carbon::parse($slot->start_time)->format('H:i') }}</span>
-                                                <span class="text-gray-400">-</span>
-                                                <span class="text-gray-900 dark:text-white font-medium">{{ \Carbon\Carbon::parse($slot->end_time)->format('H:i') }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-5 py-4">
-                                            <div class="flex items-center gap-2">
-                                                <div class="w-8 h-8 bg-red-100 dark:bg-red-900/40 rounded-full flex items-center justify-center">
-                                                    <i class="bi bi-book text-red-600 dark:text-red-400 text-sm"></i>
-                                                </div>
-                                                <div>
-                                                    <p class="font-medium text-gray-900 dark:text-white">{{ $slot->subject->subject_name ?? 'N/A' }}</p>
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $slot->subject->subject_code ?? '' }}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-5 py-4 text-gray-600 dark:text-gray-300">
-                                            {{ $slot->room ?? 'N/A' }}
-                                        </td>
-                                        <td class="px-5 py-4">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-400">
-                                                {{ __('Semester') }} {{ $slot->semester ?? 'N/A' }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="p-8 text-center">
-                        <i class="bi bi-calendar-x text-4xl text-gray-300 dark:text-gray-600 mb-2"></i>
-                        <p class="text-gray-500 dark:text-gray-400">No classes scheduled</p>
-                    </div>
-                @endif
+        <form method="GET" action="{{ route('teacher.timetable') }}" class="mt-6 grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_auto_auto]">
+            <div>
+                <label for="semester" class="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    {{ __('Semester') }}
+                </label>
+                <select id="semester" name="semester" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200">
+                    <option value="">{{ __('All Semesters') }}</option>
+                    @foreach($semesters as $semester)
+                        <option value="{{ $semester }}" {{ (string) $selectedSemester === (string) $semester ? 'selected' : '' }}>
+                            {{ __('Semester') }} {{ $semester }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
-        @endforeach
-    </div>
+
+            <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700">
+                <i class="bi bi-funnel"></i>
+                {{ __('Apply') }}
+            </button>
+
+            <a href="{{ route('teacher.timetable') }}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                <i class="bi bi-arrow-clockwise"></i>
+                {{ __('Reset') }}
+            </a>
+        </form>
+    </section>
 
     @if($totalSlots === 0)
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-            <div class="flex items-center gap-3">
-                <i class="bi bi-exclamation-triangle text-yellow-600 dark:text-yellow-400 text-xl"></i>
+        <section class="rounded-[28px] border border-yellow-200 bg-yellow-50 p-6 shadow-sm">
+            <div class="flex items-start gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-yellow-100 text-yellow-700">
+                    <i class="bi bi-exclamation-triangle text-xl"></i>
+                </div>
                 <div>
-                    <p class="font-medium text-yellow-800 dark:text-yellow-400">No Timetable Assigned</p>
-                    <p class="text-sm text-yellow-700 dark:text-yellow-500">Your timetable will appear here once it's assigned by the administrator.</p>
+                    <h2 class="text-lg font-semibold text-yellow-900">{{ __('No timetable assigned') }}</h2>
+                    <p class="mt-2 text-sm text-yellow-800">
+                        {{ __('Your timetable will appear here once classes are assigned to you.') }}
+                    </p>
                 </div>
             </div>
-        </div>
+        </section>
+    @else
+        @include('shared.timetable.partials.routine-sheet')
     @endif
 </div>
 @endsection

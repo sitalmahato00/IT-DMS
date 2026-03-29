@@ -151,6 +151,14 @@ class Subject extends Model
     }
 
     /**
+     * Get the assigned lab technician for this subject.
+     */
+    public function labTechnician()
+    {
+        return $this->belongsTo(Teacher::class, 'lab_technician_id');
+    }
+
+    /**
      * Get the primary teacher (first one from the pivot).
      */
     public function getPrimaryTeacherAttribute()

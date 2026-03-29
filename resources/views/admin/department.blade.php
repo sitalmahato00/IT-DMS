@@ -12,16 +12,24 @@
         --department-brand-soft-strong: rgba(255, 0, 55, 0.14);
         --department-brand-border: rgba(255, 0, 55, 0.24);
         --department-brand-ring: rgba(255, 0, 55, 0.16);
+        margin: -0.75rem -1.5rem;
+        min-height: calc(100vh - 4rem);
+        background: #fff;
     }
 
     .department-settings-page .department-shell {
         width: 100%;
         max-width: none;
         padding-inline: 0;
+        min-height: inherit;
     }
 
     .department-settings-page .department-card {
-        min-height: calc(100vh - 12rem);
+        min-height: inherit;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
     }
 
     .department-settings-page .text-blue-600,
@@ -124,7 +132,7 @@
 @endsection
 
 @section('content')
-<div class="department-settings-page min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+<div class="department-settings-page min-h-screen bg-white">
     <!-- Global Loader Overlay -->
     <div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-sm hidden flex items-center justify-center">
         <div class="text-center">
@@ -137,7 +145,7 @@
     <div id="toast-container" class="fixed top-4 right-4 z-[1001] space-y-2"></div>
 
     <div class="department-shell w-full">
-        <div class="department-card bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="department-card overflow-hidden">
             <!-- Tab Navigation -->
             <div class="sticky top-0 z-10 bg-white border-b border-gray-200 overflow-x-auto">
                 <div class="flex max-w-full px-6">

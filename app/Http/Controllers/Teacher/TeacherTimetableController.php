@@ -3,126 +3,125 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\SubjectTeacher;
+use App\Models\Department;
 use App\Models\TimetableSlot;
-use App\Models\Subject;
-use Illuminate\Support\Facades\DB;
+use App\Traits\BuildsRoutineTimetable;
+use Illuminate\Http\Request;
 
 class TeacherTimetableController extends Controller
 {
-    /**
-     * Get teacher's assigned subjects with semester info
-     */
-    private function getTeacherAssignments()
-    {
-        $user = auth()->user();
-        $teacher = $user->teacher;
-        
-        if (!$teacher) {
-            return [
-                'subjectIds' => [],
-                'semesters' => [],
-            ];
-        }
-        
-        $assignments = SubjectTeacher::where('teacher_id', $teacher->id)
-            ->with('subject')
-            ->get();
-        
-        $subjectIds = $assignments->pluck('subject_id')->toArray();
-        
-        // Get unique semesters from assignments
-        $semesters = $assignments->pluck('semester')
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
-        
-        // Also get semesters from subjects if not in assignments
-        $subjectSemesters = Subject::whereIn('id', $subjectIds)
-            ->whereNotNull('semester')
-            ->distinct()
-            ->pluck('semester')
-            ->filter()
-            ->values()
-            ->toArray();
-        
-        // Merge and unique
-        $allSemesters = array_unique(array_merge($semesters, $subjectSemesters));
-        sort($allSemesters);
-        
-        return [
-            'subjectIds' => $subjectIds,
-            'semesters' => $allSemesters,
-        ];
-    }
+    use BuildsRoutineTimetable;
 
     /**
      * Display teacher's timetable
      */
     public function index(Request $request)
     {
-        $assignments = $this->getTeacherAssignments();
-        $subjectIds = $assignments['subjectIds'];
-        $semesters = $assignments['semesters'];
-        
-        $selectedSemester = $request->get('semester', '');
-        
-        // Get subjects for dropdown
-        $subjectsQuery = SubjectTeacher::whereHas('subject', function($q) use ($subjectIds) {
-            $q->whereIn('id', $subjectIds);
-        })->with('subject');
-        
-        if ($selectedSemester) {
-            $subjectsQuery->where('semester', $selectedSemester);
-        }
-        
-        $subjects = $subjectsQuery->get()->map(function ($st) {
+        return view('teacher.timetable', $this->buildTimetableContext($request));
+    }
+
+    /**
+     * Display a printable teacher routine sheet.
+     */
+    public function print(Request $request)
+    {
+        return view('teacher.timetable-print', $this->buildTimetableContext($request));
+    }
+
+    /**
+     * Build the teacher timetable context for screen and print.
+     */
+    private function buildTimetableContext(Request $request): array
+    {
+        $teacher = auth()->user()?->teacher;
+        $college = Department::first();
+
+        if (!$teacher) {
             return [
-                'id' => $st->subject->id,
-                'name' => $st->subject->subject_name,
-                'code' => $st->subject->subject_code,
-                'semester' => $st->semester ?? $st->subject->semester,
+                'timetableByDay' => [],
+                'subjects' => collect(),
+                'semesters' => [],
+                'selectedSemester' => '',
+                'totalSlots' => 0,
+                'totalSubjects' => 0,
+                'activeDays' => 0,
+                'days' => TimetableSlot::getDaysOfWeek(),
+                'teacher' => null,
+                'college' => $college,
+                'timeRows' => collect(),
+                'slotMatrix' => [],
+                'gapOverrideMatrix' => [],
             ];
-        })->values();
-        
-        // Get subject IDs for this semester filter
-        $filteredSubjectIds = $subjects->pluck('id')->toArray();
-        
-        // If no semester selected, use all subjects
-        $timetableSubjectIds = empty($selectedSemester) ? $subjectIds : $filteredSubjectIds;
-        
-        // Get timetable slots for teacher's subjects
-        $timetableQuery = TimetableSlot::whereIn('subject_id', $timetableSubjectIds)
-            ->with(['subject', 'teacher']);
-        
-        $timetableSlots = $timetableQuery->orderBy('day_of_week')
+        }
+
+        $semesters = TimetableSlot::query()
+            ->where('teacher_id', $teacher->id)
+            ->where('is_active', true)
+            ->where('is_holiday', false)
+            ->whereNotNull('semester')
+            ->distinct()
+            ->pluck('semester')
+            ->filter()
+            ->sort()
+            ->values()
+            ->toArray();
+
+        $selectedSemester = trim((string) $request->get('semester', ''));
+
+        if ($selectedSemester !== '' && !in_array($selectedSemester, $semesters, true)) {
+            $selectedSemester = '';
+        }
+
+        $timetableSlots = TimetableSlot::query()
+            ->where('teacher_id', $teacher->id)
+            ->where('is_active', true)
+            ->where('is_holiday', false)
+            ->when($selectedSemester, fn ($query) => $query->where('semester', $selectedSemester))
+            ->with(['subject', 'teacher.user'])
+            ->orderBy('day_of_week')
             ->orderBy('start_time')
             ->get();
-        
-        // Timetable slots store day names in lowercase.
+
+        $subjects = $timetableSlots
+            ->pluck('subject')
+            ->filter()
+            ->unique('id')
+            ->sortBy('subject_name')
+            ->values()
+            ->map(function ($subject) {
+                return [
+                    'id' => $subject->id,
+                    'name' => $subject->subject_name,
+                    'code' => $subject->subject_code,
+                    'semester' => $subject->semester,
+                ];
+            });
+
         $days = TimetableSlot::getDaysOfWeek();
-        $timetableByDay = [];
-        
-        foreach ($days as $day) {
-            $timetableByDay[$day] = $timetableSlots->filter(function ($slot) use ($day) {
-                return $slot->day_of_week === $day;
-            })->values();
-        }
-        
+        $timetableByDay = $this->buildTimetableByDay($timetableSlots, $days);
+        $timeRows = $this->buildRoutineTimeRows($timetableSlots);
+        $slotMatrix = $this->buildRoutineSlotMatrix($days, $timetableByDay, $timeRows);
+        $gapOverrideMatrix = $this->buildRoutineGapOverrideMatrix($selectedSemester);
+
         // Stats
         $totalSlots = $timetableSlots->count();
-        $totalSubjects = count($timetableSubjectIds);
+        $totalSubjects = $subjects->count();
+        $activeDays = collect($timetableByDay)->filter(fn ($slots) => $slots->count() > 0)->count();
         
-        return view('teacher.timetable', [
+        return [
             'timetableByDay' => $timetableByDay,
             'subjects' => $subjects,
             'semesters' => $semesters,
             'selectedSemester' => $selectedSemester,
             'totalSlots' => $totalSlots,
             'totalSubjects' => $totalSubjects,
+            'activeDays' => $activeDays,
             'days' => $days,
-        ]);
+            'teacher' => $teacher,
+            'college' => $college,
+            'timeRows' => $timeRows,
+            'slotMatrix' => $slotMatrix,
+            'gapOverrideMatrix' => $gapOverrideMatrix,
+        ];
     }
 }

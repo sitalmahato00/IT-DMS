@@ -134,10 +134,10 @@ class StudentMarkController extends Controller
         // Get all exams for this subject
         $exams = DB::table('exam_marks')
             ->where('student_id', $student->id)
-            ->where('subject_id', $subject->id)
+            ->where('exam_marks.subject_id', $subject->id)
             ->join('exams', 'exam_marks.exam_id', '=', 'exams.id')
-            ->select('exams.*', 'exam_marks.marks_obtained', 'exam_marks.full_marks', 'exam_marks.pass_marks')
-            ->orderBy('exams.date', 'desc')
+            ->select('exams.*', 'exam_marks.marks_obtained', 'exam_marks.full_marks', 'exam_marks.passing_marks')
+            ->orderBy('exams.exam_date', 'desc')
             ->get();
         
         return view('student.marks.show', compact('subject', 'teachers', 'assessmentMarks', 'ctevtMarks', 'componentMarks', 'exams'));

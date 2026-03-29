@@ -9,6 +9,7 @@
     $displaySemester = $student->semester ?: ($subjectStats->max('semester') ?: __('N/A'));
     $displaySubjects = $subjectStats->take(6);
     $attentionItems = collect();
+    $todayKey = strtolower(now()->format('l'));
 
     foreach ($subjectStats as $subject) {
         if ($subject['attendance_percentage'] < 75) {
@@ -212,6 +213,60 @@
 </div>
                 </div>
             </div>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4" data-student-search-item data-student-search-text="{{ __('Timetable routine classes') }}">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <div>
+                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Class Routine') }}</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $timetableTotalSlots }} {{ __('slots this week') }}</p>
+                </div>
+                <a href="{{ route('student.timetable') }}" class="inline-flex items-center gap-1 text-xs font-medium text-red-700 dark:text-red-400 hover:underline">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    <span>{{ __('Full view') }}</span>
+                </a>
+            </div>
+
+            @if($timetableTotalSlots === 0)
+                <div class="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 px-4 py-5 text-center">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No routine assigned yet.') }}</p>
+                </div>
+            @else
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7 gap-3">
+                    @foreach($timetableDays as $day)
+                        @php
+                            $daySlots = $timetableByDay[$day] ?? collect();
+                            $isToday = $todayKey === $day;
+                        @endphp
+
+                        @if($daySlots->isNotEmpty())
+                            <div class="rounded-lg border {{ $isToday ? 'border-red-300 dark:border-red-800 bg-red-50/70 dark:bg-red-950/10' : 'border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/40' }} p-3">
+                                <div class="flex items-center justify-between gap-2 mb-2">
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ ucfirst($day) }}</p>
+                                    @if($isToday)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-600 text-white">{{ __('Today') }}</span>
+                                    @endif
+                                </div>
+
+                                <div class="space-y-2">
+                                    @foreach($daySlots->take(2) as $slot)
+                                        <div class="rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-2.5 py-2">
+                                            <p class="text-[11px] text-red-600 dark:text-red-300 font-semibold">{{ $slot->short_time_range }}</p>
+                                            <p class="text-xs text-gray-800 dark:text-gray-200 truncate mt-0.5">
+                                                {{ $slot->subject?->subject_code ?? ($slot->subject?->subject_name ?? __('Class')) }}
+                                            </p>
+                                        </div>
+                                    @endforeach
+
+                                    @if($daySlots->count() > 2)
+                                        <p class="text-[11px] text-gray-500 dark:text-gray-400">+{{ $daySlots->count() - 2 }} {{ __('more') }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            @endif
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">

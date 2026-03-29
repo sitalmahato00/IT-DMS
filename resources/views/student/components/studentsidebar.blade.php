@@ -1,6 +1,7 @@
 @php
     $isDashboard = request()->routeIs('student.dashboard');
     $isCourses = request()->routeIs('student.courses*');
+    $isTimetable = request()->routeIs('student.timetable*');
     $isAttendance = request()->routeIs('student.attendance*');
     $isMarks = request()->routeIs('student.marks*');
     $isProfile = request()->routeIs('student.profile*');
@@ -62,7 +63,7 @@
                 </a>
             </div>
 
-            <a href="{{ route('student.timetable') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ activeGroup === 'schedule' ? 'bg-red-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:text-[#FF0037] hover:bg-red-500/10' }}">
+            <a href="{{ route('student.timetable') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isTimetable ? 'bg-red-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:text-[#FF0037] hover:bg-red-500/10' }}">
     <i class="bi bi-calendar3 text-lg flex-shrink-0 text-[#FF0037]"></i>
     <span class="sidebar-label">{{ __('Timetable') }}</span>
 </a>

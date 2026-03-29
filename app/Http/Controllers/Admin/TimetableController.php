@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Department;
 use App\Models\TimetableSlot;
+use App\Models\TimetableGapOverride;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Traits\LogsActivity;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 
 class TimetableController extends Controller
 {
@@ -78,14 +82,20 @@ class TimetableController extends Controller
         // Get all teacher conflicts
         $conflicts = $this->detectAllConflicts($slots);
 
-        // Get all unique time ranges from slots
-        $timeSlots = $this->extractTimeSlots($slots);
-
         // Available subjects for this semester
-        $subjectsQuery = Subject::where('status', 'active')->orderBy('subject_name');
+        $subjectsQuery = Subject::with([
+                'teacherAssignments.teacher.user',
+                'labTechnician.user',
+            ])
+            ->where('status', 'active')
+            ->orderBy('subject_name');
         
         if ($semester) {
-            $semesterSubjects = Subject::where('semester', $semester)
+            $semesterSubjects = Subject::with([
+                    'teacherAssignments.teacher.user',
+                    'labTechnician.user',
+                ])
+                ->where('semester', $semester)
                 ->where('status', 'active')
                 ->orderBy('subject_name')
                 ->get();
@@ -101,17 +111,46 @@ class TimetableController extends Controller
 
         $semesters = $semesterOptions;
 
-        // Sections
-        $sections = TimetableSlot::getSections();
-
         // Days
         $days = TimetableSlot::getDaysOfWeek();
+
+        // Get all unique time ranges from slots
+        $timeSlots = $this->extractTimeSlots($slots);
+        $timeRows = $this->buildTimeRows($slots);
+        $slotMatrix = [];
+
+        foreach ($days as $dayName) {
+            $daySlots = $slotsByDay[$dayName] ?? collect();
+
+            foreach ($timeRows as $timeRow) {
+                if ($timeRow['is_break']) {
+                    $slotMatrix[$dayName][$timeRow['key']] = collect();
+                    continue;
+                }
+
+                $slotMatrix[$dayName][$timeRow['key']] = $daySlots
+                    ->filter(
+                        fn($slot) => $slot->start_time === $timeRow['start']
+                            && $slot->end_time <= $timeRow['end']
+                    )
+                    ->sortBy('end_time')
+                    ->values();
+            }
+        }
+
+        $gapOverrideMatrix = $this->buildGapOverrideMatrix($semester, $section);
+
+        // Sections
+        $sections = TimetableSlot::getSections();
 
         // Lab groups
         $labGroups = TimetableSlot::getLabGroups();
 
         // Time slots for grid
         $gridTimeSlots = TimetableSlot::getTimeSlots();
+
+        // Department info for routine sheet header
+        $college = Department::first();
 
         // Stats
         $stats = [
@@ -136,8 +175,53 @@ class TimetableController extends Controller
             'sections',
             'day',
             'labGroups',
-            'stats'
+            'stats',
+            'timeRows',
+            'slotMatrix',
+            'college',
+            'gapOverrideMatrix'
         ));
+    }
+
+    /**
+     * Persist a removed break as an empty slot override.
+     */
+    public function storeGapOverride(Request $request)
+    {
+        if (!Schema::hasTable('timetable_gap_overrides')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gap override storage is not available yet. Run migrations first.',
+            ], 500);
+        }
+
+        $validated = $request->validate([
+            'semester' => 'required|string|max:20',
+            'section' => 'nullable|string|max:50',
+            'day_of_week' => 'required|in:sunday,monday,tuesday,wednesday,thursday,friday,saturday',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+        ]);
+
+        $section = trim((string) ($validated['section'] ?? ''));
+
+        TimetableGapOverride::updateOrCreate(
+            [
+                'semester' => $validated['semester'],
+                'section' => $section,
+                'day_of_week' => $validated['day_of_week'],
+                'start_time' => $validated['start_time'],
+                'end_time' => $validated['end_time'],
+            ],
+            []
+        );
+
+        $this->logActivity(
+            'Timetable',
+            "Converted break to empty slot: {$validated['semester']} {$section} {$validated['day_of_week']} {$validated['start_time']}-{$validated['end_time']}"
+        );
+
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -403,11 +487,34 @@ class TimetableController extends Controller
         $slots = $query->get();
         $slotsByDay = $slots->groupBy('day_of_week');
         $days = TimetableSlot::getDaysOfWeek();
+        $timeRows = $this->buildTimeRows($slots);
+        $slotMatrix = [];
+
+        foreach ($days as $dayName) {
+            $daySlots = $slotsByDay[$dayName] ?? collect();
+
+            foreach ($timeRows as $timeRow) {
+                if ($timeRow['is_break']) {
+                    $slotMatrix[$dayName][$timeRow['key']] = collect();
+                    continue;
+                }
+
+                $slotMatrix[$dayName][$timeRow['key']] = $daySlots
+                    ->filter(
+                        fn($slot) => $slot->start_time === $timeRow['start']
+                            && $slot->end_time <= $timeRow['end']
+                    )
+                    ->sortBy('end_time')
+                    ->values();
+            }
+        }
+
+        $gapOverrideMatrix = $this->buildGapOverrideMatrix($semester, $section);
 
         // Get college info
-        $college = \App\Models\Department::first();
+        $college = Department::first();
 
-        return view('admin.print.timetable', compact('slots', 'slotsByDay', 'days', 'semester', 'section', 'college'));
+        return view('admin.print.timetable', compact('slots', 'slotsByDay', 'days', 'semester', 'section', 'college', 'timeRows', 'slotMatrix', 'gapOverrideMatrix'));
     }
 
     /**
@@ -721,5 +828,76 @@ class TimetableController extends Controller
         ksort($timeSlots);
         
         return array_values($timeSlots);
+    }
+
+    /**
+     * Build printable time rows and insert break rows between gaps.
+     */
+    private function buildTimeRows(Collection $timetableSlots): Collection
+    {
+        $rows = $timetableSlots
+            ->groupBy('start_time')
+            ->map(function ($slotGroup, $startTime) {
+                $resolvedEndTime = $slotGroup->max('end_time');
+
+                return [
+                    'key' => $startTime . '-' . $resolvedEndTime,
+                    'start' => $startTime,
+                    'end' => $resolvedEndTime,
+                    'is_break' => false,
+                ];
+            })
+            ->sortBy('start')
+            ->values();
+
+        if ($rows->isEmpty()) {
+            return collect();
+        }
+
+        $rowsWithBreaks = collect();
+
+        foreach ($rows as $index => $row) {
+            $rowsWithBreaks->push($row);
+
+            $nextRow = $rows->get($index + 1);
+
+            if (!$nextRow || $row['end'] >= $nextRow['start']) {
+                continue;
+            }
+
+            $rowsWithBreaks->push([
+                'key' => 'break-' . $row['end'] . '-' . $nextRow['start'],
+                'start' => $row['end'],
+                'end' => $nextRow['start'],
+                'is_break' => true,
+            ]);
+        }
+
+        return $rowsWithBreaks->values();
+    }
+
+    /**
+     * Build a lookup of break rows that should render as empty slots.
+     */
+    private function buildGapOverrideMatrix(?string $semester, ?string $section = ''): array
+    {
+        if (blank($semester) || !Schema::hasTable('timetable_gap_overrides')) {
+            return [];
+        }
+
+        return TimetableGapOverride::query()
+            ->where('semester', (string) $semester)
+            ->whereIn('section', array_values(array_unique([
+                (string) ($section ?? ''),
+                '',
+            ])))
+            ->get()
+            ->groupBy('day_of_week')
+            ->map(function ($overrides) {
+                return $overrides->mapWithKeys(function ($override) {
+                    return ['break-' . $override->start_time . '-' . $override->end_time => true];
+                })->all();
+            })
+            ->all();
     }
 }

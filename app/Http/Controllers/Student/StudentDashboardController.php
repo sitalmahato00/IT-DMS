@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\TimetableSlot;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -63,6 +64,34 @@ class StudentDashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $timetableDays = TimetableSlot::getDaysOfWeek();
+        $enrolledSubjectIds = $subjectStats->pluck('id')->all();
+        $timetableSlots = collect();
+
+        if (!empty($enrolledSubjectIds)) {
+            $timetableQuery = TimetableSlot::query()
+                ->whereIn('subject_id', $enrolledSubjectIds)
+                ->where('is_active', true)
+                ->where('is_holiday', false)
+                ->with(['subject', 'teacher.user']);
+
+            if ($student->semester) {
+                $timetableQuery->where('semester', $student->semester);
+            }
+
+            $timetableSlots = $timetableQuery
+                ->get()
+                ->sortBy(fn ($slot) => sprintf(
+                    '%02d_%s',
+                    array_search($slot->day_of_week, $timetableDays, true),
+                    $slot->start_time
+                ))
+                ->values();
+        }
+
+        $timetableByDay = collect($timetableDays)
+            ->mapWithKeys(fn ($day) => [$day => $timetableSlots->where('day_of_week', $day)->values()]);
+
         return view('student.studentdashboard', [
             'user' => $user,
             'student' => $student,
@@ -76,6 +105,10 @@ class StudentDashboardController extends Controller
             'failedSubjects' => $subjectStats->where('status', 'fail')->count(),
             'pendingSubjects' => $subjectStats->where('status', 'pending')->count(),
             'recentAttendance' => $recentAttendance,
+            'timetableByDay' => $timetableByDay,
+            'timetableDays' => $timetableDays,
+            'timetableTotalSlots' => $timetableSlots->count(),
+            'timetableActiveDays' => $timetableByDay->filter(fn ($slots) => $slots->isNotEmpty())->count(),
         ]);
     }
 }
