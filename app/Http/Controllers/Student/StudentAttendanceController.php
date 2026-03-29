@@ -50,6 +50,7 @@ class StudentAttendanceController extends Controller
         // Get recent attendance records
         $recentAttendance = DB::table('attendance')
             ->where('student_id', $student->id)
+            ->where('attendance_type', 'class')
             ->join('subjects', 'attendance.subject_id', '=', 'subjects.id')
             ->select('attendance.*', 'subjects.subject_name', 'subjects.subject_code')
             ->orderBy('attendance.date', 'desc')
@@ -88,6 +89,7 @@ class StudentAttendanceController extends Controller
         $attendanceRecords = DB::table('attendance')
             ->where('student_id', $student->id)
             ->where('subject_id', $subjectId)
+            ->where('attendance_type', 'class')
             ->orderBy('date', 'desc')
             ->get();
         

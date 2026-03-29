@@ -17,6 +17,7 @@ class Attendance extends Model
         'date_bs',
         'subject',
         'subject_id',
+        'attendance_type',
         'academic_year',
         'academic_year_bs',
         'status',
@@ -78,4 +79,3 @@ class Attendance extends Model
         return $query->where('status', $status);
     }
 }
-

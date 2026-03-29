@@ -16,6 +16,7 @@ use App\Models\ExamMark;
 use App\Models\Semester;
 use App\Models\ElectiveEnrollment;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use App\Helpers\NepaliContentHelper;
 
@@ -316,11 +317,20 @@ class DashboardController extends Controller
      */
     private function getActiveNonAlumniAttendanceQuery()
     {
-        return Attendance::query()
+        $query = Attendance::query()
             ->join('students', 'attendance.student_id', '=', 'students.id')
             ->where('students.status', 'active')
             ->where('students.is_alumni', 0)
             ->whereNull('students.deleted_at');
+
+        if (Schema::hasColumn('attendance', 'attendance_type')) {
+            $query->where(function ($q) {
+                $q->where('attendance.attendance_type', 'class')
+                  ->orWhereNull('attendance.attendance_type');
+            });
+        }
+
+        return $query;
     }
 
     /**
@@ -365,6 +375,12 @@ class DashboardController extends Controller
             ->selectRaw('COUNT(*) as total_count')
             ->groupBy('subject_id', 'date', 'date_bs')
             ->orderBy('created_at', 'desc');
+        if (Schema::hasColumn('attendance', 'attendance_type')) {
+            $attendanceQuery->where(function ($q) {
+                $q->where('attendance_type', 'class')
+                  ->orWhereNull('attendance_type');
+            });
+        }
 
         $attendanceRecords = $attendanceQuery->paginate($perPage)->withQueryString();
 
@@ -459,7 +475,14 @@ class DashboardController extends Controller
         $galleryUpdatedCount = \App\Models\Gallery::whereDate('updated_at', $today)->count();
 
         // Today's attendance: count distinct subjects with attendance marked today
-        $todayAttendanceCount = \App\Models\Attendance::whereDate('date', $today)->distinct('subject_id')->count('subject_id');
+        $todayAttendanceQuery = \App\Models\Attendance::whereDate('date', $today);
+        if (Schema::hasColumn('attendance', 'attendance_type')) {
+            $todayAttendanceQuery->where(function ($q) {
+                $q->where('attendance_type', 'class')
+                  ->orWhereNull('attendance_type');
+            });
+        }
+        $todayAttendanceCount = $todayAttendanceQuery->distinct('subject_id')->count('subject_id');
 
         // Also provide counts of unread notifications for 'updated' actions where available
         $examUpdatedCount = $user ? $user->unreadNotifications()->where('type', '\\App\\Notifications\\ExamNotification')->where('data->action', 'updated')->count() : 0;
@@ -575,8 +598,14 @@ class DashboardController extends Controller
         $today = Carbon::now()->format('Y-m-d');
         
         // Get all subjects that have attendance marked today
-        $todayAttendance = Attendance::whereDate('date', $today)
-            ->get()
+        $todayAttendanceQuery = Attendance::whereDate('date', $today);
+        if (Schema::hasColumn('attendance', 'attendance_type')) {
+            $todayAttendanceQuery->where(function ($q) {
+                $q->where('attendance_type', 'class')
+                  ->orWhereNull('attendance_type');
+            });
+        }
+        $todayAttendance = $todayAttendanceQuery->get()
             ->groupBy('subject_id')
             ->map(function ($records, $subjectId) {
                 $subject = Subject::find($subjectId);

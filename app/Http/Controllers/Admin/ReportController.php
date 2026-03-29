@@ -56,6 +56,7 @@ class ReportController extends Controller
 
             // Get available years from attendance
             $availableYears = DB::table('attendance')
+                ->where('attendance.attendance_type', 'class')
                 ->selectRaw('YEAR(date) as year')
                 ->distinct()
                 ->orderByDesc('year')
@@ -199,6 +200,7 @@ class ReportController extends Controller
 
         // Calculate attendance rate
         $attendanceQuery = DB::table('attendance')
+            ->where('attendance.attendance_type', 'class')
             ->leftJoin('students', 'attendance.student_id', '=', 'students.id')
             ->leftJoin('users', 'students.user_id', '=', 'users.id');
 
@@ -466,6 +468,7 @@ class ReportController extends Controller
     private function getAttendanceStats($semester)
     {
         $query = DB::table('attendance')
+            ->where('attendance.attendance_type', 'class')
             ->leftJoin('students', 'attendance.student_id', '=', 'students.id');
 
         if (!empty($semester)) {
@@ -566,6 +569,7 @@ class ReportController extends Controller
 
         // Get the current year, but fallback to any year with data
         $latestYear = DB::table('attendance')
+            ->where('attendance.attendance_type', 'class')
             ->orderByRaw('YEAR(date) DESC')
             ->limit(1)
             ->pluck('date')
@@ -579,10 +583,12 @@ class ReportController extends Controller
 
             // Get attendance data for each month
             $totalPresent = DB::table('attendance')
+                ->where('attendance.attendance_type', 'class')
                 ->whereRaw("YEAR(date) = ? AND MONTH(date) = ? AND status = ?", [$selectedYear, $i, 'present'])
                 ->count();
 
             $totalAbsent = DB::table('attendance')
+                ->where('attendance.attendance_type', 'class')
                 ->whereRaw("YEAR(date) = ? AND MONTH(date) = ? AND status = ?", [$selectedYear, $i, 'absent'])
                 ->count();
 
@@ -680,9 +686,11 @@ class ReportController extends Controller
             
             // Get attendance
             $total = DB::table('attendance')
+                ->where('attendance.attendance_type', 'class')
                 ->where('student_id', $student->student_id)
                 ->count();
             $present = DB::table('attendance')
+                ->where('attendance.attendance_type', 'class')
                 ->where('student_id', $student->student_id)
                 ->where('status', 'present')
                 ->count();
@@ -786,6 +794,7 @@ class ReportController extends Controller
     private function getAttendanceData($semester, $subject)
     {
         $query = DB::table('attendance')
+            ->where('attendance.attendance_type', 'class')
             ->leftJoin('students', 'attendance.student_id', '=', 'students.id')
             ->leftJoin('users', 'students.user_id', '=', 'users.id')
             ->select(
@@ -935,6 +944,7 @@ class ReportController extends Controller
     private function getAttendanceGrid($semester)
     {
         $query = DB::table('attendance')
+            ->where('attendance.attendance_type', 'class')
             ->leftJoin('students', 'attendance.student_id', '=', 'students.id')
             ->leftJoin('users', 'students.user_id', '=', 'users.id')
             ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
@@ -1053,6 +1063,7 @@ class ReportController extends Controller
         $leave = [];
 
         $latestYear = DB::table('attendance')
+            ->where('attendance.attendance_type', 'class')
             ->orderByRaw('YEAR(date) DESC')
             ->limit(1)
             ->pluck('date')
@@ -1066,12 +1077,15 @@ class ReportController extends Controller
 
             // Base query with optional semester filter
             $presentQuery = DB::table('attendance')
+                ->where('attendance.attendance_type', 'class')
                 ->whereRaw("YEAR(date) = ? AND MONTH(date) = ? AND status = ?", [$selectedYear, $i, 'present']);
                 
             $absentQuery = DB::table('attendance')
+                ->where('attendance.attendance_type', 'class')
                 ->whereRaw("YEAR(date) = ? AND MONTH(date) = ? AND status = ?", [$selectedYear, $i, 'absent']);
                 
             $leaveQuery = DB::table('attendance')
+                ->where('attendance.attendance_type', 'class')
                 ->whereRaw("YEAR(date) = ? AND MONTH(date) = ? AND status IN (?, ?)", [$selectedYear, $i, 'late', 'excused']);
 
             // Apply semester filter if provided

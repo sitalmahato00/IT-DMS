@@ -20,6 +20,9 @@ use App\Traits\LogsActivity;
 class TeacherAttendanceController extends Controller
 {
     use LogsActivity;
+
+    private const ATTENDANCE_TYPE_CLASS = 'class';
+    private const ATTENDANCE_TYPE_LAB = 'lab';
     
     /**
      * Get teacher's assigned subject IDs
@@ -158,6 +161,19 @@ class TeacherAttendanceController extends Controller
      */
     public function index(Request $request)
     {
+        return $this->indexByType($request, self::ATTENDANCE_TYPE_CLASS);
+    }
+
+    /**
+     * Display lab attendance for teacher's lab-enabled subjects
+     */
+    public function labIndex(Request $request)
+    {
+        return $this->indexByType($request, self::ATTENDANCE_TYPE_LAB);
+    }
+
+    private function indexByType(Request $request, string $attendanceType)
+    {
         $user = auth()->user();
         $teacher = $user->teacher;
 
@@ -179,53 +195,16 @@ class TeacherAttendanceController extends Controller
                 'semesters' => [1, 2, 3, 4, 5, 6],
                 'courses' => collect([]),
                 'availableSemesters' => [],
+                'attendanceType' => $attendanceType,
+                'attendanceLabel' => $this->getAttendanceLabel($attendanceType),
+                'attendanceRoutes' => $this->getAttendanceRoutes($attendanceType),
             ]);
         }
 
-        $subjectIds = $this->loadTeacherSubjectIds();
-
-        $pivotAssignments = SubjectTeacher::whereIn('teacher_id', [$teacher->id, $user->id])
-            ->with('subject')
-            ->get();
-
-        $subjects = $pivotAssignments
-            ->map(function ($st) {
-                return [
-                    'id' => $st->subject->id,
-                    'name' => $st->subject->subject_name,
-                    'code' => $st->subject->subject_code,
-                ];
-            });
-
-        if (Schema::hasColumn('subjects', 'teacher_id')) {
-            $legacySubjects = \App\Models\Subject::where('teacher_id', $teacher->id)->get();
-            foreach ($legacySubjects as $sub) {
-                if (!$subjects->contains('id', $sub->id)) {
-                    $subjects->push([
-                        'id' => $sub->id,
-                        'name' => $sub->subject_name,
-                        'code' => $sub->subject_code,
-                    ]);
-                }
-            }
-        }
-
-        // Compute available semesters from active sources (pivot + legacy)
-        $availableSemesters = [];
-        foreach ($pivotAssignments as $pa) {
-            $s = $pa->subject ?? null;
-            if ($s && isset($s->semester) && $s->semester != '' && ($s->status ?? 'active') == 'active') {
-                $availableSemesters[] = (int)$s->semester;
-            }
-        }
-        if (isset($legacySubjects)) {
-            foreach ($legacySubjects as $ls) {
-                if (isset($ls->semester) && $ls->semester != '' && ($ls->status ?? 'active') == 'active') {
-                    $availableSemesters[] = (int)$ls->semester;
-                }
-            }
-        }
-        $availableSemesters = array_values(array_unique($availableSemesters));
+        $subjectsData = $this->getSubjectsForAttendanceType($attendanceType, $teacher, $user);
+        $subjectIds = $subjectsData['ids'];
+        $subjects = $subjectsData['subjects'];
+        $availableSemesters = $subjectsData['availableSemesters'];
 
 
         $date = $request->get('date', '');
@@ -245,6 +224,9 @@ class TeacherAttendanceController extends Controller
                 'semesters' => [1, 2, 3, 4, 5, 6],
                 'courses' => collect([]),
                 'availableSemesters' => $availableSemesters,
+                'attendanceType' => $attendanceType,
+                'attendanceLabel' => $this->getAttendanceLabel($attendanceType),
+                'attendanceRoutes' => $this->getAttendanceRoutes($attendanceType),
             ]);
         }
 
@@ -259,7 +241,9 @@ class TeacherAttendanceController extends Controller
             ]);
 
             // Check if attendance table has any data
-            $attendanceCount = DB::table('attendance')->count();
+            $attendanceCount = DB::table('attendance')
+                ->where('attendance_type', $attendanceType)
+                ->count();
             Log::info('Total attendance records in DB: ' . $attendanceCount);
 
             // Check if students exist
@@ -273,6 +257,7 @@ class TeacherAttendanceController extends Controller
             // Get statistics for all records (not just filtered) - for display purposes
             // This must be defined BEFORE we use it in the stats calculation below
             $allStats = DB::table('attendance')
+                ->where('attendance_type', $attendanceType)
                 ->whereIn('subject_id', $subjectIds)
                 ->select(
                     DB::raw('COUNT(*) as total'),
@@ -290,6 +275,7 @@ class TeacherAttendanceController extends Controller
                     $join->on('students.user_id', '=', 'users.id');
                 })
                 ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
+                ->where('attendance.attendance_type', $attendanceType)
                 ->whereIn('attendance.subject_id', $subjectIds)
                 ->select(
                     'attendance.id',
@@ -401,6 +387,7 @@ class TeacherAttendanceController extends Controller
             // Get all attendance grouped by subject for the main table (with pagination)
             $subjectAttendanceQuery = DB::table('attendance')
                 ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
+                ->where('attendance.attendance_type', $attendanceType)
                 ->whereIn('attendance.subject_id', $subjectIds)
                 ->select(
                     'attendance.subject_id',
@@ -493,6 +480,9 @@ class TeacherAttendanceController extends Controller
                 'subjectAttendance' => $subjectAttendance,
                 'subjects' => $subjects,
                 'availableSemesters' => $availableSemesters,
+                'attendanceType' => $attendanceType,
+                'attendanceLabel' => $this->getAttendanceLabel($attendanceType),
+                'attendanceRoutes' => $this->getAttendanceRoutes($attendanceType),
             ]);
 
         }
@@ -519,6 +509,9 @@ class TeacherAttendanceController extends Controller
                 'semesters' => [1, 2, 3, 4, 5, 6],
                 'courses' => collect([]),
                 'subjectAttendance' => collect([]),
+                'attendanceType' => $attendanceType,
+                'attendanceLabel' => $this->getAttendanceLabel($attendanceType),
+                'attendanceRoutes' => $this->getAttendanceRoutes($attendanceType),
             ]);
         }
     }
@@ -527,6 +520,98 @@ class TeacherAttendanceController extends Controller
      * Get students for a specific subject to mark attendance
      */
     public function getStudentsForAttendance(Request $request)
+    {
+        return $this->getStudentsForAttendanceByType($request, self::ATTENDANCE_TYPE_CLASS);
+    }
+
+    public function getStudentsForLabAttendance(Request $request)
+    {
+        return $this->getStudentsForAttendanceByType($request, self::ATTENDANCE_TYPE_LAB);
+    }
+
+    /**
+     * Get EXISTING attendance records for view/edit modals.
+     * Unlike the mark-attendance endpoint, this queries attendance directly
+     * (not the roster) so it always returns saved records.
+     */
+    public function getSubjectAttendanceForView(Request $request)
+    {
+        return $this->getSubjectAttendanceForViewByType($request, self::ATTENDANCE_TYPE_CLASS);
+    }
+
+    public function getSubjectLabAttendanceForView(Request $request)
+    {
+        return $this->getSubjectAttendanceForViewByType($request, self::ATTENDANCE_TYPE_LAB);
+    }
+
+    private function getSubjectAttendanceForViewByType(Request $request, string $attendanceType)
+    {
+        $date     = $request->input('date', '');
+        $subjectId = $request->input('subject_id');
+
+        if (empty($date)) {
+            return response()->json(['error' => 'Date is required'], 400);
+        }
+
+        // Query directly from attendance — no roster filter, no subject-assignment check.
+        // This ensures view/edit modals always show the actual saved records.
+        $query = DB::table('attendance')
+            ->where('attendance.date', $date)
+            ->where('attendance.attendance_type', $attendanceType);
+
+        if ($subjectId && $subjectId !== 'null') {
+            $query->where('attendance.subject_id', (int) $subjectId);
+        } else {
+            $query->whereNull('attendance.subject_id');
+        }
+
+        $records = $query
+            ->join('students', 'attendance.student_id', '=', 'students.id')
+            ->join('users', 'students.user_id', '=', 'users.id')
+            ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
+            ->where('users.role', 'student')
+            ->select(
+                'students.id as student_id',
+                'users.name',
+                'users.email',
+                'students.roll_no',
+                'students.semester',
+                'attendance.status',
+                'attendance.remarks',
+                'attendance.date',
+                'attendance.date_bs',
+                'subjects.subject_name',
+                'subjects.subject_code'
+            )
+            ->orderBy('users.name')
+            ->get();
+
+        $students = $records->map(function ($r) {
+            return [
+                'student_id'   => (string) $r->student_id,
+                'name'         => $r->name,
+                'email'        => $r->email,
+                'roll_no'      => $r->roll_no,
+                'semester'     => $r->semester,
+                'status'       => $r->status ?? 'present',
+                'remarks'      => $r->remarks ?? '',
+                'date'         => $r->date,
+                'date_bs'      => $r->date_bs,
+                'subject_name' => $r->subject_name,
+                'subject_code' => $r->subject_code,
+            ];
+        });
+
+        return response()->json([
+            'students' => $students,
+            'total'    => $students->count(),
+            'present'  => $students->where('status', 'present')->count(),
+            'absent'   => $students->where('status', 'absent')->count(),
+            'leave'    => $students->where('status', 'leave')->count(),
+        ]);
+    }
+
+    private function getStudentsForAttendanceByType(Request $request, string $attendanceType)
     {
         $subjectId = (int) $request->input('subject_id');
         $date = $request->input('date', '');
@@ -539,7 +624,7 @@ class TeacherAttendanceController extends Controller
             return response()->json(['error' => 'Teacher profile not found'], 404);
         }
 
-        $subjectIds = array_map('intval', $this->loadTeacherSubjectIds());
+        $subjectIds = array_map('intval', $this->getSubjectIdsForAttendanceType($attendanceType, $teacher, $user));
         if ($subjectId <= 0) {
             return response()->json(['error' => 'Invalid subject selected'], 422);
         }
@@ -556,6 +641,7 @@ class TeacherAttendanceController extends Controller
             $existingAttendance = DB::table('attendance')
                 ->where('date', $date)
                 ->where('subject_id', $subjectId)
+                ->where('attendance_type', $attendanceType)
                 ->select('student_id', 'status', 'remarks')
                 ->get()
                 ->keyBy('student_id');
@@ -571,8 +657,8 @@ class TeacherAttendanceController extends Controller
 
         $students = $students->map(function ($student) use ($existingAttendance) {
             $attendance = $existingAttendance->get($student->student_id);
-            $student->status = $attendance->status ?? ($attendance ? null : 'present');
-            $student->remarks = $attendance->remarks ?? null;
+            $student->status = $attendance ? $attendance->status : 'present';
+            $student->remarks = $attendance ? $attendance->remarks : null;
             return $student;
         })->values();
 
@@ -590,6 +676,16 @@ class TeacherAttendanceController extends Controller
      */
     public function bulkAddForAllSubjects(Request $request)
     {
+        return $this->bulkAddForAllSubjectsByType($request, self::ATTENDANCE_TYPE_CLASS);
+    }
+
+    public function bulkAddForAllLabSubjects(Request $request)
+    {
+        return $this->bulkAddForAllSubjectsByType($request, self::ATTENDANCE_TYPE_LAB);
+    }
+
+    private function bulkAddForAllSubjectsByType(Request $request, string $attendanceType)
+    {
         try {
             $user = auth()->user();
             $teacher = $user->teacher;
@@ -597,7 +693,7 @@ class TeacherAttendanceController extends Controller
                 return response()->json(['success' => false, 'message' => 'Teacher profile not found'], 404);
             }
 
-            $subjectIds = $this->loadTeacherSubjectIds();
+            $subjectIds = $this->getSubjectIdsForAttendanceType($attendanceType, $teacher, $user);
             if (empty($subjectIds)) {
                 return response()->json(['success' => true, 'inserted' => 0]);
             }
@@ -614,13 +710,19 @@ class TeacherAttendanceController extends Controller
                     ->all();
                 foreach ($enrolled as $stid) {
                     // skip if an attendance record already exists for this date and subject
-                    $exists = DB::table('attendance')->where('date', $today)->where('subject_id', $sid)->where('student_id', $stid)->exists();
+                    $exists = DB::table('attendance')
+                        ->where('date', $today)
+                        ->where('subject_id', $sid)
+                        ->where('student_id', $stid)
+                        ->where('attendance_type', $attendanceType)
+                        ->exists();
                     if ($exists) continue;
                     // fetch student to determine status later if needed; default Present
                     $records[] = [
                         'student_id' => $stid,
                         'subject_id' => $sid,
                         'teacher_id' => $teacher->id,
+                        'attendance_type' => $attendanceType,
                         'date' => $today,
                         'date_bs' => $todayBs,
                         'status' => 'present',
@@ -652,6 +754,16 @@ class TeacherAttendanceController extends Controller
      */
     public function printAttendance(Request $request)
     {
+        return $this->printAttendanceByType($request, self::ATTENDANCE_TYPE_CLASS);
+    }
+
+    public function printLabAttendance(Request $request)
+    {
+        return $this->printAttendanceByType($request, self::ATTENDANCE_TYPE_LAB);
+    }
+
+    private function printAttendanceByType(Request $request, string $attendanceType)
+    {
         $subjectId = (int) $request->query('subject_id') ?: (int) $request->query('subject', 0);
         $date = $request->query('date', now()->toDateString());
 
@@ -662,7 +774,7 @@ class TeacherAttendanceController extends Controller
         }
 
         // Build subject info (name/code) from pivot/legacy sources
-        $subjectIds = $this->loadTeacherSubjectIds();
+        $subjectIds = $this->getSubjectIdsForAttendanceType($attendanceType, $teacher, $user);
         if (!in_array($subjectId, $subjectIds)) {
             // fallback: if subject not assigned, try to fetch by id to display anyway
             $sub = \App\Models\Subject::find($subjectId);
@@ -670,34 +782,46 @@ class TeacherAttendanceController extends Controller
                 abort(404, 'Subject not found');
             }
         }
-        $students = TeacherSubjectRoster::studentRowsForSubject($subjectId)
-            ->map(function ($student) {
-                return (object) [
-                    'student_id' => (int) $student->student_id,
-                    'name' => (string) ($student->name ?? ''),
-                    'email' => (string) ($student->email ?? ''),
-                    'roll_no' => (string) ($student->roll_no ?? ''),
-                    'semester' => (string) ($student->semester ?? ''),
-                ];
-            })
-            ->values();
 
-        // Attach status if attendance exists for given date
-        $existingAttendance = collect([]);
-        if (!empty($date)) {
-            $existingAttendance = DB::table('attendance')
-                ->where('date', $date)
-                ->where('subject_id', $subjectId)
-                ->select('student_id', 'status', 'remarks')
-                ->get()
-                ->keyBy('student_id');
+        // Fetch students directly from the attendance table
+        $query = DB::table('attendance')
+            ->where('attendance.date', $date)
+            ->where('attendance.attendance_type', $attendanceType);
+            
+        if ($subjectId > 0) {
+            $query->where('attendance.subject_id', $subjectId);
+        } else {
+            $query->whereNull('attendance.subject_id');
         }
-        $students = $students->map(function($s) use ($existingAttendance) {
-            $attendance = $existingAttendance->get($s->student_id);
-            $s->status = $attendance->status ?? 'present';
-            $s->remarks = $attendance->remarks ?? null;
-            return $s;
-        })->values();
+
+        $records = $query
+            ->join('students', 'attendance.student_id', '=', 'students.id')
+            ->join('users', 'students.user_id', '=', 'users.id')
+            ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
+            ->where('users.role', 'student')
+            ->select(
+                'students.id as student_id',
+                'users.name',
+                'users.email',
+                'students.roll_no',
+                'students.semester',
+                'attendance.status',
+                'attendance.remarks'
+            )
+            ->orderBy('users.name')
+            ->get();
+
+        $students = $records->map(function ($s) {
+            return (object) [
+                'student_id' => $s->student_id,
+                'name' => $s->name,
+                'email' => $s->email,
+                'roll_no' => $s->roll_no,
+                'semester' => $s->semester,
+                'status' => $s->status ?? 'present',
+                'remarks' => $s->remarks
+            ];
+        });
 
         $subject = \App\Models\Subject::find($subjectId);
         $subjectName = $subject->subject_name ?? 'Subject';
@@ -758,13 +882,104 @@ class TeacherAttendanceController extends Controller
             'collegeName' => $collegeName,
             'collegeAddress' => $collegeAddress,
             'collegeLogo' => $collegeLogo,
+            'attendanceType' => $attendanceType,
         ]);
+    }
+
+    /**
+     * Export detailed attendance records as CSV
+     */
+    public function exportAttendance(Request $request)
+    {
+        return $this->exportAttendanceByType($request, self::ATTENDANCE_TYPE_CLASS);
+    }
+
+    public function exportLabAttendance(Request $request)
+    {
+        return $this->exportAttendanceByType($request, self::ATTENDANCE_TYPE_LAB);
+    }
+
+    private function exportAttendanceByType(Request $request, string $attendanceType)
+    {
+        $user = auth()->user();
+        $teacher = $user->teacher;
+
+        if (!$teacher) {
+            abort(403, 'Teacher not found');
+        }
+
+        $subjectId = $request->query('subject');
+        $dateBs = $request->query('date_bs');
+        $search = $request->query('q');
+        
+        // Get all subjects assigned to this teacher for this attendance type
+        $assignedSubjectIds = $this->getSubjectIdsForAttendanceType($attendanceType, $teacher, $user);
+
+        if (empty($assignedSubjectIds)) {
+            // Nothing to export
+            return response()->streamDownload(function () {
+                echo "Date,Student ID,Name,Email,Course,Course Code,Status,Remarks\n";
+            }, "teacher-attendance-export.csv");
+        }
+
+        $query = DB::table('attendance')
+            ->join('students', 'attendance.student_id', '=', 'students.id')
+            ->join('users', 'students.user_id', '=', 'users.id')
+            ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
+            ->where('attendance.attendance_type', $attendanceType)
+            ->where('users.role', 'student')
+            ->whereIn('attendance.subject_id', $assignedSubjectIds);
+
+        if (!empty($dateBs)) {
+            $query->where('attendance.date_bs', $dateBs);
+        }
+
+        if (!empty($subjectId)) {
+            $query->where('attendance.subject_id', $subjectId);
+        }
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('users.name', 'like', "%{$search}%")
+                    ->orWhere('users.email', 'like', "%{$search}%")
+                    ->orWhere('students.roll_no', 'like', "%{$search}%");
+            });
+        }
+
+        $records = $query
+            ->select('attendance.*', 'users.name', 'users.email', 'subjects.subject_name', 'subjects.subject_code')
+            ->orderBy('attendance.date_bs', 'desc')
+            ->get();
+
+        $csv = "Date,Student ID,Name,Email,Course,Course Code,Status,Remarks\n";
+
+        foreach ($records as $record) {
+            $courseName = $record->subject_name ?? 'General';
+            $courseCode = $record->subject_code ?? '-';
+            // Output row (escaping names just in case they contain commas)
+            $safeName = str_replace(',', ' ', $record->name);
+            $csv .= "{$record->date_bs},{$record->student_id},{$safeName},{$record->email},{$courseName},{$courseCode},{$record->status},{$record->remarks}\n";
+        }
+
+        return response()->streamDownload(function () use ($csv) {
+            echo $csv;
+        }, "teacher-attendance-export.csv");
     }
 
     /**
      * Mark attendance for students
      */
     public function store(Request $request)
+    {
+        return $this->storeByType($request, self::ATTENDANCE_TYPE_CLASS);
+    }
+
+    public function storeLab(Request $request)
+    {
+        return $this->storeByType($request, self::ATTENDANCE_TYPE_LAB);
+    }
+
+    private function storeByType(Request $request, string $attendanceType)
     {
         try {
             $data = $request->validate([
@@ -782,7 +997,7 @@ class TeacherAttendanceController extends Controller
                 return response()->json(['error' => 'Teacher profile not found'], 404);
             }
 
-            $subjectIds = array_map('intval', $this->loadTeacherSubjectIds());
+            $subjectIds = array_map('intval', $this->getSubjectIdsForAttendanceType($attendanceType, $teacher, $user));
             if (!in_array((int) $data['subject_id'], $subjectIds, true)) {
                 return response()->json(['error' => 'Subject not assigned to you'], 403);
             }
@@ -812,6 +1027,7 @@ class TeacherAttendanceController extends Controller
                     'student_id' => $studentId,
                     'subject_id' => $data['subject_id'],
                     'teacher_id' => $teacher->id,
+                    'attendance_type' => $attendanceType,
                     'date' => $date,
                     'date_bs' => $dateBs,
                     'status' => $item['status'],
@@ -832,6 +1048,7 @@ class TeacherAttendanceController extends Controller
                 DB::table('attendance')
                     ->where('date', $date)
                     ->where('subject_id', $data['subject_id'])
+                    ->where('attendance_type', $records[0]['attendance_type'] ?? self::ATTENDANCE_TYPE_CLASS)
                     ->delete();
                 
                 DB::table('attendance')->insert($records);
@@ -855,5 +1072,134 @@ class TeacherAttendanceController extends Controller
                 'message' => 'Error: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    private function getAttendanceLabel(string $attendanceType): string
+    {
+        return $attendanceType === self::ATTENDANCE_TYPE_LAB ? 'Lab Attendance' : 'Class Attendance';
+    }
+
+    private function getAttendanceRoutes(string $attendanceType): array
+    {
+        if ($attendanceType === self::ATTENDANCE_TYPE_LAB) {
+            return [
+                'index' => route('teacher.attendance.lab'),
+                'students' => route('teacher.attendance.lab.students'),
+                'store' => route('teacher.attendance.lab.store'),
+                'print' => route('teacher.attendance.lab.print'),
+                'export' => route('teacher.attendance.lab.export'),
+                'bulkAddAll' => route('teacher.attendance.lab.bulkAddAll'),
+            ];
+        }
+
+        return [
+            'index' => route('teacher.attendance'),
+            'students' => route('teacher.attendance.students'),
+            'store' => route('teacher.attendance.store'),
+            'print' => route('teacher.attendance.print'),
+            'export' => route('teacher.attendance.export'),
+            'bulkAddAll' => route('teacher.attendance.bulkAddAll'),
+        ];
+    }
+
+    private function getSubjectIdsForAttendanceType(string $attendanceType, $teacher, $user): array
+    {
+        return $this->getSubjectsForAttendanceType($attendanceType, $teacher, $user)['ids'];
+    }
+
+    private function getSubjectsForAttendanceType(string $attendanceType, $teacher, $user): array
+    {
+        if (!$teacher) {
+            return [
+                'ids' => [],
+                'subjects' => collect([]),
+                'availableSemesters' => [],
+            ];
+        }
+
+        if ($attendanceType === self::ATTENDANCE_TYPE_LAB) {
+            $assignedIds = $this->loadTeacherSubjectIds();
+
+            $labSubjects = DB::table('subjects')
+                ->where(function ($q) {
+                    $q->where('has_lab', 1)->orWhereNotNull('lab_technician_id');
+                })
+                ->where(function ($q) use ($assignedIds, $teacher) {
+                    $q->whereIn('id', $assignedIds)
+                        ->orWhere('lab_technician_id', $teacher->id);
+                })
+                ->select('id', 'subject_name', 'subject_code', 'semester', 'status')
+                ->orderBy('subject_name')
+                ->get();
+
+            $subjects = $labSubjects->map(function ($subject) {
+                return [
+                    'id' => $subject->id,
+                    'name' => $subject->subject_name,
+                    'code' => $subject->subject_code,
+                ];
+            });
+
+            $availableSemesters = $labSubjects
+                ->filter(fn ($subject) => !empty($subject->semester) && ($subject->status ?? 'active') === 'active')
+                ->map(fn ($subject) => (int) $subject->semester)
+                ->unique()
+                ->values()
+                ->all();
+
+            return [
+                'ids' => $labSubjects->pluck('id')->map(fn ($id) => (int) $id)->all(),
+                'subjects' => $subjects,
+                'availableSemesters' => $availableSemesters,
+            ];
+        }
+
+        $pivotAssignments = SubjectTeacher::whereIn('teacher_id', [$teacher->id, $user->id])
+            ->with('subject')
+            ->get();
+
+        $subjects = $pivotAssignments
+            ->map(function ($st) {
+                return [
+                    'id' => $st->subject->id,
+                    'name' => $st->subject->subject_name,
+                    'code' => $st->subject->subject_code,
+                ];
+            });
+
+        $legacySubjects = collect();
+        if (Schema::hasColumn('subjects', 'teacher_id')) {
+            $legacySubjects = \App\Models\Subject::where('teacher_id', $teacher->id)->get();
+            foreach ($legacySubjects as $sub) {
+                if (!$subjects->contains('id', $sub->id)) {
+                    $subjects->push([
+                        'id' => $sub->id,
+                        'name' => $sub->subject_name,
+                        'code' => $sub->subject_code,
+                    ]);
+                }
+            }
+        }
+
+        $availableSemesters = [];
+        foreach ($pivotAssignments as $pa) {
+            $s = $pa->subject ?? null;
+            if ($s && isset($s->semester) && $s->semester != '' && ($s->status ?? 'active') == 'active') {
+                $availableSemesters[] = (int)$s->semester;
+            }
+        }
+        if ($legacySubjects->isNotEmpty()) {
+            foreach ($legacySubjects as $ls) {
+                if (isset($ls->semester) && $ls->semester != '' && ($ls->status ?? 'active') == 'active') {
+                    $availableSemesters[] = (int)$ls->semester;
+                }
+            }
+        }
+
+        return [
+            'ids' => $subjects->pluck('id')->map(fn ($id) => (int) $id)->all(),
+            'subjects' => $subjects,
+            'availableSemesters' => array_values(array_unique($availableSemesters)),
+        ];
     }
 }

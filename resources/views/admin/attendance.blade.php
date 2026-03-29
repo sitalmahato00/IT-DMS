@@ -1,8 +1,14 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Attendance')
+@section('title', $attendanceLabel ?? 'Attendance')
 
 @section('content')
+    @php
+        $attendanceType = $attendanceType ?? 'class';
+        $attendanceLabel = $attendanceLabel ?? 'Class Attendance';
+        $attendanceBaseRoute = $attendanceType === 'lab' ? route('admin.attendance.lab') : route('admin.attendance');
+        $attendanceQuery = array_merge(request()->query(), ['attendance_type' => $attendanceType]);
+    @endphp
     <div class="space-y-4">
         
         <!-- Global Loader Overlay -->
@@ -15,13 +21,13 @@
 
         <!-- Page Header -->
         @include('admin.components.admin-page-header', [
-            'title' => 'Attendance',
+            'title' => $attendanceLabel,
             'breadcrumbs' => [
                 ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
-                ['label' => 'Attendance']
+                ['label' => $attendanceLabel]
             ],
             'addButton' => [
-                'label' => 'Mark Attendance',
+                'label' => "Mark {$attendanceLabel}",
                 'onclick' => 'openMarkAttendanceModal()',
                 'color' => 'green'
             ]
@@ -39,7 +45,7 @@
 
         {{-- Filter Card - Using standardized component --}}
 @include('admin.components.admin-filter-card', [
-    'formAction' => route('admin.attendance'),
+    'formAction' => $attendanceBaseRoute,
     'filters' => [
         ['name' => 'date', 'type' => 'date', 'value' => $date ?? '', 'label' => 'Date (AD)'],
         ['name' => 'date_bs', 'type' => 'text', 'value' => $date_bs ?? '', 'placeholder' => 'YYYY-MM-DD', 'label' => 'Date (BS)', 'class' => 'bs-date', 'icon' => 'bi-calendar3', 'autocomplete' => 'off'],
@@ -47,7 +53,7 @@
         ['name' => 'course', 'type' => 'select', 'options' => array_merge(['' => 'All Courses'], $courses->mapWithKeys(function($c) { return [$c->id => $c->subject_code . ' - ' . $c->subject_name]; })->toArray()), 'value' => $course, 'label' => 'Course']
     ],
     'showReset' => true,
-    'resetRoute' => route('admin.attendance')
+    'resetRoute' => $attendanceBaseRoute
 ])
 
         <!-- Attendance by Subject - Grouped View -->
@@ -63,15 +69,15 @@
         <div class="bg-white rounded shadow-sm border border-gray-200">
             <div class="p-3 border-b border-gray-200 flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-gray-900">
-                    <i class="bi bi-collection mr-1"></i> Attendance by Subject
+                    <i class="bi bi-collection mr-1"></i> {{ $attendanceLabel }} by Subject
                 </h3>
                 <div class="flex gap-2 mb-4">
-                    <a href="{{ route('admin.attendance.export', request()->query()) }}"
+                    <a href="{{ route('admin.attendance.export', $attendanceQuery) }}"
                         class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700">
                         <i class="bi bi-download mr-1"></i> Export CSV
                     </a>
-                    <a href="{{ route('admin.attendance.print-list', request()->query()) }}"
-                        onclick="adminOpenPrintPreview('{{ route('admin.attendance.print-list', request()->query()) }}', { title: 'Print Attendance' }); return false;"
+                    <a href="{{ route('admin.attendance.print-list', $attendanceQuery) }}"
+                        onclick="adminOpenPrintPreview('{{ route('admin.attendance.print-list', $attendanceQuery) }}', { title: 'Print Attendance' }); return false;"
                         class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
                         <i class="bi bi-printer mr-1"></i> Print
                     </a>
@@ -257,7 +263,7 @@
                                 <i class="bi bi-calendar-check text-lg"></i>
                             </div>
                             <div>
-                                <h2 class="text-lg font-semibold">Mark Attendance</h2>
+                                <h2 class="text-lg font-semibold">Mark {{ $attendanceLabel }}</h2>
                                 <p class="text-red-100 text-xs">Pick a date and semester, then load students</p>
                             </div>
                         </div>
@@ -523,6 +529,21 @@
         </div>
 
         <script>
+            const attendanceType = @json($attendanceType);
+            const attendanceLabel = @json($attendanceLabel);
+            const attendanceBaseRoute = @json($attendanceBaseRoute);
+
+            function withAttendanceType(params) {
+                if (attendanceType) {
+                    params.set('attendance_type', attendanceType);
+                }
+                return params;
+            }
+
+            function withAttendancePayload(payload) {
+                return Object.assign({}, payload, { attendance_type: attendanceType });
+            }
+
             // Filter courses by semester when filter button is clicked
             document.addEventListener('DOMContentLoaded', function() {
                 var filterSemester = document.getElementById('filter_semester');
@@ -551,8 +572,10 @@
                         filterCourse.innerHTML = '<option value="">Loading subjects...</option>';
 
                         // Fetch subjects from database
-                        fetch('{{ route('admin.attendance.subjects') }}?semester=' + encodeURIComponent(
-                                selectedSemester))
+                        const filterParams = new URLSearchParams();
+                        filterParams.set('semester', selectedSemester);
+                        withAttendanceType(filterParams);
+                        fetch('{{ route('admin.attendance.subjects') }}?' + filterParams.toString())
                             .then(res => {
                                 if (!res.ok) {
                                     throw new Error('Network response was not ok');
@@ -770,29 +793,35 @@
             }
 
             // Load subjects from database based on selected semester
-            function loadSubjectsForAttendance() {
+            // Returns a Promise that resolves when subjects are loaded
+            function loadSubjectsForAttendance(courseIdToRestore) {
                 var markSemester = document.getElementById('mark_semester');
                 var markCourse = document.getElementById('mark_course');
 
                 if (!markSemester || !markCourse) {
                     console.log('Semester or Course select not found');
-                    return;
+                    return Promise.resolve();
                 }
 
                 var selectedSemester = markSemester.value;
-                console.log('Loading subjects for semester:', selectedSemester);
+                // Snapshot existing selection before any async work
+                var previousCourse = courseIdToRestore !== undefined ? courseIdToRestore : markCourse.value;
+                console.log('Loading subjects for semester:', selectedSemester, '| preserving course:', previousCourse);
 
                 if (!selectedSemester || selectedSemester === '') {
                     // Reset to show only "General Attendance" when no semester is selected
                     markCourse.innerHTML = '<option value="">General Attendance</option>';
-                    return;
+                    return Promise.resolve();
                 }
 
                 // Show loading state
                 markCourse.innerHTML = '<option value="">Loading subjects...</option>';
 
                 // Fetch subjects from database using the correct route
-                fetch('{{ route('admin.attendance.subjects') }}?semester=' + encodeURIComponent(selectedSemester))
+                const subjectParams = new URLSearchParams();
+                subjectParams.set('semester', selectedSemester);
+                withAttendanceType(subjectParams);
+                return fetch('{{ route('admin.attendance.subjects') }}?' + subjectParams.toString())
                     .then(res => {
                         if (!res.ok) {
                             throw new Error('Network response was not ok');
@@ -819,7 +848,12 @@
                                     `<option value="${subject.id}" data-semester="${subject.semester}">${subject.subject_code} - ${subject.subject_name}</option>`;
                             });
                             markCourse.innerHTML = html;
-                            console.log('Loaded ' + subjects.length + ' subjects');
+                            // Always restore the previously selected course after rebuilding options
+                            if (previousCourse) {
+                                markCourse.value = previousCourse;
+                                // If no matching option was found, .value stays as ""
+                            }
+                            console.log('Loaded ' + subjects.length + ' subjects, restored course:', markCourse.value);
                         } else {
                             // No subjects found for this semester
                             markCourse.innerHTML = '<option value="">No subjects found for this semester</option>';
@@ -1003,14 +1037,14 @@
                 try {
                     // If editing from subject attendance modal, use bulk endpoint for single student
                     if (editSubjectData.date) {
-                        const payload = {
+                        const payload = withAttendancePayload({
                             attendance: [{
                                 student_id: studentId,
                                 status: newStatus
                             }],
                             date: editSubjectData.date,
                             date_bs: editSubjectData.date_bs
-                        };
+                        });
 
                         if (editSubjectData.subject_id) {
                             payload.subject_id = editSubjectData.subject_id;
@@ -1055,11 +1089,11 @@
                         return;
                     }
 
-                    const payload = {
+                    const payload = withAttendancePayload({
                         student_id: studentId,
                         status: newStatus,
                         remarks: remarks
-                    };
+                    });
 
                     if (method === 'POST') payload.date = fallbackDate;
 
@@ -1195,6 +1229,7 @@
                     if (subjectId) {
                         url.searchParams.set('subject_id', subjectId);
                     }
+                    url.searchParams.set('attendance_type', attendanceType);
 
                     const res = await fetch(url.toString(), {
                         headers: {
@@ -1225,7 +1260,8 @@
             async function loadAttendanceStudents() {
                 const date = document.getElementById('mark_date').value;
                 const semester = document.getElementById('mark_semester').value;
-                const subjectId = document.getElementById('mark_course').value;
+                // Snapshot the course BEFORE any async operations to prevent race-condition reset
+                const currentCourseId = document.getElementById('mark_course').value;
 
                 if (!date || !semester) {
                     alert('Please select both date and semester');
@@ -1234,7 +1270,7 @@
 
                 const btn = document.getElementById('loadStudentsBtn');
                 btn.disabled = true;
-                btn.textContent = 'Loading...';
+                btn.innerHTML = '<i class="bi bi-arrow-clockwise animate-spin"></i> Loading...';
 
                 try {
                     let dateBs = document.getElementById('mark_date_bs')?.value || '';
@@ -1251,9 +1287,10 @@
                     if (dateBs) url.searchParams.set('date_bs', dateBs);
                     url.searchParams.set('semester', semester);
                     // Pass subject_id to filter attendance by subject
-                    if (subjectId) {
-                        url.searchParams.set('subject_id', subjectId);
+                    if (currentCourseId) {
+                        url.searchParams.set('subject_id', currentCourseId);
                     }
+                    url.searchParams.set('attendance_type', attendanceType);
 
                     const res = await fetch(url.toString(), {
                         headers: {
@@ -1275,12 +1312,25 @@
                     }
 
                     renderAttendanceTable(students, date);
+
+                    // Restore the course selection after render (async ops may have rebuilt the dropdown)
+                    const markCourse = document.getElementById('mark_course');
+                    if (currentCourseId && markCourse) {
+                        // If the option exists, restore it; otherwise re-load subjects with the saved value
+                        const optionExists = Array.from(markCourse.options).some(o => o.value === currentCourseId);
+                        if (optionExists) {
+                            markCourse.value = currentCourseId;
+                        } else {
+                            // Rebuild the dropdown and restore course in one shot
+                            await loadSubjectsForAttendance(currentCourseId);
+                        }
+                    }
                 } catch (err) {
                     console.error('Error loading students', err);
                     showToast('Failed to load students', 'error');
                 } finally {
                     btn.disabled = false;
-                    btn.textContent = '🔍 Load Students';
+                    btn.innerHTML = '<i class="bi bi-search"></i> <span>Load</span>';
                 }
             }
 
@@ -1446,11 +1496,11 @@
 
                 try {
                     // Build payload
-                    const payload = {
+                    const payload = withAttendancePayload({
                         attendance,
                         date,
                         date_bs: dateBs
-                    };
+                    });
                     if (courseId) {
                         payload.subject_id = courseId;
                     }
@@ -1476,7 +1526,7 @@
                         // Close modal first
                         closeMarkAttendanceModal();
 
-                        const reloadUrl = '{{ route('admin.attendance') }}';
+                        const reloadUrl = attendanceBaseRoute;
                         console.log('Reloading with URL:', reloadUrl);
 
                         // Reload after a short delay to show the toast
@@ -1540,6 +1590,7 @@
                     if (subjectId && subjectId !== 'null' && subjectId !== '') {
                         params.append('subject_id', subjectId);
                     }
+                    params.append('attendance_type', attendanceType);
 
                     const url = '{{ route('admin.attendance.subject-students') }}?' + params.toString();
                     const res = await fetch(url, {
@@ -1607,7 +1658,8 @@
                     return;
                 }
                 const url = '{{ route('admin.attendance.print') }}' + '?subject_id=' + encodeURIComponent(sid) + '&date=' + encodeURIComponent(d);
-                adminOpenPrintPreview(url, {
+                const urlWithType = url + '&attendance_type=' + encodeURIComponent(attendanceType || '');
+                adminOpenPrintPreview(urlWithType, {
                     title: 'Print Attendance',
                 });
             }
@@ -1650,6 +1702,7 @@
                     if (subjectId && subjectId !== 'null' && subjectId !== '') {
                         params.append('subject_id', subjectId);
                     }
+                    params.append('attendance_type', attendanceType);
 
                     const url = '{{ route('admin.attendance.subject-students') }}?' + params.toString();
                     const res = await fetch(url, {
@@ -1755,11 +1808,11 @@
                 }
 
                 try {
-                    const payload = {
+                    const payload = withAttendancePayload({
                         attendance: attendance,
                         date: editSubjectData.date,
                         date_bs: editSubjectData.date_bs
-                    };
+                    });
 
                     if (editSubjectData.subject_id) {
                         payload.subject_id = editSubjectData.subject_id;
@@ -1799,9 +1852,9 @@
                 }
 
                 try {
-                    const payload = {
+                    const payload = withAttendancePayload({
                         date: date
-                    };
+                    });
 
                     if (subjectId && subjectId !== 'null' && subjectId !== '') {
                         payload.subject_id = subjectId;

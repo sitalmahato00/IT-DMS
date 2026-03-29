@@ -19,10 +19,50 @@ use App\Traits\LogsActivity;
 class AttendanceController extends Controller
 {
     use LogsActivity;
+
+    private const ATTENDANCE_TYPE_CLASS = 'class';
+    private const ATTENDANCE_TYPE_LAB = 'lab';
+
+    private function normalizeAttendanceType(?string $type): string
+    {
+        return $type === self::ATTENDANCE_TYPE_LAB ? self::ATTENDANCE_TYPE_LAB : self::ATTENDANCE_TYPE_CLASS;
+    }
+
+    private function resolveAttendanceType(?Request $request = null): string
+    {
+        $type = $request?->input('attendance_type') ?? $request?->query('attendance_type') ?? null;
+        return $this->normalizeAttendanceType($type);
+    }
+
+    private function applyAttendanceTypeFilter($query, string $attendanceType, string $column = 'attendance.attendance_type')
+    {
+        if (!Schema::hasColumn('attendance', 'attendance_type')) {
+            return $query;
+        }
+
+        if ($attendanceType === self::ATTENDANCE_TYPE_LAB) {
+            return $query->where($column, self::ATTENDANCE_TYPE_LAB);
+        }
+
+        return $query->where(function ($q) use ($column) {
+            $q->where($column, self::ATTENDANCE_TYPE_CLASS)
+              ->orWhereNull($column);
+        });
+    }
     /**
      * Display attendance records from database (read-only view)
      */
     public function index(Request $request)
+    {
+        return $this->indexByType($request, self::ATTENDANCE_TYPE_CLASS);
+    }
+
+    public function labIndex(Request $request)
+    {
+        return $this->indexByType($request, self::ATTENDANCE_TYPE_LAB);
+    }
+
+    private function indexByType(Request $request, string $attendanceType)
     {
         $user = auth()->user();
         $date = $request->get('date', '');
@@ -43,7 +83,11 @@ class AttendanceController extends Controller
             ]);
 
             // Check if attendance table has any data
-            $attendanceCount = DB::table('attendance')->count();
+            $attendanceCount = $this->applyAttendanceTypeFilter(
+                DB::table('attendance'),
+                $attendanceType,
+                'attendance_type'
+            )->count();
             Log::info('Total attendance records in DB: ' . $attendanceCount);
 
             // Check if students exist
@@ -56,7 +100,11 @@ class AttendanceController extends Controller
 
             // Get statistics for all records (not just filtered) - for display purposes
             // This must be defined BEFORE we use it in the stats calculation below
-            $allStats = DB::table('attendance')
+            $allStats = $this->applyAttendanceTypeFilter(
+                DB::table('attendance'),
+                $attendanceType,
+                'attendance_type'
+            )
                 ->select(
                 DB::raw('COUNT(*) as total'),
                 DB::raw("SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present"),
@@ -73,6 +121,9 @@ class AttendanceController extends Controller
                 $join->on('students.user_id', '=', 'users.id');
             })
                 ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
+                ->tap(function ($query) use ($attendanceType) {
+                    $this->applyAttendanceTypeFilter($query, $attendanceType, 'attendance.attendance_type');
+                })
                 ->select(
                 'attendance.id',
                 'attendance.student_id',
@@ -183,6 +234,9 @@ class AttendanceController extends Controller
             // Get all attendance grouped by subject for the main table (with pagination)
             $subjectAttendanceQuery = DB::table('attendance')
                 ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
+                ->tap(function ($query) use ($attendanceType) {
+                    $this->applyAttendanceTypeFilter($query, $attendanceType, 'attendance.attendance_type');
+                })
                 ->select(
                 'attendance.subject_id',
                 'attendance.date',
@@ -251,16 +305,36 @@ class AttendanceController extends Controller
             ->all();
 
             // Get all courses/subjects for filter dropdown (including archived)
-            $courses = DB::table('subjects')
+            $coursesQuery = DB::table('subjects')
                 ->orderBy('subject_name')
-                ->select('id', 'subject_code', 'subject_name', 'semester')
-                ->get();
+                ->select('id', 'subject_code', 'subject_name', 'semester');
+
+            if ($attendanceType === self::ATTENDANCE_TYPE_LAB) {
+                $coursesQuery->where(function ($q) {
+                    $q->where('has_lab', 1)->orWhereNotNull('lab_technician_id');
+                });
+            }
+
+            $courses = $coursesQuery->get();
 
             // Type hint for static analysis
             /** @var \Illuminate\Support\Collection $attendanceRecords */
             Log::info('Attendance query result count: ' . $attendance->total());
 
-            return view('admin.attendance', compact('attendance', 'date', 'date_bs', 'search', 'semester', 'course', 'stats', 'semesters', 'courses', 'subjectAttendance'));
+            return view('admin.attendance', [
+                'attendance' => $attendance,
+                'date' => $date,
+                'date_bs' => $date_bs,
+                'search' => $search,
+                'semester' => $semester,
+                'course' => $course,
+                'stats' => $stats,
+                'semesters' => $semesters,
+                'courses' => $courses,
+                'subjectAttendance' => $subjectAttendance,
+                'attendanceType' => $attendanceType,
+                'attendanceLabel' => $attendanceType === self::ATTENDANCE_TYPE_LAB ? 'Lab Attendance' : 'Class Attendance',
+            ]);
 
         }
         catch (\Exception $e) {
@@ -286,6 +360,8 @@ class AttendanceController extends Controller
                 'semesters' => [1, 2, 3, 4, 5, 6],
                 'courses' => collect([]),
                 'subjectAttendance' => collect([]),
+                'attendanceType' => $attendanceType,
+                'attendanceLabel' => $attendanceType === self::ATTENDANCE_TYPE_LAB ? 'Lab Attendance' : 'Class Attendance',
             ]);
         }
     }
@@ -296,6 +372,7 @@ class AttendanceController extends Controller
     public function store(Request $request)
     {
         try {
+            $attendanceType = $this->resolveAttendanceType($request);
             Log::info('Attendance store request data: ', $request->all());
 
             $data = $request->validate([
@@ -315,6 +392,7 @@ class AttendanceController extends Controller
                 'remarks' => $remarks,
                 'date' => $data['date'],
                 'date_bs' => NepaliContentHelper::convertAdToBs($data['date']),
+                'attendance_type' => $attendanceType,
             ];
 
             // Add subject_id if provided and not empty
@@ -332,6 +410,7 @@ class AttendanceController extends Controller
             [
                 'student_id' => $data['student_id'],
                 'date' => $data['date'],
+                'attendance_type' => $attendanceType,
             ],
                 $updateData
             );
@@ -371,6 +450,7 @@ class AttendanceController extends Controller
      */
     public function toggle(Request $request)
     {
+        $attendanceType = $this->resolveAttendanceType($request);
         $data = $request->validate([
             'student_id' => 'required|exists:students,id',
             'date_bs' => 'required|string|max:30',
@@ -379,6 +459,14 @@ class AttendanceController extends Controller
 
         $attendance = Attendance::where('student_id', $data['student_id'])
             ->where('date_bs', $data['date_bs'])
+            ->where(function ($q) use ($attendanceType) {
+                if ($attendanceType === self::ATTENDANCE_TYPE_LAB) {
+                    $q->where('attendance_type', self::ATTENDANCE_TYPE_LAB);
+                } else {
+                    $q->where('attendance_type', self::ATTENDANCE_TYPE_CLASS)
+                        ->orWhereNull('attendance_type');
+                }
+            })
             ->first();
 
         $newStatus = ($attendance && $attendance->status === 'present') ? 'absent' : 'present';
@@ -389,6 +477,7 @@ class AttendanceController extends Controller
             'remarks' => $remarks,
             'date_bs' => $data['date_bs'],
             'date' => NepaliContentHelper::convertBsToAd($data['date_bs']),
+            'attendance_type' => $attendanceType,
         ];
 
         $user = auth()->user();
@@ -403,6 +492,7 @@ class AttendanceController extends Controller
         [
             'student_id' => $data['student_id'],
             'date_bs' => $data['date_bs'],
+            'attendance_type' => $attendanceType,
         ],
             $updateData
         );
@@ -420,6 +510,7 @@ class AttendanceController extends Controller
      */
     public function bulkUpdate(Request $request)
     {
+        $attendanceType = $this->resolveAttendanceType($request);
         $data = $request->validate([
             'attendance' => 'required|array',
             'attendance.*.student_id' => 'required|exists:students,id',
@@ -454,6 +545,7 @@ class AttendanceController extends Controller
                 'date' => $date,
                 'date_bs' => $dateBs,
                 'teacher_id' => $teacherId,
+                'attendance_type' => $attendanceType,
                 'status' => $item['status'],
                 'remarks' => $remarks,
                 'updated_at' => $now,
@@ -470,11 +562,12 @@ class AttendanceController extends Controller
         // This prevents duplicates while allowing updates
         $studentIds = array_column($records, 'student_id');
 
-        DB::transaction(function () use ($records, $studentIds, $subjectId) {
+        DB::transaction(function () use ($records, $studentIds, $subjectId, $attendanceType) {
             // Build query to delete existing attendance records for these students and date
             $query = DB::table('attendance')
                 ->whereIn('student_id', $studentIds)
                 ->where('date', $records[0]['date']);
+            $this->applyAttendanceTypeFilter($query, $attendanceType, 'attendance_type');
             if (!empty($subjectId)) {
                 $query->where('subject_id', $subjectId);
             }
@@ -494,6 +587,7 @@ class AttendanceController extends Controller
      */
     public function getStudentsForAttendance(Request $request)
     {
+        $attendanceType = $this->resolveAttendanceType($request);
         $date_bs = $request->get('date_bs');
         $semester = $request->get('semester');
         $subject_id = $request->get('subject_id');
@@ -507,16 +601,14 @@ class AttendanceController extends Controller
             return response()->json(['error' => 'Semester is required'], 400);
         }
 
-        // Get all students for this semester with father name
+        // Get ALL students for this semester.
+        // Do NOT restrict by subject enrollment (subject_students table).
+        // The subject_id is only used for attendance status lookup below.
         $studentsQuery = DB::table('students')
             ->join('users', 'students.user_id', '=', 'users.id')
             ->leftJoin('users as parent_users', 'students.parent_id', '=', 'parent_users.id')
             ->where('users.role', 'student')
-            ->where('students.semester', $semester)
-            ->when($subjectFilterId, function ($query) use ($subjectFilterId) {
-                return $query->join('subject_students', 'subject_students.student_id', '=', 'students.id')
-                    ->where('subject_students.subject_id', $subjectFilterId);
-            });
+            ->where('students.semester', $semester);
 
         $students = $studentsQuery
             ->select(
@@ -533,33 +625,29 @@ class AttendanceController extends Controller
 
         // Get existing attendance records for this date and subject
         $existingAttendance = collect([]);
-        $alreadyMarkedStudents = collect([]);
+        $alreadyMarkedStudentIds = collect([]);
         if (!empty($date_bs)) {
-            $attendanceQuery = DB::table('attendance')
+            $baseQuery = DB::table('attendance')
                 ->where('date_bs', $date_bs);
+            $this->applyAttendanceTypeFilter($baseQuery, $attendanceType, 'attendance_type');
 
-            // Filter by subject_id if provided
-            if (!empty($subject_id)) {
-                $attendanceQuery->where('subject_id', $subject_id);
+            // Filter by subject_id if provided, otherwise look for general (null-subject) records
+            if (!empty($subjectFilterId)) {
+                $baseQuery->where('subject_id', $subjectFilterId);
+            } else {
+                $baseQuery->whereNull('subject_id');
             }
-            else {
-                // If no subject selected, get records with null subject_id (general attendance)
-                $attendanceQuery->whereNull('subject_id');
-            }
 
-            $existingAttendance = $attendanceQuery
-                ->pluck('status', 'student_id');
-
-            // Get students who already have attendance for this date and subject
-            $alreadyMarkedStudents = $attendanceQuery
-                ->pluck('student_id');
+            // Clone so both plucks run on separate query executions
+            $existingAttendance     = (clone $baseQuery)->pluck('status', 'student_id');
+            $alreadyMarkedStudentIds = (clone $baseQuery)->pluck('student_id');
         }
 
-        // Merge with existing attendance
-        $students = $students->map(function ($student) use ($existingAttendance, $alreadyMarkedStudents) {
-            $attendance = $existingAttendance->get($student->student_id);
-            $student->status = $attendance ?? 'present'; // Default to present
-            $student->alreadyMarked = $alreadyMarkedStudents->contains($student->student_id);
+        // Merge attendance status into student records
+        $students = $students->map(function ($student) use ($existingAttendance, $alreadyMarkedStudentIds) {
+            $existingStatus  = $existingAttendance->get($student->student_id);
+            $student->status = $existingStatus ?? 'present'; // Default to present
+            $student->alreadyMarked = $alreadyMarkedStudentIds->contains($student->student_id);
             return $student;
         });
 
@@ -572,10 +660,11 @@ class AttendanceController extends Controller
     }
 
     /**
-     * Get attendance records for a specific subject and date (for viewing in modal)
+     * Get attendance records for a specific subject and date (for View/Edit modals)
      */
     public function getSubjectStudentsForAttendance(Request $request)
     {
+        $attendanceType = $this->resolveAttendanceType($request);
         $date = $request->get('date');
         $subjectId = $request->get('subject_id');
 
@@ -583,65 +672,70 @@ class AttendanceController extends Controller
             return response()->json(['error' => 'Date is required'], 400);
         }
 
-        // Get only students with attendance records
-        $studentsQuery = DB::table('students')
+        // Start from the attendance table so the type/subject filters are simple WHERE clauses
+        // (avoids buggy grouped-where inside JoinClause in some DB drivers)
+        $query = DB::table('attendance')
+            ->where('attendance.date', $date);
+
+        // Apply attendance_type filter
+        $this->applyAttendanceTypeFilter($query, $attendanceType, 'attendance.attendance_type');
+
+        // Filter by subject
+        if ($subjectId && $subjectId !== 'null' && $subjectId !== '') {
+            $query->where('attendance.subject_id', $subjectId);
+        } else {
+            $query->whereNull('attendance.subject_id');
+        }
+
+        // Join student and user details
+        $query->join('students', 'attendance.student_id', '=', 'students.id')
             ->join('users', 'students.user_id', '=', 'users.id')
-            ->join('attendance', function ($join) use ($date, $subjectId) {
-            $join->on('attendance.student_id', '=', 'students.id')
-                ->where('attendance.date', '=', $date);
-            if ($subjectId && $subjectId !== 'null' && $subjectId !== '') {
-                $join->where('attendance.subject_id', '=', $subjectId);
-            }
-            else {
-                $join->whereNull('attendance.subject_id');
-            }
-        })
             ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
-            ->select(
-            'attendance.id',
-            'students.id as student_id',
-            'attendance.subject_id',
-            'attendance.status',
-            'attendance.remarks',
-            'attendance.date',
-            'attendance.date_bs',
-            'users.name',
-            'users.email',
-            'students.roll_no',
-            'students.semester',
-            'subjects.subject_name',
-            'subjects.subject_code'
-        )
             ->where('users.role', 'student')
+            ->select(
+                'attendance.id',
+                'students.id as student_id',
+                'attendance.subject_id',
+                'attendance.status',
+                'attendance.remarks',
+                'attendance.date',
+                'attendance.date_bs',
+                'users.name',
+                'users.email',
+                'students.roll_no',
+                'students.semester',
+                'subjects.subject_name',
+                'subjects.subject_code'
+            )
             ->orderBy('users.name');
 
-        $records = $studentsQuery->get();
+        $records = $query->get();
 
         // Transform records
         $students = $records->map(function ($record) {
             return [
-            'id' => (string)($record->id ?? $record->student_id),
-            'student_id' => (string)$record->student_id,
-            'subject_id' => $record->subject_id ? (string)$record->subject_id : null,
-            'status' => $record->status ?? 'pending',
-            'remarks' => $record->remarks ?? '',
-            'date' => $record->date,
-            'date_bs' => $record->date_bs,
-            'name' => $record->name,
-            'email' => $record->email,
-            'roll_no' => $record->roll_no,
-            'semester' => $record->semester,
-            'subject_name' => $record->subject_name,
-            'subject_code' => $record->subject_code,
+                'id'           => (string)($record->id ?? $record->student_id),
+                'student_id'   => (string)$record->student_id,
+                'subject_id'   => $record->subject_id ? (string)$record->subject_id : null,
+                'status'       => $record->status ?? 'pending',
+                'remarks'      => $record->remarks ?? '',
+                'date'         => $record->date,
+                'date_bs'      => $record->date_bs,
+                'name'         => $record->name,
+                'email'        => $record->email,
+                'roll_no'      => $record->roll_no,
+                'semester'     => $record->semester,
+                'subject_name' => $record->subject_name,
+                'subject_code' => $record->subject_code,
             ];
         });
 
         return response()->json([
             'students' => $students,
-            'total' => $students->count(),
-            'present' => $students->where('status', 'present')->count(),
-            'absent' => $students->where('status', 'absent')->count(),
-            'leave' => $students->where('status', 'leave')->count(),
+            'total'    => $students->count(),
+            'present'  => $students->where('status', 'present')->count(),
+            'absent'   => $students->where('status', 'absent')->count(),
+            'leave'    => $students->where('status', 'leave')->count(),
         ]);
     }
 
@@ -656,6 +750,10 @@ class AttendanceController extends Controller
         }
 
         $attendanceRecords = Attendance::forStudent($studentId)
+            ->where(function ($q) {
+                $q->where('attendance_type', self::ATTENDANCE_TYPE_CLASS)
+                    ->orWhereNull('attendance_type');
+            })
             ->orderBy('date_bs', 'desc')
             ->get();
 
@@ -683,6 +781,7 @@ class AttendanceController extends Controller
      */
     public function export(Request $request)
     {
+        $attendanceType = $this->resolveAttendanceType($request);
         $date_bs = $request->get('date_bs', '');
         $search = $request->get('q', '');
         $semester = $request->get('semester', '');
@@ -693,6 +792,7 @@ class AttendanceController extends Controller
             ->join('users', 'students.user_id', '=', 'users.id')
             ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
             ->where('users.role', 'student');
+        $this->applyAttendanceTypeFilter($attendanceQuery, $attendanceType, 'attendance.attendance_type');
 
         if ($date_bs !== '' && $date_bs !== null) {
             $attendanceQuery->where('attendance.date_bs', '=', $date_bs);
@@ -737,6 +837,7 @@ class AttendanceController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            $attendanceType = $this->resolveAttendanceType($request);
             $data = $request->validate([
                 'student_id' => 'required|exists:students,id',
                 // date field for AD date (optional in update)
@@ -754,6 +855,7 @@ class AttendanceController extends Controller
                 'student_id' => $data['student_id'],
                 'status' => $data['status'],
                 'remarks' => $remarks,
+                'attendance_type' => $attendanceType,
             ];
 
             // Auto-calculate BS date when AD date is provided in update
@@ -838,12 +940,15 @@ class AttendanceController extends Controller
     public function bulkDelete(Request $request)
     {
         try {
+            $attendanceType = $this->resolveAttendanceType($request);
             $data = $request->validate([
                 'date' => 'required|date',
                 'subject_id' => 'nullable'
             ]);
 
-            $query = DB::table('attendance')->where('date', $data['date']);
+            $query = DB::table('attendance')
+                ->where('date', $data['date']);
+            $this->applyAttendanceTypeFilter($query, $attendanceType, 'attendance_type');
 
             if (!empty($data['subject_id'])) {
                 $query->where('subject_id', $data['subject_id']);
@@ -874,6 +979,7 @@ class AttendanceController extends Controller
      */
     public function getSubjectsBySemester(Request $request)
     {
+        $attendanceType = $this->resolveAttendanceType($request);
         $semester = $request->get('semester');
 
         if (empty($semester)) {
@@ -885,11 +991,18 @@ class AttendanceController extends Controller
 
         try {
             // Get subjects for the selected semester from the subjects table
-            $subjects = DB::table('subjects')
+            $subjectsQuery = DB::table('subjects')
                 ->where('semester', $semester)
                 ->orderBy('subject_name')
-                ->select('id', 'subject_code', 'subject_name', 'semester')
-                ->get();
+                ->select('id', 'subject_code', 'subject_name', 'semester');
+
+            if ($attendanceType === self::ATTENDANCE_TYPE_LAB) {
+                $subjectsQuery->where(function ($q) {
+                    $q->where('has_lab', 1)->orWhereNotNull('lab_technician_id');
+                });
+            }
+
+            $subjects = $subjectsQuery->get();
 
             return response()->json([
                 'success' => true,
@@ -910,6 +1023,7 @@ class AttendanceController extends Controller
      */
     public function todayAttendance(Request $request)
     {
+        $attendanceType = $this->resolveAttendanceType($request);
         $user = auth()->user();
 
         // Get today's date
@@ -924,9 +1038,10 @@ class AttendanceController extends Controller
             'leave' => 0,
         ];
 
-        $todayAttendance = DB::table('attendance')
-            ->where('date', $todayAd)
-            ->get();
+            $todayAttendance = DB::table('attendance')
+                ->where('date', $todayAd);
+            $this->applyAttendanceTypeFilter($todayAttendance, $attendanceType, 'attendance_type');
+            $todayAttendance = $todayAttendance->get();
 
         if ($todayAttendance->count() > 0) {
             $todayStats['total'] = $todayAttendance->count();
@@ -944,25 +1059,29 @@ class AttendanceController extends Controller
     public function getTodayAttendanceData(Request $request)
     {
         try {
+            $attendanceType = $this->resolveAttendanceType($request);
             $todayAd = Carbon::now()->format('Y-m-d');
             $todayBs = NepaliContentHelper::convertAdToBs($todayAd);
 
             // Get attendance records for today grouped by subject
-            $attendanceRecords = DB::table('attendance')
-                ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
-                ->where('attendance.date', $todayAd)
-                ->select(
-                'attendance.subject_id',
-                'subjects.subject_name',
-                'subjects.subject_code',
-                DB::raw('COUNT(*) as total_students'),
-                DB::raw('SUM(CASE WHEN attendance.status = "present" THEN 1 ELSE 0 END) as present_count'),
-                DB::raw('SUM(CASE WHEN attendance.status = "absent" THEN 1 ELSE 0 END) as absent_count'),
-                DB::raw('SUM(CASE WHEN attendance.status = "leave" THEN 1 ELSE 0 END) as leave_count')
-            )
-                ->groupBy('attendance.subject_id', 'subjects.subject_name', 'subjects.subject_code')
-                ->orderBy('subjects.subject_name', 'asc')
-                ->get();
+            $attendanceRecords = $this->applyAttendanceTypeFilter(
+                DB::table('attendance')
+                    ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
+                    ->where('attendance.date', $todayAd)
+                    ->select(
+                        'attendance.subject_id',
+                        'subjects.subject_name',
+                        'subjects.subject_code',
+                        DB::raw('COUNT(*) as total_students'),
+                        DB::raw('SUM(CASE WHEN attendance.status = "present" THEN 1 ELSE 0 END) as present_count'),
+                        DB::raw('SUM(CASE WHEN attendance.status = "absent" THEN 1 ELSE 0 END) as absent_count'),
+                        DB::raw('SUM(CASE WHEN attendance.status = "leave" THEN 1 ELSE 0 END) as leave_count')
+                    )
+                    ->groupBy('attendance.subject_id', 'subjects.subject_name', 'subjects.subject_code')
+                    ->orderBy('subjects.subject_name', 'asc'),
+                $attendanceType,
+                'attendance.attendance_type'
+            )->get();
 
             // Transform records
             $subjects = $attendanceRecords->map(function ($record) {
@@ -1008,6 +1127,7 @@ class AttendanceController extends Controller
     public function getTodaySubjectStudents(Request $request)
     {
         try {
+            $attendanceType = $this->resolveAttendanceType($request);
             $subjectId = $request->get('subject_id');
             $todayAd = Carbon::now()->format('Y-m-d');
             $todayBs = NepaliContentHelper::convertAdToBs($todayAd);
@@ -1015,9 +1135,17 @@ class AttendanceController extends Controller
             // Get only students who have attendance marked for today
             $query = DB::table('students')
                 ->join('users', 'students.user_id', '=', 'users.id')
-                ->join('attendance', function ($join) use ($todayAd, $subjectId) {
+                ->join('attendance', function ($join) use ($todayAd, $subjectId, $attendanceType) {
                 $join->on('attendance.student_id', '=', 'students.id')
                     ->where('attendance.date', '=', $todayAd);
+                if ($attendanceType === self::ATTENDANCE_TYPE_LAB) {
+                    $join->where('attendance.attendance_type', '=', self::ATTENDANCE_TYPE_LAB);
+                } else {
+                    $join->where(function ($q) {
+                        $q->where('attendance.attendance_type', '=', self::ATTENDANCE_TYPE_CLASS)
+                          ->orWhereNull('attendance.attendance_type');
+                    });
+                }
                 if ($subjectId && $subjectId !== 'general' && $subjectId !== 'null') {
                     $join->where('attendance.subject_id', '=', $subjectId);
                 }
@@ -1098,43 +1226,49 @@ class AttendanceController extends Controller
      */
     public function printAttendance(Request $request)
     {
-        $subjectId = (int) $request->query('subject_id') ?: (int) $request->query('subject', 0);
+        $attendanceType = $this->resolveAttendanceType($request);
+        $subjectId = $request->query('subject_id') !== 'null' ? (int) $request->query('subject_id') : 0;
         $date = $request->query('date', now()->toDateString());
 
-        if ($subjectId <= 0) {
-            abort(404, 'Subject not found');
+        // Fetch students from the attendance table directly so we only get marked records
+        $query = DB::table('attendance')
+            ->where('attendance.date', $date);
+            
+        $this->applyAttendanceTypeFilter($query, $attendanceType, 'attendance.attendance_type');
+            
+        if ($subjectId > 0) {
+            $query->where('attendance.subject_id', $subjectId);
+        } else {
+            $query->whereNull('attendance.subject_id');
         }
 
-        // Fetch enrolled students for this subject
-        $students = DB::table('subject_students')
-            ->join('students', 'subject_students.student_id', '=', 'students.id')
+        $records = $query
+            ->join('students', 'attendance.student_id', '=', 'students.id')
             ->join('users', 'students.user_id', '=', 'users.id')
-            ->where('subject_students.subject_id', $subjectId)
+            ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
             ->where('users.role', 'student')
-            ->where('students.is_active', 1)
-            ->where('students.is_alumni', 0)
             ->select(
                 'students.id as student_id',
                 'users.name',
                 'users.email',
                 'students.roll_no',
-                'students.semester'
+                'students.semester',
+                'attendance.status',
+                'attendance.remarks'
             )
             ->orderBy('users.name')
             ->get();
 
-        // Attach status if attendance exists for given date
-        $existingAttendance = collect([]);
-        if (!empty($date)) {
-            $existingAttendance = DB::table('attendance')
-                ->where('date', $date)
-                ->where('subject_id', $subjectId)
-                ->pluck('status', 'student_id');
-        }
-
-        $students = $students->map(function ($s) use ($existingAttendance) {
-            $s->status = $existingAttendance->get($s->student_id, 'present');
-            return $s;
+        $students = $records->map(function ($s) {
+            return (object) [
+                'student_id' => $s->student_id,
+                'name' => $s->name,
+                'email' => $s->email,
+                'roll_no' => $s->roll_no,
+                'semester' => $s->semester,
+                'status' => $s->status ?? 'present',
+                'remarks' => $s->remarks
+            ];
         });
 
         $subject = DB::table('subjects')->where('id', $subjectId)->first();
@@ -1203,6 +1337,7 @@ class AttendanceController extends Controller
      */
     public function printList(Request $request)
     {
+        $attendanceType = $this->resolveAttendanceType($request);
         $date = $request->get('date', '');
         $date_bs = $request->get('date_bs', '');
         $semester = $request->get('semester', '');
@@ -1227,9 +1362,10 @@ class AttendanceController extends Controller
                 DB::raw('COUNT(*) as total'),
                 DB::raw("SUM(CASE WHEN attendance.status = 'present' THEN 1 ELSE 0 END) as present"),
                 DB::raw("SUM(CASE WHEN attendance.status = 'absent' THEN 1 ELSE 0 END) as absent"),
-                DB::raw("SUM(CASE WHEN attendance.status = 'leave' THEN 1 ELSE 0 END) as leave")
+                DB::raw("SUM(CASE WHEN attendance.status = 'leave' THEN 1 ELSE 0 END) as `leave`")
             )
             ->groupBy('attendance.date', 'attendance.date_bs', 'attendance.subject_id', 'subjects.subject_name', 'subjects.subject_code');
+        $this->applyAttendanceTypeFilter($attendanceQuery, $attendanceType, 'attendance.attendance_type');
 
         // Apply filters
         if (!empty($date)) {

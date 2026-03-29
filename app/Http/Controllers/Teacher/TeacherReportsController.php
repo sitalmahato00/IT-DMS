@@ -102,7 +102,9 @@ class TeacherReportsController extends Controller
             $q->whereIn('subjects.id', $filteredSubjectIds);
         })->count();
         
-        $totalAttendanceRecords = Attendance::whereIn('subject_id', $filteredSubjectIds)->count();
+        $totalAttendanceRecords = Attendance::whereIn('subject_id', $filteredSubjectIds)
+            ->where('attendance_type', 'class')
+            ->count();
         
         $totalExams = Exam::whereIn('subject_id', $filteredSubjectIds)->count();
         
@@ -110,6 +112,7 @@ class TeacherReportsController extends Controller
         
         // Get recent attendance average
         $attendanceStats = Attendance::whereIn('subject_id', $filteredSubjectIds)
+            ->where('attendance_type', 'class')
             ->select('status', DB::raw('count(*) as count'))
             ->groupBy('status')
             ->get()

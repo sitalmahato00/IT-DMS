@@ -693,7 +693,8 @@ class TeacherMarksController extends Controller
     private function calculateAttendancePercentage($student, $subject = null)
     {
         $query = DB::table('attendance')
-            ->where('student_id', $student->id);
+            ->where('student_id', $student->id)
+            ->where('attendance_type', 'class');
 
         $subjectId = is_numeric($subject) ? (int) $subject : ($subject->id ?? null);
 

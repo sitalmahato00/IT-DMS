@@ -56,6 +56,7 @@ class StudentDashboardController extends Controller
 
         $recentAttendance = DB::table('attendance')
             ->where('student_id', $student->id)
+            ->where('attendance_type', 'class')
             ->join('subjects', 'attendance.subject_id', '=', 'subjects.id')
             ->select('attendance.*', 'subjects.subject_name', 'subjects.subject_code')
             ->orderBy('attendance.date', 'desc')

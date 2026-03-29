@@ -990,10 +990,12 @@ $exam->load(['subject', 'marks.student.user']);
             if ($exam->subject_id) {
                 foreach ($students as $student) {
                     $totalAttendance = Attendance::where('student_id', $student->id)
+                        ->where('attendance_type', 'class')
                         ->where('subject_id', $exam->subject_id)
                         ->count();
                     
                     $presentAttendance = Attendance::where('student_id', $student->id)
+                        ->where('attendance_type', 'class')
                         ->where('subject_id', $exam->subject_id)
                         ->where('status', 'present')
                         ->count();
@@ -1173,7 +1175,8 @@ $exam->load(['subject', 'marks.student.user']);
             $subjectId = $request->subject_id && $request->subject_id !== '' ? (int)$request->subject_id : null;
             
             foreach ($students as $student) {
-                $attendanceQuery = Attendance::where('student_id', $student->id);
+                $attendanceQuery = Attendance::where('student_id', $student->id)
+                    ->where('attendance_type', 'class');
                 
                 // If a specific subject is selected, filter attendance by that subject
                 if ($subjectId) {
@@ -1183,6 +1186,7 @@ $exam->load(['subject', 'marks.student.user']);
                 $totalAttendance = $attendanceQuery->count();
                 
                 $presentAttendance = Attendance::where('student_id', $student->id)
+                    ->where('attendance_type', 'class')
                     ->where('status', 'present');
                 
                 // If a specific subject is selected, filter by that subject
@@ -2150,7 +2154,8 @@ $exam->load(['subject', 'marks.student.user']);
 
     private function calculateMarksAttendancePercentage(int $studentId, ?int $subjectId = null): float
     {
-        $attendanceQuery = Attendance::where('student_id', $studentId);
+        $attendanceQuery = Attendance::where('student_id', $studentId)
+            ->where('attendance_type', 'class');
 
         if ($subjectId) {
             $attendanceQuery->where('subject_id', $subjectId);
@@ -2162,6 +2167,7 @@ $exam->load(['subject', 'marks.student.user']);
         }
 
         $presentAttendance = Attendance::where('student_id', $studentId)
+            ->where('attendance_type', 'class')
             ->where('status', 'present');
 
         if ($subjectId) {

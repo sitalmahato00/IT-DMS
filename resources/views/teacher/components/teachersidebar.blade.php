@@ -3,6 +3,8 @@
     $isSubjects = request()->routeIs('teacher.subjects*');
     $isStudents = request()->routeIs('teacher.students*');
     $isAttendance = request()->routeIs('teacher.attendance*');
+    $isLabAttendance = request()->routeIs('teacher.attendance.lab*');
+    $isClassAttendance = $isAttendance && !$isLabAttendance;
     $isMarks = request()->routeIs('teacher.marks*') && !request()->routeIs('teacher.marksheet*');
     $isMarksheet = request()->routeIs('teacher.marksheet*');
     $isTimetable = request()->routeIs('teacher.timetable*');
@@ -102,9 +104,13 @@
                 <i :class="activeGroup === 'attendance' ? 'bi-chevron-down' : 'bi-chevron-right'" class="bi text-base"></i>
             </button>
             <div class="collapsible-section space-y-0.5 overflow-hidden transition-all duration-300" x-show="activeGroup === 'attendance'" x-collapse>
-                <a href="{{ route('teacher.attendance') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isAttendance ? 'bg-red-600 text-white' : 'text-slate-600 hover:text-[#FF0037] hover:bg-red-500/10' }}">
+                <a href="{{ route('teacher.attendance') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isClassAttendance ? 'bg-red-600 text-white' : 'text-slate-600 hover:text-[#FF0037] hover:bg-red-500/10' }}">
                     <i class="bi bi-calendar-check text-base flex-shrink-0"></i>
-                    <span class="sidebar-label">{{ __('Attendance') }}</span>
+                    <span class="sidebar-label">{{ __('Class Attendance') }}</span>
+                </a>
+                <a href="{{ route('teacher.attendance.lab') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isLabAttendance ? 'bg-red-600 text-white' : 'text-slate-600 hover:text-[#FF0037] hover:bg-red-500/10' }}">
+                    <i class="bi bi-beaker text-base flex-shrink-0"></i>
+                    <span class="sidebar-label">{{ __('Lab Attendance') }}</span>
                 </a>
             </div>
 

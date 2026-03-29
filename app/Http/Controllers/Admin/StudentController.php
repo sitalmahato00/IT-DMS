@@ -1031,8 +1031,8 @@ class StudentController extends Controller
             });
 
             // Get attendance summary
-            $totalDays = $student->attendanceRecords()->count();
-            $presentDays = $student->attendanceRecords()->where('status', 'present')->count();
+            $totalDays = $student->attendanceRecords()->where('attendance_type', 'class')->count();
+            $presentDays = $student->attendanceRecords()->where('attendance_type', 'class')->where('status', 'present')->count();
 
             return response()->json([
                 'success' => true,

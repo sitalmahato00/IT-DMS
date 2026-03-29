@@ -91,8 +91,16 @@ Route::middleware(['auth', 'verified', 'role:teacher'])->prefix('teacher')->name
     Route::post('/attendance/students', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'getStudentsForAttendance'])->name('attendance.students');
     Route::post('/attendance', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'store'])->name('attendance.store');
     Route::get('/attendance/print', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'printAttendance'])->name('attendance.print');
+    Route::get('/attendance/export', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'exportAttendance'])->name('attendance.export');
     // Bulk add attendance for all subjects for today
     Route::post('/attendance/bulk-add-all', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'bulkAddForAllSubjects'])->name('attendance.bulkAddAll');
+    // Lab attendance routes
+    Route::get('/attendance/lab', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'labIndex'])->name('attendance.lab');
+    Route::post('/attendance/lab/students', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'getStudentsForLabAttendance'])->name('attendance.lab.students');
+    Route::post('/attendance/lab', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'storeLab'])->name('attendance.lab.store');
+    Route::get('/attendance/lab/print', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'printLabAttendance'])->name('attendance.lab.print');
+    Route::get('/attendance/lab/export', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'exportLabAttendance'])->name('attendance.lab.export');
+    Route::post('/attendance/lab/bulk-add-all', [\App\Http\Controllers\Teacher\TeacherAttendanceController::class, 'bulkAddForAllLabSubjects'])->name('attendance.lab.bulkAddAll');
     Route::get('/marks', [\App\Http\Controllers\Teacher\TeacherMarksController::class, 'index'])->name('marks');
     Route::post('/marks', [\App\Http\Controllers\Teacher\TeacherMarksController::class, 'store'])->name('marks.store');
     Route::put('/marks/{id}', [\App\Http\Controllers\Teacher\TeacherMarksController::class, 'update'])->name('marks.update');
@@ -283,6 +291,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('parents/{id}/download', [\App\Http\Controllers\Admin\ParentController::class, 'download'])->name('parents.download');
 
     Route::get('/attendance', [\App\Http\Controllers\Admin\AttendanceController::class, 'index'])->name('attendance');
+    Route::get('/attendance/lab', [\App\Http\Controllers\Admin\AttendanceController::class, 'labIndex'])->name('attendance.lab');
     Route::post('/attendance', [\App\Http\Controllers\Admin\AttendanceController::class, 'store'])->name('attendance.store');
     Route::put('/attendance/{id}', [\App\Http\Controllers\Admin\AttendanceController::class, 'update'])->name('attendance.update');
     Route::post('/attendance/toggle', [\App\Http\Controllers\Admin\AttendanceController::class, 'toggle'])->name('attendance.toggle');

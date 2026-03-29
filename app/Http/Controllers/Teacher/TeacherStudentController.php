@@ -122,6 +122,7 @@ class TeacherStudentController extends Controller
         $attendanceRecords = DB::table('attendance')
             ->where('student_id', $id)
             ->whereIn('subject_id', $subjectIds)
+            ->where('attendance_type', 'class')
             ->orderBy('date', 'desc')
             ->limit(20)
             ->get();
@@ -132,6 +133,7 @@ class TeacherStudentController extends Controller
             $stats = DB::table('attendance')
                 ->where('student_id', $id)
                 ->where('subject_id', $subjectId)
+                ->where('attendance_type', 'class')
                 ->selectRaw('
                     COUNT(*) as total,
                     SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_count

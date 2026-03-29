@@ -70,10 +70,11 @@ class Student extends Model
     /**
      * Get attendance percentage for this student
      */
-    public function getAttendancePercentage($subjectId = null)
+    public function getAttendancePercentage($subjectId = null, $attendanceType = 'class')
     {
         $query = DB::table('attendance')
-            ->where('student_id', $this->id);
+            ->where('student_id', $this->id)
+            ->where('attendance_type', $attendanceType);
 
         if ($subjectId) {
             $query->where('subject_id', $subjectId);

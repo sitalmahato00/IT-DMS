@@ -261,7 +261,7 @@
                             <!-- Action Buttons -->
                             <div class="flex gap-2 mt-4 pt-4 border-t border-gray-300 dark:border-gray-600">
                                 <a href="{{ route('teacher.attendance') }}?subject={{ $subject['id'] }}" class="flex-1 text-center px-3 py-2 rounded-lg text-sm font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition">
-                                    <i class="bi bi-calendar-check"></i> {{ __('Attendance') }}
+                                    <i class="bi bi-calendar-check"></i> {{ __('Class Attendance') }}
                                 </a>
                                 <a href="{{ route('teacher.marks') }}?subject={{ $subject['id'] }}" class="flex-1 text-center px-3 py-2 rounded-lg text-sm font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition">
                                     <i class="bi bi-clipboard-data"></i> {{ __('Marks') }}

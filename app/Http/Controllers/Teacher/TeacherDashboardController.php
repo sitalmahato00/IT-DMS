@@ -120,6 +120,7 @@ class TeacherDashboardController extends Controller
             $attendanceStats = DB::table('attendance')
                 ->join('students', 'attendance.student_id', '=', 'students.id')
                 ->where('attendance.subject_id', $subject->id)
+                ->where('attendance.attendance_type', 'class')
                 ->where('students.status', 'active')
                 ->where('students.is_alumni', 0)
                 ->selectRaw('
@@ -238,6 +239,7 @@ class TeacherDashboardController extends Controller
         $attendance = DB::table('attendance')
             ->join('students', 'attendance.student_id', '=', 'students.id')
             ->whereIn('attendance.subject_id', $subjectIds)
+            ->where('attendance.attendance_type', 'class')
             ->where('students.status', 'active')
             ->where('students.is_alumni', 0)
             ->selectRaw('
@@ -262,6 +264,7 @@ class TeacherDashboardController extends Controller
         $summary = DB::table('attendance')
             ->join('students', 'attendance.student_id', '=', 'students.id')
             ->whereIn('attendance.subject_id', $subjectIds)
+            ->where('attendance.attendance_type', 'class')
             ->where('students.status', 'active')
             ->where('students.is_alumni', 0)
             ->selectRaw('
@@ -326,6 +329,7 @@ class TeacherDashboardController extends Controller
                 
                 $attendance = DB::table('attendance')
                     ->whereIn('subject_id', $subjectIds)
+                    ->where('attendance_type', 'class')
                     ->when(!empty($teacherIds), function ($query) use ($teacherIds) {
                         $query->whereIn('teacher_id', $teacherIds);
                     })
@@ -416,6 +420,7 @@ class TeacherDashboardController extends Controller
 
         $rows = DB::table('attendance')
             ->whereIn('subject_id', $subjectIds)
+            ->where('attendance_type', 'class')
             ->when(!empty($teacherIds), function ($query) use ($teacherIds) {
                 $query->whereIn('teacher_id', $teacherIds);
             })
@@ -533,6 +538,7 @@ class TeacherDashboardController extends Controller
         $subjectsMap = Subject::whereIn('id', $subjectIds)->get()->keyBy('id');
         
         $todayAttendance = Attendance::whereIn('subject_id', $subjectIds)
+            ->where('attendance_type', 'class')
             ->whereDate('date', $today)
             ->whereHas('student', function ($query) {
                 $query->where('status', 'active')

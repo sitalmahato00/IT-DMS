@@ -186,9 +186,11 @@
                     // Calculate attendance for this student
                     $attendanceSubjectId = $mark->subject_id ?? $exam->subject_id;
                     $attendance = App\Models\Attendance::where('student_id', $mark->student_id)
+                        ->where('attendance_type', 'class')
                         ->where('subject_id', $attendanceSubjectId)
                         ->count();
                     $present = App\Models\Attendance::where('student_id', $mark->student_id)
+                        ->where('attendance_type', 'class')
                         ->where('subject_id', $attendanceSubjectId)
                         ->where('status', 'present')
                         ->count();

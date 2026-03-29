@@ -1,6 +1,6 @@
 @extends('teacher.layouts.teacherlayout')
 
-@section('title', __('Attendance'))
+@section('title', __($attendanceLabel ?? 'Attendance'))
 
 @section('content')
 <div class="space-y-4">
@@ -9,10 +9,10 @@
 
     <!-- Page Header -->
     @include('teacher.components.teacher-page-header', [
-        'title' => __('Attendance'),
+        'title' => __($attendanceLabel ?? 'Attendance'),
         'breadcrumbs' => [
             ['label' => __('Dashboard'), 'url' => route('teacher.dashboard')],
-            ['label' => __('Attendance')]
+            ['label' => __($attendanceLabel ?? 'Attendance')]
         ],
         'addButton' => [
             'label' => __('Mark Attendance'),
@@ -33,7 +33,7 @@
 
     <!-- Filters Card -->
     @include('teacher.components.teacher-filter-card', [
-        'formAction' => route('teacher.attendance'),
+        'formAction' => $attendanceRoutes['index'] ?? route('teacher.attendance'),
         'filters' => [
             ['name' => 'date', 'type' => 'date', 'value' => request('date'), 'label' => __('Date (AD)')],
             ['name' => 'date_bs', 'type' => 'text', 'value' => request('date_bs'), 'placeholder' => 'YYYY-MM-DD', 'label' => __('Date (BS)'), 'class' => 'bs-date', 'icon' => 'bi-calendar3', 'autocomplete' => 'off'],
@@ -41,7 +41,7 @@
             ['name' => 'q', 'type' => 'text', 'value' => request('q'), 'placeholder' => __('Name, Email, Roll No'), 'label' => __('Search Student')]
         ],
         'showReset' => true,
-        'resetRoute' => route('teacher.attendance')
+        'resetRoute' => $attendanceRoutes['index'] ?? route('teacher.attendance')
     ])
 
         <!-- Attendance Table -->
@@ -51,14 +51,18 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div class="flex items-center gap-2">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
-                        <i class="bi bi-collection mr-2"></i>{{ __('Attendance by Subject') }}
+                        <i class="bi bi-collection mr-2"></i>{{ __($attendanceLabel ?? 'Attendance') }} {{ __('by Subject') }}
                     </h3>
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300">
                         {{ $subjectAttendance->count() }} {{ __('records') }}
                     </span>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
-                    <a href="{{ route('teacher.attendance.print') }}?{{ http_build_query(request()->query()) }}"
+                    <a href="{{ ($attendanceRoutes['export'] ?? route('teacher.attendance.export')) }}?{{ http_build_query(request()->query()) }}"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-md text-xs font-medium hover:bg-green-700 transition-colors shadow-sm">
+                        <i class="bi bi-download"></i> {{ __('Export CSV') }}
+                    </a>
+                    <a href="{{ ($attendanceRoutes['print'] ?? route('teacher.attendance.print')) }}?{{ http_build_query(request()->query()) }}"
                         target="_blank"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-medium hover:bg-blue-700 transition-colors shadow-sm">
                         <i class="bi bi-printer"></i> {{ __('Print') }}
@@ -150,7 +154,7 @@
                         <i class="bi bi-calendar-check text-xl"></i>
                     </div>
                     <div>
-                        <h2 class="text-lg font-semibold">{{ __('Mark Attendance') }}</h2>
+                        <h2 class="text-lg font-semibold">{{ __('Mark') }} {{ __($attendanceLabel ?? 'Attendance') }}</h2>
                         <p class="text-red-100 text-xs">{{ __('Pick a subject and date, then load students') }}</p>
                     </div>
                 </div>
@@ -566,6 +570,7 @@
     });
 
     async function loadAttendanceStudents() {
+        // Snapshot values BEFORE any async operations
         const date = document.getElementById('mark_date').value;
         const subjectId = document.getElementById('mark_subject').value;
 
@@ -576,10 +581,10 @@
 
         const btn = document.getElementById('loadStudentsBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i class="bi bi-spinner animate-spin"></i> Loading...';
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise animate-spin"></i> Loading...';
 
         try {
-            const res = await fetch('{{ route("teacher.attendance.students") }}', {
+            const res = await fetch('{{ $attendanceRoutes['students'] ?? route("teacher.attendance.students") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -597,13 +602,15 @@
             const students = data.students || [];
             
             const saveBtn = document.getElementById('saveAllBtn');
-            if (students.length > 0) {
-                saveBtn.disabled = false;
-            } else {
-                saveBtn.disabled = true;
-            }
+            saveBtn.disabled = students.length === 0;
             
             renderAttendanceTable(students, date);
+
+            // Restore subject selection after render (guard against any side-effects)
+            const markSubjectEl = document.getElementById('mark_subject');
+            if (markSubjectEl && subjectId) {
+                markSubjectEl.value = subjectId;
+            }
         } catch (err) {
             console.error('Error loading students', err);
             showToast('Failed to load students', 'error');
@@ -616,7 +623,7 @@
     // Bulk add attendance for all subjects today
     async function bulkAddAllAttendance() {
         try {
-            const res = await fetch('{{ route("teacher.attendance.bulkAddAll") }}', {
+            const res = await fetch('{{ $attendanceRoutes['bulkAddAll'] ?? route("teacher.attendance.bulkAddAll") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -771,7 +778,7 @@
                 subject_id: subjectId
             };
 
-            const res = await fetch('{{ route("teacher.attendance.store") }}', {
+            const res = await fetch('{{ $attendanceRoutes['store'] ?? route("teacher.attendance.store") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -787,7 +794,7 @@
                 showToast('Attendance saved successfully for ' + attendance.length + ' students!', 'success');
                 closeMarkAttendanceModal();
                 setTimeout(() => { 
-                    window.location.href = '{{ route("teacher.attendance") }}'; 
+                    window.location.href = '{{ $attendanceRoutes['index'] ?? route("teacher.attendance") }}'; 
                 }, 1500);
             } else {
                 throw new Error(data.message || 'Failed to save attendances');
@@ -813,7 +820,7 @@ async function viewSubjectAttendance(date, subjectId, subjectName) {
                 params.append('subject_id', subjectId);
             }
 
-            const url = '{{ route("teacher.attendance.students") }}';
+            const url = '{{ $attendanceRoutes['students'] ?? route("teacher.attendance.students") }}';
             const res = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -876,7 +883,7 @@ async function viewSubjectAttendance(date, subjectId, subjectName) {
     function printCurrentSubjectAttendance() {
         const sid = window.currentSubjectId || '';
         const d = window.currentDate || '';
-        const url = '{{ route("teacher.attendance.print") }}' + '?subject_id=' + encodeURIComponent(sid) + '&date=' + encodeURIComponent(d);
+        const url = '{{ $attendanceRoutes['print'] ?? route("teacher.attendance.print") }}' + '?subject_id=' + encodeURIComponent(sid) + '&date=' + encodeURIComponent(d);
         teacherOpenPrintPreview(url, {
             title: 'Print Attendance',
         });
@@ -912,7 +919,7 @@ async function openEditSubjectAttendance(date, date_bs, subjectId, subjectName) 
                 params.append('subject_id', subjectId);
             }
 
-            const url = '{{ route("teacher.attendance.students") }}';
+            const url = '{{ $attendanceRoutes['students'] ?? route("teacher.attendance.students") }}';
             const res = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -970,7 +977,8 @@ async function openEditSubjectAttendance(date, date_bs, subjectId, subjectName) 
     function updateStudentStatus(studentId, newStatus) {
         const student = editSubjectData.students.find(s => String(s.student_id) === String(studentId));
         if (student) {
-            student.new_status = String(student.status || '') === String(newStatus) ? null : newStatus;
+            // Always record the chosen status as new_status so it's included in the save payload
+            student.new_status = newStatus;
         }
     }
 
@@ -1016,7 +1024,7 @@ async function openEditSubjectAttendance(date, date_bs, subjectId, subjectName) 
                 subject_id: editSubjectData.subject_id
             };
 
-            const res = await fetch('{{ route("teacher.attendance.store") }}', {
+            const res = await fetch('{{ $attendanceRoutes['store'] ?? route("teacher.attendance.store") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

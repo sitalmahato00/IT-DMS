@@ -98,6 +98,7 @@ class TeacherSubjectController extends Controller
         // Get recent attendance for this subject
         $recentAttendance = DB::table('attendance')
             ->where('subject_id', $subject->id)
+            ->where('attendance_type', 'class')
             ->orderBy('date', 'desc')
             ->limit(10)
             ->get()
@@ -232,6 +233,7 @@ class TeacherSubjectController extends Controller
 
             $attendanceStats = DB::table('attendance')
                 ->where('subject_id', $subject->id)
+                ->where('attendance_type', 'class')
                 ->selectRaw('
                     COUNT(*) as total,
                     SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_count
