@@ -160,18 +160,18 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <style>
         :root {
-            --landing-bg: linear-gradient(180deg, #f8fafc 0%, #fff4f7 16%, #f8fafc 48%, #ffffff 100%);
-            --landing-red: #FF0037;
-            --landing-red-deep: #D90033;
-            --landing-red-soft: #ffd9e3;
-            --landing-surface: rgba(255, 255, 255, 0.97);
-            --landing-surface-soft: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 250, 252, 0.99) 58%, rgba(255, 246, 248, 0.99) 100%);
-            --landing-surface-muted: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
-            --landing-border: rgba(255, 0, 55, 0.12);
-            --landing-border-strong: rgba(255, 0, 55, 0.22);
-            --landing-shadow: 0 24px 56px rgba(15, 23, 42, 0.08);
-            --landing-shadow-soft: 0 14px 34px rgba(15, 23, 42, 0.06);
-            --landing-text-soft: #6b7280;
+            --landing-bg: linear-gradient(180deg, #f4f6fa 0%, #eef2f7 32%, #f8fafc 66%, #fdfefe 100%);
+            --landing-red: #dc2626;
+            --landing-red-deep: #b91c1c;
+            --landing-red-soft: #fee2e2;
+            --landing-surface: rgba(255, 255, 255, 0.985);
+            --landing-surface-soft: linear-gradient(180deg, rgba(249, 250, 251, 0.99) 0%, rgba(241, 245, 249, 0.99) 100%);
+            --landing-surface-muted: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 250, 252, 0.99) 100%);
+            --landing-border: rgba(148, 163, 184, 0.16);
+            --landing-border-strong: rgba(220, 38, 38, 0.2);
+            --landing-shadow: 0 20px 44px rgba(15, 23, 42, 0.08);
+            --landing-shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.05);
+            --landing-text-soft: #64748b;
         }
 
         .dark {
@@ -210,8 +210,8 @@
         }
 
         .landing-stage:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 28px 60px rgba(2, 6, 23, 0.35);
+            transform: translateY(-1px);
+            box-shadow: 0 24px 46px rgba(15, 23, 42, 0.1);
         }
 
         .landing-stage::before {
@@ -220,11 +220,9 @@
             inset: 0;
             pointer-events: none;
             background:
-                radial-gradient(circle at top right, rgba(255, 0, 55, 0.12), transparent 34%),
-                radial-gradient(circle at bottom left, rgba(251, 146, 60, 0.08), transparent 28%),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.74), transparent 30%);
-            background-size: 140% 140%, 120% 120%, auto;
-            animation: stageGlow 18s ease-in-out infinite alternate;
+                radial-gradient(circle at top right, rgba(248, 113, 113, 0.08), transparent 34%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.7), transparent 26%);
+            background-size: 140% 140%, auto;
         }
 
         .dark .landing-stage {
@@ -261,9 +259,9 @@
         .landing-input,
         .landing-select {
             border-radius: 1rem;
-            border: 1px solid rgba(170, 23, 37, 0.16);
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 10px 24px rgba(15, 23, 42, 0.04);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 6px 18px rgba(15, 23, 42, 0.04);
         }
 
         .landing-input:focus,
@@ -296,7 +294,7 @@
 
         .landing-panel:hover {
             transform: translateY(-2px);
-            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35);
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1);
         }
 
         .dark .landing-panel {
@@ -314,7 +312,7 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.38), transparent 32%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 24%);
         }
 
         .dark .landing-panel::before {
@@ -322,9 +320,9 @@
         }
 
         .landing-panel.lift-card {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 250, 252, 0.99) 60%, rgba(255, 246, 248, 0.99) 100%);
-            border-color: rgba(255, 0, 55, 0.12);
-            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.06);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.995) 0%, rgba(248, 250, 252, 0.995) 100%);
+            border-color: rgba(226, 232, 240, 0.95);
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.06);
         }
 
         .dark .landing-panel.lift-card {
@@ -399,14 +397,14 @@
             align-items: center;
             gap: 0.625rem;
             border-radius: 9999px;
-            padding: 0.55rem 1rem;
+            padding: 0.45rem 0.9rem;
             font-size: 0.7rem;
             font-weight: 700;
             letter-spacing: 0.14em;
             text-transform: uppercase;
             color: #b42318;
-            background: rgba(255, 244, 241, 0.95);
-            box-shadow: inset 0 0 0 1px rgba(180, 35, 24, 0.12);
+            background: rgba(255, 244, 241, 0.98);
+            box-shadow: inset 0 0 0 1px rgba(180, 35, 24, 0.1);
         }
 
         .dark .section-chip {
@@ -487,11 +485,11 @@
         .landing-hero-card {
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.22);
             border-radius: 1.75rem;
-            background: linear-gradient(180deg, rgba(30, 41, 59, 0.28) 0%, rgba(51, 65, 85, 0.24) 62%, rgba(107, 33, 49, 0.18) 100%);
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.24);
-            backdrop-filter: blur(8px);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(226, 232, 240, 0.12) 100%);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(14px);
             padding: 1rem 1.1rem;
             animation: heroCardFloat 8.5s ease-in-out infinite;
         }
@@ -505,9 +503,9 @@
         }
 
         .landing-hero-card-ghost {
-            background: rgba(15, 23, 42, 0.18);
-            border-color: rgba(255, 255, 255, 0.18);
-            box-shadow: 0 20px 42px rgba(15, 23, 42, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.22);
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.18);
         }
 
         .dark .landing-hero-card-ghost {
@@ -533,14 +531,14 @@
             justify-content: space-between;
             gap: 0.75rem;
             border-radius: 1rem;
-            background: linear-gradient(180deg, rgba(51, 65, 85, 0.54) 0%, rgba(30, 41, 59, 0.72) 100%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(226, 232, 240, 0.12) 100%);
             padding: 0.82rem 1rem;
             transition: transform 180ms ease, background-color 180ms ease;
         }
 
         .landing-hero-link:hover {
             transform: translateY(-2px);
-            background: linear-gradient(180deg, rgba(71, 85, 105, 0.58) 0%, rgba(30, 41, 59, 0.78) 100%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(226, 232, 240, 0.16) 100%);
         }
 
         .dark .landing-hero-link {
@@ -559,7 +557,7 @@
 
         .landing-hero-meta-item {
             border-radius: 1rem;
-            background: linear-gradient(180deg, rgba(51, 65, 85, 0.48) 0%, rgba(30, 41, 59, 0.68) 100%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(226, 232, 240, 0.12) 100%);
             padding: 0.8rem 1rem 0.9rem;
         }
 
@@ -612,6 +610,73 @@
         .dark .landing-hero-link,
         .dark .landing-hero-meta-item {
             border-color: rgba(248, 113, 113, 0.14);
+        }
+
+        .landing-header-nav-link {
+            color: #111827;
+        }
+
+        .landing-header-nav-link:hover {
+            color: #dc2626;
+            background: rgba(254, 242, 242, 0.95);
+        }
+
+        .landing-header-select {
+            background: transparent;
+            color: #111827;
+        }
+
+        .landing-header-select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(254, 202, 202, 0.7);
+        }
+
+        .landing-header-icon-button {
+            background: #ffffff;
+            color: #111827;
+            border: 1px solid rgba(226, 232, 240, 0.95);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+        }
+
+        .landing-header-icon-button:hover {
+            color: #dc2626;
+            border-color: rgba(252, 165, 165, 0.85);
+            background: #fff7f7;
+        }
+
+        .landing-header-mobile-panel {
+            background: rgba(255, 255, 255, 0.98);
+            border-top: 1px solid rgba(226, 232, 240, 0.95);
+            box-shadow: 0 24px 40px rgba(15, 23, 42, 0.08);
+        }
+
+        .dark .landing-header-nav-link,
+        .dark .landing-header-select {
+            color: #e5e7eb;
+        }
+
+        .dark .landing-header-nav-link:hover {
+            color: #ffffff;
+            background: rgba(15, 23, 42, 0.86);
+        }
+
+        .dark .landing-header-icon-button {
+            background: rgba(15, 23, 42, 0.9);
+            color: #e5e7eb;
+            border-color: rgba(51, 65, 85, 0.95);
+            box-shadow: none;
+        }
+
+        .dark .landing-header-icon-button:hover {
+            background: rgba(17, 24, 39, 0.96);
+            color: #ffffff;
+            border-color: rgba(71, 85, 105, 0.95);
+        }
+
+        .dark .landing-header-mobile-panel {
+            background: rgba(2, 6, 23, 0.98);
+            border-top-color: rgba(30, 41, 59, 0.95);
+            box-shadow: 0 24px 40px rgba(2, 6, 23, 0.42);
         }
 
         @keyframes floatOrb {
@@ -675,191 +740,7 @@
             {{ $locale === 'ne' ? 'मुख्य सामग्रीमा जानुहोस्' : 'Skip to content' }}
         </a>
 
-        <header class="sticky top-0 z-[1200] border-b border-white/10 bg-gradient-to-r from-red-700 via-red-600 to-red-800 shadow-[0_18px_45px_rgba(127,29,29,0.28)] backdrop-blur-xl">
-            <div class="landing-shell mx-auto w-full px-4 py-1.5 sm:px-6 lg:px-8">
-                <div class="flex flex-col gap-1.5">
-                    <div class="flex items-center justify-between gap-4 border-b border-white/10 pb-1.5">
-                        <div class="hidden items-center gap-4 text-xs font-medium text-white/75 xl:flex">
-                            @if (!empty($department?->email))
-                                <a href="mailto:{{ $department->email }}" class="inline-flex items-center gap-1.5 rounded-full bg-white/8 px-3 py-0.5 ring-1 ring-white/10 transition hover:bg-white/12">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5">
-                                        <path d="M1.5 6.75A2.25 2.25 0 0 1 3.75 4.5h16.5A2.25 2.25 0 0 1 22.5 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 17.25V6.75Zm2.25-.75a.75.75 0 0 0-.75.75v.243l7.5 4.5 7.5-4.5V6.75a.75.75 0 0 0-.75-.75H3.75Zm15.75 3.006-7.114 4.268a1.5 1.5 0 0 1-1.542 0L4.5 9.006v8.244c0 .414.336.75.75.75h15a.75.75 0 0 0 .75-.75V9.006Z"/>
-                                    </svg>
-                                    <span>{{ $department->email }}</span>
-                                </a>
-                            @endif
-                            @if (!empty($department?->phone))
-                                <a href="tel:{{ preg_replace('/\\s+/', '', $department->phone) }}" class="inline-flex items-center gap-1.5 rounded-full bg-white/8 px-3 py-0.5 ring-1 ring-white/10 transition hover:bg-white/12">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5">
-                                        <path fill-rule="evenodd" d="M6.648 2.25A2.25 2.25 0 0 0 4.5 4.5c0 9.113 7.387 16.5 16.5 16.5a2.25 2.25 0 0 0 2.25-2.148l.248-3.705a2.25 2.25 0 0 0-1.54-2.278l-3.405-1.136a2.25 2.25 0 0 0-2.56.94l-.724 1.086a18.11 18.11 0 0 1-5.028-5.028l1.086-.724a2.25 2.25 0 0 0 .94-2.56L11.13 2.54A2.25 2.25 0 0 0 8.852 1l-2.204.148Z" clip-rule="evenodd" />
-                                    </svg>
-                                    <span>{{ $department->phone }}</span>
-                                </a>
-                            @endif
-                            @if (!empty($addressText))
-                                <div class="inline-flex max-w-xs items-center gap-1.5 truncate rounded-full bg-white/8 px-3 py-0.5 ring-1 ring-white/10">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5 shrink-0">
-                                        <path fill-rule="evenodd" d="M11.54 22.351a.75.75 0 0 0 .92 0c4.884-3.73 7.29-7.15 7.29-10.601a7.75 7.75 0 1 0-15.5 0c0 3.45 2.406 6.87 7.29 10.6ZM12 12.75a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd" />
-                                    </svg>
-                                    <span class="truncate">{{ $addressText }}</span>
-                                </div>
-                            @endif
-                        </div>
-                        <div class="hidden items-center gap-2 lg:flex">
-                            <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-0.5 text-[11px] font-semibold text-white ring-1 ring-white/15">
-                                <span class="h-2 w-2 rounded-full bg-red-200"></span>
-                                <span>{{ $locale === 'ne' ? 'डिजिटल विभागीय पोर्टल' : 'Digital Department Portal' }}</span>
-                            </div>
-                            <div class="inline-flex items-center gap-3 rounded-full bg-white/8 px-3 py-0.5 text-[11px] font-semibold text-white/80 ring-1 ring-white/10">
-                                <span>{{ number_format((int) ($stats['students'] ?? 0)) }} {{ $locale === 'ne' ? 'विद्यार्थी' : 'Students' }}</span>
-                                <span class="h-1 w-1 rounded-full bg-white/40"></span>
-                                <span>{{ number_format((int) ($stats['teachers'] ?? 0)) }} {{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</span>
-                                <span class="h-1 w-1 rounded-full bg-white/40"></span>
-                                <span>{{ number_format((int) ($stats['subjects'] ?? 0)) }} {{ $locale === 'ne' ? 'विषय' : 'Courses' }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('home') }}" class="flex min-w-0 items-center gap-3">
-                            <div class="relative">
-                                <img src="{{ $departmentLogoUrl }}" alt="{{ $departmentName }} logo" class="h-11 w-11 rounded-xl bg-white object-contain ring-1 ring-gray-200 shadow-lg shadow-red-900/15">
-                                <span class="absolute -right-1 -top-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-white text-[8px] font-bold text-red-700 shadow-sm">IT</span>
-                            </div>
-                            <div class="min-w-0 leading-tight">
-                                <div class="flex items-center gap-2">
-                                    <div class="truncate text-sm font-bold text-white">{{ $departmentShort }}</div>
-                                    <span class="hidden rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/80 ring-1 ring-white/10 sm:inline-flex">
-                                        {{ $locale === 'ne' ? 'आधिकारिक' : 'Official' }}
-                                    </span>
-                                </div>
-                                <div class="truncate text-[11px] font-medium text-white/85 sm:text-xs">{{ $departmentName }}</div>
-                            </div>
-                        </a>
-
-                        <nav class="hidden flex-1 items-center justify-center gap-1 xl:flex">
-                            <a href="#about" class="rounded-full px-3 py-1 text-xs font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">{{ $locale === 'ne' ? 'बारेमा' : 'About' }}</a>
-                            <a href="#programs" class="rounded-full px-3 py-1 text-xs font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">{{ $locale === 'ne' ? 'कार्यक्रम' : 'Programs' }}</a>
-                            <a href="#curriculum" class="rounded-full px-3 py-1 text-xs font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">{{ $locale === 'ne' ? 'पाठ्यक्रम' : 'Curriculum' }}</a>
-                            <a href="#faculty" class="rounded-full px-3 py-1 text-xs font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">{{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</a>
-                            <a href="#notices" class="rounded-full px-3 py-1 text-xs font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">{{ $locale === 'ne' ? 'सूचना' : 'News & Events' }}</a>
-                            <a href="#resources" class="rounded-full px-3 py-1 text-xs font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">{{ $locale === 'ne' ? 'स्रोत' : 'Resources' }}</a>
-                            <a href="#contact" class="rounded-full px-3 py-1 text-xs font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">{{ $locale === 'ne' ? 'सम्पर्क' : 'Contact' }}</a>
-                        </nav>
-
-                        <div class="ml-auto flex items-center gap-2">
-                            <a href="#contact" class="hidden items-center gap-2 rounded-full border border-white/15 bg-white/8 px-3 py-1 text-[11px] font-semibold text-white/90 transition hover:bg-white/12 lg:inline-flex">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                                    <path d="M1.5 6.75A2.25 2.25 0 0 1 3.75 4.5h16.5A2.25 2.25 0 0 1 22.5 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 17.25V6.75Zm2.25-.75a.75.75 0 0 0-.75.75v.243l7.5 4.5 7.5-4.5V6.75a.75.75 0 0 0-.75-.75H3.75Zm15.75 3.006-7.114 4.268a1.5 1.5 0 0 1-1.542 0L4.5 9.006v8.244c0 .414.336.75.75.75h15a.75.75 0 0 0 .75-.75V9.006Z"/>
-                                </svg>
-                                <span>{{ $locale === 'ne' ? 'छिटो सम्पर्क' : 'Quick Contact' }}</span>
-                            </a>
-
-                            <form method="POST" action="{{ route('language.switch') }}" class="hidden sm:block">
-                                @csrf
-                                <label class="sr-only" for="localeSelect">{{ $locale === 'ne' ? 'भाषा' : 'Language' }}</label>
-                                <select id="localeSelect" name="locale" onchange="this.form.submit()" class="rounded-xl border border-white/20 bg-slate-950/60 px-4 py-1 text-xs text-white shadow-sm focus:border-white/40 focus:ring-white/30">
-                                    @foreach (config('locales.supported') as $code => $label)
-                                        <option value="{{ $code }}" @selected($code === $locale)>{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                            </form>
-
-                            <button id="darkModeToggle" type="button" class="inline-flex items-center justify-center rounded-xl border border-white/20 bg-slate-950/60 p-1 text-white shadow-sm hover:bg-slate-950/75 focus:outline-none focus:ring-2 focus:ring-white/40" aria-label="{{ $locale === 'ne' ? 'डार्क मोड टगल' : 'Toggle dark mode' }}" aria-pressed="false">
-                                <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-                                    <path d="M21 14.1A8.5 8.5 0 0 1 9.9 3 7 7 0 1 0 21 14.1Z" />
-                                </svg>
-                                <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hidden h-5 w-5">
-                                    <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12ZM12 2.75a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V3.5a.75.75 0 0 1 .75-.75Zm0 16a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V19.5a.75.75 0 0 1 .75-.75ZM2.75 12a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H3.5a.75.75 0 0 1-.75-.75Zm16 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1-.75-.75ZM5.28 5.28a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 1 1-1.06 1.06L5.28 6.34a.75.75 0 0 1 0-1.06Zm11.26 11.26a.75.75 0 0 1 1.06 0l1.06 1.06a.75.75 0 0 1-1.06 1.06l-1.06-1.06a.75.75 0 0 1 0-1.06ZM18.72 5.28a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0ZM7.46 16.54a.75.75 0 0 1 0 1.06l-1.06 1.06a.75.75 0 0 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0Z" />
-                                </svg>
-                            </button>
-
-                            <!-- Mobile Menu Button -->
-                            <div x-data="{ mobileMenuOpen: false }" class="relative xl:hidden">
-                                <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="inline-flex items-center justify-center rounded-xl border border-white/20 bg-slate-950/60 p-1.5 text-white shadow-sm hover:bg-slate-950/75 focus:outline-none focus:ring-2 focus:ring-white/40">
-                                    <svg x-show="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
-                                        <path d="M3 12h18M3 6h18M3 18h18" />
-                                    </svg>
-                                    <svg x-show="mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hidden h-5 w-5">
-                                        <path d="M18 6L6 18M6 6l12 12" />
-                                    </svg>
-                                </button>
-
-                                <!-- Dropdown Menu -->
-                                <div x-show="mobileMenuOpen" @click.outside="mobileMenuOpen = false" x-transition class="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-white/20 bg-gradient-to-b from-slate-950 to-slate-900 shadow-2xl">
-                                    <div class="space-y-1 p-3">
-                                        <!-- Navigation Links -->
-                                        <a href="#about" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
-                                            {{ $locale === 'ne' ? 'बारेमा' : 'About' }}
-                                        </a>
-                                        <a href="#programs" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
-                                            {{ $locale === 'ne' ? 'कार्यक्रम' : 'Programs' }}
-                                        </a>
-                                        <a href="#curriculum" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
-                                            {{ $locale === 'ne' ? 'पाठ्यक्रम' : 'Curriculum' }}
-                                        </a>
-                                        <a href="#faculty" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
-                                            {{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}
-                                        </a>
-                                        <a href="#notices" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
-                                            {{ $locale === 'ne' ? 'सूचना' : 'News & Events' }}
-                                        </a>
-                                        <a href="#resources" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
-                                            {{ $locale === 'ne' ? 'स्रोत' : 'Resources' }}
-                                        </a>
-                                        <a href="#contact" @click="mobileMenuOpen = false" class="block rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
-                                            {{ $locale === 'ne' ? 'सम्पर्क' : 'Contact' }}
-                                        </a>
-
-                                        <div class="border-t border-white/10 pt-3">
-                                            <!-- Quick Contact -->
-                                            <a href="#contact" @click="mobileMenuOpen = false" class="flex items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/8 px-3 py-2 text-xs font-semibold text-white/90 transition hover:bg-white/12">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
-                                                    <path d="M1.5 6.75A2.25 2.25 0 0 1 3.75 4.5h16.5A2.25 2.25 0 0 1 22.5 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 17.25V6.75Zm2.25-.75a.75.75 0 0 0-.75.75v.243l7.5 4.5 7.5-4.5V6.75a.75.75 0 0 0-.75-.75H3.75Zm15.75 3.006-7.114 4.268a1.5 1.5 0 0 1-1.542 0L4.5 9.006v8.244c0 .414.336.75.75.75h15a.75.75 0 0 0 .75-.75V9.006Z"/>
-                                                </svg>
-                                                <span>{{ $locale === 'ne' ? 'छिटो सम्पर्क' : 'Quick Contact' }}</span>
-                                            </a>
-
-                                            <!-- Language Selector Mobile -->
-                                            <form method="POST" action="{{ route('language.switch') }}" class="mt-3 block sm:hidden">
-                                                @csrf
-                                                <label class="sr-only" for="localeSelectMobile">{{ $locale === 'ne' ? 'भाषा' : 'Language' }}</label>
-                                                <select id="localeSelectMobile" name="locale" onchange="this.form.submit()" class="w-full rounded-lg border border-white/20 bg-slate-950/60 px-3 py-2 text-xs text-white shadow-sm focus:border-white/40 focus:ring-white/30">
-                                                    @foreach (config('locales.supported') as $code => $label)
-                                                        <option value="{{ $code }}" @selected($code === $locale)>{{ $label }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </form>
-
-                                            <!-- Auth Button Mobile -->
-                                            @auth
-                                                <a href="{{ route('dashboard') }}" @click="mobileMenuOpen = false" class="shine-button mt-3 block w-full rounded-lg bg-white px-4 py-2 text-center text-xs font-semibold text-red-700 shadow-sm transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-white/40">
-                                                    {{ $locale === 'ne' ? 'ड्यासबोर्ड' : 'Dashboard' }}
-                                                </a>
-                                            @else
-                                                <a href="{{ route('login') }}" @click="mobileMenuOpen = false" class="shine-button mt-3 block w-full rounded-lg bg-slate-950 px-4 py-2 text-center text-xs font-semibold text-white shadow-sm ring-1 ring-white/10 transition hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-white/40">
-                                                    {{ $locale === 'ne' ? 'लगइन' : 'Login' }}
-                                                </a>
-                                            @endauth
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            @auth
-                                <a href="{{ route('dashboard') }}" class="shine-button hidden rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-red-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-white/40 sm:inline-flex">
-                                    {{ $locale === 'ne' ? 'ड्यासबोर्ड' : 'Dashboard' }}
-                                </a>
-                            @else
-                                <a href="{{ route('login') }}" class="shine-button hidden rounded-full bg-slate-950 px-4 py-1.5 text-xs font-semibold text-white shadow-sm ring-1 ring-white/10 transition hover:-translate-y-0.5 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-white/40 sm:inline-flex">
-                                    {{ $locale === 'ne' ? 'लगइन' : 'Login' }}
-                                </a>
-                            @endauth
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
+        <x-header />
 
         <main id="content">
             <section class="relative isolate overflow-hidden bg-slate-950" x-data="heroSlider({ slides: @js($heroSlides->values()->all()) })">
@@ -2195,7 +2076,7 @@
             <script>
                 document.addEventListener('alpine:init', () => {
                     Alpine.data('infoModal', () => ({
-                        open: true,
+                        open: false,
                         close() {
                             this.open = false;
                         },
