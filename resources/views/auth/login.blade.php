@@ -29,7 +29,6 @@
         ? 'mailto:' . $department->email
         : (!empty($department?->phone) ? 'tel:' . preg_replace('/\s+/', '', $department->phone) : null);
     $supportLabel = !empty($department?->email) ? $department->email : ($department?->phone ?: null);
-    $heroBrandTitle = $locale === 'ne' ? 'IT विभाग व्यवस्थापन प्रणाली' : 'IT Department Management System';
 
     $contactItems = [
         [
@@ -54,7 +53,7 @@
 @endpush
 
 @section('content')
-    <div class="auth-page auth-page-login">
+    <div class="auth-page">
         <div class="auth-shell">
             <section class="auth-hero">
                 <div class="auth-hero-content">
@@ -64,7 +63,7 @@
                         </div>
                         <div class="auth-brand-copy">
                             <span class="auth-brand-kicker">{{ $departmentShort }}</span>
-                            <div class="auth-brand-title">{{ $heroBrandTitle }}</div>
+                            <div class="auth-brand-title">{{ $departmentName }} {{ $locale === 'ne' ? 'व्यवस्थापन प्रणाली' : 'Management System' }}</div>
                         </div>
                     </div>
 
@@ -227,18 +226,14 @@
                                 </a>
                             @endif
 
-                            <p class="auth-support-note">
-                                {{ $locale === 'ne' ? 'सहायता चाहिन्छ?' : 'Need help?' }}
-                                @if ($supportHref && $supportLabel)
+                            @if ($supportHref && $supportLabel)
+                                <p class="auth-support-note">
+                                    {{ $locale === 'ne' ? 'सहायता चाहिन्छ?' : 'Need help?' }}
                                     <a href="{{ $supportHref }}" class="auth-link">
                                         {{ $locale === 'ne' ? 'IT सहायता सम्पर्क गर्नुहोस्' : 'Contact IT Support' }}
                                     </a>
-                                @else
-                                    <span class="auth-support-highlight">
-                                        {{ $locale === 'ne' ? 'IT सहायता सम्पर्क गर्नुहोस्' : 'Contact IT Support' }}
-                                    </span>
-                                @endif
-                            </p>
+                                </p>
+                            @endif
 
                             <a href="{{ $homeUrl }}" class="auth-back-link">&#8592; {{ $locale === 'ne' ? 'मुखपृष्ठमा फर्कनुहोस्' : 'Back to Home' }}</a>
 
