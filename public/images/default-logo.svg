@@ -1,1 +1,6 @@
-<svg xmlns=" http://www.w3.org/2000/svg\ viewBox=\0 0 200 200\ width=\200\ height=\200\><rect width=\200\ height=\200\ fill=\#dc2626\ rx=\20\/><text x=\100\ y=\120\ font-family=\Arial sans-serif\ font-size=\80\ font-weight=\bold\ fill=\white\ text-anchor=\middle\>IT</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" fill="none">
+  <circle cx="100" cy="100" r="92" fill="#fff5f5" stroke="#f9caca" stroke-width="4"/>
+  <circle cx="100" cy="100" r="72" fill="#ffffff" stroke="#dc2626" stroke-width="5"/>
+  <path d="M100 49l11.45 23.2 25.6 3.72-18.52 18.06 4.37 25.49L100 107.43 77.1 119.47l4.37-25.49L62.95 75.92l25.6-3.72L100 49Z" fill="#dc2626"/>
+  <text x="100" y="154" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#991b1b">IT</text>
+</svg>

@@ -1,0 +1,73 @@
+services:
+  # Laravel Application
+  app:
+    build: .
+    image: laravel-app-npm
+    container_name: laravel-app
+    restart: unless-stopped
+    working_dir: /app
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=dit
+      - DB_USERNAME=laravel
+      - DB_PASSWORD=laravel_password
+    volumes:
+      - ./:/app
+    depends_on:
+      - mysql
+    networks:
+      - laravel-network
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:1.21-alpine
+    container_name: laravel-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/app
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - app
+    networks:
+      - laravel-network
+
+  # MySQL Database
+  mysql:
+    image: mysql:5.7
+    container_name: laravel-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: dit
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_PASSWORD: laravel_password
+      MYSQL_USER: laravel
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'false'
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - laravel-network
+
+  # Redis Cache (Optional)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: laravel-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - laravel-network
+
+networks:
+  laravel-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local

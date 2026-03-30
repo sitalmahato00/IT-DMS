@@ -111,7 +111,7 @@
     }
 @endphp
 
-<header x-data="{ mobileMenuOpen: false }" class="sticky top-0 z-[1100] border-b border-red-100/80 bg-white/95 shadow-[0_16px_38px_rgba(15,23,42,0.08)] backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
+<header x-data="{ mobileMenuOpen: false }" class="sticky top-0 isolate z-[2200] border-b border-red-100/80 bg-white shadow-[0_16px_38px_rgba(15,23,42,0.08)] dark:border-slate-800 dark:bg-slate-950">
     <div class="bg-red-600 text-white dark:bg-red-700">
         <div class="flex w-full items-center justify-between gap-4 px-4 py-2 text-[11px] font-semibold sm:px-6 lg:px-8">
             <div class="flex min-w-0 items-center gap-2">

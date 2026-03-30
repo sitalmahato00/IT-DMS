@@ -229,6 +229,7 @@
 
         .landing-section {
             position: relative;
+            scroll-margin-top: 8.5rem;
         }
 
         .landing-stage {
@@ -1023,9 +1024,11 @@
             {{ $locale === 'ne' ? 'मुख्य सामग्रीमा जानुहोस्' : 'Skip to content' }}
         </a>
 
-        <x-header />
+        <div class="relative isolate z-[2200]">
+            <x-header />
+        </div>
 
-        <main id="content">
+        <main id="content" class="relative z-0">
             <section id="home" class="relative isolate overflow-hidden bg-slate-950" x-data="heroSlider({ slides: @js($heroSlides->values()->all()) })">
                 <div class="absolute inset-0 -z-10">
                     <div class="relative h-full w-full">
