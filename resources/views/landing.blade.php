@@ -1024,9 +1024,7 @@
             {{ $locale === 'ne' ? 'मुख्य सामग्रीमा जानुहोस्' : 'Skip to content' }}
         </a>
 
-        <div class="relative isolate z-[2200]">
-            <x-header />
-        </div>
+        <x-header />
 
         <main id="content" class="relative z-0">
             <section id="home" class="relative isolate overflow-hidden bg-slate-950" x-data="heroSlider({ slides: @js($heroSlides->values()->all()) })">
