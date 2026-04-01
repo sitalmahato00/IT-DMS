@@ -97,12 +97,13 @@ class ParentController extends Controller
         // Generate a temporary password
         $password = Str::random(10);
 
-        $user = User::create([
+        $user = new User([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($password),
-            'role' => 'parent',
         ]);
+        $user->role = 'parent';
+        $user->save();
 
         // Create parent record with profile fields
         $parent = $user->parent()->create([

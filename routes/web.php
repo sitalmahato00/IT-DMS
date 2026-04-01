@@ -198,7 +198,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->post('students/{id}/move-
 Route::middleware(['auth', 'verified', 'role:admin'])->get('teachers/print-list', [\App\Http\Controllers\Admin\TeacherController::class, 'printList'])->name('teachers.print-list');
 Route::middleware(['auth', 'verified', 'role:admin'])->get('parents/print-list', [\App\Http\Controllers\Admin\ParentController::class, 'printList'])->name('parents.print-list');
 Route::middleware(['auth', 'verified', 'role:admin'])->get('courses/print-list', [\App\Http\Controllers\Admin\CourseController::class, 'printList'])->name('courses.print-list');
-Route::get('alumni-students/print-list', [StudentController::class, 'printAlumniList'])->name('alumni-students.print-list');
+Route::middleware(['auth', 'verified', 'role:admin'])->get('alumni-students/print-list', [StudentController::class, 'printAlumniList'])->name('alumni-students.print-list');
 
 // Admin Routes
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

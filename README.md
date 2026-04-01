@@ -308,7 +308,16 @@ IT-DMS/
 
 ---
 
-## � Recent Updates & Improvements (March 2026)
+## ✨ Recent Updates & Improvements (April 2026)
+
+### Comprehensive Features Documentation
+✅ **Complete Feature Mapping by User Role**
+- Documented all features for Admin, Teacher, Student, and Parent roles
+- Created detailed feature tables with module breakdown for each role
+- Added feature accessibility matrix showing permission levels
+- Clarified CRUD vs read-only access for each role
+- Created quick reference guide for feature availability across all 4 user roles
+- Total of **80+ distinct features** now documented with role-specific access levels
 
 ### Database Migrations Standardization
 ✅ **All 27 migration files** now follow proper Laravel naming convention:
@@ -429,6 +438,120 @@ IT-DMS/
 - User action logging
 - Data modification history
 - Security audit trails
+
+---
+
+## 👥 Complete Features by User Role
+
+### 📊 ADMIN - Features & Capabilities
+
+| Category | Features |
+|----------|----------|
+| **Dashboard** | System analytics, attendance charts, quick statistics, user activity overview |
+| **User Management** | Create/Edit/Delete users, assign roles, toggle active status, bulk operations |
+| **Student Management** | CRUD operations, enrollment management, move to alumni, print profiles, export data (CSV/Excel) |
+| **Teacher Management** | CRUD operations, subject assignment, print records, export data (CSV/Excel) |
+| **Parent Management** | Link parents to students, manage contact info, print records, export data (CSV/Excel) |
+| **Academic Structure** | Manage semesters (create/edit/toggle/set active), manage courses/subjects, set credit hours |
+| **Attendance Management** | Mark attendance, edit/delete records, bulk operations, lab attendance tracking, print/export reports |
+| **Examination System** | Create exams, schedule multiple types (Midterm/Final/Assessment), manage exam marks, upload marks (bulk/single) |
+| **Marks Management** | View all marks, search by criteria, dynamic marks entry, clear marks, student-wise detail view |
+| **Marksheet Generation** | Generate marksheets, search student records, print/export marksheets (PDF/Excel) |
+| **Timetable Management** | Create/edit/delete time slots, conflict detection, apply breaks/overrides, lock/unlock slots, print/export (PDF/Excel) |
+| **Elective Management** | Assign electives to students, approve/reject/withdraw enrollments, toggle enrollment status |
+| **Notice Board** | Post announcements, edit/delete notices, toggle publish status, bilingual support (EN/NE) |
+| **Gallery Management** | Upload event photos, categorize images, delete/archive, toggle visibility |
+| **Study Materials** | Upload study resources, organize by subject/semester, manage file access, delete outdated materials |
+| **Reports & Analytics** | Attendance trends, performance analysis, export reports (CSV/PDF), print analytics |
+| **Audit Logging** | View system activity log, track user actions, see data modification history for security compliance |
+| **Department Settings** | Configure department info (logo, name, contact), set location/map, manage leadership info |
+| **System Settings** | Configure application settings, manage system configuration, cache management |
+
+---
+
+### 👨‍🏫 TEACHER - Features & Capabilities
+
+| Category | Features |
+|----------|----------|
+| **Dashboard** | Class summary, quick stats, assigned subjects, student overview |
+| **Profile Management** | View and update personal profile, change password, configure preferences |
+| **Subject Management** | View assigned subjects, export subject list, print curriculum details |
+| **Student Management** | View enrolled students per subject, filter by semester, export student data (CSV/Excel), print student list |
+| **Attendance Marking** | Mark daily attendance, select attendance type (Present/Absent/Late/Leave), bulk mark all students |
+| **Lab Attendance** | Track practical session attendance, mark lab attendance separately, bulk operations |
+| **Attendance Reports** | View attendance statistics, print attendance sheets, export reports (CSV/Excel), student attendance trends |
+| **Marks Entry** | Enter marks for multiple exams, update existing marks, manage different mark types (Internal/Assessment/Final) |
+| **Exam Management** | View assigned exams, upload marks (single/bulk), filter by exam type, view student marks per exam |
+| **Marksheet Viewing** | Access comprehensive marksheet portal, search by student/semester, view grade details, print/export marksheets |
+| **Study Materials** | Upload course materials, organize by subject, manage file access, track downloads |
+| **Notices** | Post class announcements, create bilingual notices (EN/NE), publish to students |
+| **Timetable** | View assigned time slots, print personal timetable, check classroom schedule |
+| **Reports** | Generate attendance reports, view performance analytics, export data for analysis |
+| **Notifications** | View notifications, message alerts, parameter change notifications |
+| **Export/Print** | Multiple export formats (CSV/Excel/PDF), print-ready layouts, bulk operations support |
+
+---
+
+### 🎓 STUDENT - Features & Capabilities
+
+| Category | Features |
+|----------|----------|
+| **Dashboard** | Personal stats, quick links, academic summary, alerts |
+| **Profile Management** | View and update personal information, change password, manage account settings |
+| **Course Management** | View enrolled courses for current semester, see course details, access subject information |
+| **Attendance Tracking** | View attendance percentage, subject-wise attendance summary, track low attendance alerts |
+| **Results & Marks** | View exam results, see marks by exam type, check calculated grades, view GPA |
+| **Marksheet Access** | Download personal marksheet, view semester-wise results, check grade progression |
+| **Timetable** | View class schedule, filter by semester, print personal timetable |
+| **Study Materials** | Access uploaded materials by subject, download resources, view material list organized by semester |
+| **Notices** | Read department announcements, view bilingual notices (EN/NE), receive important alerts |
+| **Faculty Directory** | View teacher information, see contact details, access department faculty |
+
+---
+
+### 👨‍👩‍👧 PARENT - Features & Capabilities
+
+| Category | Features |
+|----------|----------|
+| **Dashboard** | Child's performance overview, quick statistics, important updates, alerts |
+| **Children Management** | View linked children, see child details, manage multiple children |
+| **Attendance Monitoring** | View child's attendance percentage, check subject-wise attendance, receive low attendance alerts |
+| **Results Tracking** | View exam results, see marks by exam/subject, track grade progression, view semester reports |
+| **Course Information** | See enrolled courses, view course details, understand curriculum |
+| **Notices & Updates** | Read department announcements, receive important notifications |
+| **Communication** | Check student-teacher communication, view parent-teacher messages |
+| **Events** | View gallery of department events, check activity updates |
+| **Reports** | Print child's performance report, export attendance summary, download marksheet |
+| **Profile Management** | Update contact information, manage account preferences, change password |
+
+---
+
+## 📱 Feature Accessibility Matrix
+
+```
+┌─────────────────────────────┬──────────┬─────────┬──────────┬────────┐
+│ Feature Module              │ Admin    │ Teacher │ Student  │ Parent │
+├─────────────────────────────┼──────────┼─────────┼──────────┼────────┤
+│ Dashboard                   │ ✅ Full  │ ✅ Full │ ✅ Full  │ ✅ Full│
+│ User Management             │ ✅ Full  │ ❌ None │ ❌ None  │ ❌ None│
+│ Student Management          │ ✅ Full  │ ✅ View │ ✅ Self  │ ✅ Own │
+│ Attendance Marking          │ ✅ Full  │ ✅ Full │ ❌ None  │ ❌ None│
+│ Attendance Viewing          │ ✅ View All│✅ View All│✅ Self  │✅ Own │
+│ Marks Entry                 │ ✅ Full  │ ✅ Full │ ❌ None  │ ❌ None│
+│ Marks/Results Viewing       │ ✅ View All│✅ All  │ ✅ Self  │ ✅ Own │
+│ Exam Management             │ ✅ Full  │ ✅ View │ ✅ View  │ ✅ View│
+│ Timetable Management        │ ✅ Full  │ ❌ None │ ❌ View  │ ❌ View│
+│ Notice Creation             │ ✅ Full  │ ✅ Full │ ❌ None  │ ❌ None│
+│ Notice Viewing              │ ✅ Full  │ ✅ Full │ ✅ Full  │ ✅ Full│
+│ Study Materials Upload      │ ✅ Full  │ ✅ Full │ ✅ View  │ ✅ View│
+│ Gallery Management          │ ✅ Full  │ ✅ View │ ✅ View  │ ✅ View│
+│ Reports & Analytics         │ ✅ Full  │ ✅ Own  │ ✅ Self  │ ✅ Own │
+│ Audit Logs                  │ ✅ Full  │ ❌ None │ ❌ None  │ ❌ None│
+│ Department Settings         │ ✅ Full  │ ❌ None │ ❌ None  │ ❌ None│
+└─────────────────────────────┴──────────┴─────────┴──────────┴────────┘
+```
+
+**Legend**: ✅ = Available | ❌ = Not Available | View = Read-only | Full = CRUD Operations | own = Own records only
 
 ---
 
@@ -588,8 +711,8 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ## ✨ Version
 
-**Current Version**: 1.1.0  
-**Last Updated**: March 28, 2026  
+**Current Version**: 1.2.0  
+**Last Updated**: April 1, 2026  
 **Status**: Production Ready
 
 ### Version History

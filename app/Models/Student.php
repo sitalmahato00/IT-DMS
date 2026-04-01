@@ -68,6 +68,14 @@ class Student extends Model
     }
 
     /**
+     * Get legacy marks for this student.
+     */
+    public function marks()
+    {
+        return $this->hasMany(Mark::class, 'student_id');
+    }
+
+    /**
      * Get attendance percentage for this student
      */
     public function getAttendancePercentage($subjectId = null, $attendanceType = 'class')

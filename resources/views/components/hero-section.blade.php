@@ -1,7 +1,7 @@
 @props([
     'description' => 'IT Department Management System (IT-DMS) is a comprehensive academic management solution designed to streamline administrative tasks, improve communication, and enhance the learning experience.',
     'primaryBtnText' => 'Get Started',
-    'primaryBtnUrl' => '/register',
+    'primaryBtnUrl' => '/login',
     'secondaryBtnText' => 'Learn More',
     'secondaryBtnUrl' => '#about',
     'imageSrc' => '/images/hero-image.jpg',

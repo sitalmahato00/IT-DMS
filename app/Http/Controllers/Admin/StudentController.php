@@ -312,12 +312,13 @@ class StudentController extends Controller
 
             $password = Str::random(10);
 
-            $user = User::create([
+            $user = new User([
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($password),
-                'role' => 'student',
             ]);
+            $user->role = 'student';
+            $user->save();
 
             $student = Student::create([
                 'user_id' => $user->id,
@@ -1011,28 +1012,32 @@ class StudentController extends Controller
     public function apiGetStudent($id)
     {
         try {
-            $user = User::findOrFail($id);
+            $user = User::where('role', 'student')
+                ->with(['student.marks.subject', 'student.attendanceRecords'])
+                ->findOrFail($id);
             $student = $user->student;
             
             if (!$student) {
                 return response()->json(['error' => 'Student not found'], 404);
             }
 
-            // Get college
-            $college = $student->college ?? Auth::user()->college;
+            $college = Department::first();
 
-            // Get marks
-            $marks = $student->marks()->get()->map(function($mark) {
+            $marks = $student->marks->map(function ($mark) {
                 return [
-                    'subject' => $mark->subject ?? 'Subject',
-                    'obtained_marks' => $mark->obtained_marks ?? 0,
-                    'total_marks' => $mark->total_marks ?? 100,
+                    'subject' => $mark->subject?->subject_name ?? 'Subject',
+                    'obtained_marks' => $mark->marks_obtained ?? 0,
+                    'total_marks' => $mark->full_marks ?? 100,
+                    'percentage' => $mark->percentage ?? 0,
                 ];
-            });
+            })->values();
 
-            // Get attendance summary
-            $totalDays = $student->attendanceRecords()->where('attendance_type', 'class')->count();
-            $presentDays = $student->attendanceRecords()->where('attendance_type', 'class')->where('status', 'present')->count();
+            $classAttendance = $student->attendanceRecords
+                ->where('attendance_type', 'class')
+                ->values();
+
+            $totalDays = $classAttendance->count();
+            $presentDays = $classAttendance->where('status', 'present')->count();
 
             return response()->json([
                 'success' => true,
@@ -1064,8 +1069,12 @@ class StudentController extends Controller
                     'present_days' => $presentDays,
                 ],
             ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['error' => 'Student not found'], 404);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            report($e);
+
+            return response()->json(['error' => 'Unable to load student record.'], 500);
         }
     }
 }

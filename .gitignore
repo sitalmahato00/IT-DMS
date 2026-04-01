@@ -22,6 +22,8 @@
 /storage/framework/sessions
 /storage/framework/views
 /storage/logs
+/bootstrap/cache/*.php
+!/bootstrap/cache/.gitignore
 /bootstrap/cache/*.tmp
 /vendor
 Homestead.json

@@ -3,19 +3,20 @@
     <div class="px-6 py-0 h-16">
         <div class="flex items-center justify-between gap-4 h-full">
             <div class="flex-1 min-w-0">
-                <div class="hidden md:flex items-center">
-                    <form id="headerSearchForm" class="relative w-full max-w-2xl" role="search">
-                        <label for="headerSearchInput" class="sr-only">{{ __('Search') }}</label>
-                        <input
-                            id="headerSearchInput"
-                            type="search"
-                            placeholder="{{ __('Search...') }}"
-                            class="w-full px-4 py-2 pl-10 pr-4 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0037] focus:border-transparent bg-white text-slate-900 placeholder:text-[#FF6B7C] shadow-sm transition duration-150 dark:bg-slate-900/80 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400"
-                        >
-                        <button type="submit" class="absolute left-2.5 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-100 transition" aria-label="{{ __('Search') }}">
-                            <i class="bi bi-search text-[#FF0037] text-sm"></i>
-                        </button>
-                    </form>
+                <!-- Quick Action Buttons -->
+                <div class="hidden lg:flex items-center gap-2">
+                    <a href="{{ route('admin.students') }}" class="px-3 py-1.5 text-xs font-medium text-white bg-white/15 border border-white/30 rounded-lg hover:bg-white/25 transition" title="{{ __('View Students') }}">
+                        <i class="bi bi-people-fill mr-1"></i> {{ __('Students') }}
+                    </a>
+                    <a href="{{ route('admin.teachers') }}" class="px-3 py-1.5 text-xs font-medium text-white bg-white/15 border border-white/30 rounded-lg hover:bg-white/25 transition" title="{{ __('View Teachers') }}">
+                        <i class="bi bi-person-chalkboard mr-1"></i> {{ __('Teachers') }}
+                    </a>
+                    <a href="{{ route('admin.courses') }}" class="px-3 py-1.5 text-xs font-medium text-white bg-white/15 border border-white/30 rounded-lg hover:bg-white/25 transition" title="{{ __('View Courses') }}">
+                        <i class="bi bi-book-fill mr-1"></i> {{ __('Courses') }}
+                    </a>
+                    <a href="{{ route('admin.attendance') }}" class="px-3 py-1.5 text-xs font-medium text-white bg-white/15 border border-white/30 rounded-lg hover:bg-white/25 transition" title="{{ __('Attendance') }}">
+                        <i class="bi bi-check-circle-fill mr-1"></i> {{ __('Attendance') }}
+                    </a>
                 </div>
             </div>
 
@@ -137,8 +138,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         const localeSelect = document.getElementById('locale-select');
         const notifDropdown = document.getElementById('notifDropdown');
-        const headerSearchForm = document.getElementById('headerSearchForm');
-        const headerSearchInput = document.getElementById('headerSearchInput');
         if (localeSelect) {
             localeSelect.addEventListener('change', function() {
                 const locale = this.value;
@@ -160,40 +159,6 @@
                 form.appendChild(localeInput);
                 document.body.appendChild(form);
                 form.submit();
-            });
-        }
-
-        if (headerSearchForm && headerSearchInput) {
-            const filterForm = document.getElementById('filterForm');
-            const filterSearch = filterForm?.querySelector('input[name="search"], input[name="q"], input[name="query"]');
-            const initialUrl = new URL(window.location.href);
-            headerSearchInput.value = (filterSearch?.value ?? initialUrl.searchParams.get('search') ?? initialUrl.searchParams.get('q') ?? '').toString();
-
-            headerSearchForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const query = (headerSearchInput.value || '').trim();
-
-                if (filterForm && filterSearch) {
-                    filterSearch.value = query;
-                    filterForm.submit();
-                    return;
-                }
-
-                const url = new URL(window.location.href);
-                url.searchParams.delete('page');
-
-                const paramName = filterSearch?.getAttribute('name')
-                    || (url.searchParams.has('q') ? 'q' : 'search');
-
-                if (!query) {
-                    url.searchParams.delete('search');
-                    url.searchParams.delete('q');
-                    window.location.href = url.toString();
-                    return;
-                }
-
-                url.searchParams.set(paramName, query);
-                window.location.href = url.toString();
             });
         }
 

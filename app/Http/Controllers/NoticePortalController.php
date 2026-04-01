@@ -6,6 +6,7 @@ use App\Models\Notice;
 use App\Models\Gallery;
 use App\Models\Subject;
 use App\Models\Department;
+use App\Support\SafeCache;
 use Illuminate\Http\Request;
 
 class NoticePortalController extends Controller
@@ -141,33 +142,36 @@ class NoticePortalController extends Controller
      */
     public function fetch(Request $request)
     {
-        $audience = $request->get('audience', 'all');
-        $page = $request->get('page', 1);
-        
-        $query = Notice::published()
-            ->with('creator', 'subject')
-            ->orderBy('is_important', 'desc')
-            ->orderBy('published_at_bs', 'desc')
-            ->orderBy('created_at', 'desc');
-        
-        if ($audience && $audience !== 'all') {
-            if ($audience === 'teacher') {
-                $audience = 'faculty';
+        $audience = (string) $request->get('audience', 'all');
+        $page = max(1, (int) $request->get('page', 1));
+        $ttl = (int) config('performance.public_data_cache_ttl', 300);
+        $cacheAudience = $audience === 'teacher' ? 'faculty' : $audience;
+
+        $payload = SafeCache::remember("notices:fetch:{$cacheAudience}:page:{$page}:v1", $ttl, function () use ($cacheAudience, $page) {
+            $query = Notice::published()
+                ->with('creator', 'subject')
+                ->orderBy('is_important', 'desc')
+                ->orderBy('published_at_bs', 'desc')
+                ->orderBy('created_at', 'desc');
+
+            if ($cacheAudience !== '' && $cacheAudience !== 'all') {
+                $query->where(function ($q) use ($cacheAudience) {
+                    $q->where('audience', $cacheAudience)
+                        ->orWhere('audience', 'all');
+                });
             }
-            $query->where(function($q) use ($audience) {
-                $q->where('audience', $audience)
-                  ->orWhere('audience', 'all');
-            });
-        }
-        
-        $notices = $query->paginate(6, ['*'], 'page', $page);
-        
-        return response()->json([
-            'notices' => $notices->items(),
-            'current_page' => $notices->currentPage(),
-            'last_page' => $notices->lastPage(),
-            'has_more' => $notices->hasMorePages(),
-        ]);
+
+            $notices = $query->paginate(6, ['*'], 'page', $page);
+
+            return [
+                'notices' => $notices->items(),
+                'current_page' => $notices->currentPage(),
+                'last_page' => $notices->lastPage(),
+                'has_more' => $notices->hasMorePages(),
+            ];
+        });
+
+        return response()->json($payload);
     }
     
     /**
@@ -175,12 +179,18 @@ class NoticePortalController extends Controller
      */
     public function show($id)
     {
-        $notice = Notice::with('creator', 'subject')->findOrFail($id);
-        
-        return response()->json([
-            'notice' => $notice,
-            'audience_text' => $notice->audience_text,
-            'formatted_date' => $notice->formatted_date,
-        ]);
+        $ttl = (int) config('performance.public_data_cache_ttl', 300);
+
+        $payload = SafeCache::remember("notices:show:{$id}:v1", $ttl, function () use ($id) {
+            $notice = Notice::with('creator', 'subject')->findOrFail($id);
+
+            return [
+                'notice' => $notice,
+                'audience_text' => $notice->audience_text,
+                'formatted_date' => $notice->formatted_date,
+            ];
+        });
+
+        return response()->json($payload);
     }
 }

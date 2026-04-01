@@ -151,8 +151,31 @@
         }
     });
 
-    // Language switcher
-    document.getElementById('locale-select').addEventListener('change', function() {
-        window.location.href = '{{ route("language.switch") }}?lang=' + this.value;
-    });
+    const localeSelect = document.getElementById('locale-select');
+    if (localeSelect) {
+        localeSelect.addEventListener('change', function() {
+            const form = document.createElement('form');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+
+            form.method = 'POST';
+            form.action = '{{ route("language.switch") }}';
+
+            if (csrfToken) {
+                const csrfField = document.createElement('input');
+                csrfField.type = 'hidden';
+                csrfField.name = '_token';
+                csrfField.value = csrfToken.getAttribute('content');
+                form.appendChild(csrfField);
+            }
+
+            const localeField = document.createElement('input');
+            localeField.type = 'hidden';
+            localeField.name = 'locale';
+            localeField.value = this.value;
+            form.appendChild(localeField);
+
+            document.body.appendChild(form);
+            form.submit();
+        });
+    }
 </script>

@@ -53,7 +53,7 @@
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Select Course</option>
                     @forelse($courses as $course)
-                        <option value="{{ $course->subject_name }}">{{ $course->subject_name }} ({{ $course->subject_code }})</option>
+                        <option value="{{ $course->id }}">{{ $course->subject_name }} ({{ $course->subject_code }})</option>
                     @empty
                         <option value="">No courses available</option>
                     @endforelse
@@ -67,8 +67,7 @@
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="all">Everyone (All)</option>
                     <option value="students">Students Only</option>
-                    <option value="teachers">Teachers Only</option>
-                    <option value="admins">Admins Only</option>
+                    <option value="faculty">Faculty Only</option>
                 </select>
                 @error('visibility')<p class="text-blue-600 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
@@ -126,7 +125,7 @@ function openEditMaterialModal(materialId) {
     document.getElementById('editTitle').value = material.title || '';
     document.getElementById('editSemester').value = material.semester || '';
     document.getElementById('editDocumentType').value = material.document_type || '';
-    document.getElementById('editCourse').value = material.course || '';
+    document.getElementById('editCourse').value = material.course_id || '';
     document.getElementById('editVisibility').value = material.visibility || 'all';
     document.getElementById('editDescription').value = material.description || '';
     

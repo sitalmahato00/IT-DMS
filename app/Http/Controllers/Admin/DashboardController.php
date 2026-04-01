@@ -183,6 +183,19 @@ class DashboardController extends Controller
         // Get the authenticated user
         $user = auth()->user();
 
+        $dashboardOverview = [
+            'total_users' => $totalStudents + $teachers + $parents + $alumni,
+            'student_teacher_ratio' => $teachers > 0 ? round($totalStudents / $teachers, 1) : null,
+            'upcoming_exam_count' => $upcomingExams->count(),
+            'today_class_count' => $todayClasses->count(),
+            'low_attendance_classes' => $todayClasses->where('attendance_rate', '<', 75)->count(),
+            'healthy_attendance_classes' => $todayClasses->where('attendance_rate', '>=', 75)->count(),
+            'unread_notifications' => $user ? $user->unreadNotifications()->count() : 0,
+            'pending_elective_approvals' => ElectiveEnrollment::where('status', 'pending')->count(),
+            'today_notice_count' => Notice::whereDate('created_at', Carbon::today())->count(),
+            'recent_activity_count' => $recentActivities->count(),
+        ];
+
         return view('admin.dashboard', compact(
             'user',
             'totalStudents',
@@ -201,7 +214,8 @@ class DashboardController extends Controller
             'newStudents',
             'recentAttendance',
             'upcomingExams',
-            'todayClasses'
+            'todayClasses',
+            'dashboardOverview'
         ));
     }
 

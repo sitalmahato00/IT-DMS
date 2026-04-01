@@ -119,11 +119,19 @@ class StudyMaterial extends Model
     }
 
     /**
-     * Get the teacher who uploaded this material.
+     * Get the user who uploaded this material.
      */
     public function teacher()
     {
-        return $this->belongsTo(Teacher::class, 'teacher_id');
+        return $this->belongsTo(User::class, 'teacher_id');
+    }
+
+    /**
+     * Backward-compatible alias for the uploader relationship.
+     */
+    public function uploader()
+    {
+        return $this->teacher();
     }
 
     /**

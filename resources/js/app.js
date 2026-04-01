@@ -1,4 +1,3 @@
-console.log('app.js loaded');
 import './bootstrap';
 
 import Alpine from 'alpinejs';
@@ -145,7 +144,6 @@ window.openBsDatePicker = function (inputOrId) {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('DOMContentLoaded fired, initializing dark mode toggle');
     const ok = await ensureBsDatePickerLoaded();
     if (ok) initBsDatePicker();
 
@@ -240,21 +238,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     obs.observe(document.body, { childList: true, subtree: true });
 
-    // Locale selector: attach JS handler to navigate to locale route (uses data-base-url)
-    try {
-        const localeSelect = document.getElementById('locale-select');
-        if (localeSelect) {
-            const base = localeSelect.getAttribute('data-base-url') || '/locale';
-            localeSelect.addEventListener('change', function () {
-                if (!this.value) return;
-                const url = base.replace(/\/$/, '') + '/' + encodeURIComponent(this.value);
-                console.log('[Locale] navigating to', url);
-                window.location.href = url;
-            });
-        }
-    } catch (e) {
-        console.warn('Locale select init failed', e);
-    }
 });
 
 // Keep BS inputs displayed using Devanagari digits, but submit English digits to the server.

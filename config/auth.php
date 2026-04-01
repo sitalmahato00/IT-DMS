@@ -117,4 +117,17 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Self Registration
+    |--------------------------------------------------------------------------
+    |
+    | Public self-registration is disabled by default for this project because
+    | student, teacher, and parent accounts are typically provisioned by
+    | administrators. Enable it explicitly only when that workflow is desired.
+    |
+    */
+
+    'allow_self_registration' => env('AUTH_ALLOW_SELF_REGISTRATION', false),
+
 ];

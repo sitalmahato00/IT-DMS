@@ -98,12 +98,13 @@ class TeacherController extends Controller
 
         try {
             $user = DB::transaction(function () use ($data, $request, $password, &$storedPhotoPath) {
-                $user = User::create([
+                $user = new User([
                     'name' => $data['name'],
                     'email' => $data['email'],
                     'password' => Hash::make($password),
-                    'role' => 'teacher',
                 ]);
+                $user->role = 'teacher';
+                $user->save();
 
                 $teacher = $user->teacher()->create($this->buildTeacherPayload($data));
 
@@ -181,11 +182,10 @@ class TeacherController extends Controller
 
         try {
             DB::transaction(function () use ($user, $data, $request, &$storedPhotoPath) {
-                $user->update([
-                    'name' => $data['name'],
-                    'email' => $data['email'],
-                    'role' => 'teacher',
-                ]);
+                $user->name = $data['name'];
+                $user->email = $data['email'];
+                $user->role = 'teacher';
+                $user->save();
 
                 $teacher = $user->teacher;
 

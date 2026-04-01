@@ -2,7 +2,7 @@
     'title' => 'Ready to Transform Your Institution?',
     'description' => "Join hundreds of educational institutions that have already upgraded their management system with our comprehensive solution.",
     'primaryBtnText' => 'Get Started Now',
-    'primaryBtnUrl' => '/register',
+    'primaryBtnUrl' => '/login',
     'secondaryBtnText' => 'Contact Sales',
     'secondaryBtnUrl' => '#contact'
 ])
@@ -73,4 +73,3 @@
         </div>
     </div>
 </section>
-

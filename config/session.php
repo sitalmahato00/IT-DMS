@@ -18,7 +18,7 @@ return [
     |
     */
 
-'driver' => 'file',
+    'driver' => env('SESSION_DRIVER', 'database'),
 
     /*
     |--------------------------------------------------------------------------
@@ -114,7 +114,10 @@ return [
     |
     */
 
-    'lottery' => [2, 100],
+    'lottery' => array_map(
+        static fn (string $value): int => (int) trim($value),
+        explode(',', env('SESSION_LOTTERY', '2,100'))
+    ),
 
     /*
     |--------------------------------------------------------------------------
