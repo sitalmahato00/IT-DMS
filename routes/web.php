@@ -147,6 +147,15 @@ Route::middleware(['auth', 'verified', 'role:teacher'])->prefix('teacher')->name
 
 // Parent Profile Routes
 Route::middleware(['auth', 'verified', 'role:parent'])->prefix('parent')->name('parent.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Parent\ParentPortalController::class, 'dashboard'])->name('dashboard');
+    Route::get('/children', [\App\Http\Controllers\Parent\ParentPortalController::class, 'children'])->name('children');
+    Route::get('/attendance', [\App\Http\Controllers\Parent\ParentPortalController::class, 'attendance'])->name('attendance');
+    Route::get('/results', [\App\Http\Controllers\Parent\ParentPortalController::class, 'results'])->name('results');
+    Route::get('/courses', [\App\Http\Controllers\Parent\ParentPortalController::class, 'courses'])->name('courses');
+    Route::get('/notices', [\App\Http\Controllers\Parent\ParentPortalController::class, 'notices'])->name('notices');
+    Route::get('/communication', [\App\Http\Controllers\Parent\ParentPortalController::class, 'communication'])->name('communication');
+    Route::get('/events', [\App\Http\Controllers\Parent\ParentPortalController::class, 'events'])->name('events');
+    Route::get('/report/print', [\App\Http\Controllers\Parent\ParentPortalController::class, 'print'])->name('print');
     Route::get('/profile', [\App\Http\Controllers\Parent\ParentProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [\App\Http\Controllers\Parent\ParentProfileController::class, 'update'])->name('profile.update');
     Route::get('/export', [\App\Http\Controllers\Parent\ParentExportController::class, 'export'])->name('export');
@@ -156,11 +165,6 @@ Route::middleware(['auth', 'verified', 'role:parent'])->prefix('parent')->name('
 Route::get('/student', [\App\Http\Controllers\Student\StudentDashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:student'])
     ->name('student.dashboard');
-
-// Parent-facing dashboard
-Route::get('/parent', function () {
-    return view('parent.parentdashboard');
-})->middleware(['auth', 'verified', 'role:parent'])->name('parent.dashboard');
 
 // Teacher-facing dashboard
 Route::get('/teacher', [\App\Http\Controllers\Teacher\TeacherDashboardController::class, 'index'])
