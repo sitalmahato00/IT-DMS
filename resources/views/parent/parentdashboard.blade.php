@@ -102,7 +102,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs text-amber-600 dark:text-amber-300 font-semibold uppercase tracking-wide">{{ __('Children') }}</p>
-                        <p class="text-3xl font-bold text-amber-900 dark:text-amber-100 mt-2">0</p>
+                        <p class="text-3xl font-bold text-amber-900 dark:text-amber-100 mt-2">{{ $childrenCount ?? 0 }}</p>
                         <p class="text-xs text-amber-600 dark:text-amber-300 mt-2">{{ __('Enrolled children') }}</p>
                     </div>
                     <div class="w-12 h-12 bg-amber-200 dark:bg-amber-700 rounded-lg flex items-center justify-center text-amber-600 dark:text-amber-300">
@@ -116,7 +116,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs text-green-600 dark:text-green-300 font-semibold uppercase tracking-wide">{{ __('Overall Attendance') }}</p>
-                        <p class="text-3xl font-bold text-green-900 dark:text-green-100 mt-2">0%</p>
+                        <p class="text-3xl font-bold text-green-900 dark:text-green-100 mt-2">{{ round($overallAttendance ?? 0, 1) }}%</p>
                         <p class="text-xs text-green-600 dark:text-green-300 mt-2">{{ __('All children average') }}</p>
                     </div>
                     <div class="w-12 h-12 bg-green-200 dark:bg-green-700 rounded-lg flex items-center justify-center text-green-600 dark:text-green-300">
@@ -130,7 +130,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs text-blue-600 dark:text-blue-300 font-semibold uppercase tracking-wide">{{ __('New Notices') }}</p>
-                        <p class="text-3xl font-bold text-blue-900 dark:text-blue-100 mt-2">0</p>
+                        <p class="text-3xl font-bold text-blue-900 dark:text-blue-100 mt-2">{{ $unreadNotices ?? 0 }}</p>
                         <p class="text-xs text-blue-600 dark:text-blue-300 mt-2">{{ __('Unread notices') }}</p>
                     </div>
                     <div class="w-12 h-12 bg-blue-200 dark:bg-blue-700 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-300">
@@ -151,7 +151,7 @@
                 <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('Child Profile') }}</h3>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('View your child\'s information') }}</p>
-            <a href="#" class="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 text-sm font-medium">
+            <a href="{{ route('parent.children.index') }}" class="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 text-sm font-medium">
                 {{ __('View') }} <i class="bi bi-arrow-right text-xs"></i>
             </a>
         </div>
@@ -164,7 +164,7 @@
                 <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('Attendance') }}</h3>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('Check attendance records') }}</p>
-            <a href="#" class="inline-flex items-center gap-2 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 text-sm font-medium">
+            <a href="{{ route('parent.attendance.index') }}" class="inline-flex items-center gap-2 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 text-sm font-medium">
                 {{ __('View') }} <i class="bi bi-arrow-right text-xs"></i>
             </a>
         </div>
@@ -177,7 +177,7 @@
                 <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('Results') }}</h3>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('View examination results') }}</p>
-            <a href="#" class="inline-flex items-center gap-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 text-sm font-medium">
+            <a href="{{ route('parent.marks.index') }}" class="inline-flex items-center gap-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 text-sm font-medium">
                 {{ __('View') }} <i class="bi bi-arrow-right text-xs"></i>
             </a>
         </div>
@@ -190,7 +190,7 @@
                 <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('Notices') }}</h3>
             </div>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('Stay updated with announcements') }}</p>
-            <a href="#" class="inline-flex items-center gap-2 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 text-sm font-medium">
+            <a href="{{ route('parent.notices.index') }}" class="inline-flex items-center gap-2 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 text-sm font-medium">
                 {{ __('View') }} <i class="bi bi-arrow-right text-xs"></i>
             </a>
         </div>

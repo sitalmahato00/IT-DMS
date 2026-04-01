@@ -49,6 +49,14 @@ RUN mkdir -p /app/storage /app/bootstrap/cache && \
     chown -R www-data:www-data /app /app/storage /app/bootstrap/cache && \
     chmod +x /usr/local/bin/docker-app-entrypoint /usr/local/bin/docker-vite-start
 
+# Configure PHP-FPM with increased limits
+RUN echo "[www]" > /usr/local/etc/php-fpm.d/99-custom.conf && \
+    echo "pm.max_children = 20" >> /usr/local/etc/php-fpm.d/99-custom.conf && \
+    echo "pm.start_servers = 10" >> /usr/local/etc/php-fpm.d/99-custom.conf && \
+    echo "pm.min_spare_servers = 5" >> /usr/local/etc/php-fpm.d/99-custom.conf && \
+    echo "pm.max_spare_servers = 15" >> /usr/local/etc/php-fpm.d/99-custom.conf && \
+    echo "pm.max_requests = 100" >> /usr/local/etc/php-fpm.d/99-custom.conf
+
 # Install composer dependencies
 RUN composer install --no-interaction --optimize-autoloader && \
     npm install

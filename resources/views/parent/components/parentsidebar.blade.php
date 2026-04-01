@@ -28,43 +28,43 @@
                 </a>
             </li>
             <li>
-                <a href="#" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600 rounded text-sm transition duration-300">
+                <a href="{{ route('parent.children.index') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('parent.children.*') ? 'bg-amber-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-mortarboard text-xs"></i>
                     <span>{{ __("My Child") }}</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600 rounded text-sm transition duration-300">
+                <a href="{{ route('parent.attendance.index') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('parent.attendance.*') ? 'bg-amber-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-calendar-check text-xs"></i>
                     <span>{{ __("Attendance") }}</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600 rounded text-sm transition duration-300">
+                <a href="{{ route('parent.marks.index') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('parent.marks.*') ? 'bg-amber-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-graph-up text-xs"></i>
                     <span>{{ __("Marks/Results") }}</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600 rounded text-sm transition duration-300">
+                <a href="{{ route('parent.courses.index') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('parent.courses.*') ? 'bg-amber-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-file-earmark text-xs"></i>
                     <span>{{ __("Courses") }}</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600 rounded text-sm transition duration-300">
+                <a href="{{ route('parent.notices.index') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('parent.notices.*') ? 'bg-amber-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-bell text-xs"></i>
                     <span>{{ __("Notices") }}</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600 rounded text-sm transition duration-300">
+                <a href="{{ route('parent.communication.index') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('parent.communication.*') ? 'bg-amber-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-chat-dots text-xs"></i>
                     <span>{{ __("Communication") }}</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600 rounded text-sm transition duration-300">
+                <a href="{{ route('parent.events.index') }}" class="flex items-center gap-2 px-3 py-2 lg:py-1.5 {{ request()->routeIs('parent.events.*') ? 'bg-amber-600 text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600' }} rounded text-sm transition duration-300">
                     <i class="bi bi-calendar text-xs"></i>
                     <span>{{ __("Events") }}</span>
                 </a>

@@ -52,7 +52,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::WmpHHJfMEFJRRLeF',
+            '_route' => 'generated::ihUImBaDEcZhcg7t',
           ),
           1 => NULL,
           2 => 
@@ -71,7 +71,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::DQnZVZ2nBje5UwwT',
+            '_route' => 'generated::CmTe27JqzgfqKONa',
           ),
           1 => NULL,
           2 => 
@@ -90,7 +90,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::4wP0bfMH4OgWdXxO',
+            '_route' => 'generated::55btSfCNuXGxAtFk',
           ),
           1 => NULL,
           2 => 
@@ -110,7 +110,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::F5bTHGlRT8r7CBP4',
+            '_route' => 'generated::jXTDTBPVLFxX4qnz',
           ),
           1 => NULL,
           2 => 
@@ -1300,6 +1300,165 @@ app('router')->setCompiledRoutes(
           array (
             'GET' => 0,
             'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/parent/children' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.children.index',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/parent/attendance' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.attendance.index',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/parent/marks' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.marks.index',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/parent/courses' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.courses.index',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/parent/notices' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.notices.index',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/parent/events' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.events.index',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/parent/communication' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.communication.index',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      '/parent/communication/send' => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.communication.send',
+          ),
+          1 => NULL,
+          2 => 
+          array (
+            'POST' => 0,
           ),
           3 => NULL,
           4 => false,
@@ -3040,7 +3199,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::PWJNW8FJKVxX1jI0',
+            '_route' => 'generated::rqIJFymnxoLaNj4U',
           ),
           1 => NULL,
           2 => 
@@ -3076,7 +3235,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::IvljE6U2TegLToTf',
+            '_route' => 'generated::zWCWoeI4kD1nnOxW',
           ),
           1 => NULL,
           2 => 
@@ -3206,7 +3365,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::aJCQVWs5flL67Kmt',
+            '_route' => 'generated::HWsDFWF83siXyzia',
           ),
           1 => NULL,
           2 => 
@@ -3260,7 +3419,7 @@ app('router')->setCompiledRoutes(
     ),
     2 => 
     array (
-      0 => '{^(?|/a(?|pi/admin/students/([^/]++)(*:38)|dmin/(?|s(?|emesters/([^/]++)(?|(*:77)|/(?|toggle(*:94)|set\\-active(*:112))|(*:121))|tud(?|ents/([^/]++)(?|(*:152)|/(?|e(?|dit(*:171)|xam\\-report(*:190))|toggle(?|(*:208)|\\-alumni(*:224))|print(?|(*:241)|\\-detail(*:257))|json(*:270)|download(*:286))|(*:295))|y\\-material/(?|([^/]++)(?|/row(*:334)|(*:342))|download/([^/]++)(*:368)|([^/]++)(*:384)))|ubject\\-teacher/(?|([^/]++)(?|(*:424))|subject/([^/]++)(?|(*:452)|/available\\-teachers(*:480))|teacher/([^/]++)(?|(*:508)|/available\\-subjects(*:536))))|e(?|lectives/(?|([^/]++)/(?|approve(*:582)|reject(*:596)|withdraw(*:612))|student/([^/]++)(*:637)|([^/]++)(*:653))|xam/(?|([^/]++)(?|/edit\\-data(*:691)|(*:699))|assessment\\-numbers(*:727)|([^/]++)(?|(*:746)|/(?|toggle\\-status(*:772)|upload\\-marks(?|(*:796)|\\-ajax(*:810))))|marks/([^/]++)(*:835)|([^/]++)/s(?|tudents(?|(*:866)|\\-with\\-marks(*:887))|ubject(?|s(*:906)|\\-marks/([^/]++)(*:930)))|marks/([^/]++)(?|/edit(*:962)|(*:970))|convert\\-date(*:992)))|t(?|imetable/(?|([^/]++)(?|(*:1029))|break\\-overrides(*:1055)|([^/]++)/(?|toggle(*:1082)|lock(*:1095))|conflicts(*:1114)|print/([^/]++)(*:1137)|bulk/lock(*:1155))|eachers/([^/]++)(?|/(?|edit(*:1192)|print(*:1206)|download(*:1223))|(*:1233)))|parents/([^/]++)(?|/(?|edit(*:1271)|print(*:1285)|download(*:1302))|(*:1312))|a(?|ttendance/(?|([^/]++)(*:1347)|toggle(*:1362)|bulk\\-(?|update(*:1386)|delete(*:1401))|s(?|tudent(?|s(*:1425)|/([^/]++)/report(*:1450))|ubject\\-students(*:1476))|delete(*:1492)|print(?|(*:1509)|\\-list(*:1524))|export(*:1540))|udit\\-logs/([^/]++)(*:1569))|courses/(?|([^/]++)(?|(*:1601)|/(?|view(*:1618)|edit(*:1631))|(*:1641))|teachers(?|(*:1662)|/(?|([^/]++)(*:1683)|semester/([^/]++)(*:1709)))|([^/]++)/detail(*:1735))|marks/dynamic/(?|export/([^/]++)(*:1777)|student/([^/]++)(*:1802))|notice\\-board/(?|([^/]++)(?|(*:1840))|toggle\\-status(*:1864)|([^/]++)(*:1881))|gallery/(?|([^/]++)(?|(*:1913))|toggle\\-status(*:1937)|categories(*:1956))|department/hero\\-images/([^/]++)(*:1998)))|/department/about(?:/([^/]++))?(*:2040)|/res(?|ources/download/([^/]++)(*:2080)|et\\-password/([^/]++)(*:2110))|/notices/([^/]++)(*:2137)|/gallery/download/([^/]++)(*:2172)|/st(?|udent(?|/(?|courses/([^/]++)(*:2215)|attendance/([^/]++)(*:2243)|marks/([^/]++)(*:2266))|s/([^/]++)/move\\-to\\-alumni(*:2303))|orage/(.*)(?|(*:2326)))|/teacher/(?|s(?|ubjects/([^/]++)(*:2369)|tudy\\-materials/download/([^/]++)(*:2411))|marks/(?|([^/]++)(*:2438)|ex(?|ams(*:2455)|port(*:2468))|print(*:2483))|exams/(?|([^/]++)(?|(*:2513)|/(?|s(?|tudents(?|(*:2540)|\\-with\\-marks(*:2562))|ubject\\-marks/([^/]++)(*:2594))|upload\\-marks(?|(*:2620)|\\-ajax(*:2635))))|marks/([^/]++)(?|/edit(*:2669)|(*:2678)|(*:2687))))|/verify\\-email/([^/]++)/([^/]++)(*:2731))/?$}sDu',
+      0 => '{^(?|/a(?|pi/admin/students/([^/]++)(*:38)|dmin/(?|s(?|emesters/([^/]++)(?|(*:77)|/(?|toggle(*:94)|set\\-active(*:112))|(*:121))|tud(?|ents/([^/]++)(?|(*:152)|/(?|e(?|dit(*:171)|xam\\-report(*:190))|toggle(?|(*:208)|\\-alumni(*:224))|print(?|(*:241)|\\-detail(*:257))|json(*:270)|download(*:286))|(*:295))|y\\-material/(?|([^/]++)(?|/row(*:334)|(*:342))|download/([^/]++)(*:368)|([^/]++)(*:384)))|ubject\\-teacher/(?|([^/]++)(?|(*:424))|subject/([^/]++)(?|(*:452)|/available\\-teachers(*:480))|teacher/([^/]++)(?|(*:508)|/available\\-subjects(*:536))))|e(?|lectives/(?|([^/]++)/(?|approve(*:582)|reject(*:596)|withdraw(*:612))|student/([^/]++)(*:637)|([^/]++)(*:653))|xam/(?|([^/]++)(?|/edit\\-data(*:691)|(*:699))|assessment\\-numbers(*:727)|([^/]++)(?|(*:746)|/(?|toggle\\-status(*:772)|upload\\-marks(?|(*:796)|\\-ajax(*:810))))|marks/([^/]++)(*:835)|([^/]++)/s(?|tudents(?|(*:866)|\\-with\\-marks(*:887))|ubject(?|s(*:906)|\\-marks/([^/]++)(*:930)))|marks/([^/]++)(?|/edit(*:962)|(*:970))|convert\\-date(*:992)))|t(?|imetable/(?|([^/]++)(?|(*:1029))|break\\-overrides(*:1055)|([^/]++)/(?|toggle(*:1082)|lock(*:1095))|conflicts(*:1114)|print/([^/]++)(*:1137)|bulk/lock(*:1155))|eachers/([^/]++)(?|/(?|edit(*:1192)|print(*:1206)|download(*:1223))|(*:1233)))|parents/([^/]++)(?|/(?|edit(*:1271)|print(*:1285)|download(*:1302))|(*:1312))|a(?|ttendance/(?|([^/]++)(*:1347)|toggle(*:1362)|bulk\\-(?|update(*:1386)|delete(*:1401))|s(?|tudent(?|s(*:1425)|/([^/]++)/report(*:1450))|ubject\\-students(*:1476))|delete(*:1492)|print(?|(*:1509)|\\-list(*:1524))|export(*:1540))|udit\\-logs/([^/]++)(*:1569))|courses/(?|([^/]++)(?|(*:1601)|/(?|view(*:1618)|edit(*:1631))|(*:1641))|teachers(?|(*:1662)|/(?|([^/]++)(*:1683)|semester/([^/]++)(*:1709)))|([^/]++)/detail(*:1735))|marks/dynamic/(?|export/([^/]++)(*:1777)|student/([^/]++)(*:1802))|notice\\-board/(?|([^/]++)(?|(*:1840))|toggle\\-status(*:1864)|([^/]++)(*:1881))|gallery/(?|([^/]++)(?|(*:1913))|toggle\\-status(*:1937)|categories(*:1956))|department/hero\\-images/([^/]++)(*:1998)))|/department/about(?:/([^/]++))?(*:2040)|/res(?|ources/download/([^/]++)(*:2080)|et\\-password/([^/]++)(*:2110))|/notices/([^/]++)(*:2137)|/gallery/download/([^/]++)(*:2172)|/st(?|udent(?|/(?|courses/([^/]++)(*:2215)|attendance/([^/]++)(*:2243)|marks/([^/]++)(*:2266))|s/([^/]++)/move\\-to\\-alumni(*:2303))|orage/(.*)(?|(*:2326)))|/teacher/(?|s(?|ubjects/([^/]++)(*:2369)|tudy\\-materials/download/([^/]++)(*:2411))|marks/(?|([^/]++)(*:2438)|ex(?|ams(*:2455)|port(*:2468))|print(*:2483))|exams/(?|([^/]++)(?|(*:2513)|/(?|s(?|tudents(?|(*:2540)|\\-with\\-marks(*:2562))|ubject\\-marks/([^/]++)(*:2594))|upload\\-marks(?|(*:2620)|\\-ajax(*:2635))))|marks/([^/]++)(?|/edit(*:2669)|(*:2678)|(*:2687))))|/parent/(?|c(?|hildren/([^/]++)(*:2730)|ourses/child/([^/]++)(?|(*:2763)|/subject/([^/]++)(*:2789)))|attendance/(?|child/([^/]++)(*:2828)|([^/]++)/pdf(*:2849))|marks/(?|child/([^/]++)(?|(*:2885)|/exam/([^/]++)(*:2908))|([^/]++)/pdf(*:2930))|notices/([^/]++)(?|(*:2959)|/read(*:2973))|events/([^/]++)(*:2998))|/verify\\-email/([^/]++)/([^/]++)(*:3040))/?$}sDu',
     ),
     3 => 
     array (
@@ -3270,7 +3429,7 @@ app('router')->setCompiledRoutes(
         array (
           0 => 
           array (
-            '_route' => 'generated::vQ2edbtWnE5QLh3c',
+            '_route' => 'generated::gTn7QCylpHdrK83E',
           ),
           1 => 
           array (
@@ -6070,7 +6229,261 @@ app('router')->setCompiledRoutes(
           6 => NULL,
         ),
       ),
-      2731 => 
+      2730 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.children.show',
+          ),
+          1 => 
+          array (
+            0 => 'id',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      2763 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.courses.child',
+          ),
+          1 => 
+          array (
+            0 => 'childId',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      2789 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.courses.subject',
+          ),
+          1 => 
+          array (
+            0 => 'childId',
+            1 => 'subjectId',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      2828 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.attendance.child',
+          ),
+          1 => 
+          array (
+            0 => 'childId',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      2849 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.attendance.pdf',
+          ),
+          1 => 
+          array (
+            0 => 'childId',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      2885 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.marks.child',
+          ),
+          1 => 
+          array (
+            0 => 'childId',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      2908 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.marks.exam',
+          ),
+          1 => 
+          array (
+            0 => 'childId',
+            1 => 'examId',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      2930 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.marks.pdf',
+          ),
+          1 => 
+          array (
+            0 => 'childId',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      2959 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.notices.show',
+          ),
+          1 => 
+          array (
+            0 => 'id',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      2973 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.notices.read',
+          ),
+          1 => 
+          array (
+            0 => 'id',
+          ),
+          2 => 
+          array (
+            'POST' => 0,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => false,
+          6 => NULL,
+        ),
+      ),
+      2998 => 
+      array (
+        0 => 
+        array (
+          0 => 
+          array (
+            '_route' => 'parent.events.show',
+          ),
+          1 => 
+          array (
+            0 => 'id',
+          ),
+          2 => 
+          array (
+            'GET' => 0,
+            'HEAD' => 1,
+          ),
+          3 => NULL,
+          4 => false,
+          5 => true,
+          6 => NULL,
+        ),
+      ),
+      3040 => 
       array (
         0 => 
         array (
@@ -6156,7 +6569,7 @@ app('router')->setCompiledRoutes(
             }
 
             return response()->json([\'status\' => \'logged\']);
-        }";s:5:"scope";s:34:"Laravel\\Boost\\BoostServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000007720000000000000000";}}',
+        }";s:5:"scope";s:34:"Laravel\\Boost\\BoostServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000003950000000000000000";}}',
         'as' => 'boost.browser-logs',
         'excluded_middleware' => 
         array (
@@ -6214,7 +6627,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::WmpHHJfMEFJRRLeF' => 
+    'generated::ihUImBaDEcZhcg7t' => 
     array (
       'methods' => 
       array (
@@ -6234,7 +6647,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::WmpHHJfMEFJRRLeF',
+        'as' => 'generated::ihUImBaDEcZhcg7t',
       ),
       'fallback' => false,
       'defaults' => 
@@ -6250,7 +6663,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::DQnZVZ2nBje5UwwT' => 
+    'generated::CmTe27JqzgfqKONa' => 
     array (
       'methods' => 
       array (
@@ -6271,7 +6684,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::DQnZVZ2nBje5UwwT',
+        'as' => 'generated::CmTe27JqzgfqKONa',
       ),
       'fallback' => false,
       'defaults' => 
@@ -6287,7 +6700,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::4wP0bfMH4OgWdXxO' => 
+    'generated::55btSfCNuXGxAtFk' => 
     array (
       'methods' => 
       array (
@@ -6309,7 +6722,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::4wP0bfMH4OgWdXxO',
+        'as' => 'generated::55btSfCNuXGxAtFk',
       ),
       'fallback' => false,
       'defaults' => 
@@ -6325,7 +6738,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::vQ2edbtWnE5QLh3c' => 
+    'generated::gTn7QCylpHdrK83E' => 
     array (
       'methods' => 
       array (
@@ -6347,7 +6760,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::vQ2edbtWnE5QLh3c',
+        'as' => 'generated::gTn7QCylpHdrK83E',
       ),
       'fallback' => false,
       'defaults' => 
@@ -6363,7 +6776,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::F5bTHGlRT8r7CBP4' => 
+    'generated::jXTDTBPVLFxX4qnz' => 
     array (
       'methods' => 
       array (
@@ -6391,8 +6804,8 @@ app('router')->setCompiledRoutes(
                     return response(\\Illuminate\\Support\\Facades\\View::file(\'/app/vendor/laravel/framework/src/Illuminate/Foundation/Configuration\'.\'/../resources/health-up.blade.php\', [
                         \'exception\' => $exception,
                     ]), status: $exception ? 500 : 200);
-                }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"000000000000093e0000000000000000";}}',
-        'as' => 'generated::F5bTHGlRT8r7CBP4',
+                }";s:5:"scope";s:54:"Illuminate\\Foundation\\Configuration\\ApplicationBuilder";s:4:"this";N;s:4:"self";s:32:"00000000000005610000000000000000";}}',
+        'as' => 'generated::jXTDTBPVLFxX4qnz',
       ),
       'fallback' => false,
       'defaults' => 
@@ -6872,7 +7285,7 @@ app('router')->setCompiledRoutes(
         \\session([\'locale\' => $locale]);
     }
     return \\back();
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000009500000000000000000";}}',
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000005730000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
@@ -6913,7 +7326,7 @@ app('router')->setCompiledRoutes(
         'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:121:"function () {
     // Redirect to role-based dashboard
     return \\redirect()->to(\\auth()->user()->getDashboardRoute());
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"000000000000094f0000000000000000";}}',
+}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000005720000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
@@ -9678,6 +10091,764 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
+    'parent.children.index' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/children',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentChildrenController@index',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentChildrenController@index',
+        'as' => 'parent.children.index',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.children.show' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/children/{id}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentChildrenController@show',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentChildrenController@show',
+        'as' => 'parent.children.show',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.attendance.index' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/attendance',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentAttendanceController@index',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentAttendanceController@index',
+        'as' => 'parent.attendance.index',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.attendance.child' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/attendance/child/{childId}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentAttendanceController@showChild',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentAttendanceController@showChild',
+        'as' => 'parent.attendance.child',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.marks.index' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/marks',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentMarksController@index',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentMarksController@index',
+        'as' => 'parent.marks.index',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.marks.child' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/marks/child/{childId}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentMarksController@showChild',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentMarksController@showChild',
+        'as' => 'parent.marks.child',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.marks.exam' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/marks/child/{childId}/exam/{examId}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentMarksController@showExam',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentMarksController@showExam',
+        'as' => 'parent.marks.exam',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.courses.index' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/courses',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentCoursesController@index',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentCoursesController@index',
+        'as' => 'parent.courses.index',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.courses.child' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/courses/child/{childId}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentCoursesController@showChild',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentCoursesController@showChild',
+        'as' => 'parent.courses.child',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.courses.subject' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/courses/child/{childId}/subject/{subjectId}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentCoursesController@showSubject',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentCoursesController@showSubject',
+        'as' => 'parent.courses.subject',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.notices.index' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/notices',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentNoticesController@index',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentNoticesController@index',
+        'as' => 'parent.notices.index',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.notices.show' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/notices/{id}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentNoticesController@show',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentNoticesController@show',
+        'as' => 'parent.notices.show',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.notices.read' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'parent/notices/{id}/read',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentNoticesController@markAsRead',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentNoticesController@markAsRead',
+        'as' => 'parent.notices.read',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.events.index' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/events',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentEventsController@index',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentEventsController@index',
+        'as' => 'parent.events.index',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.events.show' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/events/{id}',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentEventsController@show',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentEventsController@show',
+        'as' => 'parent.events.show',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.communication.index' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/communication',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentCommunicationController@index',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentCommunicationController@index',
+        'as' => 'parent.communication.index',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.communication.send' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'POST',
+      ),
+      'uri' => 'parent/communication/send',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentCommunicationController@sendMessage',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentCommunicationController@sendMessage',
+        'as' => 'parent.communication.send',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.attendance.pdf' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/attendance/{childId}/pdf',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentPdfExportController@attendancePdf',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentPdfExportController@attendancePdf',
+        'as' => 'parent.attendance.pdf',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
+    'parent.marks.pdf' => 
+    array (
+      'methods' => 
+      array (
+        0 => 'GET',
+        1 => 'HEAD',
+      ),
+      'uri' => 'parent/marks/{childId}/pdf',
+      'action' => 
+      array (
+        'middleware' => 
+        array (
+          0 => 'web',
+          1 => 'auth',
+          2 => 'verified',
+          3 => 'role:parent',
+        ),
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentPdfExportController@marksPdf',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentPdfExportController@marksPdf',
+        'as' => 'parent.marks.pdf',
+        'namespace' => NULL,
+        'prefix' => '/parent',
+        'where' => 
+        array (
+        ),
+      ),
+      'fallback' => false,
+      'defaults' => 
+      array (
+      ),
+      'wheres' => 
+      array (
+      ),
+      'bindingFields' => 
+      array (
+      ),
+      'lockSeconds' => NULL,
+      'waitSeconds' => NULL,
+      'withTrashed' => false,
+    ),
     'student.dashboard' => 
     array (
       'methods' => 
@@ -9735,9 +10906,8 @@ app('router')->setCompiledRoutes(
           2 => 'verified',
           3 => 'role:parent',
         ),
-        'uses' => 'O:55:"Laravel\\SerializableClosure\\UnsignedSerializableClosure":1:{s:12:"serializable";O:46:"Laravel\\SerializableClosure\\Serializers\\Native":5:{s:3:"use";a:0:{}s:8:"function";s:59:"function () {
-    return \\view(\'parent.parentdashboard\');
-}";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"000000000000094c0000000000000000";}}',
+        'uses' => 'App\\Http\\Controllers\\Parent\\ParentDashboardController@index',
+        'controller' => 'App\\Http\\Controllers\\Parent\\ParentDashboardController@index',
         'namespace' => NULL,
         'prefix' => '',
         'where' => 
@@ -9968,7 +11138,7 @@ app('router')->setCompiledRoutes(
         $date = $request->input(\'date\');
         $bs = \\App\\Helpers\\NepaliContentHelper::convertAdToBs($date ?? \'\');
         return \\response()->json([\'bs\' => $bs]);
-    }";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000007da0000000000000000";}}',
+    }";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"000000000000040f0000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '/convert',
         'where' => 
@@ -10009,7 +11179,7 @@ app('router')->setCompiledRoutes(
         $date = $request->input(\'date\');
         $ad = \\App\\Helpers\\NepaliContentHelper::convertBsToAd($date ?? \'\');
         return \\response()->json([\'ad\' => $ad]);
-    }";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000007dc0000000000000000";}}',
+    }";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000004110000000000000000";}}',
         'namespace' => NULL,
         'prefix' => '/convert',
         'where' => 
@@ -14726,7 +15896,7 @@ app('router')->setCompiledRoutes(
         $date = $request->input(\'date\');
         $bs = \\App\\Helpers\\NepaliContentHelper::convertAdToBs($date ?? \'\');
         return \\response()->json([\'bs\' => $bs]);
-    }";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000008540000000000000000";}}',
+    }";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"000000000000078b0000000000000000";}}',
         'as' => 'admin.convert.ad-to-bs',
         'namespace' => NULL,
         'prefix' => '/admin',
@@ -14768,7 +15938,7 @@ app('router')->setCompiledRoutes(
         $date = $request->input(\'date\');
         $ad = \\App\\Helpers\\NepaliContentHelper::convertBsToAd($date ?? \'\');
         return \\response()->json([\'ad\' => $ad]);
-    }";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"00000000000008560000000000000000";}}',
+    }";s:5:"scope";s:37:"Illuminate\\Routing\\RouteFileRegistrar";s:4:"this";N;s:4:"self";s:32:"000000000000078d0000000000000000";}}',
         'as' => 'admin.convert.bs-to-ad',
         'namespace' => NULL,
         'prefix' => '/admin',
@@ -17247,7 +18417,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::PWJNW8FJKVxX1jI0' => 
+    'generated::rqIJFymnxoLaNj4U' => 
     array (
       'methods' => 
       array (
@@ -17268,7 +18438,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::PWJNW8FJKVxX1jI0',
+        'as' => 'generated::rqIJFymnxoLaNj4U',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17322,7 +18492,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::IvljE6U2TegLToTf' => 
+    'generated::zWCWoeI4kD1nnOxW' => 
     array (
       'methods' => 
       array (
@@ -17343,7 +18513,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::IvljE6U2TegLToTf',
+        'as' => 'generated::zWCWoeI4kD1nnOxW',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17663,7 +18833,7 @@ app('router')->setCompiledRoutes(
       'waitSeconds' => NULL,
       'withTrashed' => false,
     ),
-    'generated::aJCQVWs5flL67Kmt' => 
+    'generated::HWsDFWF83siXyzia' => 
     array (
       'methods' => 
       array (
@@ -17684,7 +18854,7 @@ app('router')->setCompiledRoutes(
         'where' => 
         array (
         ),
-        'as' => 'generated::aJCQVWs5flL67Kmt',
+        'as' => 'generated::HWsDFWF83siXyzia',
       ),
       'fallback' => false,
       'defaults' => 
@@ -17790,7 +18960,7 @@ app('router')->setCompiledRoutes(
                         $config,
                         $isProduction
                     ))($request, $path);
-                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000007e20000000000000000";}}',
+                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000004170000000000000000";}}',
         'as' => 'storage.local',
       ),
       'fallback' => false,
@@ -17823,7 +18993,7 @@ app('router')->setCompiledRoutes(
                         $config,
                         $isProduction
                     ))($request, $path);
-                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000008a50000000000000000";}}',
+                }";s:5:"scope";s:47:"Illuminate\\Filesystem\\FilesystemServiceProvider";s:4:"this";N;s:4:"self";s:32:"00000000000007dc0000000000000000";}}',
         'as' => 'storage.local.upload',
       ),
       'fallback' => false,

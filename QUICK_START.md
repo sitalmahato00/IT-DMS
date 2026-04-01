@@ -1,6 +1,30 @@
 # IT-DMS Quick Start Guide
 
-## 🚀 Initial Setup (First Time Only)
+## � Choose Your Development Environment
+
+### Option 1: Laragon (Recommended for Windows Solo Development)
+**Faster setup, better performance, direct system integration**
+
+```powershell
+# Move to Laragon directory and run setup
+cd C:\laragon\www\IT-DMS
+.\setup-laragon.ps1
+```
+
+Then open: **http://it-dms.test** or **http://localhost**
+
+📖 **Detailed guide:** See [LARAGON_SETUP.md](LARAGON_SETUP.md)
+
+---
+
+### Option 2: Docker (Recommended for Team/Production)
+**Consistent across machines, production-like environment**
+
+See instructions below ⬇️
+
+---
+
+## 🚀 Initial Setup (First Time Only) - Docker
 
 ```powershell
 # 1. Navigate to project
