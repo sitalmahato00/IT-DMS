@@ -42,11 +42,12 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy project files
 COPY . .
 COPY docker/app/entrypoint.sh /usr/local/bin/docker-app-entrypoint
+COPY docker/app/start-vite.sh /usr/local/bin/docker-vite-start
 
 # Create necessary directories with proper permissions
 RUN mkdir -p /app/storage /app/bootstrap/cache && \
     chown -R www-data:www-data /app /app/storage /app/bootstrap/cache && \
-    chmod +x /usr/local/bin/docker-app-entrypoint
+    chmod +x /usr/local/bin/docker-app-entrypoint /usr/local/bin/docker-vite-start
 
 # Install composer dependencies
 RUN composer install --no-interaction --optimize-autoloader && \

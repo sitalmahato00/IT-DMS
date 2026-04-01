@@ -60,8 +60,8 @@ Then open: **http://localhost**
 docker-compose up -d
 ```
 
-This starts PHP, Nginx, and MySQL. It does not start the Vite dev server.
-Docker now clears any stale `public/hot` file on startup, so `http://localhost` uses the built frontend assets by default.
+This starts PHP, Nginx, MySQL, and the Vite dev server.
+The Vite container clears any stale `public/hot` file before it starts, so the frontend stays pointed at a live dev server instead of a dead hot-file URL.
 
 ### Check Status
 ```powershell
@@ -97,13 +97,13 @@ docker-compose down -v && docker-compose up -d
 docker-compose exec app npm install
 ```
 
-### Start Vite Dev Server (HMR Enabled)
+### Start or Restart Vite Dev Server (HMR Enabled)
 ```powershell
-docker-compose exec app npm run dev
+docker-compose up -d vite
 ```
 Access at: **http://localhost:5173**
 
-Only run this when you want live frontend hot reload. If it is not running, `http://localhost` should still work with the built assets.
+`docker-compose up -d` already starts the Vite service. Run the command above when you only need to bring the frontend dev server back up.
 
 ### Build for Production
 ```powershell
@@ -400,16 +400,15 @@ docker-compose exec app php artisan --version
 ## 🔄 Workflow During Development
 
 ```powershell
-# 1. Start containers in one terminal
+# 1. Start containers (includes Vite)
 docker-compose up -d
 
-# 2. Start Vite dev server in another terminal
-docker-compose exec app npm run dev
+# 2. Access app at http://localhost
+# 3. Make changes to code (auto-reloads with HMR)
+# 4. If only Vite stops, restart it
+docker-compose up -d vite
 
-# 3. Access app at http://localhost
-# 4. Make changes to code (auto-reloads with HMR)
-# 5. When done, stop with Ctrl+C
-# 6. Stop containers
+# 5. Stop containers when done
 docker-compose stop
 ```
 

@@ -62,11 +62,11 @@ docker-compose exec app npm install
 
 **Option A: Run with Vite Development Server** (for active development)
 ```powershell
-# Terminal 1: Keep PHP/MySQL running
-docker-compose up
+# Start the full Docker development stack
+docker-compose up -d
 
-# Terminal 2: Start Vite dev server (HMR - Hot Module Replacement)
-docker-compose exec app npm run dev
+# If the frontend dev server ever stops, restart only Vite
+docker-compose up -d vite
 ```
 
 **Option B: Build Frontend Assets** (for production)
@@ -82,7 +82,7 @@ Open these URLs in your browser:
 | Service | URL | Purpose |
 |---------|-----|---------|
 | **Laravel App** | http://localhost | Main application |
-| **Vite Dev Server** | http://localhost:5173 | Frontend dev (when running `npm run dev`) |
+| **Vite Dev Server** | http://localhost:5173 | Frontend dev (when the `vite` service is running) |
 | **MySQL** | localhost:3306 | Database server |
 
 ---
@@ -116,13 +116,13 @@ docker-compose exec app php artisan storage:link
 docker-compose exec app php artisan db:seed
 ```
 
-### 3. Run Vite Dev Server (Frontend Build)
+### 3. Frontend Development
 ```powershell
 # Install npm dependencies
 docker-compose exec app npm install
 
-# Start Vite dev server (runs on http://localhost:5173)
-docker-compose exec app npm run dev
+# Start or restart the Vite dev server
+docker-compose up -d vite
 
 # Or build for production
 docker-compose exec app npm run build
@@ -131,7 +131,7 @@ docker-compose exec app npm run build
 ### 4. Access the Application
 - **Application**: http://localhost
 - **MySQL**: localhost:3306
-- **Vite Dev Server**: http://localhost:5173 (when running `npm run dev`)
+- **Vite Dev Server**: http://localhost:5173 (when the `vite` service is running)
 
 ## Database Credentials
 - **Database**: dit
@@ -158,8 +158,8 @@ docker-compose exec app bash
 # Install npm packages
 docker-compose exec app npm install
 
-# Start Vite development server
-docker-compose exec app npm run dev
+# Start or restart the Vite development server
+docker-compose up -d vite
 
 # Build for production
 docker-compose exec app npm run build
@@ -374,16 +374,16 @@ docker-compose exec app php artisan storage:link
 docker-compose exec app npm install
 
 # 6. For development: Start Vite
-docker-compose exec app npm run dev
+docker-compose up -d vite
 ```
 
 ### Daily Development
 ```powershell
-# Start all containers
+# Start all containers (includes Vite)
 docker-compose up -d
 
-# Start Vite dev server (in another terminal)
-docker-compose exec app npm run dev
+# Restart only Vite if needed
+docker-compose up -d vite
 
 # View logs (troubleshooting)
 docker-compose logs -f

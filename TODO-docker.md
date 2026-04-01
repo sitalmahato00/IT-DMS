@@ -10,7 +10,7 @@
 - [ ] 5. Run migrations: docker-compose exec app php artisan migrate
 - [ ] 6. Storage link: docker-compose exec app php artisan storage:link
 - [ ] 7. Install npm deps: docker-compose exec app npm install
-- [ ] 8. Start Vite dev server: docker-compose exec app npm run dev  (new terminal)
+- [ ] 8. Start Vite dev server: docker-compose up -d vite
 - [ ] 9. Verify: docker-compose ps && open http://localhost
 
 Notes: 

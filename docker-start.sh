@@ -23,6 +23,14 @@ case $COMMAND in
         echo "Showing Docker logs..."
         docker-compose logs -f
         ;;
+    vite)
+        echo "Starting or restarting Vite..."
+        docker-compose up -d vite
+        ;;
+    vite-logs)
+        echo "Showing Vite logs..."
+        docker-compose logs -f vite
+        ;;
     shell)
         echo "Opening app shell..."
         docker-compose exec app bash
@@ -55,6 +63,8 @@ case $COMMAND in
         echo "  ./docker-start.sh down     - Stop and remove containers"
         echo "  ./docker-start.sh stop     - Stop containers"
         echo "  ./docker-start.sh logs     - Show logs"
+        echo "  ./docker-start.sh vite     - Start or restart Vite"
+        echo "  ./docker-start.sh vite-logs - Show Vite logs"
         echo "  ./docker-start.sh shell    - Access app shell"
         echo "  ./docker-start.sh migrate  - Run migrations"
         echo "  ./docker-start.sh seed     - Run seeders"
