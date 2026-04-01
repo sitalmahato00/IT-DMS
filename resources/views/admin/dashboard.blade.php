@@ -5,7 +5,38 @@
 @section('content')
 @php
     $adminName = $user->name ?? 'Administrator';
-    $totalGradedRecords = array_sum($gradeDistribution ?? []);
+    $gradeDistribution = $gradeDistribution ?? [];
+    $totalGradedRecords = array_sum($gradeDistribution);
+    $passCount = $totalGradedRecords - ($gradeDistribution['F'] ?? 0);
+    $distinctionCount = ($gradeDistribution['A+'] ?? 0) + ($gradeDistribution['A'] ?? 0);
+    $needsAttentionCount = ($gradeDistribution['D'] ?? 0) + ($gradeDistribution['F'] ?? 0);
+    $passRate = $totalGradedRecords > 0 ? round(($passCount / $totalGradedRecords) * 100, 1) : 0;
+    $distinctionRate = $totalGradedRecords > 0 ? round(($distinctionCount / $totalGradedRecords) * 100, 1) : 0;
+    $needsAttentionRate = $totalGradedRecords > 0 ? round(($needsAttentionCount / $totalGradedRecords) * 100, 1) : 0;
+    $gradeLeaders = collect($gradeDistribution)->filter(fn ($count) => $count > 0)->sortDesc();
+    $topGrade = $gradeLeaders->keys()->first() ?? '—';
+    $topGradeCount = $topGrade !== '—' ? ($gradeDistribution[$topGrade] ?? 0) : 0;
+
+    $attendanceTarget = 85;
+    $attendanceBuckets = collect($attendanceChartData['labels'] ?? [])->map(function ($label, $index) use ($attendanceChartData) {
+        $detail = $attendanceChartData['details'][$index] ?? [];
+
+        return [
+            'label' => $label,
+            'present' => (int) ($detail['present'] ?? 0),
+            'total' => (int) ($detail['total'] ?? 0),
+            'percentage' => (float) ($detail['percentage'] ?? 0),
+        ];
+    });
+    $activeAttendanceBuckets = $attendanceBuckets->filter(fn ($bucket) => $bucket['total'] > 0)->values();
+    $initialAttendanceAverage = $activeAttendanceBuckets->isNotEmpty()
+        ? round((float) $activeAttendanceBuckets->avg('percentage'), 1)
+        : 0;
+    $initialAttendanceBest = $activeAttendanceBuckets->sortByDesc('percentage')->first();
+    $initialAttendanceLowest = $activeAttendanceBuckets->sortBy('percentage')->first();
+    $initialAttendancePresent = $activeAttendanceBuckets->sum('present');
+    $initialAttendanceTracked = $activeAttendanceBuckets->sum('total');
+    $initialAttendanceNotPresent = max($initialAttendanceTracked - $initialAttendancePresent, 0);
 @endphp
 
 <div class="space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif">
@@ -168,14 +199,14 @@
     <!-- Charts Section with Enhanced Styling -->
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <!-- Attendance Bar Chart -->
-        <div class="xl:col-span-7 rounded-xl border-2 border-emerald-300 dark:border-emerald-700 bg-gradient-to-br from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-gray-800 p-4 hover:shadow-xl transition">
+        <div class="xl:col-span-7 rounded-xl border-2 border-emerald-300 dark:border-emerald-700 bg-gradient-to-br from-emerald-50/50 to-white dark:from-emerald-950/20 dark:to-gray-800 p-4 lg:p-5 hover:shadow-xl transition">
             <div class="flex items-center justify-between mb-3">
                 <div>
                     <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <i class="bi bi-graph-up text-emerald-500 dark:text-emerald-400"></i>
                         {{ __('Attendance Overview') }}
                     </h2>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{{ __('daily patterns') }}</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{{ __('Daily attendance trend, class coverage, and risk signals') }}</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <label for="attendancePeriod" class="text-xs font-semibold text-gray-700 dark:text-gray-300 bg-emerald-100/50 dark:bg-emerald-900/40 px-3 py-1 rounded-full">{{ __('Period:') }}</label>
@@ -186,31 +217,101 @@
                     </select>
                 </div>
             </div>
-            <div class="h-56 relative">
+            <div class="grid grid-cols-2 xl:grid-cols-4 gap-2 mb-4">
+                <div class="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white/70 dark:bg-emerald-950/30 px-3 py-2.5">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">{{ __('Semester Avg') }}</p>
+                    <p class="mt-1 text-lg font-bold text-emerald-900 dark:text-emerald-100">{{ number_format((float) ($avgAttendance ?? 0), 1) }}%</p>
+                    <p class="text-[11px] text-emerald-700 dark:text-emerald-300">{{ __('Target') }} {{ $attendanceTarget }}%</p>
+                </div>
+                <div class="rounded-xl border border-sky-200 dark:border-sky-800 bg-white/70 dark:bg-sky-950/30 px-3 py-2.5">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">{{ __('Present') }}</p>
+                    <p class="mt-1 text-lg font-bold text-sky-900 dark:text-sky-100">{{ number_format($attendanceSummary['present'] ?? 0) }}</p>
+                    <p class="text-[11px] text-sky-700 dark:text-sky-300">{{ __('Marked on time and present') }}</p>
+                </div>
+                <div class="rounded-xl border border-amber-200 dark:border-amber-800 bg-white/70 dark:bg-amber-950/30 px-3 py-2.5">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">{{ __('Absent') }}</p>
+                    <p class="mt-1 text-lg font-bold text-amber-900 dark:text-amber-100">{{ number_format($attendanceSummary['absent'] ?? 0) }}</p>
+                    <p class="text-[11px] text-amber-700 dark:text-amber-300">{{ __('Records needing follow-up') }}</p>
+                </div>
+                <div class="rounded-xl border border-violet-200 dark:border-violet-800 bg-white/70 dark:bg-violet-950/30 px-3 py-2.5">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">{{ __('Late') }}</p>
+                    <p class="mt-1 text-lg font-bold text-violet-900 dark:text-violet-100">{{ number_format($attendanceSummary['late'] ?? 0) }}</p>
+                    <p class="text-[11px] text-violet-700 dark:text-violet-300">{{ __('Late arrivals in records') }}</p>
+                </div>
+            </div>
+            <div class="h-72 relative">
                 <canvas id="attendanceBarChart"></canvas>
-                <p id="attendanceBarNoData" class="hidden text-sm text-gray-500 dark:text-gray-400 text-center pt-24">{{ __('No attendance data available.') }}</p>
+                <p id="attendanceBarNoData" class="hidden text-sm text-gray-500 dark:text-gray-400 text-center pt-28">{{ __('No attendance data available.') }}</p>
+            </div>
+            <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mt-4">
+                <div class="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/30 px-3 py-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">{{ __('Current View Avg') }}</p>
+                    <p id="attendanceSelectedAverage" class="mt-1 text-lg font-bold text-emerald-900 dark:text-emerald-100">{{ number_format($initialAttendanceAverage, 1) }}%</p>
+                    <p id="attendanceSelectedAverageNote" class="text-[11px] text-emerald-700 dark:text-emerald-300">{{ $activeAttendanceBuckets->count() }} {{ __('active buckets') }}</p>
+                </div>
+                <div class="rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50/70 dark:bg-sky-950/30 px-3 py-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">{{ __('Best Period') }}</p>
+                    <p id="attendanceBestLabel" class="mt-1 text-sm font-bold text-sky-900 dark:text-sky-100">{{ $initialAttendanceBest['label'] ?? __('No records') }}</p>
+                    <p id="attendanceBestValue" class="text-[11px] text-sky-700 dark:text-sky-300">
+                        {{ isset($initialAttendanceBest['percentage']) ? number_format((float) $initialAttendanceBest['percentage'], 1) . '%' . ' ' . __('attendance') : __('Waiting for data') }}
+                    </p>
+                </div>
+                <div class="rounded-xl border border-rose-200 dark:border-rose-800 bg-rose-50/70 dark:bg-rose-950/30 px-3 py-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-700 dark:text-rose-300">{{ __('Needs Attention') }}</p>
+                    <p id="attendanceLowestLabel" class="mt-1 text-sm font-bold text-rose-900 dark:text-rose-100">{{ $initialAttendanceLowest['label'] ?? __('No records') }}</p>
+                    <p id="attendanceLowestValue" class="text-[11px] text-rose-700 dark:text-rose-300">
+                        {{ isset($initialAttendanceLowest['percentage']) ? number_format((float) $initialAttendanceLowest['percentage'], 1) . '%' . ' ' . __('attendance') : __('Waiting for data') }}
+                    </p>
+                </div>
+                <div class="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/60 px-3 py-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600 dark:text-slate-300">{{ __('Coverage') }}</p>
+                    <p id="attendanceCoverageValue" class="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">{{ number_format($initialAttendancePresent) }} / {{ number_format($initialAttendanceTracked) }}</p>
+                    <p id="attendanceCoverageNote" class="text-[11px] text-slate-600 dark:text-slate-300">{{ number_format($initialAttendanceNotPresent) }} {{ __('not present in this range') }}</p>
+                </div>
             </div>
         </div>
 
         <!-- Grade Distribution Pie Chart -->
-        <div class="xl:col-span-5 rounded-xl border-2 border-fuchsia-300 dark:border-fuchsia-700 bg-gradient-to-br from-fuchsia-50/50 to-white dark:from-fuchsia-950/20 dark:to-gray-800 p-4 hover:shadow-xl transition">
+        <div class="xl:col-span-5 rounded-xl border-2 border-fuchsia-300 dark:border-fuchsia-700 bg-gradient-to-br from-fuchsia-50/50 to-white dark:from-fuchsia-950/20 dark:to-gray-800 p-4 lg:p-5 hover:shadow-xl transition">
             <div class="flex items-center justify-between mb-3">
                 <div>
                     <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <i class="bi bi-pie-chart-fill text-fuchsia-500 dark:text-fuchsia-400"></i>
                         {{ __('Grade Distribution') }}
                     </h2>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">📈 {{ __('Academic performance metrics') }}</p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ __('Academic performance mix, pass rate, and support indicators') }}</p>
                 </div>
                 <span class="text-xs px-3 py-2 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 dark:from-green-900 dark:to-emerald-900 dark:text-green-200 font-bold border border-green-300 dark:border-green-700">
                     {{ $totalGradedRecords }} {{ __('Graded') }}
                 </span>
             </div>
-            <div class="h-56">
-                <canvas id="gradePieChart"></canvas>
-                <p id="gradePieNoData" class="hidden text-sm text-gray-500 dark:text-gray-400 text-center pt-20">{{ __('No grades available yet.') }}</p>
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <div class="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-white/70 dark:bg-emerald-950/30 px-3 py-2.5">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">{{ __('Pass Rate') }}</p>
+                    <p class="mt-1 text-lg font-bold text-emerald-900 dark:text-emerald-100">{{ number_format($passRate, 1) }}%</p>
+                    <p class="text-[11px] text-emerald-700 dark:text-emerald-300">{{ $passCount }} {{ __('students cleared') }}</p>
+                </div>
+                <div class="rounded-xl border border-blue-200 dark:border-blue-800 bg-white/70 dark:bg-blue-950/30 px-3 py-2.5">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">{{ __('A Range') }}</p>
+                    <p class="mt-1 text-lg font-bold text-blue-900 dark:text-blue-100">{{ number_format($distinctionRate, 1) }}%</p>
+                    <p class="text-[11px] text-blue-700 dark:text-blue-300">{{ $distinctionCount }} {{ __('top grades') }}</p>
+                </div>
+                <div class="rounded-xl border border-rose-200 dark:border-rose-800 bg-white/70 dark:bg-rose-950/30 px-3 py-2.5">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-700 dark:text-rose-300">{{ __('Need Support') }}</p>
+                    <p class="mt-1 text-lg font-bold text-rose-900 dark:text-rose-100">{{ number_format($needsAttentionRate, 1) }}%</p>
+                    <p class="text-[11px] text-rose-700 dark:text-rose-300">{{ $needsAttentionCount }} {{ __('in D or F') }}</p>
+                </div>
+                <div class="rounded-xl border border-amber-200 dark:border-amber-800 bg-white/70 dark:bg-amber-950/30 px-3 py-2.5">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">{{ __('Top Band') }}</p>
+                    <p class="mt-1 text-lg font-bold text-amber-900 dark:text-amber-100">{{ $topGrade }}</p>
+                    <p class="text-[11px] text-amber-700 dark:text-amber-300">{{ $topGradeCount }} {{ __('students in this band') }}</p>
+                </div>
             </div>
-            <div class="grid grid-cols-4 gap-2 mt-6 text-center text-xs">
+            <div class="h-72">
+                <canvas id="gradePieChart"></canvas>
+                <p id="gradePieNoData" class="hidden text-sm text-gray-500 dark:text-gray-400 text-center pt-24">{{ __('No grades available yet.') }}</p>
+            </div>
+            <div class="grid grid-cols-4 md:grid-cols-8 gap-2 mt-5 text-center">
                 @php
                     $gradeColors = [
                         'A+' => '#22c55e',
@@ -224,10 +325,14 @@
                     ];
                 @endphp
                 @foreach($gradeDistribution as $grade => $count)
-                    <div class="rounded-lg border-2 py-3 px-1 font-bold transition hover:shadow-md" style="border-color: {{ $gradeColors[$grade] ?? '#6b7280' }}; background-color: {{ $gradeColors[$grade] ?? '#6b7280' }}15;">
-                        <div class="w-4 h-4 mx-auto rounded-full mb-2" style="background-color: {{ $gradeColors[$grade] ?? '#6b7280' }}"></div>
-                        <p class="font-bold" style="color: {{ $gradeColors[$grade] ?? '#6b7280' }}">{{ $count }}</p>
-                        <p class="text-gray-700 dark:text-gray-300 text-xs mt-0.5">{{ $grade }}</p>
+                    @php
+                        $gradePercent = $totalGradedRecords > 0 ? round(($count / $totalGradedRecords) * 100, 1) : 0;
+                    @endphp
+                    <div class="rounded-lg border py-2 px-1 font-bold transition hover:shadow-md" style="border-color: {{ $gradeColors[$grade] ?? '#6b7280' }}; background-color: {{ $gradeColors[$grade] ?? '#6b7280' }}12;">
+                        <div class="w-3 h-3 mx-auto rounded-full mb-1.5" style="background-color: {{ $gradeColors[$grade] ?? '#6b7280' }}"></div>
+                        <p class="text-sm font-bold leading-none" style="color: {{ $gradeColors[$grade] ?? '#6b7280' }}">{{ $count }}</p>
+                        <p class="text-[11px] text-gray-700 dark:text-gray-300 mt-1 leading-none">{{ $grade }}</p>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1 leading-none">{{ number_format($gradePercent, 1) }}%</p>
                     </div>
                 @endforeach
             </div>
@@ -421,11 +526,163 @@
         const attendanceChartData = @json($attendanceChartData);
         const gradeDistribution = @json($gradeDistribution);
         const attendanceDataUrl = @json(route('admin.dashboard.attendance'));
+        const totalGradedRecords = @json($totalGradedRecords);
+        const gradePassRate = @json($passRate);
+        const attendanceTarget = @json($attendanceTarget);
 
         // Common variables
         const isDark = document.documentElement.classList.contains('dark');
         const labelColor = isDark ? '#d1d5db' : '#4b5563';
         const gridColor = isDark ? 'rgba(75, 85, 99, 0.45)' : 'rgba(229, 231, 235, 0.9)';
+        const titleColor = isDark ? '#f9fafb' : '#111827';
+        const mutedColor = isDark ? '#9ca3af' : '#6b7280';
+
+        const attendanceInsightNodes = {
+            average: document.getElementById('attendanceSelectedAverage'),
+            averageNote: document.getElementById('attendanceSelectedAverageNote'),
+            bestLabel: document.getElementById('attendanceBestLabel'),
+            bestValue: document.getElementById('attendanceBestValue'),
+            lowestLabel: document.getElementById('attendanceLowestLabel'),
+            lowestValue: document.getElementById('attendanceLowestValue'),
+            coverageValue: document.getElementById('attendanceCoverageValue'),
+            coverageNote: document.getElementById('attendanceCoverageNote'),
+        };
+
+        const formatPercent = (value) => `${Number(value || 0).toFixed(1)}%`;
+        const getAttendanceBarColor = (value) => {
+            if (value >= attendanceTarget) {
+                return '#16a34a';
+            }
+
+            if (value >= 75) {
+                return '#22c55e';
+            }
+
+            if (value >= 60) {
+                return '#f59e0b';
+            }
+
+            return '#ef4444';
+        };
+
+        const getAttendanceHoverColor = (value) => {
+            if (value >= attendanceTarget) {
+                return '#15803d';
+            }
+
+            if (value >= 75) {
+                return '#16a34a';
+            }
+
+            if (value >= 60) {
+                return '#d97706';
+            }
+
+            return '#dc2626';
+        };
+
+        const updateAttendanceInsights = (chartData) => {
+            const labels = chartData.labels || [];
+            const details = (chartData.details || []).map((detail, index) => ({
+                label: labels[index] || detail.period || '—',
+                present: Number(detail.present || 0),
+                total: Number(detail.total || 0),
+                percentage: Number(detail.percentage || 0),
+            }));
+
+            const activeDetails = details.filter((detail) => detail.total > 0);
+            const totalTracked = activeDetails.reduce((sum, detail) => sum + detail.total, 0);
+            const totalPresent = activeDetails.reduce((sum, detail) => sum + detail.present, 0);
+            const average = activeDetails.length
+                ? activeDetails.reduce((sum, detail) => sum + detail.percentage, 0) / activeDetails.length
+                : 0;
+
+            const best = activeDetails.reduce((winner, detail) => {
+                if (!winner || detail.percentage > winner.percentage) {
+                    return detail;
+                }
+
+                return winner;
+            }, null);
+
+            const lowest = activeDetails.reduce((winner, detail) => {
+                if (!winner || detail.percentage < winner.percentage) {
+                    return detail;
+                }
+
+                return winner;
+            }, null);
+
+            if (attendanceInsightNodes.average) {
+                attendanceInsightNodes.average.textContent = formatPercent(average);
+            }
+
+            if (attendanceInsightNodes.averageNote) {
+                attendanceInsightNodes.averageNote.textContent = activeDetails.length
+                    ? `${activeDetails.length} active bucket${activeDetails.length === 1 ? '' : 's'}`
+                    : 'No tracked periods yet';
+            }
+
+            if (attendanceInsightNodes.bestLabel) {
+                attendanceInsightNodes.bestLabel.textContent = best ? best.label : 'No records';
+            }
+
+            if (attendanceInsightNodes.bestValue) {
+                attendanceInsightNodes.bestValue.textContent = best
+                    ? `${formatPercent(best.percentage)} attendance`
+                    : 'Waiting for data';
+            }
+
+            if (attendanceInsightNodes.lowestLabel) {
+                attendanceInsightNodes.lowestLabel.textContent = lowest ? lowest.label : 'No records';
+            }
+
+            if (attendanceInsightNodes.lowestValue) {
+                attendanceInsightNodes.lowestValue.textContent = lowest
+                    ? `${formatPercent(lowest.percentage)} attendance`
+                    : 'Waiting for data';
+            }
+
+            if (attendanceInsightNodes.coverageValue) {
+                attendanceInsightNodes.coverageValue.textContent = `${totalPresent.toLocaleString()} / ${totalTracked.toLocaleString()}`;
+            }
+
+            if (attendanceInsightNodes.coverageNote) {
+                const notPresent = Math.max(totalTracked - totalPresent, 0);
+                attendanceInsightNodes.coverageNote.textContent = totalTracked
+                    ? `${notPresent.toLocaleString()} not present in this range`
+                    : 'No attendance records captured';
+            }
+        };
+
+        const gradeCenterTextPlugin = {
+            id: 'gradeCenterText',
+            afterDatasetsDraw(chart) {
+                if (chart.canvas.id !== 'gradePieChart') {
+                    return;
+                }
+
+                const dataset = chart.getDatasetMeta(0);
+                if (!dataset?.data?.length) {
+                    return;
+                }
+
+                const { ctx } = chart;
+                const { x, y } = dataset.data[0];
+
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = titleColor;
+                ctx.font = '700 22px system-ui';
+                ctx.fillText(totalGradedRecords.toLocaleString(), x, y - 12);
+                ctx.fillStyle = mutedColor;
+                ctx.font = '600 11px system-ui';
+                ctx.fillText('graded records', x, y + 8);
+                ctx.fillText(`Pass ${formatPercent(gradePassRate)}`, x, y + 24);
+                ctx.restore();
+            }
+        };
 
         // Grade Pie Chart
         const gradePieCanvas = document.getElementById('gradePieChart');
@@ -453,18 +710,26 @@
             } else if (hasGradeData) {
                 new Chart(gradePieCanvas.getContext('2d'), {
                     type: 'doughnut',
+                    plugins: [gradeCenterTextPlugin],
                     data: {
                         labels: gradeLabels,
                         datasets: [{
                             data: gradeData,
                             backgroundColor: colors,
-                            borderWidth: 0
+                            borderWidth: 0,
+                            hoverOffset: 8
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        cutout: '60%',
+                        cutout: '52%',
+                        layout: {
+                            padding: {
+                                top: 6,
+                                bottom: 6
+                            }
+                        },
                         plugins: {
                             legend: {
                                 position: 'bottom',
@@ -472,8 +737,19 @@
                                     color: labelColor,
                                     boxWidth: 10,
                                     boxHeight: 10,
+                                    padding: 14,
                                     usePointStyle: true,
                                     pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label(context) {
+                                        const value = Number(context.parsed || 0);
+                                        const share = totalGradedRecords > 0 ? (value / totalGradedRecords) * 100 : 0;
+
+                                        return `${context.label}: ${value} students (${share.toFixed(1)}%)`;
+                                    }
                                 }
                             }
                         }
@@ -496,6 +772,8 @@
             const barLabels = chartData.labels || [];
             const barValues = (chartData.data || []).map(value => Number(value));
             const hasBarData = barLabels.length > 0 && barValues.some(value => value > 0);
+
+            updateAttendanceInsights(chartData);
 
             if (attendanceChartInstance) {
                 attendanceChartInstance.destroy();
@@ -521,15 +799,67 @@
                         label: 'Attendance %',
                         data: barValues,
                         borderRadius: 6,
-                        backgroundColor: '#22c55e',
-                        hoverBackgroundColor: '#16a34a'
+                        backgroundColor: barValues.map(getAttendanceBarColor),
+                        hoverBackgroundColor: barValues.map(getAttendanceHoverColor),
+                        maxBarThickness: 48,
+                        categoryPercentage: 0.8,
+                        barPercentage: 0.9,
+                        minBarLength: 4
+                    }, {
+                        type: 'line',
+                        label: 'Target',
+                        data: barValues.map(() => attendanceTarget),
+                        borderColor: '#0f766e',
+                        borderWidth: 2,
+                        borderDash: [6, 6],
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        tension: 0,
+                        fill: false
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false }
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label(context) {
+                                    if (context.dataset.type === 'line') {
+                                        return `Target: ${attendanceTarget}%`;
+                                    }
+
+                                    return `Attendance: ${formatPercent(context.parsed.y)}`;
+                                },
+                                afterLabel(context) {
+                                    if (context.dataset.type === 'line') {
+                                        return null;
+                                    }
+
+                                    const detail = chartData.details?.[context.dataIndex];
+                                    if (!detail) {
+                                        return null;
+                                    }
+
+                                    const present = Number(detail.present || 0);
+                                    const total = Number(detail.total || 0);
+                                    const notPresent = Math.max(total - present, 0);
+                                    if (!total) {
+                                        return 'No attendance records';
+                                    }
+
+                                    const targetGap = Math.max(attendanceTarget - Number(detail.percentage || 0), 0);
+
+                                    return [
+                                        `Present: ${present}`,
+                                        `Not present: ${notPresent}`,
+                                        `Tracked records: ${total}`,
+                                        `Gap to target: ${targetGap.toFixed(1)}%`
+                                    ];
+                                }
+                            }
+                        }
                     },
                     scales: {
                         x: {
@@ -578,4 +908,3 @@
     });
 </script>
 @endsection
-
