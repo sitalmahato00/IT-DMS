@@ -147,56 +147,24 @@ Route::middleware(['auth', 'verified', 'role:teacher'])->prefix('teacher')->name
 
 // Parent Profile Routes
 Route::middleware(['auth', 'verified', 'role:parent'])->prefix('parent')->name('parent.')->group(function () {
-    // Dashboard and Profile
+    Route::get('/', [\App\Http\Controllers\Parent\ParentPortalController::class, 'dashboard'])->name('dashboard');
+    Route::get('/children', [\App\Http\Controllers\Parent\ParentPortalController::class, 'children'])->name('children');
+    Route::get('/attendance', [\App\Http\Controllers\Parent\ParentPortalController::class, 'attendance'])->name('attendance');
+    Route::get('/results', [\App\Http\Controllers\Parent\ParentPortalController::class, 'results'])->name('results');
+    Route::get('/courses', [\App\Http\Controllers\Parent\ParentPortalController::class, 'courses'])->name('courses');
+    Route::get('/notices', [\App\Http\Controllers\Parent\ParentPortalController::class, 'notices'])->name('notices');
+    Route::get('/communication', [\App\Http\Controllers\Parent\ParentPortalController::class, 'communication'])->name('communication');
+    Route::get('/events', [\App\Http\Controllers\Parent\ParentPortalController::class, 'events'])->name('events');
+    Route::get('/report/print', [\App\Http\Controllers\Parent\ParentPortalController::class, 'print'])->name('print');
     Route::get('/profile', [\App\Http\Controllers\Parent\ParentProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [\App\Http\Controllers\Parent\ParentProfileController::class, 'update'])->name('profile.update');
     Route::get('/export', [\App\Http\Controllers\Parent\ParentExportController::class, 'export'])->name('export');
-    
-    // Children Management
-    Route::get('/children', [\App\Http\Controllers\Parent\ParentChildrenController::class, 'index'])->name('children.index');
-    Route::get('/children/{id}', [\App\Http\Controllers\Parent\ParentChildrenController::class, 'show'])->name('children.show');
-    
-    // Attendance Monitoring
-    Route::get('/attendance', [\App\Http\Controllers\Parent\ParentAttendanceController::class, 'index'])->name('attendance.index');
-    Route::get('/attendance/child/{childId}', [\App\Http\Controllers\Parent\ParentAttendanceController::class, 'showChild'])->name('attendance.child');
-    
-    // Marks and Results
-    Route::get('/marks', [\App\Http\Controllers\Parent\ParentMarksController::class, 'index'])->name('marks.index');
-    Route::get('/marks/child/{childId}', [\App\Http\Controllers\Parent\ParentMarksController::class, 'showChild'])->name('marks.child');
-    Route::get('/marks/child/{childId}/exam/{examId}', [\App\Http\Controllers\Parent\ParentMarksController::class, 'showExam'])->name('marks.exam');
-    
-    // Courses
-    Route::get('/courses', [\App\Http\Controllers\Parent\ParentCoursesController::class, 'index'])->name('courses.index');
-    Route::get('/courses/child/{childId}', [\App\Http\Controllers\Parent\ParentCoursesController::class, 'showChild'])->name('courses.child');
-    Route::get('/courses/child/{childId}/subject/{subjectId}', [\App\Http\Controllers\Parent\ParentCoursesController::class, 'showSubject'])->name('courses.subject');
-    
-    // Notices
-    Route::get('/notices', [\App\Http\Controllers\Parent\ParentNoticesController::class, 'index'])->name('notices.index');
-    Route::get('/notices/{id}', [\App\Http\Controllers\Parent\ParentNoticesController::class, 'show'])->name('notices.show');
-    Route::post('/notices/{id}/read', [\App\Http\Controllers\Parent\ParentNoticesController::class, 'markAsRead'])->name('notices.read');
-    
-    // Events
-    Route::get('/events', [\App\Http\Controllers\Parent\ParentEventsController::class, 'index'])->name('events.index');
-    Route::get('/events/{id}', [\App\Http\Controllers\Parent\ParentEventsController::class, 'show'])->name('events.show');
-    
-    // Communication
-    Route::get('/communication', [\App\Http\Controllers\Parent\ParentCommunicationController::class, 'index'])->name('communication.index');
-    Route::post('/communication/send', [\App\Http\Controllers\Parent\ParentCommunicationController::class, 'sendMessage'])->name('communication.send');
-    
-    // PDF Exports
-    Route::get('/attendance/{childId}/pdf', [\App\Http\Controllers\Parent\ParentPdfExportController::class, 'attendancePdf'])->name('attendance.pdf');
-    Route::get('/marks/{childId}/pdf', [\App\Http\Controllers\Parent\ParentPdfExportController::class, 'marksPdf'])->name('marks.pdf');
 });
 
 // Student-facing dashboard
 Route::get('/student', [\App\Http\Controllers\Student\StudentDashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:student'])
     ->name('student.dashboard');
-
-// Parent-facing dashboard
-Route::get('/parent', [\App\Http\Controllers\Parent\ParentDashboardController::class, 'index'])
-    ->middleware(['auth', 'verified', 'role:parent'])
-    ->name('parent.dashboard');
 
 // Teacher-facing dashboard
 Route::get('/teacher', [\App\Http\Controllers\Teacher\TeacherDashboardController::class, 'index'])
