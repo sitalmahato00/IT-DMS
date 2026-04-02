@@ -204,55 +204,59 @@
     ]
 ])
 
-<div class="space-y-4 w-full">
+<div class="students-page space-y-6 w-full">
     <!-- Stats Cards -->
-    @include('admin.components.admin-stats-cards', [
-        'cards' => [
-            ['title' => 'Active Students', 'value' => \App\Models\User::where('role','student')->whereHas('student', fn($q) => $q->where('status','active')->whereNull('is_alumni'))->count(), 'icon' => 'bi-check-circle', 'color' => 'green'],
-            ['title' => 'Inactive Students', 'value' => \App\Models\User::where('role','student')->whereHas('student', fn($q) => $q->where('status','inactive')->whereNull('is_alumni'))->count(), 'icon' => 'bi-x-circle', 'color' => 'red'],
-            ['title' => 'Pending Students', 'value' => \App\Models\User::where('role','student')->whereHas('student', fn($q) => $q->where('status','pending')->whereNull('is_alumni'))->count(), 'icon' => 'bi-hourglass-split', 'color' => 'yellow'],
-            ['title' => 'Alumni', 'value' => \App\Models\User::where('role','student')->whereHas('student', fn($q) => $q->where('is_alumni', 1))->count(), 'icon' => 'bi-mortarboard', 'color' => 'purple'],
-        ]
-    ])
+    <div class="students-stats">
+        @include('admin.components.admin-stats-cards', [
+            'cards' => [
+                ['title' => 'Active Students', 'value' => \App\Models\User::where('role','student')->whereHas('student', fn($q) => $q->where('status','active')->whereNull('is_alumni'))->count(), 'icon' => 'bi-check-circle', 'color' => 'green'],
+                ['title' => 'Inactive Students', 'value' => \App\Models\User::where('role','student')->whereHas('student', fn($q) => $q->where('status','inactive')->whereNull('is_alumni'))->count(), 'icon' => 'bi-x-circle', 'color' => 'red'],
+                ['title' => 'Pending Students', 'value' => \App\Models\User::where('role','student')->whereHas('student', fn($q) => $q->where('status','pending')->whereNull('is_alumni'))->count(), 'icon' => 'bi-hourglass-split', 'color' => 'yellow'],
+                ['title' => 'Alumni', 'value' => \App\Models\User::where('role','student')->whereHas('student', fn($q) => $q->where('is_alumni', 1))->count(), 'icon' => 'bi-mortarboard', 'color' => 'purple'],
+            ]
+        ])
+    </div>
 
     <!-- Filter Card -->
-    @include('admin.components.admin-filter-card', [
-        'formAction' => route('admin.students'),
-        'filters' => [
-            ['name' => 'q', 'type' => 'text', 'placeholder' => 'Search by name or email...', 'value' => request('q'), 'label' => 'Search'],
-            ['name' => 'status', 'type' => 'select', 'options' => ['all' => 'All', 'active' => 'Active', 'inactive' => 'Inactive', 'pending' => 'Pending', 'alumni' => 'Alumni'], 'value' => request('status'), 'label' => 'Status'],
-            ['name' => 'semester', 'type' => 'select', 'options' => ['' => 'All Semesters', '1' => 'Sem 1', '2' => 'Sem 2', '3' => 'Sem 3', '4' => 'Sem 4', '5' => 'Sem 5', '6' => 'Sem 6'], 'value' => request('semester'), 'label' => 'Semester'],
-            ['name' => 'academic_year', 'type' => 'select', 'options' => array_merge(['' => 'All Years'], array_combine($academicYears ?? [], $academicYears ?? [])), 'value' => request('academic_year'), 'label' => 'Academic Year']
-        ],
-        'showReset' => true,
-        'resetRoute' => route('admin.students')
-    ])
+    <div class="students-filter-panel">
+        @include('admin.components.admin-filter-card', [
+            'formAction' => route('admin.students'),
+            'filters' => [
+                ['name' => 'q', 'type' => 'text', 'placeholder' => 'Search by name or email...', 'value' => request('q'), 'label' => 'Search'],
+                ['name' => 'status', 'type' => 'select', 'options' => ['all' => 'All', 'active' => 'Active', 'inactive' => 'Inactive', 'pending' => 'Pending', 'alumni' => 'Alumni'], 'value' => request('status'), 'label' => 'Status'],
+                ['name' => 'semester', 'type' => 'select', 'options' => ['' => 'All Semesters', '1' => 'Sem 1', '2' => 'Sem 2', '3' => 'Sem 3', '4' => 'Sem 4', '5' => 'Sem 5', '6' => 'Sem 6'], 'value' => request('semester'), 'label' => 'Semester'],
+                ['name' => 'academic_year', 'type' => 'select', 'options' => array_merge(['' => 'All Years'], array_combine($academicYears ?? [], $academicYears ?? [])), 'value' => request('academic_year'), 'label' => 'Academic Year']
+            ],
+            'showReset' => true,
+            'resetRoute' => route('admin.students')
+        ])
+    </div>
 
     <!-- Data Table -->
-    <div class="rounded-xl border border-gray-200 bg-white shadow-md dark:border-slate-700 dark:bg-slate-800 overflow-hidden">
+    <div class="students-table-panel rounded-xl border border-gray-200 bg-white shadow-md dark:border-slate-700 dark:bg-slate-800 overflow-hidden">
         <!-- Toolbar -->
-        <div class="px-4 py-4 border-b border-gray-100 dark:border-slate-700 bg-gradient-to-r from-gray-50 to-white dark:from-slate-800/50 dark:to-slate-800">
+        <div class="students-toolbar px-4 py-4 border-b border-gray-100 dark:border-slate-700 bg-gradient-to-r from-gray-50 to-white dark:from-slate-800/50 dark:to-slate-800">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div class="flex items-center gap-2">
                     <input type="checkbox" id="select_all" class="form-checkbox rounded text-red-600" />
                     <span class="text-sm text-gray-700 dark:text-gray-300 hidden sm:inline">Select all</span>
-                    <select id="bulk_action" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 rounded-lg text-sm">
+                    <select id="bulk_action" class="students-toolbar-select px-3 py-1.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 rounded-lg text-sm">
                         <option value="">Bulk actions</option>
                         <option value="set_status_active">Set Active</option>
                         <option value="set_status_inactive">Set Inactive</option>
                         <option value="export_csv">Export (CSV)</option>
                     </select>
-                    <button id="apply_bulk" class="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Apply</button>
+                    <button id="apply_bulk" class="students-toolbar-btn px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Apply</button>
                 </div>
                 <div class="flex items-center gap-2">
                     <form id="exportForm" method="GET" action="{{ route('admin.students.export') }}" class="inline-block">
                         <input type="hidden" name="q" value="{{ request('q') }}">
                         <input type="hidden" name="status" value="{{ request('status') }}">
-                        <button type="submit" class="px-4 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                        <button type="submit" class="students-toolbar-btn px-4 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700">
                             <i class="bi bi-file-earmark-spreadsheet"></i> CSV
                         </button>
                     </form>
-                    <button onclick="adminOpenPrintPreview('{{ route('students.print-list') }}')" class="px-4 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    <button onclick="adminOpenPrintPreview('{{ route('students.print-list') }}')" class="students-toolbar-btn px-4 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                         <i class="bi bi-printer"></i> Print
                     </button>
                 </div>
@@ -261,8 +265,8 @@
 
         <!-- Table -->
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-                <thead>
+            <table class="student-directory-table w-full text-left text-sm">
+                <thead class="student-directory-head">
                     <tr>
                         <th class="px-4 py-3.5"><input type="checkbox" id="th_select_all" class="form-checkbox rounded text-red-600" /></th>
                         <th>User</th>
@@ -276,33 +280,33 @@
                 </thead>
                 <tbody>
                     @forelse($students ?? \App\Models\User::where('role','student')->paginate(15) as $student)
-                        <tr>
+                        <tr class="student-row">
                             <td class="px-4 py-4"><input type="checkbox" class="student-checkbox rounded text-red-600" data-id="{{ $student->id }}" /></td>
                             <td class="px-4 py-4">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-xs font-semibold text-red-700">
+                                    <div class="student-avatar w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-xs font-semibold text-red-700">
                                         {{ substr($student->name, 0, 1) }}
                                     </div>
-                                    <span class="font-medium">{{ $student->name }}</span>
+                                    <span class="student-name font-medium">{{ $student->name }}</span>
                                 </div>
                             </td>
-                            <td class="px-4 py-4 text-gray-600">{{ $student->student->roll_no ?? $student->id }}</td>
-                            <td class="px-4 py-4 text-gray-600">{{ $student->email }}</td>
+                            <td class="px-4 py-4 text-gray-600"><span class="student-roll-chip">{{ $student->student->roll_no ?? $student->id }}</span></td>
+                            <td class="px-4 py-4 text-gray-600"><span class="student-meta-text">{{ $student->email }}</span></td>
                             <td class="px-4 py-4">
                                 @if($student->student->is_alumni)
                                     <span class="badge badge-alumni">Graduate</span>
                                 @else
-                                    {{ $student->student->semester ?? '--' }}
+                                    <span class="student-semester-chip">{{ $student->student->semester ?? '--' }}</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-4 text-gray-600">{{ $student->student->academic_year ?? '--' }}</td>
+                            <td class="px-4 py-4 text-gray-600"><span class="student-year-chip">{{ $student->student->academic_year ?? '--' }}</span></td>
                             <td class="px-4 py-4">
                                 <span class="badge badge-{{ $student->student->status ?? 'pending' }}">
                                     {{ ucfirst($student->student->status ?? 'pending') }}
                                 </span>
                             </td>
                             <td class="px-4 py-4 text-center">
-                                <div class="flex gap-2 justify-center">
+                                <div class="student-actions flex gap-2 justify-center">
                                     <button type="button" onclick="viewStudent({{ json_encode($student->only(['id', 'name', 'email']) + ($student->student?->toArray() ?? [])) }})" class="action-btn action-btn-view" title="View">
                                         <i class="bi bi-eye"></i>
                                     </button>
@@ -317,7 +321,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-8 text-center text-gray-500">No students found.</td>
+                            <td colspan="8" class="student-empty-state px-4 py-8 text-center text-gray-500">No students found.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -325,7 +329,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="px-4 py-4 border-t border-gray-100 dark:border-slate-700 bg-gradient-to-r from-gray-50 to-white dark:from-slate-800/50 dark:to-slate-800">
+        <div class="students-pagination px-4 py-4 border-t border-gray-100 dark:border-slate-700 bg-gradient-to-r from-gray-50 to-white dark:from-slate-800/50 dark:to-slate-800">
             @include('admin.components.admin-pagination', ['paginator' => $students ?? null])
         </div>
     </div>

@@ -10,7 +10,7 @@
         border-width: 2px;
         border-color: #e2e8f0;
         border-radius: 0.9rem;
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        background: transparent;
         box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
         transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
@@ -25,7 +25,7 @@
         overflow: hidden;
         border: 2px solid #e2e8f0;
         border-radius: 1rem;
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        background: transparent;
         box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
         transition: box-shadow 0.25s ease;
     }
@@ -39,7 +39,7 @@
         overflow: hidden;
         border: 2px solid #e2e8f0;
         border-radius: 1rem;
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        background: transparent;
         box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
         transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
@@ -53,7 +53,6 @@
     .dark .dashboard-chart-container,
     .dark .dashboard-info-card {
         border-color: #1e293b;
-        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
         box-shadow: 0 18px 35px -30px rgba(0, 0, 0, 0.5);
     }
 
