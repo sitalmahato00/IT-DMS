@@ -17,10 +17,10 @@ return new class extends Migration
             $table->string('roll_no', 50);
             $table->string('registration_number', 50)->nullable();
             $table->string('semester', 20)->default('1');
-$table->foreignId('parent_id')->nullable()->index(); // parents FK constraint added later
+            $table->foreignId('parent_id')->nullable()->index(); // parents FK constraint added later
             $table->date('date_of_birth')->nullable();
             $table->string('date_of_birth_bs', 20)->nullable();
-$table->string('academic_year', 10)->nullable();
+            $table->string('academic_year', 10)->nullable();
             $table->string('academic_year_bs', 10)->nullable();
             $table->string('batch_year', 10)->nullable();
             $table->boolean('is_active')->default(true);
@@ -37,7 +37,7 @@ $table->string('academic_year', 10)->nullable();
             $table->string('gender', 20)->nullable();
             $table->string('blood_group', 10)->nullable();
             $table->string('emergency_contact', 20)->nullable();
-            
+
             $table->timestamps();
             $table->softDeletes();
 
@@ -57,4 +57,3 @@ $table->string('academic_year', 10)->nullable();
         Schema::dropIfExists('students');
     }
 };
-

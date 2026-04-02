@@ -5,77 +5,6 @@
 @section('styles')
 <script>document.documentElement.classList.add('courses-ui-enhanced');</script>
 <style>
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel {
-        position: relative;
-        overflow: hidden;
-        border-radius: 1.5rem;
-        border: 1px solid #d90033;
-        background: linear-gradient(to right, #ff0037, #d90033, #b2002f);
-        padding: 1.5rem;
-        box-shadow: 0 20px 45px -25px rgba(178, 0, 47, 0.55);
-    }
-
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel::before,
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel::after {
-        content: '';
-        position: absolute;
-        border-radius: 999px;
-        pointer-events: none;
-    }
-
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel::before {
-        top: -3rem;
-        right: -2rem;
-        width: 11rem;
-        height: 11rem;
-        background: rgba(255, 255, 255, 0.15);
-        filter: blur(10px);
-    }
-
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel::after {
-        bottom: -4rem;
-        left: -1rem;
-        width: 13rem;
-        height: 13rem;
-        background: rgba(255, 255, 255, 0.09);
-        filter: blur(16px);
-    }
-
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel > * {
-        position: relative;
-        z-index: 1;
-    }
-
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel h1 {
-        color: #fff;
-        font-size: clamp(2rem, 2.4vw, 2.65rem);
-        letter-spacing: -0.04em;
-    }
-
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel nav a {
-        color: #ffe5ea;
-    }
-
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel nav a:hover {
-        color: #fff;
-    }
-
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel nav span {
-        color: rgba(255, 255, 255, 0.88);
-    }
-
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel nav span.text-red-600 {
-        color: #fff;
-    }
-
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel nav i {
-        color: rgba(255, 255, 255, 0.55);
-    }
-
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel button {
-        box-shadow: 0 16px 30px -20px rgba(15, 23, 42, 0.45);
-    }
-
     html.courses-ui-enhanced:not(.dark) .courses-stats > .grid > div {
         position: relative;
         overflow: hidden;
@@ -307,9 +236,6 @@
     }
 
     @media (max-width: 640px) {
-        html.courses-ui-enhanced:not(.dark) .courses-hero-panel {
-            padding: 1.25rem;
-        }
     }
 </style>
 @endsection
@@ -317,20 +243,18 @@
 @section('content')
 
 {{-- Page Header --}}
-<div class="courses-hero-panel">
-    @include('admin.components.admin-page-header', [
-        'title' => 'Courses',
-        'breadcrumbs' => [
-            ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
-            ['label' => 'Courses']
-        ],
-        'addButton' => [
-            'label' => 'Add Course',
-            'onclick' => "openAddCourseModal()",
-            'color' => 'green'
-        ]
-    ])
-</div>
+@include('admin.components.admin-page-header', [
+    'title' => 'Courses',
+    'breadcrumbs' => [
+        ['label' => 'Dashboard', 'url' => route('admin.dashboard')],
+        ['label' => 'Courses']
+    ],
+    'addButton' => [
+        'label' => 'Add Course',
+        'onclick' => "openAddCourseModal()",
+        'color' => 'green'
+    ]
+])
 
 <div class="courses-page space-y-6">
     <!-- Global Loader Overlay -->
