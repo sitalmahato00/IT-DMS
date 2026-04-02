@@ -2,6 +2,77 @@
 
 @section('title', __('Dashboard'))
 
+@section('styles')
+<style>
+    html:not(.dark) .dashboard-stats > div {
+        position: relative;
+        overflow: hidden;
+        border-width: 2px;
+        border-color: #e2e8f0;
+        border-radius: 0.9rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    html:not(.dark) .dashboard-stats > div:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 40px -28px rgba(15, 23, 42, 0.28);
+    }
+
+    html:not(.dark) .dashboard-chart-container {
+        position: relative;
+        overflow: hidden;
+        border: 2px solid #e2e8f0;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
+        transition: box-shadow 0.25s ease;
+    }
+
+    html:not(.dark) .dashboard-chart-container:hover {
+        box-shadow: 0 24px 40px -28px rgba(15, 23, 42, 0.28);
+    }
+
+    html:not(.dark) .dashboard-info-card {
+        position: relative;
+        overflow: hidden;
+        border: 2px solid #e2e8f0;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    html:not(.dark) .dashboard-info-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 40px -28px rgba(15, 23, 42, 0.28);
+    }
+
+    .dark .dashboard-stats > div,
+    .dark .dashboard-chart-container,
+    .dark .dashboard-info-card {
+        border-color: #1e293b;
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        box-shadow: 0 18px 35px -30px rgba(0, 0, 0, 0.5);
+    }
+
+    .dark .dashboard-stats > div:hover,
+    .dark .dashboard-chart-container:hover,
+    .dark .dashboard-info-card:hover {
+        box-shadow: 0 24px 40px -28px rgba(0, 0, 0, 0.6);
+    }
+
+    .dark .dashboard-stats > div:hover {
+        transform: translateY(-4px);
+    }
+
+    .dark .dashboard-info-card:hover {
+        transform: translateY(-4px);
+    }
+</style>
+@endsection
+
 @section('content')
 @php
     $adminName = $user->name ?? 'Administrator';
@@ -78,9 +149,9 @@
     </div>
 
     <!-- Stats Cards - Clean Design -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div class="dashboard-stats grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <!-- Total Students Card -->
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 hover:shadow-lg transition-shadow">
+        <div class="p-4">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-[11px] uppercase tracking-widest text-gray-600 dark:text-gray-400 font-semibold">{{ __('Total Students') }}</p>
                 <i class="bi bi-people-fill text-xl text-blue-500"></i>
@@ -93,7 +164,7 @@
         </div>
 
         <!-- Teachers Card -->
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 hover:shadow-lg transition-shadow">
+        <div class="p-4">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-[11px] uppercase tracking-widest text-gray-600 dark:text-gray-400 font-semibold">{{ __('Teachers') }}</p>
                 <i class="bi bi-person-check-fill text-xl text-orange-500"></i>
@@ -106,7 +177,7 @@
         </div>
 
         <!-- Courses Card -->
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 hover:shadow-lg transition-shadow">
+        <div class="p-4">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-[11px] uppercase tracking-widest text-gray-600 dark:text-gray-400 font-semibold">{{ __('Courses') }}</p>
                 <i class="bi bi-book-fill text-xl text-purple-500"></i>
@@ -119,7 +190,7 @@
         </div>
 
         <!-- Attendance Rate Card -->
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 hover:shadow-lg transition-shadow">
+        <div class="p-4">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-[11px] uppercase tracking-widest text-gray-600 dark:text-gray-400 font-semibold">{{ __('Attendance') }}</p>
                 <i class="bi bi-check-circle-fill text-xl text-green-500"></i>
@@ -133,9 +204,9 @@
     </div>
 
     <!-- Additional Stats Cards - Clean Design -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div class="dashboard-stats grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <!-- Parents Card -->
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 hover:shadow-lg transition-shadow">
+        <div class="p-4">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-[11px] uppercase tracking-widest text-gray-600 dark:text-gray-400 font-semibold">{{ __('Parents') }}</p>
                 <i class="bi bi-heart-fill text-xl text-rose-500"></i>
@@ -148,7 +219,7 @@
         </div>
 
         <!-- Alumni Card -->
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 hover:shadow-lg transition-shadow">
+        <div class="p-4">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-[11px] uppercase tracking-widest text-gray-600 dark:text-gray-400 font-semibold">{{ __('Alumni') }}</p>
                 <i class="bi bi-mortarboard-fill text-xl text-amber-500"></i>
@@ -161,7 +232,7 @@
         </div>
 
         <!-- Active Semesters Card -->
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 hover:shadow-lg transition-shadow">
+        <div class="p-4">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-[11px] uppercase tracking-widest text-gray-600 dark:text-gray-400 font-semibold">{{ __('Semesters') }}</p>
                 <i class="bi bi-calendar2-check text-xl text-teal-500"></i>
@@ -174,7 +245,7 @@
         </div>
 
         <!-- Electives Card -->
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 hover:shadow-lg transition-shadow">
+        <div class="p-4">
             <div class="flex items-center justify-between mb-3">
                 <p class="text-[11px] uppercase tracking-widest text-gray-600 dark:text-gray-400 font-semibold">{{ __('Electives') }}</p>
                 <i class="bi bi-star-fill text-xl text-indigo-500"></i>
@@ -190,7 +261,7 @@
     <!-- Charts Section -->
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <!-- Attendance Bar Chart -->
-        <div class="xl:col-span-7 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 hover:shadow-lg transition">
+        <div class="xl:col-span-7 dashboard-chart-container p-6">
             <div class="flex items-center justify-between mb-5">
                 <div>
                     <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -263,7 +334,7 @@
         </div>
 
         <!-- Grade Distribution Pie Chart -->
-        <div class="xl:col-span-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 hover:shadow-lg transition">
+        <div class="xl:col-span-5 dashboard-chart-container p-6">
             <div class="flex items-center justify-between mb-5">
                 <div>
                     <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -333,7 +404,7 @@
     <!-- Second Row -->
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <!-- Recent Notices -->
-        <div class="xl:col-span-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 hover:shadow-lg transition">
+        <div class="xl:col-span-4 dashboard-info-card p-5">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <i class="bi bi-megaphone-fill text-yellow-500"></i>
@@ -362,7 +433,7 @@
         </div>
 
         <!-- Upcoming Exams -->
-        <div class="xl:col-span-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 hover:shadow-lg transition">
+        <div class="xl:col-span-4 dashboard-info-card p-5">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <i class="bi bi-pencil-square text-red-500"></i>
@@ -395,7 +466,7 @@
         </div>
 
         <!-- Today's Classes -->
-        <div class="xl:col-span-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 hover:shadow-lg transition">
+        <div class="xl:col-span-4 dashboard-info-card p-5">
             <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <i class="bi bi-calendar-day text-cyan-500"></i>
                 {{ __("Today's Classes") }}
@@ -431,7 +502,7 @@
     <!-- Third Row -->
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <!-- Recent Activities -->
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 hover:shadow-lg transition">
+        <div class="dashboard-info-card p-5">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <i class="bi bi-clock-history text-violet-500"></i>
@@ -471,7 +542,7 @@
         </div>
 
         <!-- New Students -->
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 hover:shadow-lg transition">
+        <div class="dashboard-info-card p-5">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                     <i class="bi bi-person-plus-fill text-cyan-500"></i>

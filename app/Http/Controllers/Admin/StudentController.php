@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class StudentController extends Controller
@@ -134,6 +135,33 @@ class StudentController extends Controller
             ->orderBy('subject_name', 'asc')
             ->get();
 
+        $departmentOptions = Student::query()
+            ->whereNotNull('department')
+            ->where('department', '!=', '')
+            ->distinct()
+            ->orderBy('department')
+            ->pluck('department')
+            ->values()
+            ->all();
+
+        $programOptions = Student::query()
+            ->whereNotNull('program')
+            ->where('program', '!=', '')
+            ->distinct()
+            ->orderBy('program')
+            ->pluck('program')
+            ->values()
+            ->all();
+
+        $sectionOptions = Student::query()
+            ->whereNotNull('section')
+            ->where('section', '!=', '')
+            ->distinct()
+            ->orderBy('section')
+            ->pluck('section')
+            ->values()
+            ->all();
+
         // Export as CSV if requested
         if (request('export') === 'csv') {
             $rows = $builder->get();
@@ -173,7 +201,7 @@ class StudentController extends Controller
 
         $students = $builder->paginate($perPage)->withQueryString();
 
-        return view('admin.students', compact('students','academicYears', 'subjects'));
+        return view('admin.students', compact('students', 'academicYears', 'subjects', 'departmentOptions', 'programOptions', 'sectionOptions'));
     }
 
     /**
@@ -284,71 +312,26 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'required|digits:10',
-            'department' => 'required|string|max:100',
-            // semester prefers numeric values 1-6 from the select
-            'semester' => ['required','in:1,2,3,4,5,6'],
-            'student_id' => 'required|string|max:50',
-            'bio' => 'nullable|string',
-            'profile_photo' => 'nullable|image|max:4096',
-            'date_of_birth' => 'required|date',
-            'date_of_birth_bs' => 'nullable|string|max:20',
-            'batch_year' => 'nullable|string|max:10',
-            'address' => 'required|string',
-            'academic_year' => 'required|string|max:10',
-            'academic_year_bs' => 'nullable|string|max:10|regex:/^\d{4}$/',
-            'gender' => 'nullable|string|max:20',
-        ]);
+        $data = $this->validateStudentData($request);
 
         try {
             \DB::beginTransaction();
-            // Auto-calculate academic_year_bs from academic_year if not provided
-            if (empty($data['academic_year_bs']) && !empty($data['academic_year'])) {
-                $data['academic_year_bs'] = $this->convertAdToBs($data['academic_year'] . '-01-01');
-            }
+            $data = $this->normalizeStudentData($data);
 
             $password = Str::random(10);
 
             $user = new User([
-                'name' => $data['name'],
-                'email' => $data['email'],
+                ...$this->buildUserData($data),
                 'password' => Hash::make($password),
             ]);
             $user->role = 'student';
             $user->save();
 
-            $student = Student::create([
-                'user_id' => $user->id,
-                'roll_no' => $data['student_id'] ?? null,
-                'semester' => $data['semester'] ?? null,
-                'parent_id' => null,
-                'date_of_birth' => $data['date_of_birth'] ?? null,
-                'date_of_birth_bs' => $data['date_of_birth_bs'] ?? null,
-                'batch_year' => $data['batch_year'] ?? null,
-                'academic_year' => $data['academic_year'] ?? null,
-                'academic_year_bs' => $data['academic_year_bs'] ?? null,
-                'gender' => $data['gender'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'department' => $data['department'] ?? null,
-                'bio' => $data['bio'] ?? null,
-                'status' => 'active',
-                'address' => $data['address'] ?? null,
-            ]);
+            $student = new Student($this->buildStudentData($data));
+            $student->user_id = $user->id;
+            $student->save();
 
-            if ($request->hasFile('profile_photo')) {
-                $path = $request->file('profile_photo')->store('profiles', 'public');
-                $student->profile_photo_path = $path;
-                $student->save();
-            }
-
-            // Defensive: ensure semester saved (some environments might cast/ignore values)
-            if (isset($data['semester'])) {
-                $student->semester = $data['semester'];
-                $student->save();
-            }
+            $this->syncStudentFiles($request, $student, $data);
 
             \DB::commit();
 
@@ -528,80 +511,32 @@ class StudentController extends Controller
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        $student = $user->student;
+        $data = $this->validateStudentData($request, $user);
 
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'phone' => 'required|digits:10',
-            'department' => 'required|string|max:100',
-            'semester' => ['required','in:1,2,3,4,5,6'],
-            'student_id' => 'required|string|max:50',
-            'bio' => 'nullable|string',
-            'status' => 'nullable|string',
-            'profile_photo' => 'nullable|image|max:4096',
-            'date_of_birth' => 'required|date',
-            'date_of_birth_bs' => 'nullable|string|max:20',
-            'batch_year' => 'nullable|string|max:10',
-            'address' => 'required|string',
-            'academic_year' => 'required|string|max:10',
-            'academic_year_bs' => 'nullable|string|max:10|regex:/^\d{4}$/',
-            'gender' => 'nullable|string|max:20',
-        ]);
+        try {
+            \DB::beginTransaction();
 
-        // Auto-calculate academic_year_bs from academic_year if not provided
-        if (empty($data['academic_year_bs']) && !empty($data['academic_year'])) {
-            $data['academic_year_bs'] = $this->convertAdToBs($data['academic_year'] . '-01-01');
-        }
+            $data = $this->normalizeStudentData($data);
 
-        $user->name = $data['name'];
-        $user->email = $data['email'];
-        $user->role = 'student';
-        $user->save();
+            $user->fill($this->buildUserData($data));
+            $user->role = 'student';
+            $user->save();
 
-        // Update or create student record
-        $student = $user->student;
-        if (!$student) {
-            $student = Student::create([
-                'user_id' => $user->id,
-                'roll_no' => $data['student_id'] ?? null,
-                'semester' => $data['semester'] ?? null,
-                'date_of_birth' => $data['date_of_birth'] ?? null,
-                'date_of_birth_bs' => $data['date_of_birth_bs'] ?? null,
-                'batch_year' => $data['batch_year'] ?? null,
-                'academic_year' => $data['academic_year'] ?? null,
-                'academic_year_bs' => $data['academic_year_bs'] ?? null,
-                'gender' => $data['gender'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'department' => $data['department'] ?? null,
-                'bio' => $data['bio'] ?? null,
-                'status' => $data['status'] ?? 'active',
-                'address' => $data['address'] ?? null,
-            ]);
-        } else {
-            $student->roll_no = $data['student_id'] ?? $student->roll_no;
-            $student->semester = $data['semester'] ?? $student->semester;
-            $student->date_of_birth = $data['date_of_birth'] ?? $student->date_of_birth;
-            $student->date_of_birth_bs = $data['date_of_birth_bs'] ?? $student->date_of_birth_bs;
-            $student->batch_year = $data['batch_year'] ?? $student->batch_year;
-            $student->academic_year = $data['academic_year'] ?? $student->academic_year;
-            $student->academic_year_bs = $data['academic_year_bs'] ?? $student->academic_year_bs;
-            $student->gender = $data['gender'] ?? $student->gender;
-            $student->phone = $data['phone'] ?? $student->phone;
-            $student->department = $data['department'] ?? $student->department;
-            $student->bio = $data['bio'] ?? $student->bio;
-            $student->address = $data['address'] ?? $student->address;
-            if (!empty($data['status'])) $student->status = $data['status'];
+            $student = $user->student ?: new Student(['user_id' => $user->id]);
+            $student->fill($this->buildStudentData($data));
+            $student->user_id = $user->id;
             $student->save();
-        }
 
-        if ($request->hasFile('profile_photo')) {
-            $path = $request->file('profile_photo')->store('profiles', 'public');
-            $student->profile_photo_path = $path;
-            $student->save();
-        }
+            $this->syncStudentFiles($request, $student, $data);
 
-        return redirect()->route('admin.students')->with('success', 'Student updated successfully');
+            \DB::commit();
+
+            return redirect()->route('admin.students')->with('success', 'Student updated successfully');
+        } catch (\Exception $e) {
+            \DB::rollBack();
+
+            return redirect()->back()->with('error', 'Failed to update student: ' . $e->getMessage())->withInput();
+        }
     }
 
     public function printList(Request $request)
@@ -695,36 +630,258 @@ class StudentController extends Controller
     {
         try {
             $student = User::where('role','student')->with('student')->findOrFail($id);
-            
-            // Get profile photo URL
-            $photoUrl = null;
-            if (!empty($student->profile_photo_path)) {
-                $photoUrl = asset('storage/' . $student->profile_photo_path);
-            } elseif ($student->student && !empty($student->student->profile_photo_path)) {
-                $photoUrl = asset('storage/' . $student->student->profile_photo_path);
-            }
-            
-            // Get student data with null checks
             $studentData = $student->student;
-            
+            $certificatePaths = collect($studentData?->certificate_paths ?? [])
+                ->filter()
+                ->values()
+                ->map(fn ($path) => [
+                    'name' => basename($path),
+                    'path' => $path,
+                    'url' => $this->storageUrl($path),
+                ])
+                ->all();
+             
             return response()->json([
                 'student' => [
                     'id' => $student->id,
                     'name' => $student->name,
                     'email' => $student->email,
-                    'phone' => $student->phone ?? ($studentData->phone ?? null),
-                    'student_id' => $studentData ? ($studentData->id ?? $student->id) : $student->id,
-                    'roll_no' => $studentData ? $studentData->roll_no : null,
-                    'program' => $studentData ? ($studentData->department ?? null) : null,
-                    'semester' => $studentData ? $studentData->semester : null,
-                    'status' => $studentData ? ($studentData->status ?? 'active') : 'active',
-                    'photo_url' => $photoUrl,
+                    'username' => $student->username,
+                    'role' => $student->role,
+                    'phone' => $studentData?->phone ?? $student->phone,
+                    'secondary_phone' => $studentData?->secondary_phone,
+                    'student_id' => $studentData?->roll_no,
+                    'roll_no' => $studentData?->roll_no,
+                    'department' => $studentData?->department ?? $student->department,
+                    'program' => $studentData?->program,
+                    'semester' => $studentData?->semester,
+                    'section' => $studentData?->section,
+                    'academic_year' => $studentData?->academic_year,
+                    'academic_year_bs' => $studentData?->academic_year_bs,
+                    'enrollment_date' => optional($studentData?->enrollment_date)->format('Y-m-d'),
+                    'expected_graduation_year' => $studentData?->expected_graduation_year,
+                    'date_of_birth' => optional($studentData?->date_of_birth)->format('Y-m-d'),
+                    'date_of_birth_bs' => $studentData?->date_of_birth_bs,
+                    'gender' => $studentData?->gender,
+                    'blood_group' => $studentData?->blood_group,
+                    'national_id_number' => $studentData?->national_id_number,
+                    'emergency_contact' => $studentData?->emergency_contact,
+                    'emergency_contact_name' => $studentData?->emergency_contact_name,
+                    'emergency_relationship' => $studentData?->emergency_relationship,
+                    'address' => $studentData?->address,
+                    'city' => $studentData?->city,
+                    'state_province' => $studentData?->state_province,
+                    'postal_code' => $studentData?->postal_code,
+                    'country' => $studentData?->country,
+                    'medical_conditions' => $studentData?->medical_conditions,
+                    'allergies' => $studentData?->allergies,
+                    'disability_status' => $studentData?->disability_status,
+                    'status' => $studentData?->status ?? 'active',
+                    'is_active' => (bool) ($studentData?->is_active ?? true),
+                    'is_alumni' => (bool) ($studentData?->is_alumni ?? false),
+                    'notes' => $studentData?->notes ?? $studentData?->bio ?? $student->bio,
+                    'photo_url' => $this->storageUrl($studentData?->profile_photo_path ?: $student->profile_photo_path),
+                    'photo_path' => $studentData?->profile_photo_path ?: $student->profile_photo_path,
+                    'id_document' => $studentData?->id_document_path ? [
+                        'name' => basename($studentData->id_document_path),
+                        'path' => $studentData->id_document_path,
+                        'url' => $this->storageUrl($studentData->id_document_path),
+                    ] : null,
+                    'certificates' => $certificatePaths,
                 ]
             ]);
         } catch (\Exception $e) {
             \Log::error('Error fetching student detail: ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    private function validateStudentData(Request $request, ?User $user = null): array
+    {
+        $userId = $user?->id;
+
+        return $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($userId)],
+            'username' => ['nullable', 'string', 'max:50', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users', 'username')->ignore($userId)],
+            'phone' => ['required', 'digits:10'],
+            'student_id' => ['required', 'string', 'max:50'],
+            'department' => ['required', 'string', 'max:100'],
+            'program' => ['nullable', 'string', 'max:150'],
+            'semester' => ['required', Rule::in(['1', '2', '3', '4', '5', '6'])],
+            'section' => ['nullable', 'string', 'max:50'],
+            'academic_year' => ['required', 'string', 'max:20'],
+            'academic_year_bs' => ['nullable', 'string', 'max:20'],
+            'enrollment_date' => ['nullable', 'date'],
+            'expected_graduation_year' => ['nullable', 'digits:4'],
+            'date_of_birth' => ['required', 'date'],
+            'date_of_birth_bs' => ['nullable', 'string', 'max:20'],
+            'gender' => ['nullable', 'string', 'max:20'],
+            'blood_group' => ['nullable', 'string', 'max:10'],
+            'national_id_number' => ['nullable', 'string', 'max:100'],
+            'emergency_contact' => ['nullable', 'digits:10'],
+            'emergency_contact_name' => ['nullable', 'string', 'max:150'],
+            'emergency_relationship' => ['nullable', 'string', 'max:100'],
+            'secondary_phone' => ['nullable', 'digits:10'],
+            'address' => ['required', 'string'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'state_province' => ['nullable', 'string', 'max:100'],
+            'postal_code' => ['nullable', 'string', 'max:30'],
+            'country' => ['nullable', 'string', 'max:100'],
+            'medical_conditions' => ['nullable', 'string'],
+            'allergies' => ['nullable', 'string'],
+            'disability_status' => ['nullable', 'string', 'max:120'],
+            'status' => ['required', Rule::in(['active', 'inactive', 'suspended'])],
+            'role' => ['nullable', Rule::in(['student'])],
+            'is_active' => ['nullable', 'boolean'],
+            'profile_photo' => ['nullable', 'image', 'max:4096'],
+            'remove_profile_photo' => ['nullable', 'boolean'],
+            'id_document' => ['nullable', 'file', 'max:5120', 'mimes:pdf,jpg,jpeg,png,doc,docx'],
+            'remove_id_document' => ['nullable', 'boolean'],
+            'certificates' => ['nullable', 'array'],
+            'certificates.*' => ['file', 'max:5120', 'mimes:pdf,jpg,jpeg,png,doc,docx'],
+            'replace_certificates' => ['nullable', 'boolean'],
+            'remove_certificates' => ['nullable', 'boolean'],
+            'notes' => ['nullable', 'string'],
+            'batch_year' => ['nullable', 'string', 'max:10'],
+        ]);
+    }
+
+    private function normalizeStudentData(array $data): array
+    {
+        if (empty($data['academic_year_bs']) && !empty($data['academic_year'])) {
+            $data['academic_year_bs'] = $this->convertAdToBs($data['academic_year'] . '-01-01');
+        }
+
+        if (empty($data['batch_year']) && !empty($data['enrollment_date'])) {
+            $data['batch_year'] = date('Y', strtotime($data['enrollment_date']));
+        }
+
+        $data['username'] = filled($data['username'] ?? null) ? $data['username'] : null;
+        $data['is_active'] = (bool) ($data['is_active'] ?? true);
+
+        return $data;
+    }
+
+    private function buildUserData(array $data): array
+    {
+        return [
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'username' => $data['username'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'department' => $data['department'] ?? null,
+            'bio' => $data['notes'] ?? null,
+        ];
+    }
+
+    private function buildStudentData(array $data): array
+    {
+        $notes = $data['notes'] ?? null;
+
+        return [
+            'roll_no' => $data['student_id'] ?? null,
+            'semester' => $data['semester'] ?? null,
+            'section' => $data['section'] ?? null,
+            'parent_id' => null,
+            'date_of_birth' => $data['date_of_birth'] ?? null,
+            'date_of_birth_bs' => $data['date_of_birth_bs'] ?? null,
+            'batch_year' => $data['batch_year'] ?? null,
+            'academic_year' => $data['academic_year'] ?? null,
+            'academic_year_bs' => $data['academic_year_bs'] ?? null,
+            'enrollment_date' => $data['enrollment_date'] ?? null,
+            'expected_graduation_year' => $data['expected_graduation_year'] ?? null,
+            'gender' => $data['gender'] ?? null,
+            'blood_group' => $data['blood_group'] ?? null,
+            'national_id_number' => $data['national_id_number'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'secondary_phone' => $data['secondary_phone'] ?? null,
+            'emergency_contact' => $data['emergency_contact'] ?? null,
+            'emergency_contact_name' => $data['emergency_contact_name'] ?? null,
+            'emergency_relationship' => $data['emergency_relationship'] ?? null,
+            'department' => $data['department'] ?? null,
+            'program' => $data['program'] ?? null,
+            'status' => $data['status'] ?? 'active',
+            'is_active' => $data['is_active'] ?? true,
+            'address' => $data['address'] ?? null,
+            'city' => $data['city'] ?? null,
+            'state_province' => $data['state_province'] ?? null,
+            'postal_code' => $data['postal_code'] ?? null,
+            'country' => $data['country'] ?? null,
+            'bio' => $notes,
+            'notes' => $notes,
+            'medical_conditions' => $data['medical_conditions'] ?? null,
+            'allergies' => $data['allergies'] ?? null,
+            'disability_status' => $data['disability_status'] ?? null,
+        ];
+    }
+
+    private function syncStudentFiles(Request $request, Student $student, array $data): void
+    {
+        if (!empty($data['remove_profile_photo']) && $student->profile_photo_path) {
+            $this->deletePublicFile($student->profile_photo_path);
+            $student->profile_photo_path = null;
+        }
+
+        if ($request->hasFile('profile_photo')) {
+            $this->deletePublicFile($student->profile_photo_path);
+            $student->profile_photo_path = $request->file('profile_photo')->store('profiles/students', 'public');
+        }
+
+        if (!empty($data['remove_id_document']) && $student->id_document_path) {
+            $this->deletePublicFile($student->id_document_path);
+            $student->id_document_path = null;
+        }
+
+        if ($request->hasFile('id_document')) {
+            $this->deletePublicFile($student->id_document_path);
+            $student->id_document_path = $request->file('id_document')->store('student-documents/id', 'public');
+        }
+
+        $existingCertificates = collect($student->certificate_paths ?? [])->filter()->values()->all();
+
+        if (!empty($data['remove_certificates'])) {
+            $this->deletePublicFiles($existingCertificates);
+            $student->certificate_paths = [];
+            $existingCertificates = [];
+        }
+
+        if ($request->hasFile('certificates')) {
+            $this->deletePublicFiles($existingCertificates);
+
+            $student->certificate_paths = collect($request->file('certificates'))
+                ->map(fn ($file) => $file->store('student-documents/certificates', 'public'))
+                ->all();
+        }
+
+        $student->save();
+    }
+
+    private function deletePublicFile(?string $path): void
+    {
+        if ($path) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    private function deletePublicFiles(array $paths): void
+    {
+        $paths = array_values(array_filter($paths));
+
+        if ($paths !== []) {
+            Storage::disk('public')->delete($paths);
+        }
+    }
+
+    private function storageUrl(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        return Str::startsWith($path, ['http://', 'https://'])
+            ? $path
+            : asset('storage/' . ltrim($path, '/'));
     }
 
     public function download($id)

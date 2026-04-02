@@ -2,56 +2,191 @@
 
 @section('title', 'Students')
 
-@push('styles')
+@section('styles')
+<script>document.documentElement.classList.add('students-ui-enhanced');</script>
 <style>
-    /* Essential styles only */
-    .badge {
-        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    html.students-ui-enhanced:not(.dark) .students-stats > .grid,
+    html.students-ui-enhanced:not(.dark) .students-filter-panel > div {
+        margin-bottom: 0;
     }
 
-    .badge-active { @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400; }
-    .badge-inactive { @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400; }
-    .badge-pending { @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400; }
-    .badge-alumni { @apply bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400; }
-
-    /* Action buttons */
-    .action-btn {
-        @apply inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 hover:scale-110;
+    html.students-ui-enhanced:not(.dark) .students-stats > .grid > div {
+        position: relative;
+        overflow: hidden;
+        border-width: 2px;
+        border-radius: 1rem;
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
 
-    .action-btn-view { @apply text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30; }
-    .action-btn-edit { @apply text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30; }
-    .action-btn-delete { @apply text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30; }
-
-    /* Table styling */
-    table thead { @apply bg-gradient-to-r from-red-50 to-pink-50 dark:from-slate-700/50 dark:to-slate-700/30 border-b-2 border-red-500/20; }
-    table thead th { @apply text-gray-700 dark:text-gray-200 font-semibold text-sm px-4 py-3 text-left; }
-    table tbody tr { @apply border-b border-gray-100 dark:border-slate-700/50 transition-all duration-150 hover:bg-red-50/40 dark:hover:bg-red-900/10; }
-    table tbody td { @apply px-4 py-3.5 text-sm; }
-
-    /* Form inputs */
-    input:not([type="checkbox"]):not([type="radio"]),
-    select,
-    textarea {
-        @apply transition-all duration-200 focus:ring-2 focus:ring-red-500 focus:ring-offset-0;
+    html.students-ui-enhanced:not(.dark) .students-stats > .grid > div:hover,
+    html.students-ui-enhanced:not(.dark) .student-photo-panel:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 40px -28px rgba(15, 23, 42, 0.28);
     }
 
-    /* Mobile responsive */
+    html.students-ui-enhanced:not(.dark) .students-stats > .grid > div:nth-child(1) { border-color: #86efac; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 56%, #f0fdf4 100%); }
+    html.students-ui-enhanced:not(.dark) .students-stats > .grid > div:nth-child(2) { border-color: #fda4af; background: linear-gradient(135deg, #fff1f2 0%, #ffffff 56%, #fff1f2 100%); }
+    html.students-ui-enhanced:not(.dark) .students-stats > .grid > div:nth-child(3) { border-color: #fcd34d; background: linear-gradient(135deg, #fffbeb 0%, #ffffff 56%, #fffbeb 100%); }
+    html.students-ui-enhanced:not(.dark) .students-stats > .grid > div:nth-child(4) { border-color: #c4b5fd; background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 56%, #f5f3ff 100%); }
+
+    html.students-ui-enhanced:not(.dark) .students-filter-panel > div,
+    html.students-ui-enhanced:not(.dark) .students-table-panel,
+    html.students-ui-enhanced:not(.dark) .student-modal-panel {
+        overflow: hidden;
+        border: 2px solid #e2e8f0;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
+    }
+
+    html.students-ui-enhanced:not(.dark) .students-filter-panel label,
+    html.students-ui-enhanced:not(.dark) .student-directory-head th,
+    html.students-ui-enhanced:not(.dark) .student-form label,
+    html.students-ui-enhanced:not(.dark) .student-detail-grid label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    html.students-ui-enhanced:not(.dark) .students-filter-panel input:not([type='checkbox']):not([type='radio']),
+    html.students-ui-enhanced:not(.dark) .students-filter-panel select,
+    html.students-ui-enhanced:not(.dark) .students-toolbar select,
+    html.students-ui-enhanced:not(.dark) .student-form input:not([type='checkbox']):not([type='radio']):not([type='file']),
+    html.students-ui-enhanced:not(.dark) .student-form select,
+    html.students-ui-enhanced:not(.dark) .student-form textarea {
+        min-height: 2.9rem;
+        border: 2px solid #cbd5e1;
+        border-radius: 0.85rem;
+        background: #ffffff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    html.students-ui-enhanced:not(.dark) .students-filter-panel input:not([type='checkbox']):not([type='radio']):focus,
+    html.students-ui-enhanced:not(.dark) .students-filter-panel select:focus,
+    html.students-ui-enhanced:not(.dark) .students-toolbar select:focus,
+    html.students-ui-enhanced:not(.dark) .student-form input:not([type='checkbox']):not([type='radio']):not([type='file']):focus,
+    html.students-ui-enhanced:not(.dark) .student-form select:focus,
+    html.students-ui-enhanced:not(.dark) .student-form textarea:focus {
+        outline: none;
+        border-color: #f43f5e;
+        box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1);
+    }
+
+    html.students-ui-enhanced:not(.dark) .students-toolbar,
+    html.students-ui-enhanced:not(.dark) .students-pagination,
+    html.students-ui-enhanced:not(.dark) .student-modal-footer {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    }
+
+    html.students-ui-enhanced:not(.dark) .students-toolbar { border-bottom: 1px solid #e2e8f0; }
+    html.students-ui-enhanced:not(.dark) .students-pagination,
+    html.students-ui-enhanced:not(.dark) .student-modal-footer,
+    html.students-ui-enhanced:not(.dark) .student-form-actions { border-top: 1px solid #e2e8f0; }
+
+    html.students-ui-enhanced:not(.dark) .students-toolbar-btn,
+    html.students-ui-enhanced:not(.dark) .student-secondary-btn,
+    html.students-ui-enhanced:not(.dark) .student-primary-btn,
+    html.students-ui-enhanced:not(.dark) .action-btn {
+        box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.45);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    html.students-ui-enhanced:not(.dark) .students-toolbar-btn:hover,
+    html.students-ui-enhanced:not(.dark) .student-secondary-btn:hover,
+    html.students-ui-enhanced:not(.dark) .student-primary-btn:hover,
+    html.students-ui-enhanced:not(.dark) .action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 34px -24px rgba(15, 23, 42, 0.5);
+    }
+
+    html.students-ui-enhanced:not(.dark) .student-directory-table { border-collapse: separate; border-spacing: 0; }
+    html.students-ui-enhanced:not(.dark) .student-directory-head th { background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border-bottom: 1px solid #e2e8f0; color: #64748b; }
+    html.students-ui-enhanced:not(.dark) .student-row td { border-bottom: 1px solid #e2e8f0; transition: background-color 0.18s ease; vertical-align: middle; }
+    html.students-ui-enhanced:not(.dark) .student-row:nth-child(even) td { background: #f8fafc; }
+    html.students-ui-enhanced:not(.dark) .student-row:hover td { background: #fff7f8; }
+
+    html.students-ui-enhanced:not(.dark) .student-avatar,
+    html.students-ui-enhanced:not(.dark) .student-photo-frame {
+        border: 1px solid #fecdd3;
+        background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    html.students-ui-enhanced:not(.dark) .student-roll-chip,
+    html.students-ui-enhanced:not(.dark) .student-semester-chip,
+    html.students-ui-enhanced:not(.dark) .student-year-chip,
+    html.students-ui-enhanced:not(.dark) .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.42rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    html.students-ui-enhanced:not(.dark) .student-name { color: #0f172a; font-weight: 700; }
+    html.students-ui-enhanced:not(.dark) .student-meta-text { color: #475569; }
+    html.students-ui-enhanced:not(.dark) .student-roll-chip { background: #eff6ff; color: #1d4ed8; }
+    html.students-ui-enhanced:not(.dark) .student-semester-chip { background: #ecfeff; color: #0f766e; }
+    html.students-ui-enhanced:not(.dark) .student-year-chip { background: #f8fafc; color: #475569; }
+    html.students-ui-enhanced:not(.dark) .badge-active { background: #dcfce7; color: #166534; }
+    html.students-ui-enhanced:not(.dark) .badge-inactive { background: #fee2e2; color: #b91c1c; }
+    html.students-ui-enhanced:not(.dark) .badge-pending { background: #fef3c7; color: #b45309; }
+    html.students-ui-enhanced:not(.dark) .badge-alumni { background: #f3e8ff; color: #7e22ce; }
+
+    html.students-ui-enhanced:not(.dark) .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.8rem;
+        background: #ffffff;
+    }
+
+    html.students-ui-enhanced:not(.dark) .action-btn-view { color: #2563eb; }
+    html.students-ui-enhanced:not(.dark) .action-btn-edit { color: #d97706; }
+    html.students-ui-enhanced:not(.dark) .action-btn-delete { color: #dc2626; }
+    html.students-ui-enhanced:not(.dark) .student-empty-state { color: #64748b; font-weight: 500; }
+
+    html.students-ui-enhanced:not(.dark) .student-modal-header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        border-bottom: none;
+        background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+    }
+
+    html.students-ui-enhanced:not(.dark) .student-modal-header p { color: #ffe4e6; }
+    html.students-ui-enhanced:not(.dark) .student-modal-close { display: inline-flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 0.8rem; background: rgba(255, 255, 255, 0.14); }
+    html.students-ui-enhanced:not(.dark) .student-photo-panel { border: 1px solid #e2e8f0; border-radius: 1rem; background: linear-gradient(180deg, #fff1f2 0%, #ffffff 100%); padding: 1.25rem; transition: transform 0.25s ease, box-shadow 0.25s ease; }
+    html.students-ui-enhanced:not(.dark) .student-upload-btn { border: 1px solid #fecdd3; border-radius: 0.85rem; background: #fff1f2; color: #be123c; }
+    html.students-ui-enhanced:not(.dark) .student-detail-grid > div { padding: 0.95rem 1rem; border: 1px solid #e2e8f0; border-radius: 0.9rem; background: #ffffff; }
+    html.students-ui-enhanced:not(.dark) .student-detail-grid p { color: #0f172a; }
+    html.students-ui-enhanced:not(.dark) .student-secondary-btn { border: 1px solid #cbd5e1; background: #ffffff; color: #334155; }
+    html.students-ui-enhanced:not(.dark) .student-form-actions { margin-top: 1.5rem; padding-top: 1rem; }
+
     @media (max-width: 768px) {
-        table thead th:nth-child(n+4),
-        table tbody td:nth-child(n+4) { display: none; }
-        
-        table th, table td { padding: 0.75rem 0.5rem; }
+        html.students-ui-enhanced:not(.dark) .student-directory-table thead th:nth-child(n+4),
+        html.students-ui-enhanced:not(.dark) .student-directory-table tbody td:nth-child(n+4) { display: none; }
+        html.students-ui-enhanced:not(.dark) .student-directory-table th,
+        html.students-ui-enhanced:not(.dark) .student-directory-table td { padding: 0.75rem 0.5rem; }
     }
 
     @media (max-width: 640px) {
-        table thead th:nth-child(n+2),
-        table tbody td:nth-child(n+2) { display: none; }
-        
-        table th, table td { padding: 0.5rem 0.25rem; }
+        html.students-ui-enhanced:not(.dark) .student-directory-table thead th:nth-child(n+2),
+        html.students-ui-enhanced:not(.dark) .student-directory-table tbody td:nth-child(n+2) { display: none; }
+        html.students-ui-enhanced:not(.dark) .student-directory-table th,
+        html.students-ui-enhanced:not(.dark) .student-directory-table td { padding: 0.5rem 0.25rem; }
     }
 </style>
-@endpush
+@endsection
 
 @section('content')
 
