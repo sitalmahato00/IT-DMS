@@ -24,7 +24,7 @@ class TeacherController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $query = $request->get('q');
+        $query = $request->get('search', $request->get('q'));
         $status = $request->get('status');
         $subjectId = $request->get('course');
         $perPage = intval($request->get('per_page', 10)) ?: 10;
@@ -116,6 +116,16 @@ class TeacherController extends Controller
         return view('admin.teachers', compact('teachers', 'subjects', 'teacherSubjectOptions', 'semesterOptions'));
     }
 
+    public function create()
+    {
+        return view('admin.teachers.create', array_merge([
+            'teacher' => new User(),
+            'teacherProfile' => new Teacher(),
+            'selectedSubjectIds' => [],
+            'selectedSemester' => '',
+        ], $this->getTeacherFormViewData()));
+    }
+
     public function store(Request $request)
     {
         $data = $this->validateTeacherData($request);
@@ -187,6 +197,15 @@ class TeacherController extends Controller
             return response()->json(['error' => 'You can only view your own profile'], 403);
         }
         
+        if (!request()->ajax() && !request()->wantsJson()) {
+            return view('admin.teachers.edit', array_merge([
+                'teacher' => $teacher,
+                'teacherProfile' => $teacher->teacher ?? new Teacher(),
+                'selectedSubjectIds' => $teacher->teacher?->subjects?->pluck('id')->map(fn ($id) => (string) $id)->values()->all() ?? [],
+                'selectedSemester' => $teacher->teacher?->subjects?->first()?->pivot?->semester ?? '',
+            ], $this->getTeacherFormViewData()));
+        }
+
         $teacherProfile = $teacher->teacher;
         return response()->json([
             'id' => $teacher->id,
@@ -243,6 +262,19 @@ class TeacherController extends Controller
                 ];
             })->values() ?? [],
         ]);
+    }
+
+    public function show($id)
+    {
+        $teacher = User::where('role', 'teacher')
+            ->with(['teacher.subjects', 'teacher.subjectAssignments', 'teacher'])
+            ->findOrFail($id);
+
+        return view('admin.teachers.show', array_merge([
+            'teacher' => $teacher,
+            'teacherProfile' => $teacher->teacher ?? new Teacher(),
+            'assignedSubjects' => $teacher->teacher?->subjects ?? collect(),
+        ], $this->getTeacherFormViewData()));
     }
 
     public function update(Request $request, $id)
@@ -360,7 +392,7 @@ class TeacherController extends Controller
             'emergency_contact_name' => ['nullable', 'string', 'max:255'],
             'emergency_contact_phone' => ['nullable', 'digits:10'],
             'emergency_relationship' => ['nullable', 'string', 'max:100'],
-            'access_level' => ['nullable', Rule::in(['basic', 'editor', 'manager', 'admin'])],
+            'access_level' => ['nullable', Rule::in(['teacher', 'admin'])],
             'profile_visibility' => ['nullable', Rule::in(['public', 'private'])],
             'notes' => ['nullable', 'string'],
             'social_links' => ['nullable', 'string'],
@@ -419,6 +451,36 @@ class TeacherController extends Controller
             'notes' => $data['notes'] ?? null,
             'status' => $data['status'] ?? 'active',
         ];
+    }
+
+    protected function getTeacherFormViewData(): array
+    {
+        $teacherSubjectOptions = Subject::where('status', 'active')
+            ->orderByRaw('CASE WHEN semester IS NULL OR semester = "" THEN 1 ELSE 0 END')
+            ->orderBy('semester')
+            ->orderBy('subject_name')
+            ->get()
+            ->map(function ($subject) {
+                return [
+                    'id' => $subject->id,
+                    'label' => trim(($subject->subject_code ? $subject->subject_code . ' - ' : '') . $subject->subject_name),
+                    'semester' => (string) ($subject->semester ?? ''),
+                    'semester_label' => $subject->semester ? 'Semester ' . $subject->semester : 'All Semesters',
+                ];
+            })
+            ->values();
+
+        $semesterOptions = Semester::orderBy('number')
+            ->get()
+            ->map(function ($semester) {
+                return [
+                    'value' => (string) $semester->number,
+                    'label' => trim(($semester->name ?: Semester::getOrdinalName((int) $semester->number)) . ' (Sem ' . $semester->number . ')'),
+                ];
+            })
+            ->values();
+
+        return compact('teacherSubjectOptions', 'semesterOptions');
     }
 
     protected function storeTeacherUploads(Request $request): array
@@ -586,7 +648,8 @@ class TeacherController extends Controller
             $builder = User::where('role', 'teacher')->with('teacher');
 
             // Apply search filter
-            if ($q = $request->input('search')) {
+            $q = $request->input('search', $request->input('q'));
+            if ($q) {
                 $builder->where(function($sub) use ($q) {
                     $sub->where('name', 'like', "%{$q}%")->orWhere('email', 'like', "%{$q}%");
                 });
@@ -599,10 +662,10 @@ class TeacherController extends Controller
                 });
             }
 
-            // Apply course/department filter
+            // Apply subject filter
             if ($course = $request->input('course')) {
-                $builder->whereHas('teacher', function($s) use ($course) {
-                    $s->where('department', $course);
+                $builder->whereHas('teacher.subjects', function($subjectQuery) use ($course) {
+                    $subjectQuery->where('subjects.id', $course);
                 });
             }
 
@@ -682,8 +745,6 @@ class TeacherController extends Controller
     public function print($id)
     {
         $teacher = User::where('role','teacher')->with('teacher')->findOrFail($id);
-        // Convert image to base64 for PDF
-        $teacher->photo_base64 = $this->getImageBase64($teacher);
         return view('admin.partials.teacher-print', compact('teacher'));
     }
 
@@ -691,8 +752,6 @@ class TeacherController extends Controller
     {
         try {
             $teacher = User::where('role','teacher')->with('teacher')->findOrFail($id);
-            // Convert image to base64 for PDF
-            $teacher->photo_base64 = $this->getImageBase64($teacher);
             $pdf = Pdf::loadView('admin.partials.teacher-print', compact('teacher'));
             return $pdf->download('teacher_' . $teacher->id . '_' . Str::slug($teacher->name) . '.pdf');
         } catch (\Exception $e) {
@@ -701,45 +760,14 @@ class TeacherController extends Controller
         }
     }
 
-    private function getImageBase64($user)
-    {
-        $path = null;
-        
-        if ($user->teacher && $user->teacher->profile_photo_path) {
-            $path = $user->teacher->profile_photo_path;
-        } elseif ($user->profile_photo_path) {
-            $path = $user->profile_photo_path;
-        }
-
-        if (!$path) {
-            return null;
-        }
-
-        // Handle both with and without storage/ prefix
-        if (strpos($path, 'storage/') === 0) {
-            $fullPath = public_path($path);
-        } else {
-            $fullPath = public_path('storage/' . $path);
-        }
-
-        if (file_exists($fullPath)) {
-            $data = file_get_contents($fullPath);
-            $base64 = base64_encode($data);
-            $mime = mime_content_type($fullPath);
-            return 'data:' . $mime . ';base64,' . $base64;
-        }
-
-        return null;
-    }
-
     /**
      * Print list of teachers
      */
     public function printList(Request $request)
     {
-        $query = $request->input('q');
+        $query = $request->input('search', $request->input('q'));
         $status = $request->input('status');
-        $department = $request->input('department');
+        $course = $request->input('course', $request->input('department'));
 
         $teachersQuery = User::where('role', 'teacher')
             ->with('teacher')
@@ -754,9 +782,9 @@ class TeacherController extends Controller
                     $t->where('status', $status);
                 });
             })
-            ->when($department, function ($q) use ($department) {
-                $q->whereHas('teacher', function ($t) use ($department) {
-                    $t->where('department', $department);
+            ->when($course, function ($q) use ($course) {
+                $q->whereHas('teacher.subjects', function ($subjectQuery) use ($course) {
+                    $subjectQuery->where('subjects.id', $course);
                 });
             })
             ->orderBy('name');

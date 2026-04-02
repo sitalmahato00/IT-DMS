@@ -401,10 +401,6 @@ class StudentController extends Controller
                 'student.subjects.teacherAssignments.teacher.user',
             ])
             ->findOrFail($id);
-        // If request is AJAX, return a lightweight modal partial so the list page can inject it
-        if (request()->ajax() || request()->wantsJson()) {
-            return view('admin.partials.student-modal', compact('student'));
-        }
 
         return view('admin.students.show', array_merge([
             'student' => $student,
@@ -867,6 +863,9 @@ class StudentController extends Controller
                 'subject_id' => $mark->subject_id,
                 'subject_name' => $mark->subject?->subject_name ?? 'Subject',
                 'subject_code' => $mark->subject?->subject_code,
+                'exam_id' => $mark->exam_id,
+                'exam_category' => $mark->exam?->exam_category,
+                'assessment_number' => $mark->exam?->assessment_number,
                 'exam_name' => $mark->exam?->exam_name ?? 'Exam',
                 'category_label' => $mark->exam?->formatted_category ?? 'Exam',
                 'type_label' => $mark->exam?->formatted_type ?? 'Assessment',
@@ -874,6 +873,7 @@ class StudentController extends Controller
                 'date_label' => $examDate?->format('M d, Y') ?? 'Date pending',
                 'obtained_marks' => round((float) $mark->effective_obtained_marks, 2),
                 'full_marks' => round((float) $mark->effective_full_marks, 2),
+                'passing_marks' => round((float) $mark->effective_passing_marks, 2),
                 'percentage' => $percentage !== null ? round((float) $percentage, 2) : null,
                 'grade' => $mark->calculateGrade(),
                 'status' => $status,
@@ -898,6 +898,9 @@ class StudentController extends Controller
                 'subject_id' => $mark->subject_id,
                 'subject_name' => $mark->subject?->subject_name ?? 'Subject',
                 'subject_code' => $mark->subject?->subject_code,
+                'exam_id' => null,
+                'exam_category' => 'legacy',
+                'assessment_number' => null,
                 'exam_name' => ucfirst(str_replace('_', ' ', $mark->exam_type ?? 'mark')),
                 'category_label' => 'Recorded Mark',
                 'type_label' => ucfirst(str_replace('_', ' ', $mark->exam_type ?? 'mark')),
@@ -905,6 +908,7 @@ class StudentController extends Controller
                 'date_label' => optional($markDate)?->format('M d, Y') ?? 'Date pending',
                 'obtained_marks' => round((float) $mark->marks_obtained, 2),
                 'full_marks' => round((float) $mark->full_marks, 2),
+                'passing_marks' => $mark->full_marks > 0 ? round((float) $mark->full_marks * 0.4, 2) : 0,
                 'percentage' => $percentage !== null ? round((float) $percentage, 2) : null,
                 'grade' => $percentage >= 90 ? 'A+' : ($percentage >= 80 ? 'A' : ($percentage >= 70 ? 'B+' : ($percentage >= 60 ? 'B' : ($percentage >= 50 ? 'C+' : ($percentage >= 40 ? 'C' : 'F'))))),
                 'status' => $status,
@@ -936,6 +940,7 @@ class StudentController extends Controller
                 ];
 
                 $subjectMarks = $markTimeline->where('subject_id', $subject->id)->values();
+                $latestSubjectMark = $subjectMarks->first();
                 $markAverage = $subjectMarks->whereNotNull('percentage')->isNotEmpty()
                     ? round((float) $subjectMarks->whereNotNull('percentage')->avg('percentage'), 1)
                     : null;
@@ -950,6 +955,14 @@ class StudentController extends Controller
                     'attendance_total' => $subjectAttendance['total'] ?? 0,
                     'marks_average' => $markAverage,
                     'marks_count' => $subjectMarks->count(),
+                    'latest_mark' => $latestSubjectMark ? (
+                        isset($latestSubjectMark['full_marks']) && (float) $latestSubjectMark['full_marks'] > 0
+                            ? trim(($latestSubjectMark['obtained_marks'] ?? 0) . ' / ' . ($latestSubjectMark['full_marks'] ?? 0))
+                            : (string) ($latestSubjectMark['obtained_marks'] ?? 0)
+                    ) : null,
+                    'latest_percentage' => $latestSubjectMark['percentage'] ?? null,
+                    'latest_exam_name' => $latestSubjectMark['exam_name'] ?? null,
+                    'latest_grade' => $latestSubjectMark['grade'] ?? null,
                 ];
             })
             ->sortByDesc('attendance_percentage')
@@ -975,6 +988,54 @@ class StudentController extends Controller
             'latest' => $markTimeline->first(),
         ];
 
+        $examGroups = $markTimeline
+            ->groupBy(function (array $mark) {
+                return !empty($mark['exam_id'])
+                    ? 'exam-' . $mark['exam_id']
+                    : 'legacy-' . md5(($mark['exam_name'] ?? 'Exam') . '|' . ($mark['date_label'] ?? ''));
+            })
+            ->map(function ($marks, $groupKey) {
+                $marks = collect($marks)
+                    ->sortBy(fn (array $mark) => $mark['subject_name'] ?? '')
+                    ->values();
+
+                $totalFull = round((float) $marks->sum(fn (array $mark) => (float) ($mark['full_marks'] ?? 0)), 2);
+                $totalObtained = round((float) $marks->sum(fn (array $mark) => (float) ($mark['obtained_marks'] ?? 0)), 2);
+                $percentage = $totalFull > 0 ? round(($totalObtained / $totalFull) * 100, 1) : 0;
+                $grade = $percentage >= 90 ? 'A+' : ($percentage >= 80 ? 'A' : ($percentage >= 70 ? 'B+' : ($percentage >= 60 ? 'B' : ($percentage >= 50 ? 'C+' : ($percentage >= 40 ? 'C' : 'F')))));
+                $statuses = $marks->pluck('status')->map(fn ($status) => strtolower((string) $status));
+                $resultStatus = $statuses->contains('absent') ? 'absent' : ($statuses->contains('fail') ? 'fail' : 'pass');
+                $resultLabel = match ($resultStatus) {
+                    'pass' => 'Pass',
+                    'fail' => 'Needs Attention',
+                    'absent' => 'Absent',
+                    default => 'Pending',
+                };
+                $first = $marks->first();
+
+                return [
+                    'group_key' => $groupKey,
+                    'exam_id' => $first['exam_id'] ?? null,
+                    'exam_category' => $first['exam_category'] ?? null,
+                    'assessment_number' => $first['assessment_number'] ?? null,
+                    'exam_name' => $first['exam_name'] ?? 'Exam',
+                    'category_label' => $first['category_label'] ?? 'Exam',
+                    'type_label' => $first['type_label'] ?? 'Assessment',
+                    'date_label' => $first['date_label'] ?? 'Date pending',
+                    'sort_key' => $marks->max('sort_key') ?? 0,
+                    'total_subjects' => $marks->count(),
+                    'total_full' => $totalFull,
+                    'total_obtained' => $totalObtained,
+                    'percentage' => $percentage,
+                    'grade' => $grade,
+                    'result_status' => $resultStatus,
+                    'result_label' => $resultLabel,
+                    'marks' => $marks,
+                ];
+            })
+            ->sortByDesc('sort_key')
+            ->values();
+
         $photoUrl = $this->storageUrl($profile?->profile_photo_path ?: $student->profile_photo_path) ?? $student->profile_photo_url;
         $idDocument = $profile?->id_document_path ? [
             'name' => basename($profile->id_document_path),
@@ -997,6 +1058,7 @@ class StudentController extends Controller
             'attendanceRecords' => $attendanceRecords->take(10),
             'attendanceBySubject' => $attendanceBySubject,
             'markSummary' => $markSummary,
+            'examGroups' => $examGroups,
             'markTimeline' => $markTimeline->take(10),
             'subjectPerformance' => $subjectPerformance->take(6),
             'parentInfo' => [

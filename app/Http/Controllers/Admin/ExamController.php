@@ -2683,6 +2683,7 @@ $exam->load(['subject', 'marks.student.user']);
                 'semester' => $request->get('semester', ''),
                 'exam_category' => $request->get('exam_category', 'assessment'),
                 'assessment_number' => $request->get('assessment_number', ''),
+                'exam_id' => $request->get('exam_id', ''),
                 'student_id' => $request->get('student_id', ''),
                 'dob' => $request->get('dob', ''),
                 'dob_bs' => $request->get('dob_bs', ''),
@@ -2731,10 +2732,13 @@ $exam->load(['subject', 'marks.student.user']);
         $query = Student::with('user');
         
         if (!empty($studentId)) {
-            // Search by student ID (primary key) or roll_no
+            // Search by student profile id, linked user id, or roll_no.
             $query->where(function($q) use ($studentId) {
                 $q->where('id', $studentId)
-                  ->orWhere('roll_no', 'like', "%{$studentId}%");
+                  ->orWhere('roll_no', 'like', "%{$studentId}%")
+                  ->orWhereHas('user', function ($userQuery) use ($studentId) {
+                      $userQuery->where('id', $studentId);
+                  });
             });
         }
         
@@ -2832,6 +2836,7 @@ $exam->load(['subject', 'marks.student.user']);
         $academicYear = $request->get('academic_year', '');
         $semester = $request->get('semester', '');
         $examCategory = $request->get('exam_category', 'assessment');
+        $examId = $request->get('exam_id', '');
         
         $examMarksQuery = ExamMark::where('student_id', $student->id)
             ->with(['exam', 'subject']);
@@ -2855,6 +2860,11 @@ $exam->load(['subject', 'marks.student.user']);
             $examMarksQuery->whereHas('exam', function($q) use ($examCategory) {
                 $q->where('exam_category', $examCategory);
             });
+        }
+
+        // Filter by specific exam when a detail link points to one exam block.
+        if (!empty($examId)) {
+            $examMarksQuery->where('exam_id', $examId);
         }
 
         // Filter by assessment number (only for assessment category)
@@ -2937,15 +2947,21 @@ $exam->load(['subject', 'marks.student.user']);
             $dob = $request->get('dob', '');
             
             if (empty($studentId) && empty($dob)) {
-                return redirect()->route('admin.marksheet.search')
-                    ->with('error', 'Please provide student ID or Date of Birth');
+                return response()->view('admin.marks.marksheet-error', [
+                    'title' => 'Student Not Found',
+                    'message' => 'Please provide student ID or Date of Birth to generate the marksheet.',
+                    'searchUrl' => route('admin.marksheet.search'),
+                ], 404);
             }
             
             $student = $this->findStudentByIdOrDob($request);
             
             if (!$student) {
-                return redirect()->route('admin.marksheet.search')
-                    ->with('error', 'Student not found');
+                return response()->view('admin.marks.marksheet-error', [
+                    'title' => 'Student Not Found',
+                    'message' => 'The requested student could not be found for this marksheet.',
+                    'searchUrl' => route('admin.marksheet.search'),
+                ], 404);
             }
             
             $marksheetData = $this->getMarksheetData($student, $request);
@@ -2972,15 +2988,21 @@ $exam->load(['subject', 'marks.student.user']);
             $dob = $request->get('dob', '');
 
             if (empty($studentId) && empty($dob)) {
-                return redirect()->route('admin.marksheet.search')
-                    ->with('error', 'Please provide student ID or Date of Birth');
+                return response()->view('admin.marks.marksheet-error', [
+                    'title' => 'Student Not Found',
+                    'message' => 'Please provide student ID or Date of Birth to export the marksheet.',
+                    'searchUrl' => route('admin.marksheet.search'),
+                ], 404);
             }
 
             $student = $this->findStudentByIdOrDob($request);
 
             if (!$student) {
-                return redirect()->route('admin.marksheet.search')
-                    ->with('error', 'Student not found');
+                return response()->view('admin.marks.marksheet-error', [
+                    'title' => 'Student Not Found',
+                    'message' => 'The requested student could not be found for this marksheet export.',
+                    'searchUrl' => route('admin.marksheet.search'),
+                ], 404);
             }
 
             $marksheetData = $this->getMarksheetData($student, $request);

@@ -23,6 +23,9 @@
     .student-chip.inactive{background:#fee2e2;color:#be123c}
     .student-chip.suspended{background:#fef3c7;color:#b45309}
     .student-chip.soft{background:#eef2ff;color:#4338ca}
+    .student-chip.pass{background:#dcfce7;color:#166534}
+    .student-chip.fail{background:#fee2e2;color:#be123c}
+    .student-chip.absent{background:#fef3c7;color:#b45309}
     .student-btn-primary,.student-btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:.55rem;border-radius:999px;font-weight:700;transition:transform .2s ease}
     .student-btn-primary:hover,.student-btn-secondary:hover{transform:translateY(-1px)}
     .student-btn-primary{padding:.9rem 1.4rem;background:linear-gradient(135deg,#e11d48 0%,#fb7185 100%);color:#fff;box-shadow:0 18px 34px -24px rgba(225,29,72,.7)}
@@ -44,6 +47,19 @@
     .student-table th{padding:.85rem 1rem;border-bottom:1px solid #e2e8f0;background:#f8fafc;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#64748b;text-align:left}
     .student-table td{padding:.95rem 1rem;border-bottom:1px solid #eef2f7;vertical-align:top}
     .student-table tbody tr:hover td{background:#fff7f8}
+    .student-exam-accordion{overflow:hidden;border:1px solid #e2e8f0;border-radius:1.25rem;background:#fff;box-shadow:0 14px 28px -28px rgba(15,23,42,.22)}
+    .student-exam-accordion + .student-exam-accordion{margin-top:.9rem}
+    .student-exam-summary{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.05rem;background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);cursor:pointer;list-style:none}
+    .student-exam-summary:hover{background:#fff7f8}
+    .student-exam-summary::-webkit-details-marker{display:none}
+    .student-exam-summary::marker{content:''}
+    .student-exam-title{font-size:1rem;font-weight:800;color:#0f172a}
+    .student-exam-meta{margin-top:.18rem;font-size:.82rem;color:#64748b}
+    .student-exam-body{border-top:1px solid #e2e8f0;background:#fff}
+    .student-exam-table-wrap{overflow-x:auto}
+    .student-exam-footer td{background:#f8fafc !important;font-size:.8rem;font-weight:800;color:#0f172a}
+    .student-exam-footer td:first-child{border-bottom-left-radius:1rem}
+    .student-exam-footer td:last-child{border-bottom-right-radius:1rem}
     .student-view-actions{display:flex;flex-direction:column;gap:.75rem;width:100%}
     .student-view-actions > *{width:100%}
     @media (min-width:640px){.student-view-actions{width:auto;flex-direction:row}.student-view-actions > *{width:auto;min-width:9rem}}
@@ -445,12 +461,18 @@
                                         <p class="text-base font-semibold text-slate-900">{{ $subject['name'] ?? 'Subject' }}</p>
                                         <p class="text-sm text-slate-500">{{ $subject['code'] ?? 'No code' }}</p>
                                     </div>
-                                    <span class="student-chip soft">{{ $subject['marks_average'] !== null ? $subject['marks_average'] . '%' : 'No marks' }}</span>
+                                    <span class="student-chip soft">{{ $subject['latest_percentage'] !== null ? $subject['latest_percentage'] . '%' : 'No marks' }}</span>
                                 </div>
                                 <div class="mt-4 grid grid-cols-2 gap-3 text-sm text-slate-600">
                                     <div><span class="student-label !mb-1">Attendance</span><p class="font-semibold text-slate-900">{{ $subject['attendance_percentage'] ?? 0 }}%</p></div>
-                                    <div><span class="student-label !mb-1">Marks</span><p class="font-semibold text-slate-900">{{ $subject['marks_count'] ?? 0 }}</p></div>
+                                    <div><span class="student-label !mb-1">Marks</span><p class="font-semibold text-slate-900">{{ $subject['latest_mark'] ?? 'No marks' }}</p><p class="text-xs text-slate-500">{{ $subject['latest_exam_name'] ?? 'Latest exam score' }}</p></div>
                                     <div class="col-span-2"><span class="student-label !mb-1">Teacher</span><p class="font-semibold text-slate-900">{{ $subject['teacher_name'] ?: 'Not assigned' }}</p></div>
+                                </div>
+                                <div class="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
+                                    <span class="student-chip soft">{{ $subject['marks_count'] ?? 0 }} exam{{ ($subject['marks_count'] ?? 0) === 1 ? '' : 's' }}</span>
+                                    @if($subject['marks_average'] !== null)
+                                        <span class="student-chip soft">Avg {{ $subject['marks_average'] }}%</span>
+                                    @endif
                                 </div>
                             </div>
                         @empty
@@ -460,42 +482,108 @@
                 </div>
 
                 <div class="student-view-section p-5">
-                    <p class="student-label">Recent Marks</p>
-                    <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                        <table class="student-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Exam / Subject</th>
-                                    <th>Marks</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($markTimeline as $mark)
-                                    <tr>
-                                        <td>
-                                            <p class="font-semibold text-slate-900">{{ $mark['date_label'] ?? 'Date pending' }}</p>
-                                            <p class="text-sm text-slate-500">{{ $mark['category_label'] ?? '' }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="font-semibold text-slate-900">{{ $mark['exam_name'] ?? 'Exam' }}</p>
-                                            <p class="text-sm text-slate-500">{{ $mark['subject_name'] ?? 'Subject' }}</p>
-                                        </td>
-                                        <td>
-                                            <p class="font-semibold text-slate-900">{{ $mark['obtained_marks'] ?? 0 }} / {{ $mark['full_marks'] ?? 0 }}</p>
-                                            <p class="text-sm text-slate-500">{{ $mark['percentage'] !== null ? $mark['percentage'] . '%' : 'No percentage' }}</p>
-                                        </td>
-                                        <td>
-                                            <span class="student-chip soft">{{ $mark['status_label'] ?? 'Pending' }}</span>
-                                            <p class="mt-1 text-sm text-slate-500">{{ $mark['grade'] ?? '' }}</p>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="4"><div class="student-empty-state">No marks have been recorded for this student yet.</div></td></tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <p class="student-label">Exam Marks</p>
+                            <h3 class="text-xl font-bold text-slate-900">Marks by exam</h3>
+                        </div>
+                        <p class="text-sm text-slate-500">Each exam expands to show subject-wise marks, totals, grades, and result status.</p>
+                    </div>
+
+                    <div class="mt-4">
+                        @forelse($examGroups as $examGroup)
+                            <details class="student-exam-accordion" @if($loop->first) open @endif>
+                                <summary class="student-exam-summary">
+                                    <div class="min-w-0">
+                                        <p class="student-exam-title truncate">{{ $examGroup['exam_name'] ?? 'Exam' }}</p>
+                                        <p class="student-exam-meta truncate">{{ $examGroup['date_label'] ?? 'Date pending' }} · {{ $examGroup['category_label'] ?? 'Exam' }} · {{ $examGroup['total_subjects'] ?? 0 }} subject{{ ($examGroup['total_subjects'] ?? 0) === 1 ? '' : 's' }}</p>
+                                    </div>
+                                    <div class="flex flex-wrap items-center justify-end gap-2">
+                                        <span class="student-chip soft">{{ number_format((float) ($examGroup['percentage'] ?? 0), 1) }}%</span>
+                                        <span class="student-chip soft">{{ number_format((float) ($examGroup['total_obtained'] ?? 0), 2) }} / {{ number_format((float) ($examGroup['total_full'] ?? 0), 2) }}</span>
+                                        <span class="student-chip {{ $examGroup['result_status'] ?? 'soft' }}">{{ $examGroup['result_label'] ?? 'Pending' }}</span>
+                                        @if(!empty($examGroup['exam_id']))
+                                            @php
+                                                $marksheetQuery = [
+                                                    'student_id' => $studentProfile?->id ?? $student->id,
+                                                    'academic_year' => $basicInfo['academic_year_bs'] ?? '',
+                                                    'semester' => $basicInfo['semester'] ?? '',
+                                                    'exam_id' => $examGroup['exam_id'],
+                                                    'exam_category' => $examGroup['exam_category'] ?? '',
+                                                ];
+
+                                                if (($examGroup['exam_category'] ?? '') === 'assessment' && !empty($examGroup['assessment_number'])) {
+                                                    $marksheetQuery['assessment_number'] = $examGroup['assessment_number'];
+                                                }
+                                            @endphp
+                                            <a href="{{ route('admin.marksheet.print', $marksheetQuery) }}" target="_blank" rel="noreferrer" class="student-btn-secondary !px-3 !py-2 !text-xs" onclick="event.stopPropagation();">
+                                                <i class="bi bi-journal-text"></i>Marksheet
+                                            </a>
+                                        @endif
+                                    </div>
+                                </summary>
+
+                                <div class="student-exam-body">
+                                    <div class="student-exam-table-wrap">
+                                        <table class="student-table min-w-[760px]">
+                                            <thead>
+                                                <tr>
+                                                    <th>Subject</th>
+                                                    <th>Max Marks</th>
+                                                    <th>Pass Mark</th>
+                                                    <th>Marks Obtained</th>
+                                                    <th>Grade</th>
+                                                    <th>Result</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse($examGroup['marks'] ?? [] as $mark)
+                                                    <tr>
+                                                        <td>
+                                                            <p class="font-semibold text-slate-900">{{ $mark['subject_name'] ?? 'Subject' }}</p>
+                                                            <p class="text-sm text-slate-500">{{ $mark['subject_code'] ?? '' }}</p>
+                                                        </td>
+                                                        <td class="font-semibold text-slate-900">{{ number_format((float) ($mark['full_marks'] ?? 0), 2) }}</td>
+                                                        <td class="font-semibold text-slate-900">{{ number_format((float) ($mark['passing_marks'] ?? 0), 2) }}</td>
+                                                        <td>
+                                                            <p class="font-semibold text-slate-900">{{ number_format((float) ($mark['obtained_marks'] ?? 0), 2) }}</p>
+                                                            <p class="text-sm text-slate-500">{{ $mark['percentage'] !== null ? number_format((float) $mark['percentage'], 1) . '%' : 'No percentage' }}</p>
+                                                        </td>
+                                                        <td class="font-semibold text-slate-900">{{ $mark['grade'] ?? '-' }}</td>
+                                                        <td>
+                                                            <span class="student-chip {{ $mark['status'] ?? 'soft' }}">{{ $mark['status_label'] ?? 'Pending' }}</span>
+                                                        </td>
+                                                    </tr>
+                                                @empty
+                                                    <tr><td colspan="6"><div class="student-empty-state">No subject marks were found for this exam.</div></td></tr>
+                                                @endforelse
+                                            </tbody>
+                                            <tfoot>
+                                                <tr class="student-exam-footer">
+                                                    <td>Subjects: {{ $examGroup['total_subjects'] ?? 0 }}</td>
+                                                    <td>Total: {{ number_format((float) ($examGroup['total_full'] ?? 0), 2) }}</td>
+                                                    <td>Pass Mark: {{ number_format((float) collect($examGroup['marks'] ?? [])->sum(fn ($mark) => (float) ($mark['passing_marks'] ?? 0)), 2) }}</td>
+                                                    <td>Total Obtained: {{ number_format((float) ($examGroup['total_obtained'] ?? 0), 2) }}</td>
+                                                    <td>Grade: {{ $examGroup['grade'] ?? '-' }}</td>
+                                                    <td>
+                                                        <div class="flex flex-wrap items-center gap-2">
+                                                            <span>Result: {{ $examGroup['result_label'] ?? 'Pending' }}</span>
+                                                            @if(!empty($examGroup['exam_id']))
+                                                                <a href="{{ route('admin.marksheet.print', $marksheetQuery) }}" target="_blank" rel="noreferrer" class="student-btn-secondary !px-3 !py-2 !text-xs" onclick="event.stopPropagation();">
+                                                                    <i class="bi bi-arrow-right-circle"></i>Open
+                                                                </a>
+                                                            @endif
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </details>
+                        @empty
+                            <div class="student-empty-state">No marks have been recorded for this student yet.</div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -577,6 +665,7 @@
     (function () {
         const buttons = Array.from(document.querySelectorAll('[data-student-view-tab]'));
         const panels = Array.from(document.querySelectorAll('[data-student-view-panel]'));
+        const examAccordions = Array.from(document.querySelectorAll('.student-exam-accordion'));
 
         function openTab(tabName) {
             buttons.forEach(button => {
@@ -591,6 +680,19 @@
         }
 
         buttons.forEach(button => button.addEventListener('click', () => openTab(button.dataset.studentViewTab)));
+        examAccordions.forEach(accordion => {
+            accordion.addEventListener('toggle', () => {
+                if (!accordion.open) {
+                    return;
+                }
+
+                examAccordions.forEach(other => {
+                    if (other !== accordion) {
+                        other.open = false;
+                    }
+                });
+            });
+        });
         openTab('overview');
     })();
 </script>

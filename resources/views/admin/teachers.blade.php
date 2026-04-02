@@ -3,129 +3,77 @@
 @section('title', 'Teachers')
 
 @section('styles')
-<script>document.documentElement.classList.add('teachers-ui-enhanced');</script>
 <style>
-    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid,
-    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel > div {
-        margin-bottom: 0;
+    .teachers-page .teachers-stats .grid > div,
+    .teachers-page .teachers-table-panel,
+    .teachers-page .teachers-filter-panel > div {
+        border-radius: 1rem;
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
     }
 
-    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid > div {
+    .teachers-page .teachers-stats .grid > div {
         position: relative;
         overflow: hidden;
         border-width: 2px;
-        border-radius: 1rem;
-        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
         transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
 
-    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid > div:hover,
-    html.teachers-ui-enhanced:not(.dark) .teacher-photo-panel:hover {
-        transform: translateY(-4px);
+    .teachers-page .teachers-stats .grid > div:hover {
+        transform: translateY(-3px);
         box-shadow: 0 24px 40px -28px rgba(15, 23, 42, 0.28);
     }
 
-    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid > div:nth-child(1) { border-color: #fda4af; background: linear-gradient(135deg, #fff1f2 0%, #ffffff 56%, #fff1f2 100%); }
-    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid > div:nth-child(2) { border-color: #86efac; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 56%, #f0fdf4 100%); }
-    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid > div:nth-child(3) { border-color: #fcd34d; background: linear-gradient(135deg, #fffbeb 0%, #ffffff 56%, #fffbeb 100%); }
-    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid > div:nth-child(4) { border-color: #c4b5fd; background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 56%, #f5f3ff 100%); }
-
-    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel > div,
-    html.teachers-ui-enhanced:not(.dark) .teachers-table-panel,
-    html.teachers-ui-enhanced:not(.dark) .teacher-modal-panel,
-    html.teachers-ui-enhanced:not(.dark) .teacher-confirm-panel {
-        overflow: hidden;
-        border: 2px solid #e2e8f0;
-        border-radius: 1rem;
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
+    .teachers-page .teacher-directory-table {
+        border-collapse: separate;
+        border-spacing: 0;
     }
 
-    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel label,
-    html.teachers-ui-enhanced:not(.dark) .teacher-directory-head th,
-    html.teachers-ui-enhanced:not(.dark) .teacher-form label,
-    html.teachers-ui-enhanced:not(.dark) .teacher-detail-grid label,
-    html.teachers-ui-enhanced:not(.dark) .teacher-detail-block label {
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
+    .teachers-page .teacher-directory-head th {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        border-bottom: 1px solid #e2e8f0;
         color: #64748b;
     }
 
-    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel input:not([type='checkbox']):not([type='radio']),
-    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel select,
-    html.teachers-ui-enhanced:not(.dark) .teacher-form input:not([type='checkbox']):not([type='radio']):not([type='file']),
-    html.teachers-ui-enhanced:not(.dark) .teacher-form select,
-    html.teachers-ui-enhanced:not(.dark) .teacher-form textarea {
-        min-height: 2.9rem;
-        border: 2px solid #cbd5e1;
-        border-radius: 0.85rem;
-        background: #ffffff;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    .teachers-page .teacher-row td {
+        border-bottom: 1px solid #e2e8f0;
+        transition: background-color 0.18s ease;
+        vertical-align: middle;
     }
 
-    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel input:not([type='checkbox']):not([type='radio']):focus,
-    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel select:focus,
-    html.teachers-ui-enhanced:not(.dark) .teacher-form input:not([type='checkbox']):not([type='radio']):not([type='file']):focus,
-    html.teachers-ui-enhanced:not(.dark) .teacher-form select:focus,
-    html.teachers-ui-enhanced:not(.dark) .teacher-form textarea:focus {
-        outline: none;
-        border-color: #f43f5e;
-        box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1);
+    .teachers-page .teacher-row:nth-child(even) td {
+        background: #f8fafc;
     }
 
-    html.teachers-ui-enhanced:not(.dark) .teachers-toolbar,
-    html.teachers-ui-enhanced:not(.dark) .teachers-pagination,
-    html.teachers-ui-enhanced:not(.dark) .teacher-modal-footer {
-        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    .teachers-page .teacher-row:hover td {
+        background: #fff7f8;
     }
 
-    html.teachers-ui-enhanced:not(.dark) .teachers-toolbar { border-bottom: 1px solid #e2e8f0; }
-    html.teachers-ui-enhanced:not(.dark) .teachers-pagination,
-    html.teachers-ui-enhanced:not(.dark) .teacher-modal-footer,
-    html.teachers-ui-enhanced:not(.dark) .teacher-form-actions { border-top: 1px solid #e2e8f0; }
-
-    html.teachers-ui-enhanced:not(.dark) .teachers-toolbar-btn,
-    html.teachers-ui-enhanced:not(.dark) .teacher-secondary-btn,
-    html.teachers-ui-enhanced:not(.dark) .teacher-primary-btn,
-    html.teachers-ui-enhanced:not(.dark) .teacher-danger-btn,
-    html.teachers-ui-enhanced:not(.dark) .action-btn {
-        box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.45);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    html.teachers-ui-enhanced:not(.dark) .teachers-toolbar-btn:hover,
-    html.teachers-ui-enhanced:not(.dark) .teacher-secondary-btn:hover,
-    html.teachers-ui-enhanced:not(.dark) .teacher-primary-btn:hover,
-    html.teachers-ui-enhanced:not(.dark) .teacher-danger-btn:hover,
-    html.teachers-ui-enhanced:not(.dark) .action-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 18px 34px -24px rgba(15, 23, 42, 0.5);
-    }
-
-    html.teachers-ui-enhanced:not(.dark) .teacher-directory-table { border-collapse: separate; border-spacing: 0; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-directory-head th { background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border-bottom: 1px solid #e2e8f0; color: #64748b; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-row td { border-bottom: 1px solid #e2e8f0; transition: background-color 0.18s ease; vertical-align: middle; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-row:nth-child(even) td { background: #f8fafc; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-row:hover td { background: #fff7f8; }
-
-    html.teachers-ui-enhanced:not(.dark) .teacher-avatar,
-    html.teachers-ui-enhanced:not(.dark) .teacher-photo-frame {
+    .teachers-page .teacher-avatar,
+    .teachers-page .teacher-photo-frame {
         border: 1px solid #fecdd3;
         background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
     }
 
-    html.teachers-ui-enhanced:not(.dark) .teacher-avatar-image { border: 2px solid #ffffff; box-shadow: 0 16px 28px -24px rgba(15, 23, 42, 0.4); }
-    html.teachers-ui-enhanced:not(.dark) .teacher-name { color: #0f172a; font-weight: 700; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-meta-text { color: #475569; }
+    .teachers-page .teacher-avatar-image {
+        border: 2px solid #ffffff;
+        box-shadow: 0 16px 28px -24px rgba(15, 23, 42, 0.4);
+    }
 
-    html.teachers-ui-enhanced:not(.dark) .teacher-id-chip,
-    html.teachers-ui-enhanced:not(.dark) .teacher-role-chip,
-    html.teachers-ui-enhanced:not(.dark) .teacher-course-chip,
-    html.teachers-ui-enhanced:not(.dark) .teacher-load-chip,
-    html.teachers-ui-enhanced:not(.dark) .badge {
+    .teachers-page .teacher-name {
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .teachers-page .teacher-meta-text {
+        color: #475569;
+    }
+
+    .teachers-page .teacher-id-chip,
+    .teachers-page .teacher-role-chip,
+    .teachers-page .teacher-course-chip,
+    .teachers-page .teacher-load-chip,
+    .teachers-page .badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -136,16 +84,16 @@
         line-height: 1;
     }
 
-    html.teachers-ui-enhanced:not(.dark) .teacher-id-chip { background: #eff6ff; color: #1d4ed8; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-role-chip { background: #ffedd5; color: #c2410c; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-course-chip { background: #f8fafc; color: #475569; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-load-chip { background: #dbeafe; color: #1d4ed8; }
-    html.teachers-ui-enhanced:not(.dark) .badge-active { background: #dcfce7; color: #166534; }
-    html.teachers-ui-enhanced:not(.dark) .badge-inactive { background: #fee2e2; color: #b91c1c; }
-    html.teachers-ui-enhanced:not(.dark) .badge-pending { background: #fef3c7; color: #b45309; }
-    html.teachers-ui-enhanced:not(.dark) .badge-alumni { background: #f3e8ff; color: #7e22ce; }
+    .teachers-page .teacher-id-chip { background: #eff6ff; color: #1d4ed8; }
+    .teachers-page .teacher-role-chip { background: #ffedd5; color: #c2410c; }
+    .teachers-page .teacher-course-chip { background: #f8fafc; color: #475569; }
+    .teachers-page .teacher-load-chip { background: #dbeafe; color: #1d4ed8; }
+    .teachers-page .badge-active { background: #dcfce7; color: #166534; }
+    .teachers-page .badge-inactive { background: #fee2e2; color: #b91c1c; }
+    .teachers-page .badge-pending { background: #fef3c7; color: #b45309; }
+    .teachers-page .badge-alumni { background: #f3e8ff; color: #7e22ce; }
 
-    html.teachers-ui-enhanced:not(.dark) .action-btn {
+    .teachers-page .action-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -154,52 +102,46 @@
         border: 1px solid #e2e8f0;
         border-radius: 0.8rem;
         background: #ffffff;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.45);
     }
 
-    html.teachers-ui-enhanced:not(.dark) .action-btn-view { color: #2563eb; }
-    html.teachers-ui-enhanced:not(.dark) .action-btn-edit { color: #d97706; }
-    html.teachers-ui-enhanced:not(.dark) .action-btn-delete { color: #dc2626; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-empty-state { color: #64748b; font-weight: 500; }
-
-    html.teachers-ui-enhanced:not(.dark) .teacher-modal-header {
-        position: sticky;
-        top: 0;
-        z-index: 5;
-        border-bottom: none;
-        background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+    .teachers-page .action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 34px -24px rgba(15, 23, 42, 0.5);
     }
 
-    html.teachers-ui-enhanced:not(.dark) .teacher-modal-header p { color: #ffe4e6; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-modal-close { display: inline-flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 0.8rem; background: rgba(255, 255, 255, 0.14); }
-    html.teachers-ui-enhanced:not(.dark) .teacher-photo-panel { border: 1px solid #e2e8f0; border-radius: 1rem; background: linear-gradient(180deg, #fff1f2 0%, #ffffff 100%); padding: 1.25rem; transition: transform 0.25s ease, box-shadow 0.25s ease; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-upload-btn { border: 1px solid #fecdd3; border-radius: 0.85rem; background: #fff1f2; color: #be123c; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-detail-grid > div,
-    html.teachers-ui-enhanced:not(.dark) .teacher-detail-block { padding: 0.95rem 1rem; border: 1px solid #e2e8f0; border-radius: 0.9rem; background: #ffffff; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-detail-grid p,
-    html.teachers-ui-enhanced:not(.dark) .teacher-detail-block p { color: #0f172a; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-secondary-btn { border: 1px solid #cbd5e1; background: #ffffff; color: #334155; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-danger-btn { border: 1px solid #fecaca; background: #fff1f2; color: #be123c; }
-    html.teachers-ui-enhanced:not(.dark) .teacher-form-actions { margin-top: 1.5rem; padding-top: 1rem; }
+    .teachers-page .action-btn-view { color: #2563eb; }
+    .teachers-page .action-btn-edit { color: #d97706; }
+    .teachers-page .action-btn-delete { color: #dc2626; }
 
     @media (max-width: 768px) {
-        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table thead th:nth-child(n+4),
-        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table tbody td:nth-child(n+4) { display: none; }
-        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table th,
-        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table td { padding: 0.75rem 0.5rem; }
+        .teachers-page .teacher-directory-table thead th:nth-child(n+4),
+        .teachers-page .teacher-directory-table tbody td:nth-child(n+4) {
+            display: none;
+        }
+
+        .teachers-page .teacher-directory-table th,
+        .teachers-page .teacher-directory-table td {
+            padding: 0.75rem 0.5rem;
+        }
     }
 
     @media (max-width: 640px) {
-        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table thead th:nth-child(n+2),
-        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table tbody td:nth-child(n+2) { display: none; }
-        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table th,
-        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table td { padding: 0.5rem 0.25rem; }
+        .teachers-page .teacher-directory-table thead th:nth-child(n+2),
+        .teachers-page .teacher-directory-table tbody td:nth-child(n+2) {
+            display: none;
+        }
+
+        .teachers-page .teacher-directory-table th,
+        .teachers-page .teacher-directory-table td {
+            padding: 0.5rem 0.25rem;
+        }
     }
 </style>
 @endsection
 
 @section('content')
-
-{{-- Page Header --}}
 @include('admin.components.admin-page-header', [
     'title' => 'Teachers',
     'breadcrumbs' => [
@@ -208,42 +150,11 @@
     ],
     'addButton' => [
         'label' => 'Add Teacher',
-        'onclick' => "openAddTeacherModal()"
+        'route' => route('admin.teachers.create')
     ]
 ])
 
 <div class="teachers-page space-y-6">
-	<!-- Global Loader Overlay -->
-	<div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-sm hidden flex items-center justify-center">
-		<div class="text-center">
-			<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
-			<p id="loaderText" class="text-gray-600 font-medium">Loading...</p>
-		</div>
-	</div>
-
-    <!-- Toast Notification Container -->
-    <!-- Toast Notification - Uses global toast system from layout -->
-
-    <!-- Professional Confirmation Modal -->
-	<div id="confirmModal" class="hidden fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
-		<div class="teacher-confirm-panel bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
-			<div class="p-6 text-center">
-				<div id="confirmIcon" class="mx-auto mb-4 h-12 w-12 text-gray-400">
-					<svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-					</svg>
-				</div>
-				<h3 id="confirmTitle" class="text-lg font-semibold text-gray-900 mb-2">Confirm Action</h3>
-				<p id="confirmMessage" class="text-gray-600 mb-6">Are you sure you want to proceed?</p>
-				<div class="flex justify-center gap-3">
-					<button id="confirmCancel" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors">Cancel</button>
-					<button id="confirmOk" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors">Confirm</button>
-				</div>
-			</div>
-		</div>
-	</div>
-
-    <!-- Stats Grid -->
     <div class="teachers-stats">
         @include('admin.components.admin-stats-cards', [
             'cards' => [
@@ -275,7 +186,6 @@
         ])
     </div>
 
-    <!-- Filter Card -->
     <div class="teachers-filter-panel">
         @include('admin.components.admin-filter-card', [
             'formAction' => route('admin.teachers'),
@@ -285,7 +195,7 @@
                     'type' => 'text',
                     'label' => 'Search',
                     'placeholder' => 'Name or email...',
-                    'value' => request('search', '')
+                    'value' => request('search', request('q', ''))
                 ],
                 [
                     'name' => 'status',
@@ -293,7 +203,8 @@
                     'label' => 'Status',
                     'placeholder' => 'All Status',
                     'options' => [
-                        'Active' => 'Active',
+                        'active' => 'Active',
+                        'inactive' => 'Inactive',
                         'On Leave' => 'On Leave',
                         'Retired' => 'Retired'
                     ],
@@ -313,36 +224,33 @@
         ])
     </div>
 
-    <!-- Table Card -->
     <div class="teachers-table-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
-        <!-- Table Toolbar -->
-        <div class="teachers-toolbar px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <!-- Left: Title & Record Count -->
+        <div class="teachers-toolbar border-b border-gray-100 bg-gray-50/50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center gap-2">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Teachers List</h3>
                     <span class="text-xs text-gray-500 dark:text-gray-400">({{ isset($teachers) ? $teachers->total() : 0 }} records)</span>
                 </div>
 
-                <!-- Right: Export & Print Buttons -->
                 <div class="flex items-center gap-2">
                     <form id="exportTeachersForm" method="GET" action="{{ route('admin.teachers.export') }}" class="inline-block">
-                        <input type="hidden" name="search" value="{{ request('search', '') }}">
+                        <input type="hidden" name="search" value="{{ request('search', request('q', '')) }}">
                         <input type="hidden" name="status" value="{{ request('status', '') }}">
                         <input type="hidden" name="course" value="{{ request('course', '') }}">
-                        <button type="submit" class="teachers-toolbar-btn px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 shadow-sm transition-colors inline-flex items-center gap-1">
+                        <button type="submit" class="teachers-toolbar-btn inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-purple-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-purple-700">
                             <i class="bi bi-file-earmark-spreadsheet"></i>CSV
                         </button>
                     </form>
-                    <button type="button" onclick="adminOpenPrintPreview('{{ route('teachers.print-list') }}', { title: 'Print Teachers' })" class="teachers-toolbar-btn px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 shadow-sm transition-colors inline-flex items-center gap-1 no-print">
+                    <button type="button" onclick="adminOpenPrintPreview('{{ route('teachers.print-list') }}', { title: 'Print Teachers' })" class="teachers-toolbar-btn inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700">
                         <i class="bi bi-printer"></i>Print
                     </button>
                 </div>
             </div>
         </div>
+
         <div id="teachersTableContainer" class="overflow-x-auto">
-            <table class="teacher-directory-table min-w-full text-left divide-y divide-gray-200 dark:divide-slate-700">
-                <thead class="teacher-directory-head bg-gray-50 dark:bg-slate-700/50 text-sm font-semibold text-gray-700 dark:text-gray-200">
+            <table class="teacher-directory-table min-w-full divide-y divide-gray-200 text-left dark:divide-slate-700">
+                <thead class="teacher-directory-head bg-gray-50 text-sm font-semibold text-gray-700 dark:bg-slate-700/50 dark:text-gray-200">
                     <tr>
                         <th class="px-6 py-3">Name</th>
                         <th class="px-6 py-3">Teacher ID</th>
@@ -354,1066 +262,100 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
-                @forelse($teachers ?? collect() as $teacher)
-                <tr class="teacher-row hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors border-t border-gray-200 dark:border-slate-700">
-                    <td class="px-6 py-4 text-sm">
-                        <div class="flex items-center gap-3">
-                            @php
-                                $teacherPhoto = $teacher->teacher->profile_photo_path ?? null;
-                                $teacherPhotoUrl = $teacherPhoto ? (
-                                    \Illuminate\Support\Str::startsWith($teacherPhoto, 'storage/') 
-                                    ? asset($teacherPhoto) 
-                                    : asset('storage/' . $teacherPhoto)
-                                ) : null;
-                            @endphp
-                            @if($teacherPhotoUrl)
-                                <img src="{{ $teacherPhotoUrl }}" alt="avatar" class="teacher-avatar-image w-10 h-10 rounded-full object-cover">
-                            @else
-                                <div class="teacher-avatar w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-medium text-sm">T</div>
-                            @endif
-                            <div>
-                                <p class="teacher-name font-medium text-gray-900 dark:text-white">{{ $teacher->name }}</p>
-                                <p class="teacher-meta-text text-xs text-gray-500 dark:text-gray-400">{{ $teacher->email }}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><span class="teacher-id-chip">{{ $teacher->email }}</span></td>
-                    <td class="px-6 py-4 text-sm"><span class="teacher-role-chip inline-block px-3 py-1 bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 rounded-full text-xs font-medium">{{ ucfirst($teacher->role) }}</span></td>
-                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><span class="teacher-course-chip">{{ $teacher->teacher->department ?? '—' }}</span></td>
-                    <td class="px-6 py-4 text-sm">
-                        @if(isset($teacher->teaching_load))
-                            <div class="flex items-center gap-2">
-                                <span class="teacher-load-chip inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded text-xs font-medium">
-                                    {{ $teacher->teaching_load['subjects_count'] ?? 0 }} subjects
-                                </span>
-                                <span class="teacher-meta-text text-gray-500 dark:text-gray-400">|</span>
-                                <span class="teacher-meta-text text-gray-700 dark:text-gray-300">{{ $teacher->teaching_load['total_hours'] ?? 0 }} hrs/wk</span>
-                            </div>
-                            @if(count($teacher->teaching_load['subjects'] ?? []) > 0)
-                                <p class="teacher-meta-text text-xs text-gray-500 dark:text-gray-400 mt-1">{{ implode(', ', array_slice($teacher->teaching_load['subjects'], 0, 2)) }}{{ count($teacher->teaching_load['subjects']) > 2 ? '...' : '' }}</p>
-                            @endif
-                        @else
-                            <span class="teacher-meta-text text-gray-400 dark:text-gray-500">—</span>
-                        @endif
-                    </td>
-                    <td class="px-6 py-4 text-sm">
-                        @php
-                            $status = strtolower($teacher->teacher->status ?? 'active');
-                            $badgeClass = match($status) {
-                                'active' => 'badge-active',
-                                'inactive' => 'badge-inactive',
-                                'on leave' => 'badge-pending',
-                                'retired' => 'badge-alumni',
-                                default => 'badge-active'
-                            };
-                        @endphp
-                        <span class="badge {{ $badgeClass }}">{{ ucfirst($teacher->teacher->status ?? 'active') }}</span>
-                    </td>
-                    <td class="px-6 py-4 text-center text-sm">
-                        <div class="teacher-actions flex gap-2 justify-center">
-                            <button type="button" onclick="openViewTeacherModal({{ $teacher->id }})" class="action-btn action-btn-view" title="View">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                            <button type="button" onclick="openEditTeacherModal({{ $teacher->id }})" class="action-btn action-btn-edit" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button type="button" onclick="deleteTeacher({{ $teacher->id }})" class="action-btn action-btn-delete" title="Delete">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="7" class="teacher-empty-state px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                        <div class="flex flex-col items-center justify-center">
-                            <i class="bi bi-inbox text-4xl mb-3 text-gray-300 dark:text-gray-500"></i>
-                            <p class="text-gray-600 dark:text-gray-400">No records found.</p>
-                        </div>
-                    </td>
-                </tr>
-                @endforelse
+                    @forelse($teachers ?? collect() as $teacher)
+                        <tr class="teacher-row border-t border-gray-200 transition-colors hover:bg-gray-50 dark:border-slate-700 dark:hover:bg-slate-700/30">
+                            <td class="px-6 py-4 text-sm">
+                                <div class="flex items-center gap-3">
+                                    @php
+                                        $teacherPhoto = $teacher->teacher->profile_photo_path ?? null;
+                                        $teacherPhotoUrl = $teacherPhoto ? (\Illuminate\Support\Str::startsWith($teacherPhoto, 'storage/') ? asset($teacherPhoto) : asset('storage/' . $teacherPhoto)) : null;
+                                    @endphp
+                                    @if($teacherPhotoUrl)
+                                        <img src="{{ $teacherPhotoUrl }}" alt="avatar" class="teacher-avatar-image h-10 w-10 rounded-full object-cover">
+                                    @else
+                                        <div class="teacher-avatar flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-sm font-medium text-gray-600">T</div>
+                                    @endif
+                                    <div class="min-w-0">
+                                        <p class="teacher-name truncate font-medium text-gray-900 dark:text-white">{{ $teacher->name }}</p>
+                                        <p class="teacher-meta-text truncate text-xs text-gray-500 dark:text-gray-400">{{ $teacher->email }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                <span class="teacher-id-chip">{{ $teacher->teacher->teacher_code ?? '—' }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                <span class="teacher-role-chip inline-block bg-orange-100 px-3 py-1 text-xs font-medium text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">{{ ucfirst($teacher->role) }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                <span class="teacher-course-chip">{{ $teacher->teacher->department ?? '—' }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                @if(isset($teacher->teaching_load))
+                                    <div class="flex items-center gap-2">
+                                        <span class="teacher-load-chip inline-flex items-center bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                            {{ $teacher->teaching_load['subjects_count'] ?? 0 }} subjects
+                                        </span>
+                                        <span class="teacher-meta-text text-gray-500 dark:text-gray-400">|</span>
+                                        <span class="teacher-meta-text text-gray-700 dark:text-gray-300">{{ $teacher->teaching_load['total_hours'] ?? 0 }} hrs/wk</span>
+                                    </div>
+                                    @if(count($teacher->teaching_load['subjects'] ?? []) > 0)
+                                        <p class="teacher-meta-text mt-1 text-xs text-gray-500 dark:text-gray-400">{{ implode(', ', array_slice($teacher->teaching_load['subjects'], 0, 2)) }}{{ count($teacher->teaching_load['subjects']) > 2 ? '...' : '' }}</p>
+                                    @endif
+                                @else
+                                    <span class="teacher-meta-text text-gray-400 dark:text-gray-500">—</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                @php
+                                    $status = strtolower($teacher->teacher->status ?? 'active');
+                                    $badgeClass = match($status) {
+                                        'active' => 'badge-active',
+                                        'inactive' => 'badge-inactive',
+                                        'on leave' => 'badge-pending',
+                                        'retired' => 'badge-alumni',
+                                        default => 'badge-active'
+                                    };
+                                @endphp
+                                <span class="badge {{ $badgeClass }}">{{ ucfirst($teacher->teacher->status ?? 'active') }}</span>
+                            </td>
+                            <td class="px-6 py-4 text-center text-sm">
+                                <div class="flex justify-center gap-2">
+                                    <a href="{{ route('admin.teachers.show', $teacher->id) }}" class="action-btn action-btn-view" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ route('admin.teachers.edit', $teacher->id) }}" class="action-btn action-btn-edit" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="{{ route('admin.teachers.destroy', $teacher->id) }}" method="POST" onsubmit="return confirm('Delete this teacher?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="action-btn action-btn-delete" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <div class="flex flex-col items-center justify-center">
+                                    <i class="bi bi-inbox mb-3 text-4xl text-gray-300 dark:text-gray-500"></i>
+                                    <p class="text-gray-600 dark:text-gray-400">No records found.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
-        
-        <!-- Pagination -->
-        <div class="teachers-pagination">
+
+        <div class="teachers-pagination border-t border-gray-100 bg-white dark:border-slate-700 dark:bg-slate-800">
             @include('admin.components.admin-pagination', [
                 'paginator' => $teachers
             ])
         </div>
     </div>
 </div>
-
-<!-- Add Teacher Modal -->
-<div id="addTeacherModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 p-4" onclick="if(event.target===this) closeAddTeacherModal()">
-    <div class="teacher-modal-panel bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto border border-gray-200 dark:border-slate-700">
-        <div class="teacher-modal-header px-6 py-4 border-b-2 border-red-600 flex items-center justify-between sticky top-0 bg-red-600 text-white">
-            <div>
-                <h3 class="text-lg font-semibold">Add Teacher</h3>
-                <p class="text-sm text-red-100">Create a new teacher account</p>
-            </div>
-            <button type="button" onclick="closeAddTeacherModal()" class="teacher-modal-close text-red-100 hover:text-white p-1 rounded-lg hover:bg-red-700 transition">
-                <i class="bi bi-x-lg text-lg"></i>
-            </button>
-        </div>
-        <form id="addTeacherForm" action="{{ route('admin.teachers.store') }}" method="POST" enctype="multipart/form-data" class="teacher-form">
-            @csrf
-            <div class="p-6">
-                <div class="flex flex-col gap-8 sm:flex-row">
-                    <!-- Photo Section -->
-                    <div class="teacher-photo-panel flex flex-col items-center">
-                        <div id="addTeacherAvatar" class="teacher-photo-frame w-40 h-40 bg-gray-100 rounded-full flex items-center justify-center text-4xl text-gray-500 overflow-hidden flex-shrink-0 mb-3">
-                            <img id="addTeacherAvatarImg" src="" alt="avatar" class="w-full h-full object-cover" style="display:none;">
-                            <span id="addTeacherInitial"><i class="bi bi-person text-5xl"></i></span>
-                        </div>
-                        <label class="teacher-upload-btn inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
-                            <i class="bi bi-download"></i>
-                            Choose photo
-                            <input type="file" name="profile_photo" accept="image/*" class="hidden" id="addProfilePhotoInput" onchange="previewAddTeacherPhoto()" />
-                        </label>
-                        <p class="text-xs text-gray-500 mt-2">Recommended 400x400px. Max 4MB.</p>
-                    </div>
-
-                    <!-- Form Section -->
-                    <div class="flex-1">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
-                                <select name="gender" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
-                                    <option value="">Prefer not to say</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Role</label>
-                                <input type="text" value="Teacher" disabled class="w-full px-3 py-2 border rounded-md text-sm bg-gray-100" />
-                                <input type="hidden" name="role" value="teacher" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Full name <span class="text-red-500 text-lg font-bold">*</span></label>
-                                <input name="name" required placeholder="e.g. John Doe" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Teacher ID <span class="text-red-500 text-lg font-bold">*</span></label>
-                                <input name="teacher_id" required placeholder="Teacher ID" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Email <span class="text-red-500 text-lg font-bold">*</span></label>
-                                <input name="email" type="email" required placeholder="name@example.com" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Phone <span class="text-red-500 text-lg font-bold">*</span></label>
-                                <input type="tel" name="phone" required placeholder="Phone number" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Department <span class="text-red-500 text-lg font-bold">*</span></label>
-                                <input name="department" required placeholder="Department or course" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Qualification</label>
-                                <input type="text" name="qualification" placeholder="e.g. M.Sc, B.Ed" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Status <span class="text-red-500 text-lg font-bold">*</span></label>
-                                <select name="status" required class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
-                                    <option value="">Select</option>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                    <option value="On Leave">On Leave</option>
-                                    <option value="Retired">Retired</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Address</label>
-                            <textarea name="address" rows="3" placeholder="Street, City, Postal code" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Bio</label>
-                            <textarea name="bio" rows="4" placeholder="Brief biography" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
-                        </div>
-                        <div class="mt-6 space-y-4">
-                            <div class="rounded-2xl border border-gray-200 bg-slate-50/80 p-4">
-                                <p class="text-sm font-semibold text-slate-900">Professional & Login</p>
-                                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Username</label>
-                                        <input name="username" placeholder="System login username" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Alternate Email</label>
-                                        <input name="alternate_email" type="email" placeholder="alternate@example.com" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">National ID / Citizenship</label>
-                                        <input name="national_id_number" placeholder="National ID number" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Date of Birth</label>
-                                        <input name="date_of_birth" type="date" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Joining Date <span class="text-red-500">*</span></label>
-                                        <input name="joining_date" type="date" required class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Years of Experience</label>
-                                        <input name="years_of_experience" type="number" min="0" max="80" placeholder="0" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Specialization</label>
-                                        <input name="specialization" placeholder="Subject expertise" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Employment Type</label>
-                                        <select name="employment_type" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
-                                            <option value="">Select type</option>
-                                            <option value="full-time">Full-time</option>
-                                            <option value="part-time">Part-time</option>
-                                            <option value="contract">Contract</option>
-                                        </select>
-                                    </div>
-                                    <div class="sm:col-span-2">
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Previous Institution</label>
-                                        <input name="previous_institution" placeholder="Previous school or college" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div class="sm:col-span-2">
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Certifications</label>
-                                        <textarea name="certifications_text" rows="3" placeholder="List certifications separated by commas" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="rounded-2xl border border-gray-200 bg-white p-4">
-                                <p class="text-sm font-semibold text-slate-900">Teaching Assignment</p>
-                                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Assign Semester</label>
-                                        <select name="assignment_semester" id="add_assignment_semester" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
-                                            <option value="">Select semester</option>
-                                            @foreach($semesterOptions ?? [] as $semesterOption)
-                                                <option value="{{ $semesterOption['value'] }}">{{ $semesterOption['label'] }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Teacher Access Level</label>
-                                        <select name="access_level" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
-                                            <option value="">Select level</option>
-                                            <option value="basic">Basic</option>
-                                            <option value="editor">Editor</option>
-                                            <option value="manager">Manager</option>
-                                            <option value="admin">Admin</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Profile Visibility</label>
-                                        <select name="profile_visibility" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
-                                            <option value="public">Public</option>
-                                            <option value="private">Private</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Subjects Assigned</label>
-                                        <select name="subject_ids[]" id="add_subject_ids" multiple size="7" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></select>
-                                        <p class="mt-1 text-xs text-gray-500">Choose a semester to filter the subjects.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="rounded-2xl border border-gray-200 bg-slate-50/80 p-4">
-                                <p class="text-sm font-semibold text-slate-900">Contact & Emergency</p>
-                                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Secondary Phone</label>
-                                        <input name="secondary_phone" type="tel" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" placeholder="Secondary phone" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Emergency Contact Name</label>
-                                        <input name="emergency_contact_name" placeholder="Emergency contact name" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Emergency Contact Phone</label>
-                                        <input name="emergency_contact_phone" type="tel" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" placeholder="Emergency phone" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Emergency Relationship</label>
-                                        <input name="emergency_relationship" placeholder="Father / Mother / Guardian" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div class="sm:col-span-2">
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Address</label>
-                                        <textarea name="address" rows="3" placeholder="Street, city, postal code" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Staff Room / Office</label>
-                                        <input name="staff_room_location" placeholder="Office location" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Employee Type</label>
-                                        <select name="employee_type" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
-                                            <option value="">Select employee type</option>
-                                            <option value="permanent">Permanent</option>
-                                            <option value="temporary">Temporary</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Work Shift</label>
-                                        <select name="work_shift" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
-                                            <option value="">Select shift</option>
-                                            <option value="morning">Morning</option>
-                                            <option value="day">Day</option>
-                                            <option value="evening">Evening</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Timetable Assignment</label>
-                                        <input name="timetable_assignment" placeholder="Optional timetable link or code" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="rounded-2xl border border-gray-200 bg-white p-4">
-                                <p class="text-sm font-semibold text-slate-900">Payroll, Health & Notes</p>
-                                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Salary</label>
-                                        <input name="salary" type="number" step="0.01" min="0" placeholder="0.00" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Bank Name</label>
-                                        <input name="bank_name" placeholder="Bank name" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Bank Account Number</label>
-                                        <input name="bank_account_number" placeholder="Account number" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Tax ID Number</label>
-                                        <input name="tax_identification_number" placeholder="Tax identification number" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Blood Group</label>
-                                        <select name="blood_group" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
-                                            <option value="">Select group</option>
-                                            @foreach(['A+','A-','B+','B-','AB+','AB-','O+','O-'] as $group)
-                                                <option value="{{ $group }}">{{ $group }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Medical Conditions</label>
-                                        <input name="medical_conditions" placeholder="Optional medical conditions" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div class="sm:col-span-2">
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Emergency Notes</label>
-                                        <textarea name="emergency_notes" rows="3" placeholder="Emergency remarks and instructions" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
-                                    </div>
-                                    <div class="sm:col-span-2">
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Social Links</label>
-                                        <textarea name="social_links" rows="2" placeholder="LinkedIn, portfolio, etc." class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
-                                    </div>
-                                    <div class="sm:col-span-2">
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-                                        <textarea name="notes" rows="3" placeholder="Internal remarks" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="rounded-2xl border border-gray-200 bg-slate-50/80 p-4">
-                                <p class="text-sm font-semibold text-slate-900">Documents</p>
-                                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Resume / CV</label>
-                                        <input name="resume" type="file" accept=".pdf,.doc,.docx" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Certificates</label>
-                                        <input name="certificates[]" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">ID Proof</label>
-                                        <input name="id_proof" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm dark:bg-slate-700 dark:text-white transition-colors" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="teacher-form-actions mt-6 flex items-center justify-end gap-3">
-                    <button type="button" onclick="closeAddTeacherModal()" class="teacher-secondary-btn px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-slate-600 transition">Cancel</button>
-                    <button type="submit" class="teacher-primary-btn px-5 py-2.5 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
-                        <i class="bi bi-plus-lg me-1"></i>Add Teacher
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Edit Teacher Modal -->
-<div id="editTeacherModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 p-4" onclick="if(event.target===this) closeEditTeacherModal()">
-    <div class="teacher-modal-panel bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto border border-gray-200 dark:border-slate-700">
-        <div class="teacher-modal-header px-6 py-4 border-b-2 border-red-600 flex items-center justify-between sticky top-0 bg-red-600 text-white">
-            <div>
-                <h3 class="text-lg font-semibold">Edit Teacher</h3>
-                <p class="text-sm text-red-100">Update teacher information</p>
-            </div>
-            <button type="button" onclick="closeEditTeacherModal()" class="teacher-modal-close text-red-100 hover:text-white p-1 rounded-lg hover:bg-red-700 transition">
-                <i class="bi bi-x-lg text-lg"></i>
-            </button>
-        </div>
-        <form id="editTeacherForm" enctype="multipart/form-data" class="teacher-form">
-            @csrf
-            @method('PUT')
-            <div class="p-6">
-                <input type="hidden" name="_id" id="editTeacherId" />
-                <div class="flex flex-col gap-8 sm:flex-row">
-                    <!-- Photo Section -->
-                    <div class="teacher-photo-panel flex flex-col items-center">
-                        <div id="editTeacherAvatar" class="teacher-photo-frame w-40 h-40 bg-gray-100 rounded-full flex items-center justify-center text-4xl text-gray-500 overflow-hidden flex-shrink-0 mb-3">
-                            <img id="editTeacherAvatarImg" src="" alt="avatar" class="w-full h-full object-cover" style="display:none;">
-                            <span id="editTeacherInitial">T</span>
-                        </div>
-                        <label class="teacher-upload-btn inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
-                            <i class="bi bi-download"></i>
-                            Choose photo
-                            <input type="file" name="profile_photo" accept="image/*" class="hidden" id="profilePhotoInput" onchange="previewTeacherPhoto()" />
-                        </label>
-                        <p class="text-xs text-gray-500 mt-2">Recommended 400x400px. Max 4MB.</p>
-                    </div>
-
-                    <!-- Details Section -->
-                    <div class="flex-1">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Role</label>
-                                <input type="text" value="Teacher" disabled class="mt-1 block w-full px-3 py-2 border rounded-md text-sm bg-gray-100" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Gender</label>
-                                <select id="edit_gender" name="gender" class="mt-1 block w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
-                                    <option value="">Prefer not to say</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Full name</label>
-                                <input id="edit_name" name="name" required class="mt-1 block w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Email</label>
-                                <input id="edit_email" name="email" type="email" required class="mt-1 block w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Phone</label>
-                                <input id="edit_phone" type="tel" name="phone" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" class="mt-1 block w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Department</label>
-                                <input id="edit_department" name="department" class="mt-1 block w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Qualification</label>
-                                <input type="text" id="edit_qualification" name="qualification" class="mt-1 block w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Teacher ID</label>
-                                <input id="edit_teacher_id" name="teacher_id" class="mt-1 block w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700">Status</label>
-                                <select id="edit_status" name="status" class="mt-1 block w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                    <option value="On Leave">On Leave</option>
-                                    <option value="Retired">Retired</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700">Address</label>
-                            <textarea id="edit_address" name="address" rows="3" class="mt-1 block w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-xs font-medium text-gray-700">Bio</label>
-                            <textarea id="edit_bio" name="bio" rows="4" class="mt-1 block w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="teacher-form-actions mt-6 flex items-center justify-between">
-                    <button type="button" onclick="deleteTeacher(document.getElementById('editTeacherId').value)" class="teacher-danger-btn px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-600 rounded-lg text-sm hover:bg-red-100 dark:hover:bg-red-900/50 transition">Delete</button>
-                    <div class="flex gap-3">
-                        <button type="button" onclick="closeEditTeacherModal()" class="teacher-secondary-btn px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-slate-600 transition">Cancel</button>
-                        <button type="submit" class="teacher-primary-btn px-5 py-2.5 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
-                            <i class="bi bi-check-lg me-1"></i>Save Changes
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- View Teacher Modal -->
-<div id="viewTeacherModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 p-4" onclick="if(event.target===this) closeViewTeacherModal()">
-    <div class="teacher-modal-panel bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto border border-gray-200 dark:border-slate-700">
-        <div class="teacher-modal-header px-6 py-4 border-b-2 border-red-600 flex items-center justify-between sticky top-0 bg-red-600 text-white">
-            <div>
-                <h3 class="text-lg font-semibold">Teacher Details</h3>
-                <p class="text-sm text-red-100">View teacher information</p>
-            </div>
-            <button type="button" onclick="event.preventDefault(); closeViewTeacherModal(); return false;" class="teacher-modal-close text-red-100 hover:text-white p-1 rounded-lg hover:bg-red-700 transition">
-                <i class="bi bi-x-lg text-lg"></i>
-            </button>
-        </div>
-        <div class="p-6">
-            <div class="flex flex-col gap-8 sm:flex-row">
-                <!-- Photo Section -->
-                <div class="teacher-photo-panel flex flex-col items-center">
-                    <div id="viewTeacherAvatar" class="teacher-photo-frame w-40 h-40 bg-gray-100 rounded-full flex items-center justify-center text-4xl text-gray-500 overflow-hidden flex-shrink-0">
-                        <img id="viewTeacherAvatarImg" src="" alt="avatar" class="w-full h-full object-cover" style="display:none;">
-                        <span id="viewTeacherInitial">T</span>
-                    </div>
-                </div>
-
-                <!-- Details Section -->
-                <div class="flex-1">
-                    <div class="teacher-detail-grid grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="text-xs font-medium text-gray-700">Full name</label>
-                            <p id="viewTeacherName" class="text-sm font-semibold text-gray-900 mt-1">—</p>
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-gray-700">Email</label>
-                            <p id="viewTeacherEmail" class="text-sm font-semibold text-gray-900 mt-1">—</p>
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-gray-700">Phone</label>
-                            <p id="viewTeacherPhone" class="text-sm font-semibold text-gray-900 mt-1">—</p>
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-gray-700">Department</label>
-                            <p id="viewTeacherDept" class="text-sm font-semibold text-gray-900 mt-1">—</p>
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-gray-700">Teacher ID</label>
-                            <p id="viewTeacherCode" class="text-sm font-semibold text-gray-900 mt-1">—</p>
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-gray-700">Status</label>
-                            <p id="viewTeacherStatus" class="text-sm font-semibold text-gray-900 mt-1">—</p>
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-gray-700">Gender</label>
-                            <p id="viewTeacherGender" class="text-sm font-semibold text-gray-900 mt-1">—</p>
-                        </div>
-                        <div>
-                            <label class="text-xs font-medium text-gray-700">Qualification</label>
-                            <p id="viewTeacherQualification" class="text-sm font-semibold text-gray-900 mt-1">—</p>
-                        </div>
-                    </div>
-                    <div class="teacher-detail-block col-span-2">
-                        <label class="text-xs font-medium text-gray-700">Bio</label>
-                        <p id="viewTeacherBio" class="text-sm font-semibold text-gray-900 mt-1">—</p>
-                    </div>
-                    <div class="teacher-detail-block col-span-2 mt-4">
-                        <label class="text-xs font-medium text-gray-700">Address</label>
-                        <p id="viewTeacherAddress" class="text-sm font-semibold text-gray-900 mt-1">—</p>
-                    </div>
-                </div>
-            </div>
-            <div class="teacher-modal-footer mt-6 flex items-center justify-between gap-3 pt-4">
-                <div class="flex gap-2">
-                    <button type="button" onclick="printTeacher()" class="teachers-toolbar-btn inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
-                        <i class="bi bi-printer"></i>Print
-                    </button>
-                </div>
-                <button type="button" onclick="closeViewTeacherModal()" class="teacher-secondary-btn px-3 py-2 border rounded text-sm">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-@endsection
-
-@section('scripts')
-<script>
-// Modal helper functions with body overflow control
-function openAddTeacherModal() {
-    document.body.style.overflow = 'hidden';
-    document.getElementById('addTeacherModal').classList.remove('hidden');
-}
-
-function closeAddTeacherModal() {
-    document.body.style.overflow = '';
-    document.getElementById('addTeacherModal').classList.add('hidden');
-}
-
-function openEditTeacherModal(id) {
-    // Show modal immediately so user sees feedback
-    document.body.style.overflow = 'hidden';
-    document.getElementById('editTeacherModal').classList.remove('hidden');
-    
-    // Then fetch the data
-    showLoading('Loading teacher...');
-    fetch(`/admin/teachers/${id}/edit`, {
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        credentials: 'same-origin'
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            document.getElementById('editTeacherId').value = data.id;
-            document.getElementById('edit_name').value = data.name;
-            document.getElementById('edit_email').value = data.email;
-            document.getElementById('edit_phone').value = data.phone || '';
-            document.getElementById('edit_department').value = data.department || '';
-            document.getElementById('edit_teacher_id').value = data.teacher_code || '';
-            document.getElementById('edit_gender').value = data.gender || '';
-            document.getElementById('edit_status').value = data.status || 'active';
-            document.getElementById('edit_bio').value = data.bio || '';
-            document.getElementById('edit_qualification').value = data.qualification || '';
-            document.getElementById('edit_address').value = data.address || '';
-            if (data.profile_photo_path) {
-                // Handle both with and without storage/ prefix
-                const photoPath = data.profile_photo_path.startsWith('storage/') 
-                    ? '/' + data.profile_photo_path 
-                    : '/storage/' + data.profile_photo_path;
-                document.getElementById('editTeacherAvatarImg').src = photoPath;
-                document.getElementById('editTeacherAvatarImg').style.display = 'block';
-                document.getElementById('editTeacherInitial').style.display = 'none';
-            } else {
-                document.getElementById('editTeacherInitial').style.display = 'block';
-                document.getElementById('editTeacherAvatarImg').style.display = 'none';
-            }
-            document.getElementById('editTeacherForm').action = '/admin/teachers/' + data.id;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to load teacher details: ' + error.message);
-            document.getElementById('editTeacherModal').classList.add('hidden');
-        })
-        .finally(() => {
-            try { hideLoading(); } catch(e) { /* fallback if not available */ }
-        });
-}
-
-function closeEditTeacherModal() {
-    document.body.style.overflow = '';
-    document.getElementById('editTeacherModal').classList.add('hidden');
-}
-
-function openViewTeacherModal(id) {
-    // Store teacher ID for print/download functionality
-    currentViewingTeacherId = id;
-    
-    // Show modal immediately so user sees feedback
-    document.body.style.overflow = 'hidden';
-    document.getElementById('viewTeacherModal').classList.remove('hidden');
-    
-    // Then fetch the data
-    showLoading('Loading teacher...');
-    fetch(`/admin/teachers/${id}/edit`, {
-        headers: {
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        credentials: 'same-origin'
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            document.getElementById('viewTeacherName').innerText = data.name;
-            document.getElementById('viewTeacherEmail').innerText = data.email;
-            document.getElementById('viewTeacherPhone').innerText = data.phone || '—';
-            document.getElementById('viewTeacherDept').innerText = data.department || '—';
-            document.getElementById('viewTeacherCode').innerText = data.teacher_code || '—';
-            document.getElementById('viewTeacherStatus').innerText = data.status || '—';
-            document.getElementById('viewTeacherBio').innerText = data.bio || '—';
-            document.getElementById('viewTeacherQualification').innerText = data.qualification || '—';
-            document.getElementById('viewTeacherAddress').innerText = data.address || '—';
-            if (data.profile_photo_path) {
-                // Handle both with and without storage/ prefix
-                const photoPath = data.profile_photo_path.startsWith('storage/') 
-                    ? '/' + data.profile_photo_path 
-                    : '/storage/' + data.profile_photo_path;
-                document.getElementById('viewTeacherAvatarImg').src = photoPath;
-                document.getElementById('viewTeacherAvatarImg').style.display = 'block';
-                document.getElementById('viewTeacherInitial').style.display = 'none';
-            } else {
-                document.getElementById('viewTeacherInitial').style.display = 'block';
-                document.getElementById('viewTeacherAvatarImg').style.display = 'none';
-            }
-            // set gender if provided
-            if (data.gender !== undefined) {
-                const genderEl = document.getElementById('viewTeacherGender');
-                if (genderEl) genderEl.textContent = data.gender ? (data.gender.charAt(0).toUpperCase()+data.gender.slice(1)) : '—';
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Failed to load teacher details: ' + error.message);
-            document.getElementById('viewTeacherModal').classList.add('hidden');
-        })
-        .finally(() => {
-            try { hideLoading(); } catch(e) { }
-        });
-}
-
-function closeViewTeacherModal() {
-    document.body.style.overflow = '';
-    document.getElementById('viewTeacherModal').classList.add('hidden');
-}
-
-function deleteTeacher(id) {
-    // Use showConfirm if available, fallback to native confirm
-    if (typeof showConfirm === 'function') {
-        showConfirm({
-            title: 'Delete Teacher',
-            message: 'Are you sure you want to delete this teacher? This cannot be undone.',
-            type: 'delete',
-            okText: 'Delete',
-            cancelText: 'Cancel'
-        }).then((confirmed) => {
-            if (confirmed) performTeacherDelete(id);
-        });
-    } else {
-        if (confirm('Are you sure you want to delete this teacher?')) performTeacherDelete(id);
-    }
-}
-
-function performTeacherDelete(id) {
-    showLoading('Deleting teacher...');
-    fetch(`/admin/teachers/${id}`, { 
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json'
-        }
-    })
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to delete');
-            return response.json();
-        })
-        .then(data => {
-            showToast('Teacher deleted successfully', 'success');
-            setTimeout(() => location.reload(), 1500);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('Failed to delete teacher', 'error');
-        })
-        .finally(() => {
-            try { hideLoading(); } catch(e) { }
-        });
-}
-
-// Toast notification - uses global showToast from admin/layouts/app.blade.php
-
-// Improved error handling for form submissions - shows validation errors as toast
-function handleFormError(error, defaultMessage = 'An error occurred') {
-    console.error('Error:', error);
-    
-    let errorMessage = defaultMessage;
-    
-    // Handle Laravel validation errors (422 response)
-    if (error.response && error.response.status === 422) {
-        const data = error.response.data;
-        if (data && data.errors) {
-            // Get first validation error message
-            const firstErrorKey = Object.keys(data.errors)[0];
-            if (firstErrorKey && data.errors[firstErrorKey]) {
-                errorMessage = data.errors[firstErrorKey][0];
-            }
-        } else if (data && data.message) {
-            errorMessage = data.message;
-        }
-    } else if (error.message) {
-        errorMessage = error.message;
-    }
-    
-    showToast(errorMessage, 'error');
-    return errorMessage;
-}
-
-function setTeacherSubmitState(form, isSubmitting, loadingText) {
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (!submitBtn) {
-        return;
-    }
-
-    if (!submitBtn.dataset.originalHtml) {
-        submitBtn.dataset.originalHtml = submitBtn.innerHTML;
-    }
-
-    submitBtn.disabled = isSubmitting;
-    submitBtn.innerHTML = isSubmitting ? loadingText : submitBtn.dataset.originalHtml;
-}
-
-async function parseTeacherResponse(response, fallbackMessage) {
-    let payload = null;
-
-    try {
-        payload = await response.json();
-    } catch (error) {
-        payload = null;
-    }
-
-    if (response.ok) {
-        return payload;
-    }
-
-    const requestError = new Error(payload?.message || fallbackMessage);
-    requestError.response = {
-        status: response.status,
-        data: payload,
-    };
-
-    throw requestError;
-}
-
-// Form submission handlers
-document.addEventListener('DOMContentLoaded', function() {
-    // Add keyboard escape handler for all modals
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const modals = ['addTeacherModal', 'editTeacherModal', 'viewTeacherModal'];
-            modals.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (modal && !modal.classList.contains('hidden')) {
-                    if (modalId === 'addTeacherModal') closeAddTeacherModal();
-                    else if (modalId === 'editTeacherModal') closeEditTeacherModal();
-                    else if (modalId === 'viewTeacherModal') closeViewTeacherModal();
-                }
-            });
-        }
-    });
-    
-    // AJAX form submission for Add Teacher
-    const addForm = document.getElementById('addTeacherForm');
-    if (addForm) {
-        addForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            if (addForm.dataset.submitting === 'true') {
-                return;
-            }
-
-            addForm.dataset.submitting = 'true';
-            setTeacherSubmitState(addForm, true, '<i class="bi bi-arrow-repeat animate-spin me-1"></i>Adding...');
-            showLoading('Adding teacher...');
-
-            try {
-                const response = await fetch(addForm.action, {
-                    method: 'POST',
-                    body: new FormData(addForm),
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                });
-
-                const data = await parseTeacherResponse(response, 'Failed to add teacher');
-
-                if (data.success) {
-                    showToast(data.message || 'Teacher added successfully', 'success');
-                    addForm.reset();
-                    const addTeacherAvatarImg = document.getElementById('addTeacherAvatarImg');
-                    const addTeacherInitial = document.getElementById('addTeacherInitial');
-                    if (addTeacherAvatarImg) {
-                        addTeacherAvatarImg.src = '';
-                        addTeacherAvatarImg.style.display = 'none';
-                    }
-                    if (addTeacherInitial) {
-                        addTeacherInitial.style.display = 'inline-flex';
-                    }
-                    closeAddTeacherModal();
-                    setTimeout(() => location.reload(), 1500);
-                }
-            } catch (error) {
-                handleFormError(error, 'Failed to add teacher');
-            } finally {
-                addForm.dataset.submitting = 'false';
-                setTeacherSubmitState(addForm, false);
-                try { hideLoading(); } catch(e) { }
-            }
-        });
-
-    // Image preview helpers for teacher forms
-    window.previewAddTeacherPhoto = function() {
-        const file = document.getElementById('addProfilePhotoInput').files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.getElementById('addTeacherAvatarImg');
-                const init = document.getElementById('addTeacherInitial');
-                if (img) { img.src = e.target.result; img.style.display = 'block'; }
-                if (init) init.style.display = 'none';
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    window.previewTeacherPhoto = function() {
-        const file = document.getElementById('profilePhotoInput').files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.getElementById('editTeacherAvatarImg');
-                const init = document.getElementById('editTeacherInitial');
-                if (img) { img.src = e.target.result; img.style.display = 'block'; }
-                if (init) init.style.display = 'none';
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-    }
-    
-    // AJAX form submission for Edit Teacher
-    const editForm = document.getElementById('editTeacherForm');
-    if (editForm) {
-        editForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            if (editForm.dataset.submitting === 'true') {
-                return;
-            }
-
-            const teacherId = document.getElementById('editTeacherId').value;
-            editForm.dataset.submitting = 'true';
-            setTeacherSubmitState(editForm, true, '<i class="bi bi-arrow-repeat animate-spin me-1"></i>Saving...');
-            showLoading('Saving teacher...');
-
-            try {
-                const response = await fetch(`/admin/teachers/${teacherId}`, {
-                    method: 'POST',
-                    body: new FormData(editForm),
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                });
-
-                const data = await parseTeacherResponse(response, 'Failed to update teacher');
-
-                if (data.success) {
-                    showToast(data.message || 'Teacher updated successfully', 'success');
-                    closeEditTeacherModal();
-                    setTimeout(() => location.reload(), 1500);
-                }
-            } catch (error) {
-                handleFormError(error, 'Failed to update teacher');
-            } finally {
-                editForm.dataset.submitting = 'false';
-                setTeacherSubmitState(editForm, false);
-                try { hideLoading(); } catch(e) { }
-            }
-        });
-    }
-    
-    // Check if we just came back from a form submission
-    const notification = sessionStorage.getItem('showNotification');
-    if (notification) {
-        sessionStorage.removeItem('showNotification');
-        if (notification === 'teacher_added') {
-            showToast('Teacher added successfully', 'success');
-        } else if (notification === 'teacher_updated') {
-            showToast('Teacher updated successfully', 'success');
-        }
-    }
-});
-
-// Filter functionality - filters only on Apply Filter button click
-function filterTeachers() {
-    showLoading('Filtering teachers...');
-    setTimeout(() => {
-        const searchText = document.getElementById('teachersSearch').value.toLowerCase();
-        const statusFilter = document.getElementById('teachersStatusFilter').value.toLowerCase();
-        const courseFilter = document.getElementById('teachersCourseFilter').value.toLowerCase();
-        const rows = document.querySelectorAll('#teachersTableContainer tbody tr');
-
-        let visibleCount = 0;
-
-        rows.forEach(row => {
-            const name = row.querySelector('p.font-medium')?.textContent.toLowerCase() || '';
-            const email = row.querySelector('p.text-xs')?.textContent.toLowerCase() || '';
-            // Get all cells in the row
-            const cells = row.querySelectorAll('td');
-            const status = cells[5]?.textContent.toLowerCase() || ''; // Status is in 6th column
-            const course = cells[4]?.textContent.toLowerCase() || ''; // Course is in 5th column
-
-            const matchesSearch = name.includes(searchText) || email.includes(searchText);
-            const matchesStatus = !statusFilter || status.includes(statusFilter);
-            const matchesCourse = !courseFilter || course.includes(courseFilter);
-
-            if (matchesSearch && matchesStatus && matchesCourse) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        // Show "no results" if all rows are hidden
-        if (visibleCount === 0) {
-            const tbody = document.querySelector('#teachersTableContainer tbody');
-            if (!document.getElementById('noResultsRow')) {
-                const noResultsRow = document.createElement('tr');
-                noResultsRow.id = 'noResultsRow';
-                noResultsRow.innerHTML = '<td colspan="7" class="px-3 py-4 text-center text-gray-500">No teachers found matching the criteria.</td>';
-                tbody.appendChild(noResultsRow);
-            }
-        } else {
-            const noResultsRow = document.getElementById('noResultsRow');
-            if (noResultsRow) noResultsRow.remove();
-        }
-        hideLoading();
-    }, 300);
-}
-
-// Reset filter function
-function resetTeachersFilter() {
-    // Clear all filter inputs
-    document.getElementById('teachersSearch').value = '';
-    document.getElementById('teachersStatusFilter').value = '';
-    document.getElementById('teachersCourseFilter').value = '';
-    
-    // Re-apply filter to show all teachers
-    filterTeachers();
-}
-
-// =====================
-// Print and Download Functions
-// =====================
-let currentViewingTeacherId = null;
-
-function printTeacher() {
-    if (!currentViewingTeacherId) {
-        showToast('Teacher ID not found', 'error');
-        return;
-    }
-    const url = @json(route('admin.teachers.print', ['id' => '__ID__'])).replace('__ID__', currentViewingTeacherId);
-    adminOpenPrintPreview(url, {
-        title: 'Print Teacher',
-    });
-}
-
-</script>
 @endsection
