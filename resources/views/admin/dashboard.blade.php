@@ -37,68 +37,41 @@
     $initialAttendancePresent = $activeAttendanceBuckets->sum('present');
     $initialAttendanceTracked = $activeAttendanceBuckets->sum('total');
     $initialAttendanceNotPresent = max($initialAttendanceTracked - $initialAttendancePresent, 0);
-    $healthyClassCount = (int) ($dashboardOverview['healthy_attendance_classes'] ?? 0);
-    $attentionFlags = (int) ($dashboardOverview['low_attendance_classes'] ?? 0)
-        + (int) ($dashboardOverview['pending_elective_approvals'] ?? 0)
-        + (int) ($dashboardOverview['unread_notifications'] ?? 0);
 @endphp
-
-@include('admin.components.admin-page-header', [
-    'title' => __('Dashboard'),
-    'breadcrumbs' => [
-        ['label' => __('Dashboard')]
-    ]
-])
 
 <div class="space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif">
     <!-- Welcome Section -->
-    <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 md:p-6">
-        <div class="grid gap-6 xl:grid-cols-[1.7fr,1fr] xl:items-start">
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF0037] via-[#D90033] to-[#B2002F] p-6 md:p-8 text-white shadow-xl border border-[#D90033]">
+        <div class="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-white/20 blur-2xl"></div>
+        <div class="absolute -left-10 -bottom-16 w-56 h-56 rounded-full bg-[#D90033]/40 blur-3xl"></div>
+        <div class="relative flex flex-col gap-6">
             <div>
-                <div class="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                    <span class="rounded-full bg-red-50 px-3 py-1 text-red-600 dark:bg-red-900/30 dark:text-red-300">{{ __('Dashboard Center') }}</span>
+                <div class="flex flex-wrap items-center gap-2 text-xs font-medium text-[#ffe5ea]">
+                    <span>{{ __('Dashboard') }}</span>
                     @if($college && $college->name)
-                        <span class="rounded-full bg-slate-100 px-3 py-1 text-slate-600 dark:bg-slate-700 dark:text-slate-300">{{ $college->name }}</span>
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/15 border border-white/25">
+                            <i class="bi bi-building"></i> {{ $college->name }}
+                        </span>
                     @endif
-                    <span class="rounded-full bg-slate-100 px-3 py-1 text-slate-600 dark:bg-slate-700 dark:text-slate-300">{{ __('Administrator') }}</span>
+                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/15 border border-white/25">
+                        <i class="bi bi-person-badge"></i> {{ __('Administrator') }}
+                    </span>
                 </div>
-                <h1 class="mt-4 text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">{{ __('Welcome back,') }} {{ $adminName }}</h1>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">{{ __('Manage students, teachers, attendance, and all administrative tasks from here.') }}</p>
-                <div class="mt-4 flex flex-wrap gap-3">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                <h1 class="mt-4 text-2xl md:text-3xl font-bold">{{ __('Welcome back,') }} {{ $adminName }}</h1>
+                <p class="text-[#ffe5ea] mt-2">{{ __('Manage students, teachers, attendance, and all administrative tasks from here.') }}</p>
+                <div class="mt-4 flex flex-wrap gap-3 text-sm text-[#ffe5ea]">
+                    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 border border-white/25">
                         <i class="bi bi-calendar2-week"></i>
                         {{ $dashboardOverview['today_class_count'] ?? 0 }} {{ __('classes today') }}
                     </span>
-                    <span class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 border border-white/25">
                         <i class="bi bi-pie-chart"></i>
                         {{ number_format($passRate, 1) }}% {{ __('pass rate') }}
                     </span>
-                    <span class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                    <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 border border-white/25">
                         <i class="bi bi-bell"></i>
                         {{ $dashboardOverview['unread_notifications'] ?? 0 }} {{ __('unread alerts') }}
                     </span>
-                </div>
-            </div>
-            <div class="grid gap-3 sm:grid-cols-2">
-                <div class="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">{{ __('Live Classes') }}</p>
-                    <p class="mt-3 text-2xl font-semibold text-emerald-900 dark:text-emerald-100">{{ $dashboardOverview['today_class_count'] ?? 0 }}</p>
-                    <p class="mt-1 text-xs text-emerald-700 dark:text-emerald-300">{{ $healthyClassCount }} {{ __('on track today') }}</p>
-                </div>
-                <div class="rounded-2xl border border-rose-100 bg-rose-50 p-4 dark:border-rose-800 dark:bg-rose-950/30">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-rose-700 dark:text-rose-300">{{ __('Attention Queue') }}</p>
-                    <p class="mt-3 text-2xl font-semibold text-rose-900 dark:text-rose-100">{{ $attentionFlags }}</p>
-                    <p class="mt-1 text-xs text-rose-700 dark:text-rose-300">{{ __('attendance, grades, and approvals to review') }}</p>
-                </div>
-                <div class="rounded-2xl border border-blue-100 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/30">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-blue-700 dark:text-blue-300">{{ __('Grade Health') }}</p>
-                    <p class="mt-3 text-2xl font-semibold text-blue-900 dark:text-blue-100">{{ number_format($distinctionRate, 1) }}%</p>
-                    <p class="mt-1 text-xs text-blue-700 dark:text-blue-300">{{ __('students in A and A+') }}</p>
-                </div>
-                <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/30">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-300">{{ __('Upcoming Exams') }}</p>
-                    <p class="mt-3 text-2xl font-semibold text-amber-900 dark:text-amber-100">{{ $dashboardOverview['upcoming_exam_count'] ?? 0 }}</p>
-                    <p class="mt-1 text-xs text-amber-700 dark:text-amber-300">{{ __('scheduled assessments ahead') }}</p>
                 </div>
             </div>
         </div>
