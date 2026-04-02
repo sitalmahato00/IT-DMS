@@ -5,48 +5,312 @@
 @section('styles')
 <script>document.documentElement.classList.add('courses-ui-enhanced');</script>
 <style>
-    html.courses-ui-enhanced:not(.dark) body.admin-panel { background: radial-gradient(circle at top right, rgba(255, 76, 111, .14), transparent 24rem), radial-gradient(circle at bottom left, rgba(56, 189, 248, .1), transparent 22rem), linear-gradient(180deg, #fff7fa 0%, #f8f9fc 48%, #f7fbff 100%); }
-    html.courses-ui-enhanced:not(.dark) #adminTopHeader .hidden.lg\:flex a { border-radius: 999px; background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .28); backdrop-filter: blur(12px); }
-    html.courses-ui-enhanced:not(.dark) #sidebar { background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,248,250,.9)); border-color: rgba(244, 63, 94, .14); box-shadow: 22px 0 45px -36px rgba(15, 23, 42, .45); }
-    html.courses-ui-enhanced:not(.dark) #sidebar nav > div { background: rgba(255,255,255,.74); border-color: rgba(244, 63, 94, .14); border-radius: 1.75rem; backdrop-filter: blur(16px); box-shadow: 0 18px 35px -32px rgba(15, 23, 42, .3); }
-    html.courses-ui-enhanced:not(.dark) .courses-page { position: relative; }
-    html.courses-ui-enhanced:not(.dark) .courses-page::before { content: ''; position: absolute; top: -1.5rem; right: 4%; width: 16rem; height: 16rem; border-radius: 999px; background: radial-gradient(circle, rgba(255, 94, 128, .18), transparent 68%); filter: blur(12px); pointer-events: none; }
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel, html.courses-ui-enhanced:not(.dark) .courses-filter-panel, html.courses-ui-enhanced:not(.dark) .courses-semester-section, html.courses-ui-enhanced:not(.dark) .courses-table-panel, html.courses-ui-enhanced:not(.dark) .course-modal-panel, html.courses-ui-enhanced:not(.dark) #subjectDetailModalContent { position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,.7); background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,249,251,.88)); box-shadow: 0 26px 60px -42px rgba(15, 23, 42, .45), 0 12px 30px -24px rgba(244, 63, 94, .22); backdrop-filter: blur(18px); }
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel::before, html.courses-ui-enhanced:not(.dark) .courses-filter-panel::before, html.courses-ui-enhanced:not(.dark) .courses-semester-section::before, html.courses-ui-enhanced:not(.dark) .courses-table-panel::before, html.courses-ui-enhanced:not(.dark) .course-modal-panel::before, html.courses-ui-enhanced:not(.dark) #subjectDetailModalContent::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(135deg, rgba(255,255,255,.28), rgba(255,255,255,0) 48%, rgba(255,188,199,.18)); }
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel > *, html.courses-ui-enhanced:not(.dark) .courses-filter-panel > *, html.courses-ui-enhanced:not(.dark) .courses-semester-section > *, html.courses-ui-enhanced:not(.dark) .courses-table-panel > *, html.courses-ui-enhanced:not(.dark) .course-modal-panel > *, html.courses-ui-enhanced:not(.dark) #subjectDetailModalContent > * { position: relative; z-index: 1; }
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel { border-radius: 1.9rem; padding: 1.4rem 1.6rem; }
-    html.courses-ui-enhanced:not(.dark) .courses-hero-panel h1 { font-size: clamp(2rem, 2.4vw, 2.65rem); letter-spacing: -.04em; }
-    html.courses-ui-enhanced:not(.dark) .courses-stats > .grid > div { position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,.72); background: linear-gradient(180deg, rgba(255,255,255,.94), rgba(255,251,252,.84)); box-shadow: 0 24px 48px -38px rgba(15, 23, 42, .35); transition: transform .25s ease, box-shadow .25s ease; }
-    html.courses-ui-enhanced:not(.dark) .courses-stats > .grid > div:hover, html.courses-ui-enhanced:not(.dark) .courses-semester-grid > div:hover { transform: translateY(-4px); box-shadow: 0 32px 55px -40px rgba(15, 23, 42, .4); }
-    html.courses-ui-enhanced:not(.dark) .courses-stats .w-12.h-12, html.courses-ui-enhanced:not(.dark) .courses-semester-grid > div, html.courses-ui-enhanced:not(.dark) .course-modal-section, html.courses-ui-enhanced:not(.dark) #subjectDetailContent > div { border-radius: 1.45rem; }
-    html.courses-ui-enhanced:not(.dark) .courses-filter-panel { border-radius: 1.8rem; }
-    html.courses-ui-enhanced:not(.dark) .courses-filter-panel label, html.courses-ui-enhanced:not(.dark) .course-directory-head th, html.courses-ui-enhanced:not(.dark) .course-modal-section h3, html.courses-ui-enhanced:not(.dark) #subjectDetailContent > div h3 { font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #64748b; }
-    html.courses-ui-enhanced:not(.dark) .courses-filter-panel input, html.courses-ui-enhanced:not(.dark) .courses-filter-panel select, html.courses-ui-enhanced:not(.dark) #courseForm input:not([type='checkbox']):not([type='file']), html.courses-ui-enhanced:not(.dark) #courseForm select, html.courses-ui-enhanced:not(.dark) #courseForm textarea { min-height: 2.9rem; border-radius: 1rem; border: 1px solid rgba(226,232,240,.95); background: linear-gradient(180deg, #fff, #fff8fa); box-shadow: inset 0 1px 0 rgba(255,255,255,.8); transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
-    html.courses-ui-enhanced:not(.dark) .courses-filter-panel input:focus, html.courses-ui-enhanced:not(.dark) .courses-filter-panel select:focus, html.courses-ui-enhanced:not(.dark) #courseForm input:not([type='checkbox']):not([type='file']):focus, html.courses-ui-enhanced:not(.dark) #courseForm select:focus, html.courses-ui-enhanced:not(.dark) #courseForm textarea:focus { border-color: rgba(244,63,94,.4); box-shadow: 0 0 0 4px rgba(244,63,94,.1), 0 18px 32px -28px rgba(244,63,94,.6); transform: translateY(-1px); outline: none; }
-    html.courses-ui-enhanced:not(.dark) .courses-print-btn { box-shadow: 0 18px 32px -26px rgba(37, 99, 235, .7); }
-    html.courses-ui-enhanced:not(.dark) .courses-semester-section, html.courses-ui-enhanced:not(.dark) .courses-table-panel { border-radius: 2rem; }
-    html.courses-ui-enhanced:not(.dark) .courses-semester-grid > div .space-y-3 { text-align: left; }
-    html.courses-ui-enhanced:not(.dark) .courses-semester-grid > div .space-y-3 > div { justify-content: flex-start; }
-    html.courses-ui-enhanced:not(.dark) .courses-table-header, html.courses-ui-enhanced:not(.dark) .course-modal-header, html.courses-ui-enhanced:not(.dark) #subjectDetailModalContent > div:first-child, html.courses-ui-enhanced:not(.dark) #subjectDetailModalContent > div:last-child { background: linear-gradient(180deg, rgba(255,246,248,.96), rgba(255,255,255,.78)); }
-    html.courses-ui-enhanced:not(.dark) .courses-table-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.2rem 1.4rem; border-bottom: 1px solid rgba(226,232,240,.8); }
-    html.courses-ui-enhanced:not(.dark) .courses-table-header h3, html.courses-ui-enhanced:not(.dark) .course-name { color: #0f172a; font-weight: 700; }
-    html.courses-ui-enhanced:not(.dark) .courses-table-header p { margin-top: .2rem; font-size: .82rem; color: #64748b; }
-    html.courses-ui-enhanced:not(.dark) .course-directory-table { border-collapse: separate; border-spacing: 0; }
-    html.courses-ui-enhanced:not(.dark) .course-directory-head th { position: sticky; top: 0; z-index: 5; background: rgba(255,255,255,.96); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226,232,240,.9); }
-    html.courses-ui-enhanced:not(.dark) .course-row td { border-bottom-color: rgba(226,232,240,.72); transition: background-color .18s ease; }
-    html.courses-ui-enhanced:not(.dark) .course-row:nth-child(even) td { background: rgba(248,250,252,.52); }
-    html.courses-ui-enhanced:not(.dark) .course-row:hover td { background: rgba(255,255,255,.82); }
-    html.courses-ui-enhanced:not(.dark) .course-title-stack { display: flex; flex-direction: column; gap: .45rem; }
-    html.courses-ui-enhanced:not(.dark) .course-code { display: inline-flex; width: fit-content; align-items: center; gap: .45rem; padding: .34rem .7rem; border-radius: 999px; background: rgba(255,241,242,.95); color: #be123c; font-size: .72rem; font-weight: 700; letter-spacing: .04em; }
-    html.courses-ui-enhanced:not(.dark) .course-code::before { content: ''; width: .45rem; height: .45rem; border-radius: 999px; background: #fb7185; box-shadow: 0 0 0 .3rem rgba(251,113,133,.16); }
-    html.courses-ui-enhanced:not(.dark) .course-chip { display: inline-flex; align-items: center; padding: .42rem .82rem; border-radius: 999px; font-weight: 700; box-shadow: inset 0 1px 0 rgba(255,255,255,.55); }
-    html.courses-ui-enhanced:not(.dark) .course-actions button { border: 1px solid rgba(226,232,240,.88); background: rgba(255,255,255,.92); box-shadow: 0 16px 24px -22px rgba(15,23,42,.45); }
-    html.courses-ui-enhanced:not(.dark) .course-modal-header { position: sticky; top: 0; z-index: 5; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(226,232,240,.75); backdrop-filter: blur(16px); }
-    html.courses-ui-enhanced:not(.dark) .course-modal-section, html.courses-ui-enhanced:not(.dark) #subjectDetailContent > div { border: 1px solid rgba(226,232,240,.82); background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(248,250,252,.82)); box-shadow: inset 0 1px 0 rgba(255,255,255,.7); }
-    html.courses-ui-enhanced:not(.dark) .course-modal-subpanel { border-radius: 1.1rem; border: 1px solid rgba(226,232,240,.82); background: rgba(248,250,252,.82); }
-    html.courses-ui-enhanced:not(.dark) #courseForm input[type='file'] { border-radius: 1rem; border: 1px dashed rgba(148,163,184,.65); background: rgba(248,250,252,.8); padding: .72rem .85rem; }
-    @media (max-width: 1024px) { html.courses-ui-enhanced:not(.dark) .courses-hero-panel, html.courses-ui-enhanced:not(.dark) .courses-filter-panel, html.courses-ui-enhanced:not(.dark) .courses-semester-section, html.courses-ui-enhanced:not(.dark) .courses-table-panel, html.courses-ui-enhanced:not(.dark) .course-modal-panel, html.courses-ui-enhanced:not(.dark) #subjectDetailModalContent { border-radius: 1.5rem; } html.courses-ui-enhanced:not(.dark) .courses-table-header { flex-direction: column; align-items: flex-start; } }
-    @media (max-width: 640px) { html.courses-ui-enhanced:not(.dark) .courses-hero-panel { padding: 1.2rem 1.1rem; } }
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1.5rem;
+        border: 1px solid #d90033;
+        background: linear-gradient(to right, #ff0037, #d90033, #b2002f);
+        padding: 1.5rem;
+        box-shadow: 0 20px 45px -25px rgba(178, 0, 47, 0.55);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel::before,
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel::after {
+        content: '';
+        position: absolute;
+        border-radius: 999px;
+        pointer-events: none;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel::before {
+        top: -3rem;
+        right: -2rem;
+        width: 11rem;
+        height: 11rem;
+        background: rgba(255, 255, 255, 0.15);
+        filter: blur(10px);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel::after {
+        bottom: -4rem;
+        left: -1rem;
+        width: 13rem;
+        height: 13rem;
+        background: rgba(255, 255, 255, 0.09);
+        filter: blur(16px);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel > * {
+        position: relative;
+        z-index: 1;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel h1 {
+        color: #fff;
+        font-size: clamp(2rem, 2.4vw, 2.65rem);
+        letter-spacing: -0.04em;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel nav a {
+        color: #ffe5ea;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel nav a:hover {
+        color: #fff;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel nav span {
+        color: rgba(255, 255, 255, 0.88);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel nav span.text-red-600 {
+        color: #fff;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel nav i {
+        color: rgba(255, 255, 255, 0.55);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-hero-panel button {
+        box-shadow: 0 16px 30px -20px rgba(15, 23, 42, 0.45);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-stats > .grid > div {
+        position: relative;
+        overflow: hidden;
+        border-width: 2px;
+        border-radius: 0.9rem;
+        box-shadow: 0 18px 35px -28px rgba(15, 23, 42, 0.22);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-stats > .grid > div:hover,
+    html.courses-ui-enhanced:not(.dark) .courses-semester-grid > div:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 40px -28px rgba(15, 23, 42, 0.28);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-stats > .grid > div:nth-child(1) {
+        border-color: #93c5fd;
+        background: linear-gradient(135deg, #eff6ff 0%, #ffffff 56%, #eff6ff 100%);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-stats > .grid > div:nth-child(2) {
+        border-color: #86efac;
+        background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 56%, #f0fdf4 100%);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-stats > .grid > div:nth-child(3) {
+        border-color: #fcd34d;
+        background: linear-gradient(135deg, #fffbeb 0%, #ffffff 56%, #fffbeb 100%);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-stats > .grid > div:nth-child(4) {
+        border-color: #c4b5fd;
+        background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 56%, #f5f3ff 100%);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-filter-panel,
+    html.courses-ui-enhanced:not(.dark) .courses-semester-section,
+    html.courses-ui-enhanced:not(.dark) .courses-table-panel,
+    html.courses-ui-enhanced:not(.dark) .course-modal-panel,
+    html.courses-ui-enhanced:not(.dark) #subjectDetailModalContent {
+        overflow: hidden;
+        border: 2px solid #e2e8f0;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-filter-panel label,
+    html.courses-ui-enhanced:not(.dark) .course-directory-head th,
+    html.courses-ui-enhanced:not(.dark) .course-modal-section h3,
+    html.courses-ui-enhanced:not(.dark) #subjectDetailContent > div h3 {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-filter-panel input,
+    html.courses-ui-enhanced:not(.dark) .courses-filter-panel select,
+    html.courses-ui-enhanced:not(.dark) #courseForm input:not([type='checkbox']):not([type='file']),
+    html.courses-ui-enhanced:not(.dark) #courseForm select,
+    html.courses-ui-enhanced:not(.dark) #courseForm textarea {
+        min-height: 2.9rem;
+        border: 2px solid #cbd5e1;
+        border-radius: 0.8rem;
+        background: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-filter-panel input:focus,
+    html.courses-ui-enhanced:not(.dark) .courses-filter-panel select:focus,
+    html.courses-ui-enhanced:not(.dark) #courseForm input:not([type='checkbox']):not([type='file']):focus,
+    html.courses-ui-enhanced:not(.dark) #courseForm select:focus,
+    html.courses-ui-enhanced:not(.dark) #courseForm textarea:focus {
+        border-color: #f43f5e;
+        box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1);
+        outline: none;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-print-btn {
+        box-shadow: 0 18px 32px -26px rgba(37, 99, 235, 0.7);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-semester-grid > div {
+        border-width: 2px;
+        border-radius: 1rem;
+        box-shadow: 0 18px 32px -28px rgba(15, 23, 42, 0.18);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-semester-grid > div .space-y-3 {
+        text-align: left;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-semester-grid > div .space-y-3 > div {
+        justify-content: flex-start;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-table-header,
+    html.courses-ui-enhanced:not(.dark) .course-modal-header,
+    html.courses-ui-enhanced:not(.dark) #subjectDetailModalContent > div:first-child,
+    html.courses-ui-enhanced:not(.dark) #subjectDetailModalContent > div:last-child {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-table-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.2rem 1.4rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-table-header h3,
+    html.courses-ui-enhanced:not(.dark) .course-name {
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .courses-table-header p {
+        margin-top: 0.2rem;
+        font-size: 0.82rem;
+        color: #64748b;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-directory-table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-directory-head th {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-row td {
+        border-bottom-color: #e2e8f0;
+        transition: background-color 0.18s ease;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-row:nth-child(even) td {
+        background: #f8fafc;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-row:hover td {
+        background: #fff7f8;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-title-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-code {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.34rem 0.7rem;
+        border-radius: 999px;
+        background: #fee2e2;
+        color: #be123c;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-code::before {
+        content: '';
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 999px;
+        background: #fb7185;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.42rem 0.82rem;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-actions button {
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        box-shadow: 0 12px 24px -22px rgba(15, 23, 42, 0.45);
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-modal-header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-modal-section,
+    html.courses-ui-enhanced:not(.dark) #subjectDetailContent > div {
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        background: #fff;
+    }
+
+    html.courses-ui-enhanced:not(.dark) .course-modal-subpanel {
+        border: 1px solid #e2e8f0;
+        border-radius: 0.9rem;
+        background: #f8fafc;
+    }
+
+    html.courses-ui-enhanced:not(.dark) #courseForm input[type='file'] {
+        border: 1px dashed #94a3b8;
+        border-radius: 0.8rem;
+        background: #f8fafc;
+        padding: 0.72rem 0.85rem;
+    }
+
+    @media (max-width: 1024px) {
+        html.courses-ui-enhanced:not(.dark) .courses-table-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    @media (max-width: 640px) {
+        html.courses-ui-enhanced:not(.dark) .courses-hero-panel {
+            padding: 1.25rem;
+        }
+    }
 </style>
 @endsection
 
