@@ -8,20 +8,69 @@
             </button>
 
             <div class="flex-1 min-w-0">
-                <!-- Quick Action Buttons -->
-                <div class="hidden lg:flex items-center gap-2">
-                    <a href="{{ route('admin.students') }}" class="px-3 py-1.5 text-xs font-medium text-white bg-white/15 border border-white/30 rounded-lg hover:bg-white/25 transition" title="{{ __('View Students') }}">
-                        <i class="bi bi-people-fill mr-1"></i> {{ __('Students') }}
-                    </a>
-                    <a href="{{ route('admin.teachers') }}" class="px-3 py-1.5 text-xs font-medium text-white bg-white/15 border border-white/30 rounded-lg hover:bg-white/25 transition" title="{{ __('View Teachers') }}">
-                        <i class="bi bi-person-chalkboard mr-1"></i> {{ __('Teachers') }}
-                    </a>
-                    <a href="{{ route('admin.courses') }}" class="px-3 py-1.5 text-xs font-medium text-white bg-white/15 border border-white/30 rounded-lg hover:bg-white/25 transition" title="{{ __('View Courses') }}">
-                        <i class="bi bi-book-fill mr-1"></i> {{ __('Courses') }}
-                    </a>
-                    <a href="{{ route('admin.attendance') }}" class="px-3 py-1.5 text-xs font-medium text-white bg-white/15 border border-white/30 rounded-lg hover:bg-white/25 transition" title="{{ __('Attendance') }}">
-                        <i class="bi bi-check-circle-fill mr-1"></i> {{ __('Attendance') }}
-                    </a>
+                <!-- Current Page Info for Desktop -->
+                <div class="hidden md:flex items-center gap-3">
+                    @php
+                        // Determine current page and icon
+                        $currentRoute = Route::currentRouteName() ?? '';
+                        $pageInfo = [
+                            'Students' => ['icon' => 'bi-people-fill', 'color' => 'text-blue-600'],
+                            'Teachers' => ['icon' => 'bi-person-chalkboard', 'color' => 'text-purple-600'],
+                            'Courses' => ['icon' => 'bi-book-fill', 'color' => 'text-green-600'],
+                            'Attendance' => ['icon' => 'bi-check-circle-fill', 'color' => 'text-amber-600'],
+                            'Dashboard' => ['icon' => 'bi-speedometer2', 'color' => 'text-red-600'],
+                            'Exams' => ['icon' => 'bi-pencil-fill', 'color' => 'text-orange-600'],
+                            'Marks' => ['icon' => 'bi-file-earmark-text', 'color' => 'text-indigo-600'],
+                        ];
+                        
+                        // Get current page name from route if available
+                        $currentPageName = '';
+                        $pageIcon = 'bi-folder';
+                        $pageColor = 'text-gray-600';
+                        
+                        if (strpos($currentRoute, 'students') !== false) {
+                            $currentPageName = 'Students';
+                        } elseif (strpos($currentRoute, 'teachers') !== false) {
+                            $currentPageName = 'Teachers';
+                        } elseif (strpos($currentRoute, 'courses') !== false) {
+                            $currentPageName = 'Courses';
+                        } elseif (strpos($currentRoute, 'attendance') !== false) {
+                            $currentPageName = 'Attendance';
+                        } elseif (strpos($currentRoute, 'exam') !== false) {
+                            $currentPageName = 'Exams';
+                        } elseif (strpos($currentRoute, 'marks') !== false) {
+                            $currentPageName = 'Marks';
+                        } elseif (strpos($currentRoute, 'dashboard') !== false) {
+                            $currentPageName = 'Dashboard';
+                        } else {
+                            $currentPageName = 'Admin Panel';
+                        }
+                        
+                        if (isset($pageInfo[$currentPageName])) {
+                            $pageIcon = $pageInfo[$currentPageName]['icon'];
+                            $pageColor = $pageInfo[$currentPageName]['color'];
+                        }
+                    @endphp
+                    
+                    @if($currentPageName !== '')
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-white/20 border border-white/30 rounded-lg">
+                        <i class="bi {{ $pageIcon }} {{ $pageColor }} text-base"></i>
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold text-white/80 uppercase tracking-wide">Current Page</p>
+                            <p class="text-sm font-medium text-white truncate">{{ $currentPageName }}</p>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+                <!-- Mobile Current Page Display -->
+                <div class="md:hidden flex items-center gap-2 px-2 py-1 text-white">
+                    @php
+                        $routeName = Route::currentRouteName() ?? '';
+                        $shortName = $currentPageName ?? 'Admin';
+                    @endphp
+                    <i class="bi {{ $pageIcon }} text-base"></i>
+                    <span class="text-sm font-semibold truncate">{{ substr($shortName, 0, 10) }}</span>
                 </div>
             </div>
 
