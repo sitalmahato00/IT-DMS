@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -120,13 +121,7 @@ class StudentController extends Controller
             ->with('student')
             ->orderBy('created_at', 'desc');
 
-        // Get distinct academic years for filter dropdown (only BS)
-        $academicYears = \App\Models\Student::selectRaw("DISTINCT academic_year_bs as year")
-            ->whereNotNull('academic_year_bs')
-            ->where('academic_year_bs', '<>', '')
-            ->orderBy('year', 'desc')
-            ->pluck('year')
-            ->toArray();
+        $academicYears = $this->getAcademicYears();
 
         // Get active subjects for filter dropdown
         $subjects = \App\Models\Subject::active()
@@ -135,32 +130,9 @@ class StudentController extends Controller
             ->orderBy('subject_name', 'asc')
             ->get();
 
-        $departmentOptions = Student::query()
-            ->whereNotNull('department')
-            ->where('department', '!=', '')
-            ->distinct()
-            ->orderBy('department')
-            ->pluck('department')
-            ->values()
-            ->all();
-
-        $programOptions = Student::query()
-            ->whereNotNull('program')
-            ->where('program', '!=', '')
-            ->distinct()
-            ->orderBy('program')
-            ->pluck('program')
-            ->values()
-            ->all();
-
-        $sectionOptions = Student::query()
-            ->whereNotNull('section')
-            ->where('section', '!=', '')
-            ->distinct()
-            ->orderBy('section')
-            ->pluck('section')
-            ->values()
-            ->all();
+        $departmentOptions = $this->getDistinctStudentColumnValues('department');
+        $programOptions = $this->getDistinctStudentColumnValues('program');
+        $sectionOptions = $this->getDistinctStudentColumnValues('section');
 
         // Export as CSV if requested
         if (request('export') === 'csv') {
@@ -202,6 +174,11 @@ class StudentController extends Controller
         $students = $builder->paginate($perPage)->withQueryString();
 
         return view('admin.students', compact('students', 'academicYears', 'subjects', 'departmentOptions', 'programOptions', 'sectionOptions'));
+    }
+
+    public function create()
+    {
+        return view('admin.students.create', $this->getStudentFormViewData());
     }
 
     /**
@@ -400,13 +377,13 @@ class StudentController extends Controller
             return view('admin.partials.student-modal', compact('student'));
         }
 
-        return view('admin.student-show', compact('student'));
+        return view('admin.students.show', compact('student'));
     }
 
     public function edit($id)
     {
         $student = User::where('role','student')->with('student')->findOrFail($id);
-        return view('admin.student-edit', compact('student'));
+        return view('admin.students.edit', array_merge(['student' => $student], $this->getStudentFormViewData()));
     }
 
     public function destroy($id)
@@ -882,6 +859,46 @@ class StudentController extends Controller
         return Str::startsWith($path, ['http://', 'https://'])
             ? $path
             : asset('storage/' . ltrim($path, '/'));
+    }
+
+    private function getDistinctStudentColumnValues(string $column): array
+    {
+        if (!Schema::hasColumn('students', $column)) {
+            return [];
+        }
+
+        return Student::query()
+            ->whereNotNull($column)
+            ->where($column, '!=', '')
+            ->distinct()
+            ->orderBy($column)
+            ->pluck($column)
+            ->values()
+            ->all();
+    }
+
+    private function getAcademicYears(): array
+    {
+        if (!Schema::hasColumn('students', 'academic_year_bs')) {
+            return [];
+        }
+
+        return Student::selectRaw("DISTINCT academic_year_bs as year")
+            ->whereNotNull('academic_year_bs')
+            ->where('academic_year_bs', '<>', '')
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->toArray();
+    }
+
+    private function getStudentFormViewData(): array
+    {
+        return [
+            'academicYears' => $this->getAcademicYears(),
+            'departmentOptions' => $this->getDistinctStudentColumnValues('department'),
+            'programOptions' => $this->getDistinctStudentColumnValues('program'),
+            'sectionOptions' => $this->getDistinctStudentColumnValues('section'),
+        ];
     }
 
     public function download($id)

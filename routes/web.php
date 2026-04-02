@@ -253,8 +253,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('alumni-students/bulk', [StudentController::class, 'bulk'])->name('alumni-students.bulk');
     Route::get('alumni-students/export', [StudentController::class, 'export'])->name('alumni-students.export');
 
-    // Students resource (index, show, store, edit, destroy)
-    Route::resource('students', StudentController::class)->except(['create'])->names([
+    // Students resource
+    Route::resource('students', StudentController::class)->names([
         'index' => 'students'
     ]);
 

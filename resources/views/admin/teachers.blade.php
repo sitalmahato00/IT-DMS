@@ -2,47 +2,200 @@
 
 @section('title', 'Teachers')
 
-@push('styles')
+@section('styles')
+<script>document.documentElement.classList.add('teachers-ui-enhanced');</script>
 <style>
-    /* Enhanced action buttons */
-    .action-btn {
-        @apply inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200;
+    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid,
+    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel > div {
+        margin-bottom: 0;
     }
-    
-    .action-btn-view {
-        @apply text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30;
+
+    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid > div {
+        position: relative;
+        overflow: hidden;
+        border-width: 2px;
+        border-radius: 1rem;
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
-    
-    .action-btn-edit {
-        @apply text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/30;
+
+    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid > div:hover,
+    html.teachers-ui-enhanced:not(.dark) .teacher-photo-panel:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 40px -28px rgba(15, 23, 42, 0.28);
     }
-    
-    .action-btn-delete {
-        @apply text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30;
+
+    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid > div:nth-child(1) { border-color: #fda4af; background: linear-gradient(135deg, #fff1f2 0%, #ffffff 56%, #fff1f2 100%); }
+    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid > div:nth-child(2) { border-color: #86efac; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 56%, #f0fdf4 100%); }
+    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid > div:nth-child(3) { border-color: #fcd34d; background: linear-gradient(135deg, #fffbeb 0%, #ffffff 56%, #fffbeb 100%); }
+    html.teachers-ui-enhanced:not(.dark) .teachers-stats > .grid > div:nth-child(4) { border-color: #c4b5fd; background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 56%, #f5f3ff 100%); }
+
+    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel > div,
+    html.teachers-ui-enhanced:not(.dark) .teachers-table-panel,
+    html.teachers-ui-enhanced:not(.dark) .teacher-modal-panel,
+    html.teachers-ui-enhanced:not(.dark) .teacher-confirm-panel {
+        overflow: hidden;
+        border: 2px solid #e2e8f0;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
     }
-    
-    /* Badge styles */
-    .badge {
-        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+
+    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel label,
+    html.teachers-ui-enhanced:not(.dark) .teacher-directory-head th,
+    html.teachers-ui-enhanced:not(.dark) .teacher-form label,
+    html.teachers-ui-enhanced:not(.dark) .teacher-detail-grid label,
+    html.teachers-ui-enhanced:not(.dark) .teacher-detail-block label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #64748b;
     }
-    
-    .badge-active {
-        @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
+
+    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel input:not([type='checkbox']):not([type='radio']),
+    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel select,
+    html.teachers-ui-enhanced:not(.dark) .teacher-form input:not([type='checkbox']):not([type='radio']):not([type='file']),
+    html.teachers-ui-enhanced:not(.dark) .teacher-form select,
+    html.teachers-ui-enhanced:not(.dark) .teacher-form textarea {
+        min-height: 2.9rem;
+        border: 2px solid #cbd5e1;
+        border-radius: 0.85rem;
+        background: #ffffff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
-    
-    .badge-inactive {
-        @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400;
+
+    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel input:not([type='checkbox']):not([type='radio']):focus,
+    html.teachers-ui-enhanced:not(.dark) .teachers-filter-panel select:focus,
+    html.teachers-ui-enhanced:not(.dark) .teacher-form input:not([type='checkbox']):not([type='radio']):not([type='file']):focus,
+    html.teachers-ui-enhanced:not(.dark) .teacher-form select:focus,
+    html.teachers-ui-enhanced:not(.dark) .teacher-form textarea:focus {
+        outline: none;
+        border-color: #f43f5e;
+        box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1);
     }
-    
-    .badge-pending {
-        @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400;
+
+    html.teachers-ui-enhanced:not(.dark) .teachers-toolbar,
+    html.teachers-ui-enhanced:not(.dark) .teachers-pagination,
+    html.teachers-ui-enhanced:not(.dark) .teacher-modal-footer {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
     }
-    
-    .badge-alumni {
-        @apply bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400;
+
+    html.teachers-ui-enhanced:not(.dark) .teachers-toolbar { border-bottom: 1px solid #e2e8f0; }
+    html.teachers-ui-enhanced:not(.dark) .teachers-pagination,
+    html.teachers-ui-enhanced:not(.dark) .teacher-modal-footer,
+    html.teachers-ui-enhanced:not(.dark) .teacher-form-actions { border-top: 1px solid #e2e8f0; }
+
+    html.teachers-ui-enhanced:not(.dark) .teachers-toolbar-btn,
+    html.teachers-ui-enhanced:not(.dark) .teacher-secondary-btn,
+    html.teachers-ui-enhanced:not(.dark) .teacher-primary-btn,
+    html.teachers-ui-enhanced:not(.dark) .teacher-danger-btn,
+    html.teachers-ui-enhanced:not(.dark) .action-btn {
+        box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.45);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    html.teachers-ui-enhanced:not(.dark) .teachers-toolbar-btn:hover,
+    html.teachers-ui-enhanced:not(.dark) .teacher-secondary-btn:hover,
+    html.teachers-ui-enhanced:not(.dark) .teacher-primary-btn:hover,
+    html.teachers-ui-enhanced:not(.dark) .teacher-danger-btn:hover,
+    html.teachers-ui-enhanced:not(.dark) .action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 34px -24px rgba(15, 23, 42, 0.5);
+    }
+
+    html.teachers-ui-enhanced:not(.dark) .teacher-directory-table { border-collapse: separate; border-spacing: 0; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-directory-head th { background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border-bottom: 1px solid #e2e8f0; color: #64748b; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-row td { border-bottom: 1px solid #e2e8f0; transition: background-color 0.18s ease; vertical-align: middle; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-row:nth-child(even) td { background: #f8fafc; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-row:hover td { background: #fff7f8; }
+
+    html.teachers-ui-enhanced:not(.dark) .teacher-avatar,
+    html.teachers-ui-enhanced:not(.dark) .teacher-photo-frame {
+        border: 1px solid #fecdd3;
+        background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    html.teachers-ui-enhanced:not(.dark) .teacher-avatar-image { border: 2px solid #ffffff; box-shadow: 0 16px 28px -24px rgba(15, 23, 42, 0.4); }
+    html.teachers-ui-enhanced:not(.dark) .teacher-name { color: #0f172a; font-weight: 700; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-meta-text { color: #475569; }
+
+    html.teachers-ui-enhanced:not(.dark) .teacher-id-chip,
+    html.teachers-ui-enhanced:not(.dark) .teacher-role-chip,
+    html.teachers-ui-enhanced:not(.dark) .teacher-course-chip,
+    html.teachers-ui-enhanced:not(.dark) .teacher-load-chip,
+    html.teachers-ui-enhanced:not(.dark) .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.42rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    html.teachers-ui-enhanced:not(.dark) .teacher-id-chip { background: #eff6ff; color: #1d4ed8; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-role-chip { background: #ffedd5; color: #c2410c; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-course-chip { background: #f8fafc; color: #475569; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-load-chip { background: #dbeafe; color: #1d4ed8; }
+    html.teachers-ui-enhanced:not(.dark) .badge-active { background: #dcfce7; color: #166534; }
+    html.teachers-ui-enhanced:not(.dark) .badge-inactive { background: #fee2e2; color: #b91c1c; }
+    html.teachers-ui-enhanced:not(.dark) .badge-pending { background: #fef3c7; color: #b45309; }
+    html.teachers-ui-enhanced:not(.dark) .badge-alumni { background: #f3e8ff; color: #7e22ce; }
+
+    html.teachers-ui-enhanced:not(.dark) .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.25rem;
+        height: 2.25rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.8rem;
+        background: #ffffff;
+    }
+
+    html.teachers-ui-enhanced:not(.dark) .action-btn-view { color: #2563eb; }
+    html.teachers-ui-enhanced:not(.dark) .action-btn-edit { color: #d97706; }
+    html.teachers-ui-enhanced:not(.dark) .action-btn-delete { color: #dc2626; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-empty-state { color: #64748b; font-weight: 500; }
+
+    html.teachers-ui-enhanced:not(.dark) .teacher-modal-header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        border-bottom: none;
+        background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+    }
+
+    html.teachers-ui-enhanced:not(.dark) .teacher-modal-header p { color: #ffe4e6; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-modal-close { display: inline-flex; align-items: center; justify-content: center; width: 2.5rem; height: 2.5rem; border-radius: 0.8rem; background: rgba(255, 255, 255, 0.14); }
+    html.teachers-ui-enhanced:not(.dark) .teacher-photo-panel { border: 1px solid #e2e8f0; border-radius: 1rem; background: linear-gradient(180deg, #fff1f2 0%, #ffffff 100%); padding: 1.25rem; transition: transform 0.25s ease, box-shadow 0.25s ease; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-upload-btn { border: 1px solid #fecdd3; border-radius: 0.85rem; background: #fff1f2; color: #be123c; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-detail-grid > div,
+    html.teachers-ui-enhanced:not(.dark) .teacher-detail-block { padding: 0.95rem 1rem; border: 1px solid #e2e8f0; border-radius: 0.9rem; background: #ffffff; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-detail-grid p,
+    html.teachers-ui-enhanced:not(.dark) .teacher-detail-block p { color: #0f172a; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-secondary-btn { border: 1px solid #cbd5e1; background: #ffffff; color: #334155; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-danger-btn { border: 1px solid #fecaca; background: #fff1f2; color: #be123c; }
+    html.teachers-ui-enhanced:not(.dark) .teacher-form-actions { margin-top: 1.5rem; padding-top: 1rem; }
+
+    @media (max-width: 768px) {
+        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table thead th:nth-child(n+4),
+        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table tbody td:nth-child(n+4) { display: none; }
+        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table th,
+        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table td { padding: 0.75rem 0.5rem; }
+    }
+
+    @media (max-width: 640px) {
+        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table thead th:nth-child(n+2),
+        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table tbody td:nth-child(n+2) { display: none; }
+        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table th,
+        html.teachers-ui-enhanced:not(.dark) .teacher-directory-table td { padding: 0.5rem 0.25rem; }
     }
 </style>
-@endpush
+@endsection
 
 @section('content')
 
@@ -59,7 +212,7 @@
     ]
 ])
 
-<div class="space-y-4">
+<div class="teachers-page space-y-6">
 	<!-- Global Loader Overlay -->
 	<div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-sm hidden flex items-center justify-center">
 		<div class="text-center">
@@ -73,7 +226,7 @@
 
     <!-- Professional Confirmation Modal -->
 	<div id="confirmModal" class="hidden fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
-		<div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
+		<div class="teacher-confirm-panel bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
 			<div class="p-6 text-center">
 				<div id="confirmIcon" class="mx-auto mb-4 h-12 w-12 text-gray-400">
 					<svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,75 +244,79 @@
 	</div>
 
     <!-- Stats Grid -->
-    @include('admin.components.admin-stats-cards', [
-        'cards' => [
-            [
-                'title' => 'Total Teachers',
-                'value' => isset($teachers) ? $teachers->total() : 0,
-                'icon' => 'bi bi-person-workspace',
-                'color' => 'red'
-            ],
-            [
-                'title' => 'Active',
-                'value' => isset($teachers) ? \App\Models\User::where('role','teacher')->whereHas('teacher', function($q) { $q->where('status','active'); })->count() : 0,
-                'icon' => 'bi bi-check-circle',
-                'color' => 'green'
-            ],
-            [
-                'title' => 'On Leave',
-                'value' => isset($teachers) ? \App\Models\User::where('role','teacher')->whereHas('teacher', function($q) { $q->where('status','On Leave'); })->count() : 0,
-                'icon' => 'bi bi-exclamation-circle',
-                'color' => 'yellow'
-            ],
-            [
-                'title' => 'Retired',
-                'value' => isset($teachers) ? \App\Models\User::where('role','teacher')->whereHas('teacher', function($q) { $q->where('status','Retired'); })->count() : 0,
-                'icon' => 'bi bi-hourglass-end',
-                'color' => 'purple'
+    <div class="teachers-stats">
+        @include('admin.components.admin-stats-cards', [
+            'cards' => [
+                [
+                    'title' => 'Total Teachers',
+                    'value' => isset($teachers) ? $teachers->total() : 0,
+                    'icon' => 'bi bi-person-workspace',
+                    'color' => 'red'
+                ],
+                [
+                    'title' => 'Active',
+                    'value' => isset($teachers) ? \App\Models\User::where('role','teacher')->whereHas('teacher', function($q) { $q->where('status','active'); })->count() : 0,
+                    'icon' => 'bi bi-check-circle',
+                    'color' => 'green'
+                ],
+                [
+                    'title' => 'On Leave',
+                    'value' => isset($teachers) ? \App\Models\User::where('role','teacher')->whereHas('teacher', function($q) { $q->where('status','On Leave'); })->count() : 0,
+                    'icon' => 'bi bi-exclamation-circle',
+                    'color' => 'yellow'
+                ],
+                [
+                    'title' => 'Retired',
+                    'value' => isset($teachers) ? \App\Models\User::where('role','teacher')->whereHas('teacher', function($q) { $q->where('status','Retired'); })->count() : 0,
+                    'icon' => 'bi bi-hourglass-end',
+                    'color' => 'purple'
+                ]
             ]
-        ]
-    ])
+        ])
+    </div>
 
     <!-- Filter Card -->
-    @include('admin.components.admin-filter-card', [
-        'formAction' => route('admin.teachers'),
-        'filters' => [
-            [
-                'name' => 'search',
-                'type' => 'text',
-                'label' => 'Search',
-                'placeholder' => 'Name or email...',
-                'value' => request('search', '')
-            ],
-            [
-                'name' => 'status',
-                'type' => 'select',
-                'label' => 'Status',
-                'placeholder' => 'All Status',
-                'options' => [
-                    'Active' => 'Active',
-                    'On Leave' => 'On Leave',
-                    'Retired' => 'Retired'
+    <div class="teachers-filter-panel">
+        @include('admin.components.admin-filter-card', [
+            'formAction' => route('admin.teachers'),
+            'filters' => [
+                [
+                    'name' => 'search',
+                    'type' => 'text',
+                    'label' => 'Search',
+                    'placeholder' => 'Name or email...',
+                    'value' => request('search', '')
                 ],
-                'value' => request('status', '')
+                [
+                    'name' => 'status',
+                    'type' => 'select',
+                    'label' => 'Status',
+                    'placeholder' => 'All Status',
+                    'options' => [
+                        'Active' => 'Active',
+                        'On Leave' => 'On Leave',
+                        'Retired' => 'Retired'
+                    ],
+                    'value' => request('status', '')
+                ],
+                [
+                    'name' => 'course',
+                    'type' => 'select',
+                    'label' => 'Subject',
+                    'placeholder' => 'All Subjects',
+                    'options' => $subjects ?? [],
+                    'value' => request('course', '')
+                ]
             ],
-            [
-                'name' => 'course',
-                'type' => 'select',
-                'label' => 'Subject',
-                'placeholder' => 'All Subjects',
-                'options' => $subjects ?? [],
-                'value' => request('course', '')
-            ]
-        ],
-        'showReset' => true,
-        'resetRoute' => route('admin.teachers')
-    ])
+            'showReset' => true,
+            'resetRoute' => route('admin.teachers')
+        ])
+    </div>
 
     <!-- Table Card -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+    <div class="teachers-table-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
         <!-- Table Toolbar -->
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
+        <div class="teachers-toolbar px-6 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <!-- Left: Title & Record Count -->
                 <div class="flex items-center gap-2">
@@ -173,19 +330,19 @@
                         <input type="hidden" name="search" value="{{ request('search', '') }}">
                         <input type="hidden" name="status" value="{{ request('status', '') }}">
                         <input type="hidden" name="course" value="{{ request('course', '') }}">
-                        <button type="submit" class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 shadow-sm transition-colors inline-flex items-center gap-1">
+                        <button type="submit" class="teachers-toolbar-btn px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 shadow-sm transition-colors inline-flex items-center gap-1">
                             <i class="bi bi-file-earmark-spreadsheet"></i>CSV
                         </button>
                     </form>
-                    <button type="button" onclick="adminOpenPrintPreview('{{ route('teachers.print-list') }}', { title: 'Print Teachers' })" class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 shadow-sm transition-colors inline-flex items-center gap-1 no-print">
+                    <button type="button" onclick="adminOpenPrintPreview('{{ route('teachers.print-list') }}', { title: 'Print Teachers' })" class="teachers-toolbar-btn px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 shadow-sm transition-colors inline-flex items-center gap-1 no-print">
                         <i class="bi bi-printer"></i>Print
                     </button>
                 </div>
             </div>
         </div>
         <div id="teachersTableContainer" class="overflow-x-auto">
-            <table class="min-w-full text-left divide-y divide-gray-200 dark:divide-slate-700">
-                <thead class="bg-gray-50 dark:bg-slate-700/50 text-sm font-semibold text-gray-700 dark:text-gray-200">
+            <table class="teacher-directory-table min-w-full text-left divide-y divide-gray-200 dark:divide-slate-700">
+                <thead class="teacher-directory-head bg-gray-50 dark:bg-slate-700/50 text-sm font-semibold text-gray-700 dark:text-gray-200">
                     <tr>
                         <th class="px-6 py-3">Name</th>
                         <th class="px-6 py-3">Teacher ID</th>
@@ -198,7 +355,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
                 @forelse($teachers ?? collect() as $teacher)
-                <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors border-t border-gray-200 dark:border-slate-700">
+                <tr class="teacher-row hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors border-t border-gray-200 dark:border-slate-700">
                     <td class="px-6 py-4 text-sm">
                         <div class="flex items-center gap-3">
                             @php
@@ -210,33 +367,33 @@
                                 ) : null;
                             @endphp
                             @if($teacherPhotoUrl)
-                                <img src="{{ $teacherPhotoUrl }}" alt="avatar" class="w-10 h-10 rounded-full object-cover">
+                                <img src="{{ $teacherPhotoUrl }}" alt="avatar" class="teacher-avatar-image w-10 h-10 rounded-full object-cover">
                             @else
-                                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-medium text-sm">T</div>
+                                <div class="teacher-avatar w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-medium text-sm">T</div>
                             @endif
                             <div>
-                                <p class="font-medium text-gray-900 dark:text-white">{{ $teacher->name }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $teacher->email }}</p>
+                                <p class="teacher-name font-medium text-gray-900 dark:text-white">{{ $teacher->name }}</p>
+                                <p class="teacher-meta-text text-xs text-gray-500 dark:text-gray-400">{{ $teacher->email }}</p>
                             </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $teacher->email }}</td>
-                    <td class="px-6 py-4 text-sm"><span class="inline-block px-3 py-1 bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 rounded-full text-xs font-medium">{{ ucfirst($teacher->role) }}</span></td>
-                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ $teacher->teacher->department ?? '—' }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><span class="teacher-id-chip">{{ $teacher->email }}</span></td>
+                    <td class="px-6 py-4 text-sm"><span class="teacher-role-chip inline-block px-3 py-1 bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 rounded-full text-xs font-medium">{{ ucfirst($teacher->role) }}</span></td>
+                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><span class="teacher-course-chip">{{ $teacher->teacher->department ?? '—' }}</span></td>
                     <td class="px-6 py-4 text-sm">
                         @if(isset($teacher->teaching_load))
                             <div class="flex items-center gap-2">
-                                <span class="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded text-xs font-medium">
+                                <span class="teacher-load-chip inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded text-xs font-medium">
                                     {{ $teacher->teaching_load['subjects_count'] ?? 0 }} subjects
                                 </span>
-                                <span class="text-gray-500 dark:text-gray-400">|</span>
-                                <span class="text-gray-700 dark:text-gray-300">{{ $teacher->teaching_load['total_hours'] ?? 0 }} hrs/wk</span>
+                                <span class="teacher-meta-text text-gray-500 dark:text-gray-400">|</span>
+                                <span class="teacher-meta-text text-gray-700 dark:text-gray-300">{{ $teacher->teaching_load['total_hours'] ?? 0 }} hrs/wk</span>
                             </div>
                             @if(count($teacher->teaching_load['subjects'] ?? []) > 0)
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ implode(', ', array_slice($teacher->teaching_load['subjects'], 0, 2)) }}{{ count($teacher->teaching_load['subjects']) > 2 ? '...' : '' }}</p>
+                                <p class="teacher-meta-text text-xs text-gray-500 dark:text-gray-400 mt-1">{{ implode(', ', array_slice($teacher->teaching_load['subjects'], 0, 2)) }}{{ count($teacher->teaching_load['subjects']) > 2 ? '...' : '' }}</p>
                             @endif
                         @else
-                            <span class="text-gray-400 dark:text-gray-500">—</span>
+                            <span class="teacher-meta-text text-gray-400 dark:text-gray-500">—</span>
                         @endif
                     </td>
                     <td class="px-6 py-4 text-sm">
@@ -253,7 +410,7 @@
                         <span class="badge {{ $badgeClass }}">{{ ucfirst($teacher->teacher->status ?? 'active') }}</span>
                     </td>
                     <td class="px-6 py-4 text-center text-sm">
-                        <div class="flex gap-2 justify-center">
+                        <div class="teacher-actions flex gap-2 justify-center">
                             <button type="button" onclick="openViewTeacherModal({{ $teacher->id }})" class="action-btn action-btn-view" title="View">
                                 <i class="bi bi-eye"></i>
                             </button>
@@ -268,7 +425,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    <td colspan="7" class="teacher-empty-state px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                         <div class="flex flex-col items-center justify-center">
                             <i class="bi bi-inbox text-4xl mb-3 text-gray-300 dark:text-gray-500"></i>
                             <p class="text-gray-600 dark:text-gray-400">No records found.</p>
@@ -281,35 +438,37 @@
         </div>
         
         <!-- Pagination -->
-        @include('admin.components.admin-pagination', [
-            'paginator' => $teachers
-        ])
+        <div class="teachers-pagination">
+            @include('admin.components.admin-pagination', [
+                'paginator' => $teachers
+            ])
+        </div>
     </div>
 </div>
 
 <!-- Add Teacher Modal -->
 <div id="addTeacherModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 p-4" onclick="if(event.target===this) closeAddTeacherModal()">
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto border border-gray-200 dark:border-slate-700">
-        <div class="px-6 py-4 border-b-2 border-red-600 flex items-center justify-between sticky top-0 bg-red-600 text-white">
+    <div class="teacher-modal-panel bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto border border-gray-200 dark:border-slate-700">
+        <div class="teacher-modal-header px-6 py-4 border-b-2 border-red-600 flex items-center justify-between sticky top-0 bg-red-600 text-white">
             <div>
                 <h3 class="text-lg font-semibold">Add Teacher</h3>
                 <p class="text-sm text-red-100">Create a new teacher account</p>
             </div>
-            <button type="button" onclick="closeAddTeacherModal()" class="text-red-100 hover:text-white p-1 rounded-lg hover:bg-red-700 transition">
+            <button type="button" onclick="closeAddTeacherModal()" class="teacher-modal-close text-red-100 hover:text-white p-1 rounded-lg hover:bg-red-700 transition">
                 <i class="bi bi-x-lg text-lg"></i>
             </button>
         </div>
-        <form id="addTeacherForm" action="{{ route('admin.teachers.store') }}" method="POST" enctype="multipart/form-data">
+        <form id="addTeacherForm" action="{{ route('admin.teachers.store') }}" method="POST" enctype="multipart/form-data" class="teacher-form">
             @csrf
             <div class="p-6">
-                <div class="flex gap-8">
+                <div class="flex flex-col gap-8 sm:flex-row">
                     <!-- Photo Section -->
-                    <div class="flex flex-col items-center">
-                        <div id="addTeacherAvatar" class="w-40 h-40 bg-gray-100 rounded-full flex items-center justify-center text-4xl text-gray-500 overflow-hidden flex-shrink-0 mb-3">
+                    <div class="teacher-photo-panel flex flex-col items-center">
+                        <div id="addTeacherAvatar" class="teacher-photo-frame w-40 h-40 bg-gray-100 rounded-full flex items-center justify-center text-4xl text-gray-500 overflow-hidden flex-shrink-0 mb-3">
                             <img id="addTeacherAvatarImg" src="" alt="avatar" class="w-full h-full object-cover" style="display:none;">
                             <span id="addTeacherInitial"><i class="bi bi-person text-5xl"></i></span>
                         </div>
-                        <label class="inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                        <label class="teacher-upload-btn inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
                             <i class="bi bi-download"></i>
                             Choose photo
                             <input type="file" name="profile_photo" accept="image/*" class="hidden" id="addProfilePhotoInput" onchange="previewAddTeacherPhoto()" />
@@ -379,9 +538,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-6 flex items-center justify-end gap-3">
-                    <button type="button" onclick="closeAddTeacherModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-slate-600 transition">Cancel</button>
-                    <button type="submit" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                <div class="teacher-form-actions mt-6 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeAddTeacherModal()" class="teacher-secondary-btn px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-slate-600 transition">Cancel</button>
+                    <button type="submit" class="teacher-primary-btn px-5 py-2.5 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
                         <i class="bi bi-plus-lg me-1"></i>Add Teacher
                     </button>
                 </div>
@@ -392,29 +551,29 @@
 
 <!-- Edit Teacher Modal -->
 <div id="editTeacherModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 p-4" onclick="if(event.target===this) closeEditTeacherModal()">
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto border border-gray-200 dark:border-slate-700">
-        <div class="px-6 py-4 border-b-2 border-red-600 flex items-center justify-between sticky top-0 bg-red-600 text-white">
+    <div class="teacher-modal-panel bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto border border-gray-200 dark:border-slate-700">
+        <div class="teacher-modal-header px-6 py-4 border-b-2 border-red-600 flex items-center justify-between sticky top-0 bg-red-600 text-white">
             <div>
                 <h3 class="text-lg font-semibold">Edit Teacher</h3>
                 <p class="text-sm text-red-100">Update teacher information</p>
             </div>
-            <button type="button" onclick="closeEditTeacherModal()" class="text-red-100 hover:text-white p-1 rounded-lg hover:bg-red-700 transition">
+            <button type="button" onclick="closeEditTeacherModal()" class="teacher-modal-close text-red-100 hover:text-white p-1 rounded-lg hover:bg-red-700 transition">
                 <i class="bi bi-x-lg text-lg"></i>
             </button>
         </div>
-        <form id="editTeacherForm" enctype="multipart/form-data">
+        <form id="editTeacherForm" enctype="multipart/form-data" class="teacher-form">
             @csrf
             @method('PUT')
             <div class="p-6">
                 <input type="hidden" name="_id" id="editTeacherId" />
-                <div class="flex gap-8">
+                <div class="flex flex-col gap-8 sm:flex-row">
                     <!-- Photo Section -->
-                    <div class="flex flex-col items-center">
-                        <div id="editTeacherAvatar" class="w-40 h-40 bg-gray-100 rounded-full flex items-center justify-center text-4xl text-gray-500 overflow-hidden flex-shrink-0 mb-3">
+                    <div class="teacher-photo-panel flex flex-col items-center">
+                        <div id="editTeacherAvatar" class="teacher-photo-frame w-40 h-40 bg-gray-100 rounded-full flex items-center justify-center text-4xl text-gray-500 overflow-hidden flex-shrink-0 mb-3">
                             <img id="editTeacherAvatarImg" src="" alt="avatar" class="w-full h-full object-cover" style="display:none;">
                             <span id="editTeacherInitial">T</span>
                         </div>
-                        <label class="inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                        <label class="teacher-upload-btn inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
                             <i class="bi bi-download"></i>
                             Choose photo
                             <input type="file" name="profile_photo" accept="image/*" class="hidden" id="profilePhotoInput" onchange="previewTeacherPhoto()" />
@@ -482,11 +641,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-6 flex items-center justify-between">
-                    <button type="button" onclick="deleteTeacher(document.getElementById('editTeacherId').value)" class="px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-600 rounded-lg text-sm hover:bg-red-100 dark:hover:bg-red-900/50 transition">Delete</button>
+                <div class="teacher-form-actions mt-6 flex items-center justify-between">
+                    <button type="button" onclick="deleteTeacher(document.getElementById('editTeacherId').value)" class="teacher-danger-btn px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-600 rounded-lg text-sm hover:bg-red-100 dark:hover:bg-red-900/50 transition">Delete</button>
                     <div class="flex gap-3">
-                        <button type="button" onclick="closeEditTeacherModal()" class="px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-slate-600 transition">Cancel</button>
-                        <button type="submit" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
+                        <button type="button" onclick="closeEditTeacherModal()" class="teacher-secondary-btn px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-slate-600 transition">Cancel</button>
+                        <button type="submit" class="teacher-primary-btn px-5 py-2.5 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors shadow-sm">
                             <i class="bi bi-check-lg me-1"></i>Save Changes
                         </button>
                     </div>
@@ -498,21 +657,21 @@
 
 <!-- View Teacher Modal -->
 <div id="viewTeacherModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 p-4" onclick="if(event.target===this) closeViewTeacherModal()">
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto border border-gray-200 dark:border-slate-700">
-        <div class="px-6 py-4 border-b-2 border-red-600 flex items-center justify-between sticky top-0 bg-red-600 text-white">
+    <div class="teacher-modal-panel bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto border border-gray-200 dark:border-slate-700">
+        <div class="teacher-modal-header px-6 py-4 border-b-2 border-red-600 flex items-center justify-between sticky top-0 bg-red-600 text-white">
             <div>
                 <h3 class="text-lg font-semibold">Teacher Details</h3>
                 <p class="text-sm text-red-100">View teacher information</p>
             </div>
-            <button type="button" onclick="event.preventDefault(); closeViewTeacherModal(); return false;" class="text-red-100 hover:text-white p-1 rounded-lg hover:bg-red-700 transition">
+            <button type="button" onclick="event.preventDefault(); closeViewTeacherModal(); return false;" class="teacher-modal-close text-red-100 hover:text-white p-1 rounded-lg hover:bg-red-700 transition">
                 <i class="bi bi-x-lg text-lg"></i>
             </button>
         </div>
         <div class="p-6">
-            <div class="flex gap-8">
+            <div class="flex flex-col gap-8 sm:flex-row">
                 <!-- Photo Section -->
-                <div class="flex flex-col items-center">
-                    <div id="viewTeacherAvatar" class="w-40 h-40 bg-gray-100 rounded-full flex items-center justify-center text-4xl text-gray-500 overflow-hidden flex-shrink-0">
+                <div class="teacher-photo-panel flex flex-col items-center">
+                    <div id="viewTeacherAvatar" class="teacher-photo-frame w-40 h-40 bg-gray-100 rounded-full flex items-center justify-center text-4xl text-gray-500 overflow-hidden flex-shrink-0">
                         <img id="viewTeacherAvatarImg" src="" alt="avatar" class="w-full h-full object-cover" style="display:none;">
                         <span id="viewTeacherInitial">T</span>
                     </div>
@@ -520,7 +679,7 @@
 
                 <!-- Details Section -->
                 <div class="flex-1">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div class="teacher-detail-grid grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="text-xs font-medium text-gray-700">Full name</label>
                             <p id="viewTeacherName" class="text-sm font-semibold text-gray-900 mt-1">—</p>
@@ -554,23 +713,23 @@
                             <p id="viewTeacherQualification" class="text-sm font-semibold text-gray-900 mt-1">—</p>
                         </div>
                     </div>
-                    <div class="col-span-2">
+                    <div class="teacher-detail-block col-span-2">
                         <label class="text-xs font-medium text-gray-700">Bio</label>
                         <p id="viewTeacherBio" class="text-sm font-semibold text-gray-900 mt-1">—</p>
                     </div>
-                    <div class="col-span-2">
+                    <div class="teacher-detail-block col-span-2 mt-4">
                         <label class="text-xs font-medium text-gray-700">Address</label>
                         <p id="viewTeacherAddress" class="text-sm font-semibold text-gray-900 mt-1">—</p>
                     </div>
                 </div>
             </div>
-            <div class="mt-6 flex items-center justify-between gap-3">
+            <div class="teacher-modal-footer mt-6 flex items-center justify-between gap-3 pt-4">
                 <div class="flex gap-2">
-                    <button type="button" onclick="printTeacher()" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+                    <button type="button" onclick="printTeacher()" class="teachers-toolbar-btn inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
                         <i class="bi bi-printer"></i>Print
                     </button>
                 </div>
-                <button type="button" onclick="closeViewTeacherModal()" class="px-3 py-2 border rounded text-sm">Close</button>
+                <button type="button" onclick="closeViewTeacherModal()" class="teacher-secondary-btn px-3 py-2 border rounded text-sm">Close</button>
             </div>
         </div>
     </div>
