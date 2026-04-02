@@ -11,16 +11,23 @@
         body { background: #fff; color: #111827; font-family: Arial, Helvetica, sans-serif; }
         .sheet { width: 100%; }
         .report-card { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .report-card td, .report-card th { border: 1px solid #1f2937; padding: 6px 8px; vertical-align: middle; }
-        .report-card th { background: #e9e3f7; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+        .report-card td, .report-card th {
+            border: 1px solid #1f2937;
+            padding: 5px 6px;
+            vertical-align: middle;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            white-space: normal;
+        }
+        .report-card th { background: #e9e3f7; font-size: 9.5px; line-height: 1.15; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
         .section-bar { background: #ece6ff; color: #1f2937; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; text-align: center; padding: 7px 8px; }
         .subtle-bar { background: #f8fafc; font-weight: 700; text-align: center; }
-        .meta-label { font-size: 11px; font-weight: 700; color: #4b5563; text-transform: uppercase; letter-spacing: .06em; }
-        .meta-value { font-size: 12px; font-weight: 700; color: #111827; margin-top: 2px; }
-        .report-title { font-size: 28px; font-weight: 800; letter-spacing: .02em; color: #1f2f8a; line-height: 1.1; }
-        .report-subtitle { font-size: 13px; font-weight: 700; color: #334155; }
-        .report-small { font-size: 11px; color: #475569; }
-        .logo-box { width: 74px; height: 74px; object-fit: contain; }
+        .meta-label { font-size: 8.5px; font-weight: 700; color: #4b5563; text-transform: uppercase; letter-spacing: .05em; line-height: 1.1; }
+        .meta-value { font-size: 10px; font-weight: 700; color: #111827; margin-top: 2px; line-height: 1.15; }
+        .report-title { font-size: 24px; font-weight: 800; letter-spacing: .02em; color: #1f2f8a; line-height: 1.05; }
+        .report-subtitle { font-size: 11px; font-weight: 700; color: #334155; line-height: 1.2; }
+        .report-small { font-size: 9px; color: #475569; line-height: 1.2; }
+        .logo-box { width: 68px; height: 68px; object-fit: contain; }
         .result-pass { background: #dcfce7; color: #166534; font-weight: 700; }
         .result-fail { background: #fee2e2; color: #b91c1c; font-weight: 700; }
         .result-abs { background: #fef3c7; color: #b45309; font-weight: 700; }
@@ -28,8 +35,12 @@
         .no-print button { border: 0; border-radius: 999px; padding: 10px 16px; font-weight: 700; cursor: pointer; }
         .btn-print { background: #2563eb; color: #fff; }
         .btn-close { background: #e5e7eb; color: #334155; }
-        .signature-line { border-top: 1px solid #111827; width: 72%; margin: 0 auto 6px; }
+        .signature-line { border-top: 1px solid #111827; width: 72%; margin: 0 auto 10px; }
+        .signature-cell { height: 72px; vertical-align: bottom; padding-top: 22px; padding-bottom: 10px; }
         .page-break { page-break-inside: avoid; break-inside: avoid; }
+        .subject-cell { font-size: 9.5px; font-weight: 700; line-height: 1.15; }
+        .compact-cell { font-size: 9.5px; line-height: 1.15; }
+        .sheet-header { table-layout: fixed; width: 100%; }
         @media print {
             .no-print { display: none !important; }
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -42,7 +53,7 @@
     @php
         $marks = collect($marksheetData['exam_marks'] ?? []);
         $isCtevt = strtolower($filters['exam_category'] ?? '') === 'ctevt';
-        $columns = $isCtevt ? 11 : 7;
+        $columns = $isCtevt ? 9 : 7;
         $grandTotal = (float) ($marksheetData['total_obtained'] ?? 0);
         $totalFull = (float) ($marksheetData['total_full'] ?? 0);
         $percentage = (float) ($marksheetData['percentage'] ?? 0);
@@ -73,13 +84,13 @@
         <table class="report-card">
             <tr>
                 <td colspan="{{ $columns }}" class="p-0">
-                    <table class="w-full border-collapse">
+                    <table class="sheet-header border-collapse">
                         <tr>
                             <td class="w-24 text-center align-middle p-3">
                                 <img src="{{ $departmentLogoUrl ?? asset('images/default-logo.svg') }}" alt="Logo" class="logo-box mx-auto">
                             </td>
                             <td class="text-center py-3 px-2">
-                                <div class="report-title">{{ $departmentName }}</div>
+                                <div class="report-title break-words">{{ $departmentName }}</div>
                                 @if(count($addressParts) > 0)
                                     <div class="report-subtitle mt-1">{{ implode(', ', $addressParts) }}</div>
                                 @endif
@@ -87,7 +98,7 @@
                                     <div class="report-small mt-1">{{ implode(' | ', $contactParts) }}</div>
                                 @endif
                                 <div class="mt-2 text-lg font-bold text-slate-800">ACADEMIC TRANSCRIPT</div>
-                                <div class="report-small mt-1">
+                                <div class="report-small mt-1 break-words">
                                     Academic Year: {{ $filters['academic_year'] ?? 'All' }} |
                                     Semester: {{ $filters['semester'] ?? 'All' }} |
                                     Category: {{ ucfirst($filters['exam_category'] ?? 'Assessment') }} |
@@ -164,15 +175,14 @@
                     <th class="text-center">Full Marks</th>
                     <th class="text-center">Pass Mark</th>
                     <th class="text-center">Marks Obtained</th>
+                    <th class="text-center">Grade</th>
+                    <th class="text-center">Result</th>
                 @endif
-                <th class="text-center">Grade</th>
-                <th class="text-center">Result</th>
             </tr>
 
             @forelse($marks as $index => $mark)
                 @php
                     $subjectName = $mark->subject->subject_name ?? 'N/A';
-                    $isCtevtMark = $isCtevt && $mark->isCtevt();
 
                     $tiFull = $mark->theory_internal_full_marks ?? $mark->exam->theory_internal_max_marks ?? 0;
                     $teFull = $mark->theory_external_full_marks ?? $mark->exam->theory_external_max_marks ?? 0;
@@ -186,39 +196,51 @@
                     $teObt = $mark->theory_external_marks ?? 0;
                     $piObt = $mark->practical_internal_marks ?? 0;
                     $peObt = $mark->practical_external_marks ?? 0;
-                    $componentTotal = $tiObt + $teObt + $piObt + $peObt;
-                    $rowTotal = $isCtevtMark ? ($componentTotal > 0 ? $componentTotal : ($mark->marks_obtained ?? 0)) : ($mark->marks_obtained ?? 0);
+                    $theoryTotal = $tiObt + $teObt;
+                    $practicalTotal = $piObt + $peObt;
                     $full = $mark->full_marks > 0 ? $mark->full_marks : ($mark->exam->full_marks ?? 0);
                     $pass = $mark->passing_marks > 0 ? $mark->passing_marks : ($mark->exam->passing_marks ?? ($full * 0.4));
-                    $obt = $mark->isAbsent() ? 'ABS' : ($isCtevtMark ? $rowTotal : ($mark->marks_obtained ?? 0));
+                    $obt = $mark->isAbsent() ? 'ABS' : ($mark->marks_obtained ?? 0);
                     $resultClassRow = $mark->isAbsent() ? 'result-abs' : (($mark->result ?? '') === 'PASS' || (($mark->percentage ?? 0) >= 40) ? 'result-pass' : 'result-fail');
                 @endphp
 
-                <tr class="page-break">
-                    <td class="text-center font-bold">{{ $index + 1 }}</td>
-                    <td class="font-semibold">{{ $subjectName }}</td>
-
-                    @if($isCtevt)
-                        <td class="text-center">{{ $tiFull }}</td>
-                        <td class="text-center">{{ $teFull }}</td>
-                        <td class="text-center">{{ $tiPass }}</td>
-                        <td class="text-center">{{ $tePass }}</td>
-                        <td class="text-center {{ $tiObt < $tiPass ? 'bg-red-50 text-red-700 font-bold' : '' }}">{{ $tiObt }}</td>
-                        <td class="text-center {{ $teObt < $tePass ? 'bg-red-50 text-red-700 font-bold' : '' }}">{{ $teObt }}</td>
-                        <td class="text-center font-bold">{{ $rowTotal }}</td>
-                    @else
-                        <td class="text-center">{{ $full }}</td>
-                        <td class="text-center">{{ $pass }}</td>
-                        <td class="text-center {{ $mark->isAbsent() ? 'bg-amber-50 text-amber-700 font-bold' : '' }}">{{ $obt }}</td>
-                    @endif
-
-                    <td class="text-center font-bold">{{ $mark->grade ?? '-' }}</td>
-                    <td class="text-center">
-                        <span class="inline-flex min-w-[54px] items-center justify-center rounded px-2 py-1 text-[11px] {{ $resultClassRow }}">
-                            {{ $mark->isAbsent() ? 'ABS' : (($mark->result ?? '') === 'PASS' || (($mark->percentage ?? 0) >= 40) ? 'PASS' : 'FAIL') }}
-                        </span>
-                    </td>
-                </tr>
+                @if($isCtevt)
+                    <tr class="page-break">
+                        <td class="text-center font-bold" rowspan="2">{{ $index + 1 }}</td>
+                        <td class="subject-cell">{{ $subjectName }} (Th.)</td>
+                        <td class="text-center compact-cell">{{ $tiFull }}</td>
+                        <td class="text-center compact-cell">{{ $teFull }}</td>
+                        <td class="text-center compact-cell">{{ $tiPass }}</td>
+                        <td class="text-center compact-cell">{{ $tePass }}</td>
+                        <td class="text-center compact-cell {{ $tiObt < $tiPass ? 'bg-red-50 text-red-700 font-bold' : '' }}">{{ $tiObt }}</td>
+                        <td class="text-center compact-cell {{ $teObt < $tePass ? 'bg-red-50 text-red-700 font-bold' : '' }}">{{ $teObt }}</td>
+                        <td class="text-center compact-cell font-bold">{{ $theoryTotal }}</td>
+                    </tr>
+                    <tr class="page-break">
+                        <td class="subject-cell">{{ $subjectName }} (Pr.)</td>
+                        <td class="text-center compact-cell">{{ $piFull }}</td>
+                        <td class="text-center compact-cell">{{ $peFull }}</td>
+                        <td class="text-center compact-cell">{{ $piPass }}</td>
+                        <td class="text-center compact-cell">{{ $pePass }}</td>
+                        <td class="text-center compact-cell {{ $piObt < $piPass ? 'bg-red-50 text-red-700 font-bold' : '' }}">{{ $piObt }}</td>
+                        <td class="text-center compact-cell {{ $peObt < $pePass ? 'bg-red-50 text-red-700 font-bold' : '' }}">{{ $peObt }}</td>
+                        <td class="text-center compact-cell font-bold">{{ $practicalTotal }}</td>
+                    </tr>
+                @else
+                    <tr class="page-break">
+                        <td class="text-center font-bold">{{ $index + 1 }}</td>
+                        <td class="subject-cell">{{ $subjectName }}</td>
+                        <td class="text-center compact-cell">{{ $full }}</td>
+                        <td class="text-center compact-cell">{{ $pass }}</td>
+                        <td class="text-center compact-cell {{ $mark->isAbsent() ? 'bg-amber-50 text-amber-700 font-bold' : '' }}">{{ $obt }}</td>
+                        <td class="text-center compact-cell font-bold">{{ $mark->grade ?? '-' }}</td>
+                        <td class="text-center compact-cell">
+                            <span class="inline-flex min-w-[54px] items-center justify-center rounded px-2 py-1 text-[11px] {{ $resultClassRow }}">
+                                {{ $mark->isAbsent() ? 'ABS' : (($mark->result ?? '') === 'PASS' || (($mark->percentage ?? 0) >= 40) ? 'PASS' : 'FAIL') }}
+                            </span>
+                        </td>
+                    </tr>
+                @endif
             @empty
                 <tr>
                     <td colspan="{{ $columns }}" class="p-4 text-center text-gray-500">No marks found</td>
@@ -263,15 +285,15 @@
                 <td colspan="{{ $columns }}" class="p-0">
                     <table class="w-full border-collapse">
                         <tr>
-                            <td class="p-4 text-center" style="width:33.333%;">
+                            <td class="signature-cell p-4 text-center" style="width:33.333%;">
                                 <div class="signature-line"></div>
                                 <div class="meta-value">Class Teacher</div>
                             </td>
-                            <td class="p-4 text-center" style="width:33.333%;">
+                            <td class="signature-cell p-4 text-center" style="width:33.333%;">
                                 <div class="signature-line"></div>
                                 <div class="meta-value">Controller of Examination</div>
                             </td>
-                            <td class="p-4 text-center" style="width:33.333%;">
+                            <td class="signature-cell p-4 text-center" style="width:33.333%;">
                                 <div class="signature-line"></div>
                                 <div class="meta-value">Parent / Guardian</div>
                             </td>

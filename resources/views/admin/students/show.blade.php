@@ -9,12 +9,15 @@
     .student-view-card,.student-view-section{border:1px solid #e2e8f0;border-radius:1.5rem;background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);box-shadow:0 24px 45px -34px rgba(15,23,42,.24)}
     .student-view-hero{position:relative;overflow:hidden;border:1px solid #fecdd3;border-radius:1.5rem;background:linear-gradient(135deg,#fff1f2 0%,#fff 50%,#eff6ff 100%);box-shadow:0 24px 45px -34px rgba(15,23,42,.24)}
     .student-view-hero:after{content:'';position:absolute;right:-3rem;bottom:-4rem;width:13rem;height:13rem;border-radius:999px;background:radial-gradient(circle,rgba(244,63,94,.16),rgba(244,63,94,0) 72%)}
-    .student-view-grid{display:grid;grid-template-columns:minmax(0,22rem) minmax(0,1fr);gap:1.5rem;align-items:start}
+    .student-view-grid{display:grid;grid-template-columns:minmax(0,24rem) minmax(0,1fr);gap:1.5rem;align-items:stretch}
     .student-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
     .student-view-grid > div,
     .student-detail-grid > div,
     .student-view-card,
     .student-view-section{min-width:0}
+    .student-view-grid > div:first-child{display:flex;flex-direction:column;gap:1.25rem;align-self:start}
+    .student-view-grid > div:first-child > .student-view-card:last-child{flex:0}
+    .student-view-card{min-height:10.5rem}
     .student-detail-box{padding:1rem 1.05rem;border:1px solid #e2e8f0;border-radius:1rem;background:#fff}
     .student-label{display:block;margin-bottom:.38rem;font-size:.76rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#64748b}
     .student-photo-frame{width:10.5rem;height:10.5rem;border-radius:999px;border:4px solid #fff;background:linear-gradient(135deg,#ffe4e6 0%,#fff1f2 100%);overflow:hidden;box-shadow:0 18px 34px -24px rgba(244,63,94,.45)}

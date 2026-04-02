@@ -22,9 +22,9 @@
 
     html.teacher-form-page:not(.dark) .teacher-page-grid {
         display: grid;
-        grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
         gap: 1.5rem;
-        align-items: start;
+        align-items: stretch;
     }
 
     html.teacher-form-page:not(.dark) .teacher-form-grid {
@@ -35,6 +35,21 @@
 
     html.teacher-form-page:not(.dark) .teacher-form-grid > div {
         min-width: 0;
+    }
+
+    html.teacher-form-page:not(.dark) .teacher-page-grid > div:first-child {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        align-self: start;
+    }
+
+    html.teacher-form-page:not(.dark) .teacher-page-grid > div:first-child > .teacher-side-card:last-child {
+        flex: 0;
+    }
+
+    html.teacher-form-page:not(.dark) .teacher-side-card {
+        min-height: 10.5rem;
     }
 
     html.teacher-form-page:not(.dark) .teacher-tab-bar {

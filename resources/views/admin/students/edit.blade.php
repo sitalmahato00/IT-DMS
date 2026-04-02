@@ -9,7 +9,7 @@
     .student-page-card,.student-page-section,.student-side-card,.student-sticky-bar{border:1px solid #e2e8f0;border-radius:1.5rem;background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);box-shadow:0 24px 45px -34px rgba(15,23,42,.24)}
     .student-page-hero{position:relative;overflow:hidden;border:1px solid #fecdd3;border-radius:1.5rem;background:linear-gradient(135deg,#fff1f2 0%,#fff 50%,#eff6ff 100%);box-shadow:0 24px 45px -34px rgba(15,23,42,.24)}
     .student-page-hero:after{content:'';position:absolute;right:-3rem;bottom:-4rem;width:13rem;height:13rem;border-radius:999px;background:radial-gradient(circle,rgba(244,63,94,.16),rgba(244,63,94,0) 72%)}
-    .student-page-grid{display:grid;grid-template-columns:minmax(0,21rem) minmax(0,1fr);gap:1.5rem;align-items:start}
+    .student-page-grid{display:grid;grid-template-columns:minmax(0,24rem) minmax(0,1fr);gap:1.5rem;align-items:stretch}
     .student-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
     .student-page-grid > div,
     .student-form-grid > div,
@@ -17,6 +17,9 @@
     .student-page-section,
     .student-side-card,
     .student-sticky-bar{min-width:0}
+    .student-page-grid > div:first-child{display:flex;flex-direction:column;gap:1.25rem;align-self:start}
+    .student-page-grid > div:first-child > .student-side-card:last-child{flex:0}
+    .student-side-card{min-height:10.5rem}
     .student-label{display:block;margin-bottom:.45rem;font-size:.76rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#64748b}
     .student-input,.student-select,.student-textarea,.student-file{width:100%;border:1px solid #cbd5e1;border-radius:1rem;background:#fff;color:#0f172a;transition:border-color .2s ease,box-shadow .2s ease}
     .student-input,.student-select,.student-file{min-height:3rem;padding:.82rem 1rem}
