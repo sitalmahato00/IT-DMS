@@ -2,6 +2,56 @@
 
 @section('title', 'Dynamic Marks - IT DMS')
 
+@section('styles')
+<script>
+    document.documentElement.classList.add('marks-ui-enhanced');
+</script>
+<style>
+    html.marks-ui-enhanced:not(.dark) #dynamicMarksApp {
+        color: #0f172a;
+    }
+
+    html.marks-ui-enhanced:not(.dark) .marks-panel,
+    html.marks-ui-enhanced:not(.dark) .marks-alert-panel {
+        border-radius: 28px;
+        border-color: rgba(215, 227, 243, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 251, 255, 0.97));
+        box-shadow: 0 28px 56px -40px rgba(37, 99, 235, 0.28);
+    }
+
+    html.marks-ui-enhanced:not(.dark) .marks-panel-header,
+    html.marks-ui-enhanced:not(.dark) .marks-table thead tr {
+        background: linear-gradient(180deg, #f6faff, #fbfdff);
+    }
+
+    html.marks-ui-enhanced:not(.dark) .marks-table tbody tr:hover {
+        background: linear-gradient(90deg, rgba(239, 246, 255, 0.82), rgba(255, 255, 255, 0.97));
+    }
+
+    html.marks-ui-enhanced:not(.dark) .marks-chip,
+    html.marks-ui-enhanced:not(.dark) .marks-action-btn,
+    html.marks-ui-enhanced:not(.dark) .marks-toolbar-btn,
+    html.marks-ui-enhanced:not(.dark) .category-btn {
+        border-radius: 999px;
+        font-weight: 700;
+        box-shadow: 0 16px 28px -20px rgba(15, 23, 42, 0.34);
+    }
+
+    html.marks-ui-enhanced:not(.dark) #dynamicMarksApp input,
+    html.marks-ui-enhanced:not(.dark) #dynamicMarksApp select {
+        border-radius: 16px;
+        border-color: #d8e4f5;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    html.marks-ui-enhanced:not(.dark) #dynamicMarksApp input:focus,
+    html.marks-ui-enhanced:not(.dark) #dynamicMarksApp select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+    }
+</style>
+@endsection
+
 @section('content')
 {{-- Page Header --}}
 @include('admin.components.admin-page-header', [
@@ -14,7 +64,7 @@
 
 <div class="space-y-4" id="dynamicMarksApp">
     {{-- Category Toggle --}}
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+    <div class="marks-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
         <div class="flex items-center gap-4">
             <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Category:</span>
             <div class="flex rounded-lg overflow-hidden border border-gray-300 dark:border-slate-600">
@@ -47,22 +97,22 @@
             $filteredSubjects = $filteredSubjects->filter(fn($subject) => (string) $subject->semester === (string) $currentFilters['semester']);
         }
     @endphp
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
-        <div class="p-4 border-b border-gray-200 dark:border-slate-700 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+    <div class="marks-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+        <div class="marks-panel-header p-4 border-b border-gray-200 dark:border-slate-700 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
             <div>
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Filters & Exports</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Use the filters below to target marks by academic session, semester, and subject.</p>
             </div>
             <div class="flex flex-wrap gap-2">
-                <button type="button" onclick="printMarks()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition">
+                <button type="button" onclick="printMarks()" class="marks-toolbar-btn inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition">
                     <i class="bi bi-printer"></i>
                     <span>Print</span>
                 </button>
-                <button type="button" onclick="exportMarks('excel')" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-green-600 hover:bg-green-700 text-white">
+                <button type="button" onclick="exportMarks('excel')" class="marks-toolbar-btn inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-green-600 hover:bg-green-700 text-white">
                     <i class="bi bi-file-earmark-spreadsheet"></i>
                     <span>Excel</span>
                 </button>
-                <button type="button" onclick="exportMarks('csv')" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+                <button type="button" onclick="exportMarks('csv')" class="marks-toolbar-btn inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
                     <i class="bi bi-file-earmark-text"></i>
                     <span>CSV</span>
                 </button>
@@ -162,11 +212,11 @@
                 </div>
             </div>
             <div class="flex flex-wrap gap-3 border-t border-gray-100 dark:border-slate-700 pt-3">
-                <button type="button" onclick="applyFilters()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition">
+                <button type="button" onclick="applyFilters()" class="marks-toolbar-btn inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition">
                     <i class="bi bi-funnel"></i>
                     <span>Apply Filters</span>
                 </button>
-                <button type="button" onclick="resetFilters()" class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition">
+                <button type="button" onclick="resetFilters()" class="marks-toolbar-btn inline-flex items-center gap-2 px-5 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition">
                     <i class="bi bi-arrow-counterclockwise"></i>
                     <span>Reset</span>
                 </button>
@@ -176,7 +226,7 @@
 
     {{-- Results Table --}}
     @if(!$selectedSubject)
-    <div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl shadow-sm p-6 flex items-center gap-3">
+    <div class="marks-alert-panel bg-amber-50 border border-amber-200 text-amber-900 rounded-xl shadow-sm p-6 flex items-center gap-3">
         <i class="bi bi-info-circle text-2xl"></i>
         <div>
             <p class="font-semibold">Select Semester & Subject</p>
@@ -188,8 +238,8 @@
             $subjectLabel = $selectedSubject->subject_name ?? 'Selected Subject';
         @endphp
         @if($category === 'assessment')
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
-            <div class="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+        <div class="marks-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+            <div class="marks-panel-header p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Assessment Marks - {{ $subjectLabel }}</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Filtered by the current selection.</p>
@@ -197,7 +247,7 @@
                 <span class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Subject ID: {{ $selectedSubject->subject_code ?? $selectedSubject->id }}</span>
             </div>
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
+                <table class="marks-table min-w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
                             <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200 sticky left-0 bg-gray-50 dark:bg-slate-700 z-10">Roll</th>

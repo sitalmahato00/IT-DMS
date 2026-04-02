@@ -1,12 +1,12 @@
 {{-- Add Material Modal --}}
 <div id="addMaterialModal" class="fixed inset-0 z-50 hidden">
     <div class="fixed inset-0 bg-black bg-opacity-50" onclick="closeAddMaterialModal()"></div>
-    <div class="relative mt-10 flex max-h-[calc(100vh-4rem)] w-[90%] max-w-md flex-col overflow-hidden rounded-lg bg-white shadow-xl mx-auto" style="max-width: 500px;">
-        <div class="flex items-center justify-between p-4 border-b">
-            <h3 class="text-lg font-semibold text-gray-900">Add Study Material</h3>
-            <button onclick="closeAddMaterialModal()" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+    <div class="document-modal-panel relative mt-10 flex max-h-[calc(100vh-4rem)] w-[90%] max-w-md flex-col overflow-hidden rounded-lg bg-white shadow-xl mx-auto" style="max-width: 500px;">
+        <div class="document-modal-header flex items-center justify-between p-4 border-b">
+            <h3 class="text-lg font-semibold text-white">Add Study Material</h3>
+            <button onclick="closeAddMaterialModal()" class="text-white/80 hover:text-white text-2xl">×</button>
         </div>
-        <form id="addMaterialForm" method="POST" action="{{ route('admin.study-material.store-ajax') }}" enctype="multipart/form-data" class="overflow-y-auto p-4">
+        <form id="addMaterialForm" method="POST" action="{{ route('admin.study-material.store-ajax') }}" enctype="multipart/form-data" class="document-form overflow-y-auto p-4">
             @csrf
             
             <div class="mb-4">
@@ -105,12 +105,12 @@
             
             <div class="flex justify-end gap-3">
                 <button type="button" onclick="closeAddMaterialModal()"
-                    class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+                    class="document-secondary-btn px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
                     id="addMaterialCancelBtn">
                     Cancel
                 </button>
                 <button type="submit"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                    class="document-primary-btn px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
                     id="addMaterialSubmitBtn">
                     <i class="bi bi-upload mr-1"></i>Upload
                 </button>

@@ -2,6 +2,54 @@
 
 @section('title', 'Marksheet Search - IT DMS')
 
+@section('styles')
+<script>
+    document.documentElement.classList.add('marksheet-ui-enhanced');
+</script>
+<style>
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-page {
+        color: #0f172a;
+    }
+
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-panel {
+        border-radius: 28px;
+        border-color: rgba(215, 227, 243, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 251, 255, 0.97));
+        box-shadow: 0 28px 56px -40px rgba(37, 99, 235, 0.28);
+    }
+
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-panel-header,
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-table thead {
+        background: linear-gradient(180deg, #f6faff, #fbfdff);
+    }
+
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-info-box {
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(255, 255, 255, 0.98));
+    }
+
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-chip,
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-toolbar-btn {
+        border-radius: 999px;
+        font-weight: 700;
+        box-shadow: 0 16px 28px -20px rgba(15, 23, 42, 0.34);
+    }
+
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-page input,
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-page select {
+        border-radius: 16px;
+        border-color: #d8e4f5;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-page input:focus,
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-page select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+    }
+</style>
+@endsection
+
 @section('content')
 {{-- Page Header --}}
 @include('admin.components.admin-page-header', [
@@ -12,10 +60,10 @@
     ]
 ])
 
-<div class="space-y-6">
+<div class="marksheet-page space-y-6">
     {{-- Search Form --}}
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
-        <div class="p-6 border-b border-gray-200 dark:border-slate-700">
+    <div class="marksheet-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+        <div class="marksheet-panel-header p-6 border-b border-gray-200 dark:border-slate-700">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Search Student Marksheet</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400">Enter student details to search for marksheets</p>
         </div>
@@ -118,13 +166,13 @@
                     type="submit" 
                     name="search_student" 
                     value="1"
-                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                    class="marksheet-toolbar-btn px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
                 >
                     <i class="bi bi-search mr-2"></i>Search Marksheet
                 </button>
                 <a 
                     href="{{ route('admin.marksheet.search') }}" 
-                    class="px-6 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors"
+                    class="marksheet-toolbar-btn px-6 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors"
                 >
                     <i class="bi bi-arrow-counterclockwise mr-2"></i>Reset
                 </a>
@@ -134,8 +182,8 @@
 
     {{-- Search Results --}}
     @if($student)
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
-            <div class="p-6 border-b border-gray-200 dark:border-slate-700 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="marksheet-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+            <div class="marksheet-panel-header p-6 border-b border-gray-200 dark:border-slate-700 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Details</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Search results for the selected student</p>
@@ -144,7 +192,7 @@
                     <a 
                         href="{{ route('admin.marksheet.print', array_merge($filters, ['student_id' => $student->id])) }}" 
                         onclick="adminOpenPrintPreview('{{ route('admin.marksheet.print', array_merge($filters, ['student_id' => $student->id])) }}', { title: 'Print Marksheet' }); return false;"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        class="marksheet-toolbar-btn inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                         <i class="bi bi-printer"></i>
                         Print Marksheet
@@ -152,7 +200,7 @@
                     <a 
                         href="{{ route('admin.marksheet.export', array_merge($filters, ['student_id' => $student->id])) }}" 
                         target="_blank"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        class="marksheet-toolbar-btn inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                         <i class="bi bi-download"></i>
                         Export CSV
@@ -162,7 +210,7 @@
 
             <div class="p-6">
                 {{-- Student Info --}}
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                <div class="marksheet-info-box grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
                     <div>
                         <span class="text-xs text-gray-500 dark:text-gray-400">Name</span>
                         <p class="font-medium text-gray-800 dark:text-gray-200">{{ $student->user->name ?? 'N/A' }}</p>
@@ -200,7 +248,7 @@
                             $isCtevt = strtolower($filters['exam_category'] ?? '') === 'ctevt';
                             $grandTotal = 0;
                         @endphp
-                        <table class="w-full text-sm text-left border border-gray-300 dark:border-slate-700 border-collapse">
+                        <table class="marksheet-table w-full text-sm text-left border border-gray-300 dark:border-slate-700 border-collapse">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-slate-700 dark:text-gray-300">
                                 <tr>
                                     <th class="px-4 py-3 text-center border border-gray-300 dark:border-slate-600">S.N.</th>

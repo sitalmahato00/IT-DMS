@@ -2,12 +2,40 @@
 
 @section('title', 'Settings')
 
+@section('styles')
+<script>
+    document.documentElement.classList.add('settings-ui-enhanced');
+</script>
+<style>
+    html.settings-ui-enhanced:not(.dark) .settings-page {
+        color: #0f172a;
+    }
+
+    html.settings-ui-enhanced:not(.dark) .settings-card {
+        border-radius: 28px;
+        border-color: rgba(226, 232, 240, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(249, 250, 251, 0.98));
+        box-shadow: 0 24px 52px -40px rgba(15, 23, 42, 0.22);
+    }
+
+    html.settings-ui-enhanced:not(.dark) .settings-card-header {
+        background: linear-gradient(180deg, #f8fafc, #ffffff);
+    }
+
+    html.settings-ui-enhanced:not(.dark) .settings-action-btn {
+        border-radius: 999px;
+        font-weight: 700;
+        box-shadow: 0 16px 28px -20px rgba(15, 23, 42, 0.3);
+    }
+</style>
+@endsection
+
 @section('content')
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="settings-page grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2 space-y-6">
         <!-- Department shortcut -->
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-            <div class="px-4 py-3 border-b border-gray-200">
+        <div class="settings-card bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="settings-card-header px-4 py-3 border-b border-gray-200">
                 <h3 class="text-gray-900 font-semibold text-sm flex items-center gap-2">
                     <i class="bi bi-building text-gray-500"></i>
                     Department
@@ -24,7 +52,7 @@
                             {{ $department?->phone ?? '' }}{{ (!empty($department?->phone) && !empty($department?->email)) ? ' • ' : '' }}{{ $department?->email ?? '' }}
                         </div>
                     </div>
-                    <a href="{{ route('admin.department.edit') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition shadow-sm">
+                    <a href="{{ route('admin.department.edit') }}" class="settings-action-btn inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition shadow-sm">
                         <i class="bi bi-pencil mr-1"></i>
                         Edit details
                     </a>
@@ -33,8 +61,8 @@
         </div>
 
         <!-- Admin Profile -->
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-            <div class="px-4 py-3 border-b border-gray-200">
+        <div class="settings-card bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="settings-card-header px-4 py-3 border-b border-gray-200">
                 <h3 class="text-gray-900 font-semibold text-sm flex items-center gap-2">
                     <i class="bi bi-person-circle text-gray-500"></i>
                     Admin Profile
@@ -59,7 +87,7 @@
                         <p class="text-sm text-gray-600">{{ $user->email }}</p>
                         <p class="text-xs text-gray-500 mt-1 capitalize">Role: {{ $user->role }}</p>
                         <div class="mt-3 flex gap-2">
-                            <a href="{{ route('profile.edit') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition shadow-sm">
+                            <a href="{{ route('profile.edit') }}" class="settings-action-btn inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition shadow-sm">
                                 <i class="bi bi-pencil mr-1"></i>
                                 Edit Profile
                             </a>
@@ -72,8 +100,8 @@
 
     <!-- Right Column: System Info -->
     <div class="space-y-6">
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-            <div class="px-4 py-3 border-b border-gray-200">
+        <div class="settings-card bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="settings-card-header px-4 py-3 border-b border-gray-200">
                 <h3 class="text-gray-900 font-semibold text-sm flex items-center gap-2">
                     <i class="bi bi-info-circle text-gray-500"></i>
                     System Info
@@ -97,4 +125,3 @@
     </div>
 </div>
 @endsection
-

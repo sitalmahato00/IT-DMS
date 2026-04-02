@@ -2,8 +2,28 @@
 
 @section('title', 'Audit Log Detail')
 
+@section('styles')
+<script>
+    document.documentElement.classList.add('audit-logs-ui-enhanced');
+</script>
+<style>
+    html.audit-logs-ui-enhanced:not(.dark) .audit-detail-panel {
+        border-radius: 28px;
+        border-color: rgba(226, 232, 240, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(249, 250, 251, 0.98));
+        box-shadow: 0 24px 52px -40px rgba(15, 23, 42, 0.22);
+    }
+
+    html.audit-logs-ui-enhanced:not(.dark) .audit-toolbar-btn {
+        border-radius: 999px;
+        font-weight: 700;
+        box-shadow: 0 16px 28px -20px rgba(15, 23, 42, 0.3);
+    }
+</style>
+@endsection
+
 @section('content')
-<div class="bg-white rounded-lg border border-gray-200 p-6">
+<div class="audit-detail-panel bg-white rounded-lg border border-gray-200 p-6">
     <h3 class="text-lg font-bold mb-2">{{ $log->action }}</h3>
     <p class="text-sm text-gray-600">Module: {{ $log->module ?? 'General' }}</p>
     <p class="text-sm text-gray-600">Performed by: {{ $log->user_name ?? 'System' }} ({{ $log->user_email ?? '' }})</p>
@@ -51,7 +71,7 @@
     </div>
 
     <div class="mt-4">
-        <a href="{{ route('admin.audit-logs.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition">
+        <a href="{{ route('admin.audit-logs.index') }}" class="audit-toolbar-btn inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition">
             <i class="bi bi-arrow-left mr-2"></i>Back to logs
         </a>
     </div>

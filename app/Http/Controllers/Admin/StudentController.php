@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Student;
 use App\Models\Department;
+use App\Models\Semester;
 use App\Models\AuditLog;
 use App\Notifications\StudentAccountNotification;
 use Illuminate\Support\Facades\Hash;
@@ -685,7 +686,7 @@ class StudentController extends Controller
             'student_id' => ['required', 'string', 'max:50'],
             'department' => ['required', 'string', 'max:100'],
             'program' => ['nullable', 'string', 'max:150'],
-            'semester' => ['required', Rule::in(['1', '2', '3', '4', '5', '6'])],
+            'semester' => ['required', Rule::in($this->getSemesterValues())],
             'section' => ['nullable', 'string', 'max:50'],
             'academic_year' => ['required', 'string', 'max:20'],
             'academic_year_bs' => ['nullable', 'string', 'max:20'],
@@ -898,7 +899,60 @@ class StudentController extends Controller
             'departmentOptions' => $this->getDistinctStudentColumnValues('department'),
             'programOptions' => $this->getDistinctStudentColumnValues('program'),
             'sectionOptions' => $this->getDistinctStudentColumnValues('section'),
+            'semesterOptions' => $this->getSemesterOptions(),
         ];
+    }
+
+    private function getSemesterOptions(): array
+    {
+        return $this->getSemesterRecords()
+            ->map(function ($semester) {
+                $number = (string) ($semester->number ?? '');
+                $label = trim((string) ($semester->name ?? Semester::getOrdinalName((int) $number)));
+
+                return [
+                    'value' => $number,
+                    'label' => $label !== '' ? $label : ('Semester ' . $number),
+                ];
+            })
+            ->filter(fn ($semester) => $semester['value'] !== '')
+            ->values()
+            ->all();
+    }
+
+    private function getSemesterValues(): array
+    {
+        $values = collect($this->getSemesterOptions())
+            ->pluck('value')
+            ->filter()
+            ->map(fn ($value) => (string) $value)
+            ->values()
+            ->all();
+
+        return $values !== [] ? $values : ['1', '2', '3', '4', '5', '6'];
+    }
+
+    private function getSemesterRecords()
+    {
+        if (!Schema::hasTable('semesters')) {
+            return collect(range(1, 6))->map(fn ($number) => (object) [
+                'number' => $number,
+                'name' => Semester::getOrdinalName($number),
+            ]);
+        }
+
+        $semesters = Semester::query()
+            ->orderBy('number')
+            ->get(['number', 'name']);
+
+        if ($semesters->isEmpty()) {
+            return collect(range(1, 6))->map(fn ($number) => (object) [
+                'number' => $number,
+                'name' => Semester::getOrdinalName($number),
+            ]);
+        }
+
+        return $semesters;
     }
 
     public function download($id)

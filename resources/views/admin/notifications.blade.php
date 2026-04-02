@@ -2,8 +2,67 @@
 
 @section('title', __('Notifications'))
 
+@section('styles')
+<script>
+    document.documentElement.classList.add('notifications-ui-enhanced');
+</script>
+<style>
+    html.notifications-ui-enhanced:not(.dark) .notifications-page {
+        color: #0f172a;
+    }
+
+    html.notifications-ui-enhanced:not(.dark) .notifications-card {
+        border-radius: 30px;
+        border-color: rgba(215, 227, 243, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 251, 255, 0.98));
+        box-shadow: 0 28px 58px -42px rgba(29, 78, 216, 0.28);
+    }
+
+    html.notifications-ui-enhanced:not(.dark) .notification-item {
+        border-radius: 22px;
+        border-color: rgba(219, 234, 254, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 255, 0.96));
+        box-shadow: 0 18px 34px -30px rgba(59, 130, 246, 0.35);
+    }
+
+    html.notifications-ui-enhanced:not(.dark) .notification-item:hover {
+        background: linear-gradient(90deg, rgba(239, 246, 255, 0.84), rgba(255, 255, 255, 0.97));
+    }
+
+    html.notifications-ui-enhanced:not(.dark) .notification-status-chip {
+        border-radius: 999px;
+        padding: 0.4rem 0.8rem;
+        font-weight: 700;
+        box-shadow: 0 12px 24px -20px rgba(15, 23, 42, 0.24);
+    }
+
+    html.notifications-ui-enhanced:not(.dark) .notifications-empty-state {
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(255, 255, 255, 0.98));
+    }
+
+    html.notifications-ui-enhanced:not(.dark) #confirmModal > div {
+        border-radius: 30px;
+        border: 1px solid rgba(215, 227, 243, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(247, 251, 255, 0.98));
+        box-shadow: 0 34px 70px -38px rgba(15, 23, 42, 0.42);
+    }
+
+    html.notifications-ui-enhanced:not(.dark) #confirmHeader {
+        background: linear-gradient(135deg, rgba(239, 246, 255, 0.95), rgba(219, 234, 254, 0.92));
+    }
+
+    html.notifications-ui-enhanced:not(.dark) #confirmCancel,
+    html.notifications-ui-enhanced:not(.dark) #confirmOk {
+        border-radius: 999px;
+        font-weight: 700;
+        box-shadow: 0 16px 28px -20px rgba(15, 23, 42, 0.36);
+    }
+</style>
+@endsection
+
 @section('content')
-<div class="space-y-4">
+<div class="notifications-page space-y-6">
     <!-- Global Loader Overlay -->
     <div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-sm hidden flex items-center justify-center">
         <div class="text-center">
@@ -42,7 +101,7 @@
         </div>
     </div>
 
-    <x-card>
+    <x-card class="notifications-card">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-sm font-bold text-gray-900">{{ __('Notifications') }}</h3>
         </div>
@@ -58,7 +117,7 @@
                         $time = $notification->created_at ? $notification->created_at->diffForHumans() : '';
                     @endphp
 
-                    <div class="p-3 bg-white border border-gray-100 rounded-md flex items-start gap-3">
+                    <div class="notification-item p-3 bg-white border border-gray-100 rounded-md flex items-start gap-3 transition">
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-900">{{ $title }}</p>
                             <p class="text-xs text-gray-600 mt-1">{{ Str::limit($message, 200) }}</p>
@@ -66,9 +125,9 @@
                         </div>
                         <div class="flex-shrink-0">
                             @if(!$notification->read_at)
-                                <span class="inline-block px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded">{{ __('New') }}</span>
+                                <span class="notification-status-chip inline-block px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded">{{ __('New') }}</span>
                             @else
-                                <span class="inline-block px-2 py-1 text-xs bg-gray-50 text-gray-600 rounded">{{ __('Read') }}</span>
+                                <span class="notification-status-chip inline-block px-2 py-1 text-xs bg-gray-50 text-gray-600 rounded">{{ __('Read') }}</span>
                             @endif
                         </div>
                     </div>
@@ -79,9 +138,8 @@
                 <x-pagination :paginator="$notifications" />
             </div>
         @else
-            <div class="text-center py-8 text-gray-500">{{ __('No notifications found') }}</div>
+            <div class="notifications-empty-state text-center py-8 text-gray-500">{{ __('No notifications found') }}</div>
         @endif
     </x-card>
 </div>
 @endsection
-

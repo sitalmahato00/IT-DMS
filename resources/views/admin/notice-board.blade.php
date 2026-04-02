@@ -2,8 +2,183 @@
 
 @section('title', __('Notice Board'))
 
+@section('styles')
+<script>document.documentElement.classList.add('notice-board-ui-enhanced');</script>
+<style>
+    html.notice-board-ui-enhanced:not(.dark) .notice-page {
+        position: relative;
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-stats > .grid,
+    html.notice-board-ui-enhanced:not(.dark) .notice-filter-panel > div {
+        margin-bottom: 0;
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-stats > .grid > div {
+        position: relative;
+        overflow: hidden;
+        border-width: 2px;
+        border-radius: 1rem;
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-stats > .grid > div:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 40px -28px rgba(15, 23, 42, 0.28);
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-stats > .grid > div:nth-child(1) { border-color: #93c5fd; background: linear-gradient(135deg, #eff6ff 0%, #ffffff 56%, #eff6ff 100%); }
+    html.notice-board-ui-enhanced:not(.dark) .notice-stats > .grid > div:nth-child(2) { border-color: #86efac; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 56%, #f0fdf4 100%); }
+    html.notice-board-ui-enhanced:not(.dark) .notice-stats > .grid > div:nth-child(3) { border-color: #fdba74; background: linear-gradient(135deg, #fff7ed 0%, #ffffff 56%, #fff7ed 100%); }
+    html.notice-board-ui-enhanced:not(.dark) .notice-stats > .grid > div:nth-child(4) { border-color: #c4b5fd; background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 56%, #f5f3ff 100%); }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-filter-panel > div,
+    html.notice-board-ui-enhanced:not(.dark) .notice-table-panel,
+    html.notice-board-ui-enhanced:not(.dark) .notice-modal-panel,
+    html.notice-board-ui-enhanced:not(.dark) .notice-confirm-panel {
+        overflow: hidden;
+        border: 2px solid #e2e8f0;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-filter-panel label,
+    html.notice-board-ui-enhanced:not(.dark) .notice-directory-head th,
+    html.notice-board-ui-enhanced:not(.dark) .notice-form label,
+    html.notice-board-ui-enhanced:not(.dark) #viewNoticeContent p.text-xs,
+    html.notice-board-ui-enhanced:not(.dark) #viewNoticeContent .text-xs.font-bold {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-filter-panel input:not([type='checkbox']):not([type='radio']),
+    html.notice-board-ui-enhanced:not(.dark) .notice-filter-panel select,
+    html.notice-board-ui-enhanced:not(.dark) .notice-form input:not([type='checkbox']):not([type='radio']):not([type='file']),
+    html.notice-board-ui-enhanced:not(.dark) .notice-form select,
+    html.notice-board-ui-enhanced:not(.dark) .notice-form textarea,
+    html.notice-board-ui-enhanced:not(.dark) .notice-form input[type='file'] {
+        min-height: 2.9rem;
+        border: 2px solid #cbd5e1;
+        border-radius: 0.85rem;
+        background: #ffffff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-filter-panel input:not([type='checkbox']):not([type='radio']):focus,
+    html.notice-board-ui-enhanced:not(.dark) .notice-filter-panel select:focus,
+    html.notice-board-ui-enhanced:not(.dark) .notice-form input:not([type='checkbox']):not([type='radio']):not([type='file']):focus,
+    html.notice-board-ui-enhanced:not(.dark) .notice-form select:focus,
+    html.notice-board-ui-enhanced:not(.dark) .notice-form textarea:focus,
+    html.notice-board-ui-enhanced:not(.dark) .notice-form input[type='file']:focus {
+        outline: none;
+        border-color: #f43f5e;
+        box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1);
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-table-header,
+    html.notice-board-ui-enhanced:not(.dark) .notice-pagination,
+    html.notice-board-ui-enhanced:not(.dark) .notice-modal-footer {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-table-header { border-bottom: 1px solid #e2e8f0; }
+    html.notice-board-ui-enhanced:not(.dark) .notice-pagination,
+    html.notice-board-ui-enhanced:not(.dark) .notice-modal-footer { border-top: 1px solid #e2e8f0; }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-directory-table { border-collapse: separate; border-spacing: 0; }
+    html.notice-board-ui-enhanced:not(.dark) .notice-directory-head th { background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border-bottom: 1px solid #e2e8f0; color: #64748b; }
+    html.notice-board-ui-enhanced:not(.dark) .notice-row td { border-bottom: 1px solid #e2e8f0; transition: background-color 0.18s ease; vertical-align: middle; }
+    html.notice-board-ui-enhanced:not(.dark) .notice-row:nth-child(even) td { background: #f8fafc; }
+    html.notice-board-ui-enhanced:not(.dark) .notice-row:hover td { background: #fff7f8; }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-title { color: #0f172a; font-weight: 700; }
+    html.notice-board-ui-enhanced:not(.dark) .notice-description { color: #64748b; }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.42rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-action-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.45rem 0.8rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 999px;
+        background: #ffffff;
+        box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.45);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-action-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 34px -24px rgba(15, 23, 42, 0.5);
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-action-view { color: #2563eb; }
+    html.notice-board-ui-enhanced:not(.dark) .notice-action-edit { color: #059669; }
+    html.notice-board-ui-enhanced:not(.dark) .notice-action-delete { color: #dc2626; }
+    html.notice-board-ui-enhanced:not(.dark) .notice-empty-state { color: #64748b; font-weight: 500; }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-modal-header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        border-bottom: none;
+        background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-modal-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.8rem;
+        background: rgba(255, 255, 255, 0.14);
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) #viewNoticeContent > div,
+    html.notice-board-ui-enhanced:not(.dark) #viewNoticeContent .bg-gray-50,
+    html.notice-board-ui-enhanced:not(.dark) #viewNoticeContent .bg-white,
+    html.notice-board-ui-enhanced:not(.dark) #viewNoticeContent .bg-blue-50 {
+        border-radius: 1rem;
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-secondary-btn,
+    html.notice-board-ui-enhanced:not(.dark) .notice-primary-btn {
+        box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.45);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-secondary-btn:hover,
+    html.notice-board-ui-enhanced:not(.dark) .notice-primary-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 34px -24px rgba(15, 23, 42, 0.5);
+    }
+
+    html.notice-board-ui-enhanced:not(.dark) .notice-secondary-btn {
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #334155;
+    }
+</style>
+@endsection
+
 @section('content')
-<div class="space-y-4">
+<div class="notice-page space-y-6">
     <!-- Global Loader Overlay -->
     <div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center">
         <div class="text-center">
@@ -14,7 +189,7 @@
 
     <!-- Professional Confirmation Modal -->
     <div id="confirmModal" class="hidden fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300 animate-fade-in">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all duration-300 animate-scale-up">
+        <div class="notice-confirm-panel bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all duration-300 animate-scale-up">
             <div id="confirmHeader" class="relative h-20 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/20 flex items-center justify-center">
                 <div id="confirmIconContainer" class="absolute h-24 w-24 rounded-full flex items-center justify-center" style="transform: translateY(50%);">
                     <i id="confirmIcon" class="text-4xl"></i>
@@ -62,39 +237,43 @@
     @endif
 
     {{-- Stats Cards - Using standardized component --}}
-    @include('admin.components.admin-stats-cards', [
-        'cards' => [
-            ['title' => 'Total Notices', 'value' => $stats['total'] ?? 0, 'icon' => 'bi-bell', 'color' => 'blue'],
-            ['title' => 'Published', 'value' => $stats['published'] ?? 0, 'icon' => 'bi-check-circle', 'color' => 'green'],
-            ['title' => 'Draft', 'value' => $stats['draft'] ?? 0, 'icon' => 'bi-pencil-square', 'color' => 'orange'],
-            ['title' => 'Scheduled', 'value' => $stats['scheduled'] ?? 0, 'icon' => 'bi-calendar-event', 'color' => 'purple'],
-        ]
-    ])
+    <div class="notice-stats">
+        @include('admin.components.admin-stats-cards', [
+            'cards' => [
+                ['title' => 'Total Notices', 'value' => $stats['total'] ?? 0, 'icon' => 'bi-bell', 'color' => 'blue'],
+                ['title' => 'Published', 'value' => $stats['published'] ?? 0, 'icon' => 'bi-check-circle', 'color' => 'green'],
+                ['title' => 'Draft', 'value' => $stats['draft'] ?? 0, 'icon' => 'bi-pencil-square', 'color' => 'orange'],
+                ['title' => 'Scheduled', 'value' => $stats['scheduled'] ?? 0, 'icon' => 'bi-calendar-event', 'color' => 'purple'],
+            ]
+        ])
+    </div>
 
     {{-- Filter Card - Using standardized component --}}
-    @include('admin.components.admin-filter-card', [
-        'formAction' => route('admin.notice-board'),
-        'filters' => [
-            ['name' => 'search', 'type' => 'text', 'placeholder' => 'Search notices...', 'value' => request('search'), 'label' => 'Search'],
-            ['name' => 'semester', 'type' => 'select', 'options' => ['' => 'All Semesters', '1' => '1st Semester', '2' => '2nd Semester', '3' => '3rd Semester', '4' => '4th Semester', '5' => '5th Semester', '6' => '6th Semester'], 'value' => request('semester'), 'label' => 'Semester'],
-            ['name' => 'audience', 'type' => 'select', 'options' => ['' => 'All Audience', 'all' => 'All', 'students' => 'Students', 'teachers' => 'Teachers', 'parents' => 'Parents'], 'value' => request('audience'), 'label' => 'Audience'],
-            ['name' => 'status', 'type' => 'select', 'options' => ['' => 'All Status', 'published' => 'Published', 'draft' => 'Draft', 'scheduled' => 'Scheduled'], 'value' => request('status'), 'label' => 'Status'],
-        ],
-        'showReset' => true,
-        'resetRoute' => route('admin.notice-board')
-    ])
+    <div class="notice-filter-panel">
+        @include('admin.components.admin-filter-card', [
+            'formAction' => route('admin.notice-board'),
+            'filters' => [
+                ['name' => 'search', 'type' => 'text', 'placeholder' => 'Search notices...', 'value' => request('search'), 'label' => 'Search'],
+                ['name' => 'semester', 'type' => 'select', 'options' => ['' => 'All Semesters', '1' => '1st Semester', '2' => '2nd Semester', '3' => '3rd Semester', '4' => '4th Semester', '5' => '5th Semester', '6' => '6th Semester'], 'value' => request('semester'), 'label' => 'Semester'],
+                ['name' => 'audience', 'type' => 'select', 'options' => ['' => 'All Audience', 'all' => 'All', 'students' => 'Students', 'teachers' => 'Teachers', 'parents' => 'Parents'], 'value' => request('audience'), 'label' => 'Audience'],
+                ['name' => 'status', 'type' => 'select', 'options' => ['' => 'All Status', 'published' => 'Published', 'draft' => 'Draft', 'scheduled' => 'Scheduled'], 'value' => request('status'), 'label' => 'Status'],
+            ],
+            'showReset' => true,
+            'resetRoute' => route('admin.notice-board')
+        ])
+    </div>
 
     {{-- Table Card --}}
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
+    <div class="notice-table-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+        <div class="notice-table-header px-5 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
             <div class="flex items-center justify-between">
                 <h3 class="text-sm font-bold text-gray-900 dark:text-white">Notices List</h3>
                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ $notices->total() }} total notices</span>
             </div>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-xs">
-                <thead>
+            <table class="notice-directory-table w-full text-xs">
+                <thead class="notice-directory-head">
                     <tr class="bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
                         <th class="px-3 py-2 text-left font-semibold text-gray-900 dark:text-gray-100">Title</th>
                         <th class="px-3 py-2 text-left font-semibold text-gray-900 dark:text-gray-100">Category</th>
@@ -107,18 +286,18 @@
                 </thead>
                 <tbody>
                     @forelse($notices as $notice)
-                    <tr class="border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                    <tr class="notice-row border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50">
                         <td class="px-3 py-2">
                             <div class="flex items-center gap-2">
                                 <i class="bi bi-bell text-lg text-blue-600 dark:text-blue-400"></i>
-                                <span class="font-medium text-gray-900 dark:text-gray-100">{{ $notice->title }}</span>
+                                <span class="notice-title font-medium text-gray-900 dark:text-gray-100">{{ $notice->title }}</span>
                             </div>
                             @if($notice->description)
-                            <p class="text-gray-500 dark:text-gray-400 text-[10px] mt-1 truncate max-w-[200px]">{{ $notice->description }}</p>
+                            <p class="notice-description text-gray-500 dark:text-gray-400 text-[10px] mt-1 truncate max-w-[200px]">{{ $notice->description }}</p>
                             @endif
                         </td>
                         <td class="px-3 py-2 text-gray-700 dark:text-gray-300">
-                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
+                            <span class="notice-chip inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
                                 {{ $notice->category->name ?? 'General' }}
                             </span>
                         </td>
@@ -126,7 +305,7 @@
                             {{ $notice->semester ? 'Semester ' . $notice->semester : 'All' }}
                         </td>
                         <td class="px-3 py-2 text-center">
-                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">
+                            <span class="notice-chip inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300">
                                 {{ ucfirst($notice->audience) }}
                             </span>
                         </td>
@@ -139,7 +318,7 @@
                                     default => 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                                 };
                             @endphp
-                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium {{ $statusClass }}">
+                            <span class="notice-chip inline-flex items-center px-2 py-1 rounded text-xs font-medium {{ $statusClass }}">
                                 {{ ucfirst($notice->status) }}
                             </span>
                         </td>
@@ -147,22 +326,20 @@
                             {{ $notice->created_at->format('Y-m-d') }}
                         </td>
                         <td class="px-3 py-2 text-center">
-                            <button onclick='openViewNoticeModal({{ $notice->id }})' class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition font-medium inline-flex items-center gap-1">
+                            <button onclick='openViewNoticeModal({{ $notice->id }})' class="notice-action-link notice-action-view text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition font-medium inline-flex items-center gap-1">
                                 <i class="bi bi-eye"></i>View
                             </button>
-                            <span class="mx-1 text-gray-300">|</span>
-                            <button onclick='openEditNoticeModal({{ $notice->id }})' class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition font-medium inline-flex items-center gap-1">
+                            <button onclick='openEditNoticeModal({{ $notice->id }})' class="notice-action-link notice-action-edit text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition font-medium inline-flex items-center gap-1">
                                 <i class="bi bi-pencil"></i>Edit
                             </button>
-                            <span class="mx-1 text-gray-300">|</span>
-                            <button onclick="deleteNotice({{ $notice->id }})" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition font-medium inline-flex items-center gap-1">
+                            <button onclick="deleteNotice({{ $notice->id }})" class="notice-action-link notice-action-delete text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition font-medium inline-flex items-center gap-1">
                                 <i class="bi bi-trash"></i>Delete
                             </button>
                         </td>
                     </tr>
                     @empty
                     <tr class="empty-row">
-                        <td colspan="7" class="px-3 py-8 text-center text-gray-500 dark:text-gray-400">
+                        <td colspan="7" class="notice-empty-state px-3 py-8 text-center text-gray-500 dark:text-gray-400">
                             <div class="flex flex-col items-center justify-center">
                                 <i class="bi bi-bell-slash text-4xl text-gray-300 dark:text-gray-600 mb-2"></i>
                                 <p>No notices found</p>
@@ -175,7 +352,7 @@
             </table>
         </div>
         @if($notices->hasPages())
-        <div class="px-3 py-3 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
+        <div class="notice-pagination px-3 py-3 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
             @include('admin.components.admin-pagination', [
                 'paginator' => $notices,
                 'route' => route('admin.notice-board')
@@ -187,14 +364,14 @@
 
 <!-- Create Notice Modal -->
 <div id="createNoticeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="bg-gradient-to-r from-red-600 to-orange-500 px-4 py-3 flex items-center justify-between sticky top-0">
+    <div class="notice-modal-panel bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="notice-modal-header bg-gradient-to-r from-red-600 to-orange-500 px-4 py-3 flex items-center justify-between sticky top-0">
             <h2 class="text-white font-semibold text-sm">Create New Notice</h2>
-            <button onclick="closeCreateNoticeModal()" class="text-white hover:text-gray-200 transition">
+            <button onclick="closeCreateNoticeModal()" class="notice-modal-close text-white hover:text-gray-200 transition">
                 <i class="bi bi-x-lg text-lg"></i>
             </button>
         </div>
-        <form action="{{ route('admin.notice-board.store') }}" method="POST" enctype="multipart/form-data" class="p-4 space-y-3">
+        <form action="{{ route('admin.notice-board.store') }}" method="POST" enctype="multipart/form-data" class="notice-form p-4 space-y-3">
             @csrf
             <div>
                 <label class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Notice Title *</label>
@@ -258,11 +435,11 @@
                 <input type="checkbox" name="is_important" id="importantNotice" value="1" class="w-4 h-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500">
                 <label for="importantNotice" class="ml-2 text-xs text-gray-700 dark:text-gray-300">Mark as Important Notice</label>
             </div>
-            <div class="px-4 py-3 bg-gray-50 dark:bg-slate-700 border-t border-gray-200 dark:border-slate-600 flex justify-end gap-2 sticky bottom-0">
-                <button type="button" onclick="closeCreateNoticeModal()" class="px-4 py-2 border border-gray-300 dark:border-slate-500 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-slate-600 transition">
+            <div class="notice-modal-footer px-4 py-3 bg-gray-50 dark:bg-slate-700 border-t border-gray-200 dark:border-slate-600 flex justify-end gap-2 sticky bottom-0">
+                <button type="button" onclick="closeCreateNoticeModal()" class="notice-secondary-btn px-4 py-2 border border-gray-300 dark:border-slate-500 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-slate-600 transition">
                     Cancel
                 </button>
-                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition shadow-sm">
+                <button type="submit" class="notice-primary-btn px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition shadow-sm">
                     Create Notice
                 </button>
             </div>
@@ -272,13 +449,13 @@
 
 <!-- View Notice Modal -->
 <div id="viewNoticeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto flex flex-col">
-        <div class="bg-gradient-to-r from-red-600 to-red-700 px-6 py-4 flex items-center justify-between sticky top-0 flex-shrink-0 border-b-4 border-red-800">
+    <div class="notice-modal-panel bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto flex flex-col">
+        <div class="notice-modal-header bg-gradient-to-r from-red-600 to-red-700 px-6 py-4 flex items-center justify-between sticky top-0 flex-shrink-0 border-b-4 border-red-800">
             <div class="flex items-center gap-3">
                 <i class="bi bi-bell-fill text-white text-xl"></i>
                 <h2 class="text-white font-bold text-lg">Notice Details</h2>
             </div>
-            <button onclick="closeViewNoticeModal()" class="text-white hover:text-gray-100 transition hover:scale-110">
+            <button onclick="closeViewNoticeModal()" class="notice-modal-close text-white hover:text-gray-100 transition hover:scale-110">
                 <i class="bi bi-x-lg text-xl"></i>
             </button>
         </div>
@@ -288,10 +465,10 @@
                 <p class="text-gray-500 text-sm">Loading notice details...</p>
             </div>
         </div>
-        <div class="border-t border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 px-6 py-4 flex justify-between items-center gap-3 flex-shrink-0">
+        <div class="notice-modal-footer border-t border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 px-6 py-4 flex justify-between items-center gap-3 flex-shrink-0">
             <div class="text-xs text-gray-600 dark:text-gray-400" id="noticeMetaFooter"></div>
             <div class="flex gap-2">
-                <button type="button" onclick="closeViewNoticeModal()" class="px-4 py-2 border border-gray-300 dark:border-slate-500 rounded text-xs font-medium text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-slate-600 transition">
+                <button type="button" onclick="closeViewNoticeModal()" class="notice-secondary-btn px-4 py-2 border border-gray-300 dark:border-slate-500 rounded text-xs font-medium text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-slate-600 transition">
                     Close
                 </button>
             </div>
@@ -301,17 +478,17 @@
 
 <!-- Edit Notice Modal -->
 <div id="editNoticeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto flex flex-col">
-        <div class="bg-gradient-to-r from-red-600 to-red-700 px-6 py-4 flex items-center justify-between sticky top-0 flex-shrink-0 border-b-4 border-red-800">
+    <div class="notice-modal-panel bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto flex flex-col">
+        <div class="notice-modal-header bg-gradient-to-r from-red-600 to-red-700 px-6 py-4 flex items-center justify-between sticky top-0 flex-shrink-0 border-b-4 border-red-800">
             <div class="flex items-center gap-3">
                 <i class="bi bi-pencil-square text-white text-xl"></i>
                 <h2 class="text-white font-bold text-lg">Edit Notice</h2>
             </div>
-            <button onclick="closeEditNoticeModal()" class="text-white hover:text-gray-100 transition hover:scale-110">
+            <button onclick="closeEditNoticeModal()" class="notice-modal-close text-white hover:text-gray-100 transition hover:scale-110">
                 <i class="bi bi-x-lg text-xl"></i>
             </button>
         </div>
-        <form id="editNoticeForm" action="" method="POST" enctype="multipart/form-data" class="flex-1 overflow-y-auto p-6 space-y-5">
+        <form id="editNoticeForm" action="" method="POST" enctype="multipart/form-data" class="notice-form flex-1 overflow-y-auto p-6 space-y-5">
             @csrf
             @method('PUT')
             <div class="space-y-2">
@@ -389,13 +566,13 @@
                 </p>
             </div>
         </form>
-        <div class="border-t border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 px-6 py-4 flex justify-between items-center gap-3 flex-shrink-0">
+        <div class="notice-modal-footer border-t border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 px-6 py-4 flex justify-between items-center gap-3 flex-shrink-0">
             <p class="text-xs text-gray-600 dark:text-gray-400">* Required fields</p>
             <div class="flex gap-3">
-                <button type="button" onclick="closeEditNoticeModal()" class="px-4 py-2 border border-gray-300 dark:border-slate-500 rounded-md text-sm font-medium text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-slate-600 transition">
+                <button type="button" onclick="closeEditNoticeModal()" class="notice-secondary-btn px-4 py-2 border border-gray-300 dark:border-slate-500 rounded-md text-sm font-medium text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-slate-600 transition">
                     Cancel
                 </button>
-                <button type="button" onclick="document.getElementById('editNoticeForm').submit()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold transition flex items-center gap-2 shadow-sm">
+                <button type="button" onclick="document.getElementById('editNoticeForm').submit()" class="notice-primary-btn px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold transition flex items-center gap-2 shadow-sm">
                     <i class="bi bi-check-lg"></i>Update Notice
                 </button>
             </div>

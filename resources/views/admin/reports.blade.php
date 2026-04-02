@@ -2,6 +2,48 @@
 
 @section('title', 'Reports & Analytics')
 
+@section('styles')
+<script>
+    document.documentElement.classList.add('reports-ui-enhanced');
+</script>
+<style>
+    html.reports-ui-enhanced:not(.dark) .reports-page {
+        color: #0f172a;
+    }
+
+    html.reports-ui-enhanced:not(.dark) .reports-page .bg-white.rounded-xl,
+    html.reports-ui-enhanced:not(.dark) .reports-page .bg-white.dark\:bg-gray-800.rounded-xl {
+        border-color: rgba(241, 213, 219, 0.95);
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 250, 250, 0.97));
+        box-shadow: 0 28px 56px -40px rgba(148, 19, 52, 0.28);
+    }
+
+    html.reports-ui-enhanced:not(.dark) .reports-page .hover\:shadow-md:hover {
+        box-shadow: 0 24px 48px -36px rgba(148, 19, 52, 0.3);
+    }
+
+    html.reports-ui-enhanced:not(.dark) .reports-toolbar-btn {
+        border-radius: 999px;
+        font-weight: 700;
+        box-shadow: 0 16px 28px -20px rgba(15, 23, 42, 0.34);
+    }
+
+    html.reports-ui-enhanced:not(.dark) .reports-page input,
+    html.reports-ui-enhanced:not(.dark) .reports-page select {
+        border-radius: 16px;
+        border-color: #e5d4d9;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    html.reports-ui-enhanced:not(.dark) .reports-page input:focus,
+    html.reports-ui-enhanced:not(.dark) .reports-page select:focus {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+    }
+</style>
+@endsection
+
 @section('content')
 @php
     $redColor = '#DC2626';
@@ -9,7 +51,7 @@
     $redDark = '#B91C1C';
 @endphp
 
-<div class="space-y-6">
+<div class="reports-page space-y-6">
     <!-- Global Loader Overlay -->
     <div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-sm hidden flex items-center justify-center">
         <div class="text-center">
@@ -38,10 +80,10 @@
             <p class="text-gray-600 dark:text-gray-400 mt-1">Comprehensive overview of student performance, attendance, and academic metrics</p>
         </div>
         <div class="flex items-center gap-2">
-            <button onclick="exportData('csv')" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition shadow-sm">
+            <button onclick="exportData('csv')" class="reports-toolbar-btn inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition shadow-sm">
                 <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV
             </button>
-            <button onclick="printReport()" class="inline-flex items-center gap-2 px-4 py-2" style="background: {{ $redColor }}; hover:background: {{ $redColor }}ee; color: white;" class="bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition shadow-sm">
+            <button onclick="printReport()" class="reports-toolbar-btn inline-flex items-center gap-2 px-4 py-2 text-white rounded-lg text-sm font-medium transition shadow-sm" style="background: {{ $redColor }}; color: white;">
                 <i class="bi bi-printer"></i> Print Report
             </button>
         </div>
@@ -136,10 +178,10 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition shadow-sm">
+                    <button type="submit" class="reports-toolbar-btn inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition shadow-sm">
                         <i class="bi bi-funnel"></i> Apply Filter
                     </button>
-                    <button type="button" id="resetFilterBtn" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium transition shadow-sm">
+                    <button type="button" id="resetFilterBtn" class="reports-toolbar-btn inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium transition shadow-sm">
                         <i class="bi bi-arrow-clockwise"></i> Reset
                     </button>
                 </div>

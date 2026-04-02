@@ -200,7 +200,7 @@
     ],
     'addButton' => [
         'label' => 'Add Student',
-        'onclick' => 'openAddStudentModal()',
+        'route' => route('admin.students.create'),
         'color' => 'green'
     ]
 ])
@@ -314,19 +314,19 @@
                                     {{ ucfirst($student->student->status ?? 'inactive') }}
                                 </span>
                             </td>
-                            <td class="px-4 py-4 text-center">
-                                <div class="student-actions flex gap-2 justify-center">
-                                    <button type="button" onclick="openStudentViewModal({{ $student->id }})" class="action-btn action-btn-view" title="View">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    <button type="button" onclick="openStudentFormModal('edit', {{ $student->id }})" class="action-btn action-btn-edit" title="Edit">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
-                                    <button type="button" onclick="deleteStudent({{ $student->id }})" class="action-btn action-btn-delete" title="Delete">
-                                        <i class="bi bi-trash3"></i>
-                                    </button>
-                                </div>
-                            </td>
+                             <td class="px-4 py-4 text-center">
+                                 <div class="student-actions flex gap-2 justify-center">
+                                     <a href="{{ route('admin.students.show', $student->id) }}" class="action-btn action-btn-view" title="View">
+                                         <i class="bi bi-eye"></i>
+                                     </a>
+                                     <a href="{{ route('admin.students.edit', $student->id) }}" class="action-btn action-btn-edit" title="Edit">
+                                         <i class="bi bi-pencil-square"></i>
+                                     </a>
+                                     <button type="button" onclick="deleteStudent({{ $student->id }})" class="action-btn action-btn-delete" title="Delete">
+                                         <i class="bi bi-trash3"></i>
+                                     </button>
+                                 </div>
+                             </td>
                         </tr>
                     @empty
                         <tr>
@@ -343,8 +343,6 @@
         </div>
     </div>
 </div>
-
-@include('admin.students.partials.management-modals')
 
 <script>
 
