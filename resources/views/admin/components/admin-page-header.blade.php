@@ -36,14 +36,14 @@
     $buttonClass = $colorClasses[$buttonColor] ?? $colorClasses['red'];
 @endphp
 
-<div class="mb-4 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+<div class="mb-4 flex w-full min-w-0 flex-col gap-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
     {{-- Left: Page Title & Breadcrumb --}}
     <div class="min-w-0">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
             {{ $title }}
         </h1>
         @if(!empty($breadcrumbs))
-        <nav class="flex items-center gap-2 text-sm mt-1">
+        <nav class="flex flex-wrap items-center gap-2 text-sm mt-1">
             @foreach($breadcrumbs as $index => $crumb)
                 @if($index > 0)
                     <i class="bi bi-chevron-right text-gray-400 text-xs"></i>
@@ -63,7 +63,7 @@
     </div>
 
     {{-- Right: Action Buttons --}}
-    <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
+    <div class="flex w-full min-w-0 flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
         {{-- Custom Right Content (if provided) --}}
         @if($rightContent)
             {!! $rightContent !!}

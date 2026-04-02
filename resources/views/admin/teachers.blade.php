@@ -536,6 +536,211 @@
                             <label class="block text-xs font-medium text-gray-700 mb-1">Bio</label>
                             <textarea name="bio" rows="4" placeholder="Brief biography" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
                         </div>
+                        <div class="mt-6 space-y-4">
+                            <div class="rounded-2xl border border-gray-200 bg-slate-50/80 p-4">
+                                <p class="text-sm font-semibold text-slate-900">Professional & Login</p>
+                                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Username</label>
+                                        <input name="username" placeholder="System login username" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Alternate Email</label>
+                                        <input name="alternate_email" type="email" placeholder="alternate@example.com" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">National ID / Citizenship</label>
+                                        <input name="national_id_number" placeholder="National ID number" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Date of Birth</label>
+                                        <input name="date_of_birth" type="date" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Joining Date <span class="text-red-500">*</span></label>
+                                        <input name="joining_date" type="date" required class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Years of Experience</label>
+                                        <input name="years_of_experience" type="number" min="0" max="80" placeholder="0" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Specialization</label>
+                                        <input name="specialization" placeholder="Subject expertise" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Employment Type</label>
+                                        <select name="employment_type" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
+                                            <option value="">Select type</option>
+                                            <option value="full-time">Full-time</option>
+                                            <option value="part-time">Part-time</option>
+                                            <option value="contract">Contract</option>
+                                        </select>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Previous Institution</label>
+                                        <input name="previous_institution" placeholder="Previous school or college" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Certifications</label>
+                                        <textarea name="certifications_text" rows="3" placeholder="List certifications separated by commas" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rounded-2xl border border-gray-200 bg-white p-4">
+                                <p class="text-sm font-semibold text-slate-900">Teaching Assignment</p>
+                                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Assign Semester</label>
+                                        <select name="assignment_semester" id="add_assignment_semester" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
+                                            <option value="">Select semester</option>
+                                            @foreach($semesterOptions ?? [] as $semesterOption)
+                                                <option value="{{ $semesterOption['value'] }}">{{ $semesterOption['label'] }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Teacher Access Level</label>
+                                        <select name="access_level" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
+                                            <option value="">Select level</option>
+                                            <option value="basic">Basic</option>
+                                            <option value="editor">Editor</option>
+                                            <option value="manager">Manager</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Profile Visibility</label>
+                                        <select name="profile_visibility" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
+                                            <option value="public">Public</option>
+                                            <option value="private">Private</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Subjects Assigned</label>
+                                        <select name="subject_ids[]" id="add_subject_ids" multiple size="7" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></select>
+                                        <p class="mt-1 text-xs text-gray-500">Choose a semester to filter the subjects.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rounded-2xl border border-gray-200 bg-slate-50/80 p-4">
+                                <p class="text-sm font-semibold text-slate-900">Contact & Emergency</p>
+                                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Secondary Phone</label>
+                                        <input name="secondary_phone" type="tel" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" placeholder="Secondary phone" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Emergency Contact Name</label>
+                                        <input name="emergency_contact_name" placeholder="Emergency contact name" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Emergency Contact Phone</label>
+                                        <input name="emergency_contact_phone" type="tel" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" placeholder="Emergency phone" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Emergency Relationship</label>
+                                        <input name="emergency_relationship" placeholder="Father / Mother / Guardian" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Address</label>
+                                        <textarea name="address" rows="3" placeholder="Street, city, postal code" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Staff Room / Office</label>
+                                        <input name="staff_room_location" placeholder="Office location" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Employee Type</label>
+                                        <select name="employee_type" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
+                                            <option value="">Select employee type</option>
+                                            <option value="permanent">Permanent</option>
+                                            <option value="temporary">Temporary</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Work Shift</label>
+                                        <select name="work_shift" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
+                                            <option value="">Select shift</option>
+                                            <option value="morning">Morning</option>
+                                            <option value="day">Day</option>
+                                            <option value="evening">Evening</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Timetable Assignment</label>
+                                        <input name="timetable_assignment" placeholder="Optional timetable link or code" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rounded-2xl border border-gray-200 bg-white p-4">
+                                <p class="text-sm font-semibold text-slate-900">Payroll, Health & Notes</p>
+                                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Salary</label>
+                                        <input name="salary" type="number" step="0.01" min="0" placeholder="0.00" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Bank Name</label>
+                                        <input name="bank_name" placeholder="Bank name" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Bank Account Number</label>
+                                        <input name="bank_account_number" placeholder="Account number" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Tax ID Number</label>
+                                        <input name="tax_identification_number" placeholder="Tax identification number" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Blood Group</label>
+                                        <select name="blood_group" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors">
+                                            <option value="">Select group</option>
+                                            @foreach(['A+','A-','B+','B-','AB+','AB-','O+','O-'] as $group)
+                                                <option value="{{ $group }}">{{ $group }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Medical Conditions</label>
+                                        <input name="medical_conditions" placeholder="Optional medical conditions" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Emergency Notes</label>
+                                        <textarea name="emergency_notes" rows="3" placeholder="Emergency remarks and instructions" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Social Links</label>
+                                        <textarea name="social_links" rows="2" placeholder="LinkedIn, portfolio, etc." class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Notes</label>
+                                        <textarea name="notes" rows="3" placeholder="Internal remarks" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-slate-700 dark:text-white transition-colors"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rounded-2xl border border-gray-200 bg-slate-50/80 p-4">
+                                <p class="text-sm font-semibold text-slate-900">Documents</p>
+                                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Resume / CV</label>
+                                        <input name="resume" type="file" accept=".pdf,.doc,.docx" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Certificates</label>
+                                        <input name="certificates[]" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">ID Proof</label>
+                                        <input name="id_proof" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm shadow-sm dark:bg-slate-700 dark:text-white transition-colors" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="teacher-form-actions mt-6 flex items-center justify-end gap-3">

@@ -7,6 +7,139 @@
     <title>@yield('title', 'IT Department Management System (IT-DMS)') - Teacher</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        document.documentElement.classList.add('teacher-ui-enhanced');
+    </script>
+    <style>
+        html.teacher-ui-enhanced:not(.dark) {
+            --teacher-surface-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 249, 250, 0.97));
+            --teacher-surface-border: rgba(241, 213, 219, 0.95);
+            --teacher-surface-shadow: 0 28px 56px -40px rgba(148, 19, 52, 0.24);
+            --teacher-soft-shadow: 0 18px 34px -28px rgba(15, 23, 42, 0.16);
+            --teacher-focus-ring: 0 0 0 4px rgba(244, 63, 94, 0.12);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell {
+            color: #0f172a;
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-page-header {
+            margin-bottom: 1.75rem;
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-page-header-title {
+            letter-spacing: -0.02em;
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-page-header-btn,
+        html.teacher-ui-enhanced:not(.dark) .teacher-page-primary-btn,
+        html.teacher-ui-enhanced:not(.dark) .teacher-page-secondary-btn,
+        html.teacher-ui-enhanced:not(.dark) .teacher-action-pill {
+            border-radius: 999px;
+            font-weight: 700;
+            box-shadow: 0 16px 28px -20px rgba(15, 23, 42, 0.34);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-stats-grid {
+            margin-bottom: 1.75rem;
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-stat-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            border-color: var(--teacher-surface-border);
+            background: var(--teacher-surface-bg);
+            box-shadow: var(--teacher-surface-shadow);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-stat-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -22% -55% auto;
+            width: 7rem;
+            height: 7rem;
+            border-radius: 999px;
+            background: radial-gradient(circle, rgba(251, 113, 133, 0.18), rgba(251, 113, 133, 0));
+            pointer-events: none;
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-filter-panel {
+            border-radius: 28px;
+            border-color: var(--teacher-surface-border);
+            background: var(--teacher-surface-bg);
+            box-shadow: var(--teacher-surface-shadow);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell main {
+            color: inherit;
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded-lg.border,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded-xl.border,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded-2xl.border,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell section.bg-white.rounded-lg.border,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell section.bg-white.rounded-xl.border,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell form.bg-white.rounded-lg.border,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell form.bg-white.rounded-xl.border {
+            border-color: var(--teacher-surface-border);
+            background: var(--teacher-surface-bg);
+            box-shadow: var(--teacher-surface-shadow);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell table thead,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell thead.bg-gray-50,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell thead.dark\:bg-gray-700,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell thead.dark\:bg-slate-700,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .bg-gray-50.border-b {
+            background: linear-gradient(180deg, #fff5f7, #fffafb);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell tbody tr:hover {
+            background: linear-gradient(90deg, rgba(255, 241, 242, 0.72), rgba(255, 255, 255, 0.97));
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell select,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell textarea {
+            border-radius: 16px;
+            border-color: #e5d4d9;
+            background-color: #fffdfd;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):focus,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell select:focus,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell textarea:focus {
+            border-color: #f43f5e;
+            box-shadow: var(--teacher-focus-ring);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.bg-red-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.bg-blue-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.bg-green-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-red-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-blue-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-green-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .bg-red-600.text-white,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .bg-blue-600.text-white,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .bg-green-600.text-white {
+            border-radius: 999px;
+            box-shadow: 0 16px 28px -20px rgba(15, 23, 42, 0.34);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.border,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.border {
+            border-radius: 999px;
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .rounded-full.bg-red-100,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .rounded-full.bg-blue-100,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .rounded-full.bg-green-100,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .rounded-full.bg-purple-100 {
+            box-shadow: var(--teacher-soft-shadow);
+        }
+    </style>
     @yield('styles')
     @stack('styles')
 </head>
@@ -61,7 +194,7 @@
             @include('teacher.components.teacherheader')
 
             <!-- Page Content -->
-            <main class="flex-1 overflow-auto">
+            <main class="teacher-content-shell flex-1 overflow-auto">
                 <div class="p-6 lg:p-8">
                     @yield('content')
                 </div>

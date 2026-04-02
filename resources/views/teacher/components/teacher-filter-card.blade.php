@@ -28,7 +28,7 @@
     $hideFilterButton = $hideFilterButton ?? false;
 @endphp
 
-<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-5 mb-6">
+<div class="teacher-filter-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-5 mb-6">
     <form action="{{ $formAction }}" method="GET" id="filterForm" class="space-y-4">
         {{-- Filter Fields Grid --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -141,7 +141,7 @@
         <div class="flex flex-wrap items-center gap-2 pt-2">
             <button 
                 type="submit" 
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:ring-offset-2 dark:focus:ring-offset-slate-800 transition-colors shadow-sm">
+                class="teacher-page-primary-btn inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-600 text-white rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:ring-offset-2 dark:focus:ring-offset-slate-800 transition-colors shadow-sm">
                 <i class="bi bi-funnel"></i>
                 {{ __('Apply Filters') }}
             </button>
@@ -150,7 +150,7 @@
                 @if($resetRoute !== '#')
                     <a 
                         href="{{ $resetRoute }}" 
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
+                        class="teacher-page-secondary-btn inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
                     >
                         <i class="bi bi-arrow-counterclockwise"></i>
                         {{ __('Reset') }}
@@ -159,7 +159,7 @@
                     <button 
                         type="button" 
                         onclick="document.getElementById('filterForm').reset(); document.getElementById('filterForm').submit();"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
+                        class="teacher-page-secondary-btn inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-300 dark:border-slate-500 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
                     >
                         <i class="bi bi-arrow-counterclockwise"></i>
                         {{ __('Reset') }}

@@ -85,6 +85,9 @@ class ParentController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required','email', Rule::unique('users','email')],
             'phone' => 'nullable|digits:10',
+            'parent_code' => ['nullable', 'string', 'max:20', Rule::unique('parents', 'parent_code')],
+            'occupation' => 'nullable|string|max:100',
+            'address' => 'nullable|string',
             'relationship' => 'nullable|string|max:100',
             'bio' => 'nullable|string',
             'status' => 'nullable|string',
@@ -107,7 +110,7 @@ class ParentController extends Controller
 
         // Create parent record with profile fields
         $parent = $user->parent()->create([
-            'parent_code' => 'P' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+            'parent_code' => $data['parent_code'] ?? ('P' . str_pad($user->id, 4, '0', STR_PAD_LEFT)),
             'occupation' => $data['occupation'] ?? null,
             'gender' => $data['gender'] ?? null,
             'phone' => $data['phone'] ?? null,
@@ -154,6 +157,54 @@ class ParentController extends Controller
         }
 
         return redirect()->route('admin.parents')->with($credentialsEmailSent ? 'success' : 'warning', $message);
+    }
+
+    public function lookupByEmail(Request $request)
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $parent = User::where('role', 'parent')
+            ->with('parent')
+            ->where('email', $data['email'])
+            ->first();
+
+        if (!$parent) {
+            return response()->json([
+                'found' => false,
+            ]);
+        }
+
+        $children = Student::where('parent_id', $parent->id)
+            ->with('user')
+            ->get()
+            ->map(fn ($student) => [
+                'id' => $student->user?->id,
+                'name' => $student->user?->name,
+                'email' => $student->user?->email,
+                'roll_no' => $student->roll_no,
+                'semester' => $student->semester,
+            ])
+            ->values();
+
+        return response()->json([
+            'found' => true,
+            'parent' => [
+                'id' => $parent->id,
+                'name' => $parent->name,
+                'email' => $parent->email,
+                'phone' => $parent->parent->phone ?? $parent->phone,
+                'occupation' => $parent->parent->occupation ?? null,
+                'address' => $parent->parent->address ?? null,
+                'bio' => $parent->parent->bio ?? null,
+                'status' => $parent->parent->status ?? 'active',
+                'gender' => $parent->parent->gender ?? null,
+                'parent_code' => $parent->parent->parent_code ?? null,
+                'children_count' => $children->count(),
+                'children' => $children,
+            ],
+        ]);
     }
 
     public function getStudents()

@@ -6,16 +6,23 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Student;
+use App\Models\Attendance;
+use App\Models\ExamMark;
+use App\Models\Mark;
+use App\Models\ParentModel;
 use App\Models\Department;
 use App\Models\Semester;
+use App\Models\Subject;
 use App\Models\AuditLog;
 use App\Notifications\StudentAccountNotification;
+use App\Notifications\ParentAccountNotification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class StudentController extends Controller
@@ -295,6 +302,7 @@ class StudentController extends Controller
         try {
             \DB::beginTransaction();
             $data = $this->normalizeStudentData($data);
+            $parentAccount = $this->resolveParentAccountFromStudentData($data);
 
             $password = Str::random(10);
 
@@ -305,7 +313,7 @@ class StudentController extends Controller
             $user->role = 'student';
             $user->save();
 
-            $student = new Student($this->buildStudentData($data));
+            $student = new Student($this->buildStudentData($data, $parentAccount['parent']?->id));
             $student->user_id = $user->id;
             $student->save();
 
@@ -319,6 +327,17 @@ class StudentController extends Controller
             } catch (\Exception $e) {
                 $credentialsEmailSent = false;
                 \Illuminate\Support\Facades\Log::error('Failed to send student notification: ' . $e->getMessage());
+            }
+
+            if (($parentAccount['created'] ?? false) && !empty($parentAccount['parent'])) {
+                try {
+                    $parentAccount['parent']->notify(new ParentAccountNotification(
+                        $parentAccount['password'],
+                        $parentAccount['notification_context'] ?? []
+                    ));
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to send parent notification: ' . $e->getMessage());
+                }
             }
 
             // Log the activity
@@ -336,6 +355,7 @@ class StudentController extends Controller
                     'student_roll_no' => $student->roll_no,
                     'student_semester' => $student->semester,
                     'student_department' => $student->department,
+                    'parent_id' => $student->parent_id,
                 ],
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
@@ -372,13 +392,23 @@ class StudentController extends Controller
 
     public function show($id)
     {
-        $student = User::where('role','student')->with('student')->findOrFail($id);
+        $student = User::where('role', 'student')
+            ->with([
+                'student.parentUser.parent',
+                'student.attendanceRecords.subject',
+                'student.examMarks.exam.subject',
+                'student.marks.subject',
+                'student.subjects.teacherAssignments.teacher.user',
+            ])
+            ->findOrFail($id);
         // If request is AJAX, return a lightweight modal partial so the list page can inject it
         if (request()->ajax() || request()->wantsJson()) {
             return view('admin.partials.student-modal', compact('student'));
         }
 
-        return view('admin.students.show', compact('student'));
+        return view('admin.students.show', array_merge([
+            'student' => $student,
+        ], $this->buildStudentShowViewData($student)));
     }
 
     public function edit($id)
@@ -495,13 +525,14 @@ class StudentController extends Controller
             \DB::beginTransaction();
 
             $data = $this->normalizeStudentData($data);
+            $student = $user->student ?: new Student(['user_id' => $user->id]);
+            $parentAccount = $this->resolveParentAccountFromStudentData($data, $student->parent_id);
 
             $user->fill($this->buildUserData($data));
             $user->role = 'student';
             $user->save();
 
-            $student = $user->student ?: new Student(['user_id' => $user->id]);
-            $student->fill($this->buildStudentData($data));
+            $student->fill($this->buildStudentData($data, $parentAccount['parent']?->id ?? $student->parent_id));
             $student->user_id = $user->id;
             $student->save();
 
@@ -674,9 +705,373 @@ class StudentController extends Controller
         }
     }
 
+    private function resolveParentAccountFromStudentData(array $data, ?int $fallbackParentId = null): array
+    {
+        $parentEmail = trim((string) ($data['parent_email'] ?? ''));
+
+        if ($parentEmail === '') {
+            $fallbackParent = $fallbackParentId
+                ? User::where('role', 'parent')->with('parent')->find($fallbackParentId)
+                : null;
+
+            return [
+                'parent' => $fallbackParent,
+                'created' => false,
+                'password' => null,
+                'notification_context' => [],
+            ];
+        }
+
+        $existingParent = User::where('email', $parentEmail)->with('parent')->first();
+
+        if ($existingParent && $existingParent->role !== 'parent') {
+            throw ValidationException::withMessages([
+                'parent_email' => 'This email is already used by another account type.',
+            ]);
+        }
+
+        $created = false;
+        $password = null;
+        $parentUser = $existingParent ?: new User();
+
+        if (!$existingParent) {
+            $created = true;
+            $password = Str::random(10);
+            $parentUser->password = Hash::make($password);
+        }
+
+        $parentUser->name = filled($data['parent_name'] ?? null)
+            ? trim((string) $data['parent_name'])
+            : ($parentUser->name ?: trim((string) ($data['name'] ?? '')));
+        $parentUser->email = $parentEmail;
+        $parentUser->phone = filled($data['parent_phone'] ?? null)
+            ? preg_replace('/\D+/', '', (string) $data['parent_phone'])
+            : ($parentUser->phone ?? null);
+        $parentUser->bio = filled($data['parent_bio'] ?? null)
+            ? trim((string) $data['parent_bio'])
+            : ($parentUser->bio ?? null);
+        $parentUser->role = 'parent';
+        $parentUser->save();
+
+        $parentProfile = $parentUser->parent ?: new ParentModel();
+        $parentProfile->user_id = $parentUser->id;
+        $parentProfile->parent_code = $parentProfile->parent_code ?: $this->generateParentCode($parentUser->id);
+        $parentProfile->occupation = filled($data['parent_occupation'] ?? null)
+            ? trim((string) $data['parent_occupation'])
+            : ($parentProfile->occupation ?? null);
+        $parentProfile->phone = filled($data['parent_phone'] ?? null)
+            ? preg_replace('/\D+/', '', (string) $data['parent_phone'])
+            : ($parentProfile->phone ?? null);
+        $parentProfile->address = filled($data['parent_address'] ?? null)
+            ? trim((string) $data['parent_address'])
+            : ($parentProfile->address ?? null);
+        $parentProfile->bio = filled($data['parent_bio'] ?? null)
+            ? trim((string) $data['parent_bio'])
+            : ($parentProfile->bio ?? null);
+        $parentProfile->status = filled($data['parent_status'] ?? null)
+            ? (string) $data['parent_status']
+            : ($parentProfile->status ?? 'active');
+        $parentProfile->gender = filled($data['parent_gender'] ?? null)
+            ? (string) $data['parent_gender']
+            : ($parentProfile->gender ?? null);
+        $parentProfile->save();
+
+        return [
+            'parent' => $parentUser->fresh(['parent']),
+            'created' => $created,
+            'password' => $password,
+            'notification_context' => [
+                'student_name' => $data['name'] ?? '',
+                'student_email' => $data['email'] ?? '',
+                'student_roll_no' => $data['student_id'] ?? '',
+                'relationship' => $data['parent_relationship'] ?? '',
+                'parent_name' => $parentUser->name,
+                'parent_email' => $parentUser->email,
+            ],
+        ];
+    }
+
+    private function generateParentCode(int $userId): string
+    {
+        return 'P' . str_pad((string) $userId, 4, '0', STR_PAD_LEFT);
+    }
+
+    private function buildStudentShowViewData(User $student): array
+    {
+        $profile = $student->student;
+        $parentUser = $profile?->parentUser;
+        $parentProfile = $parentUser?->parent;
+
+        $attendanceTimeline = collect($profile?->attendanceRecords ?? [])
+            ->sortByDesc(fn (Attendance $record) => optional($record->date)?->timestamp ?? optional($record->created_at)?->timestamp ?? 0)
+            ->values();
+
+        $examMarkTimeline = collect($profile?->examMarks ?? [])
+            ->sortByDesc(fn (ExamMark $mark) => optional($mark->exam?->exam_date)?->timestamp ?? optional($mark->graded_at)?->timestamp ?? optional($mark->updated_at)?->timestamp ?? 0)
+            ->values();
+
+        $legacyMarkTimeline = collect($profile?->marks ?? [])
+            ->sortByDesc(fn (Mark $mark) => optional($mark->date)?->timestamp ?? optional($mark->created_at)?->timestamp ?? 0)
+            ->values();
+
+        $attendanceRecords = $attendanceTimeline->map(function (Attendance $record) {
+            return [
+                'id' => $record->id,
+                'subject_id' => $record->subject_id,
+                'subject_name' => $record->subject?->subject_name ?? ($record->subject ?? 'Subject'),
+                'subject_code' => $record->subject?->subject_code,
+                'status' => $record->status,
+                'status_label' => ucfirst((string) $record->status),
+                'remarks' => $record->remarks,
+                'date' => $record->date,
+                'date_label' => optional($record->date)?->format('M d, Y') ?? 'Date pending',
+                'sort_key' => optional($record->date)?->timestamp ?? optional($record->created_at)?->timestamp ?? 0,
+            ];
+        });
+
+        $attendanceBySubject = $attendanceTimeline
+            ->groupBy('subject_id')
+            ->map(function ($records) {
+                $records = collect($records)->sortByDesc(fn (Attendance $record) => optional($record->date)?->timestamp ?? optional($record->created_at)?->timestamp ?? 0)->values();
+                $total = $records->count();
+                $present = $records->where('status', 'present')->count();
+                $absent = $records->where('status', 'absent')->count();
+                $late = $records->where('status', 'late')->count();
+                $leave = $records->whereIn('status', ['leave', 'excused'])->count();
+                $first = $records->first();
+
+                return [
+                    'subject_id' => $first?->subject_id,
+                    'subject_name' => $first?->subject?->subject_name ?? ($first?->subject ?? 'Subject'),
+                    'subject_code' => $first?->subject?->subject_code,
+                    'total' => $total,
+                    'present' => $present,
+                    'absent' => $absent,
+                    'late' => $late,
+                    'leave' => $leave,
+                    'percentage' => $total > 0 ? round(($present / $total) * 100, 1) : 100,
+                    'latest_status' => $first?->status,
+                    'latest_status_label' => ucfirst((string) ($first?->status ?? '')),
+                ];
+            })
+            ->sortByDesc('percentage')
+            ->values();
+
+        $examMarks = $examMarkTimeline->map(function (ExamMark $mark) {
+            $examDate = $mark->exam?->exam_date;
+            $percentage = $mark->percentage ?? $mark->calculatePercentage();
+            $status = $mark->isAbsent() ? 'absent' : ($mark->isPassedAllComponents() ? 'pass' : 'fail');
+
+            return [
+                'id' => $mark->id,
+                'subject_id' => $mark->subject_id,
+                'subject_name' => $mark->subject?->subject_name ?? 'Subject',
+                'subject_code' => $mark->subject?->subject_code,
+                'exam_name' => $mark->exam?->exam_name ?? 'Exam',
+                'category_label' => $mark->exam?->formatted_category ?? 'Exam',
+                'type_label' => $mark->exam?->formatted_type ?? 'Assessment',
+                'date' => $examDate,
+                'date_label' => $examDate?->format('M d, Y') ?? 'Date pending',
+                'obtained_marks' => round((float) $mark->effective_obtained_marks, 2),
+                'full_marks' => round((float) $mark->effective_full_marks, 2),
+                'percentage' => $percentage !== null ? round((float) $percentage, 2) : null,
+                'grade' => $mark->calculateGrade(),
+                'status' => $status,
+                'status_label' => match ($status) {
+                    'pass' => 'Pass',
+                    'fail' => 'Needs Attention',
+                    'absent' => 'Absent',
+                    default => 'Pending',
+                },
+                'remarks' => $mark->remarks,
+                'sort_key' => optional($examDate)?->timestamp ?? optional($mark->graded_at)?->timestamp ?? optional($mark->updated_at)?->timestamp ?? 0,
+            ];
+        });
+
+        $legacyMarks = $legacyMarkTimeline->map(function (Mark $mark) {
+            $markDate = $mark->date;
+            $percentage = $mark->percentage;
+            $status = $percentage >= 40 ? 'pass' : 'fail';
+
+            return [
+                'id' => $mark->id,
+                'subject_id' => $mark->subject_id,
+                'subject_name' => $mark->subject?->subject_name ?? 'Subject',
+                'subject_code' => $mark->subject?->subject_code,
+                'exam_name' => ucfirst(str_replace('_', ' ', $mark->exam_type ?? 'mark')),
+                'category_label' => 'Recorded Mark',
+                'type_label' => ucfirst(str_replace('_', ' ', $mark->exam_type ?? 'mark')),
+                'date' => $markDate,
+                'date_label' => optional($markDate)?->format('M d, Y') ?? 'Date pending',
+                'obtained_marks' => round((float) $mark->marks_obtained, 2),
+                'full_marks' => round((float) $mark->full_marks, 2),
+                'percentage' => $percentage !== null ? round((float) $percentage, 2) : null,
+                'grade' => $percentage >= 90 ? 'A+' : ($percentage >= 80 ? 'A' : ($percentage >= 70 ? 'B+' : ($percentage >= 60 ? 'B' : ($percentage >= 50 ? 'C+' : ($percentage >= 40 ? 'C' : 'F'))))),
+                'status' => $status,
+                'status_label' => $status === 'pass' ? 'Pass' : 'Needs Attention',
+                'remarks' => null,
+                'sort_key' => optional($markDate)?->timestamp ?? optional($mark->created_at)?->timestamp ?? 0,
+            ];
+        });
+
+        $markTimeline = $examMarks
+            ->concat($legacyMarks)
+            ->sortByDesc('sort_key')
+            ->values();
+
+        $marksWithPercentage = $markTimeline->filter(fn ($mark) => $mark['percentage'] !== null);
+        $averageMark = $marksWithPercentage->isNotEmpty() ? round((float) $marksWithPercentage->avg('percentage'), 1) : 0;
+
+        $subjectPerformance = collect($profile?->subjects ?? [])
+            ->map(function ($subject) use ($attendanceBySubject, $markTimeline) {
+                $teacherAssignment = $subject->teacherAssignments->firstWhere('role', 'primary')
+                    ?? $subject->teacherAssignments->first();
+                $subjectAttendance = $attendanceBySubject->firstWhere('subject_id', $subject->id) ?? [
+                    'total' => 0,
+                    'present' => 0,
+                    'absent' => 0,
+                    'late' => 0,
+                    'leave' => 0,
+                    'percentage' => 100,
+                ];
+
+                $subjectMarks = $markTimeline->where('subject_id', $subject->id)->values();
+                $markAverage = $subjectMarks->whereNotNull('percentage')->isNotEmpty()
+                    ? round((float) $subjectMarks->whereNotNull('percentage')->avg('percentage'), 1)
+                    : null;
+
+                return [
+                    'id' => $subject->id,
+                    'name' => $subject->subject_name,
+                    'code' => $subject->subject_code,
+                    'semester' => $subject->semester,
+                    'teacher_name' => $teacherAssignment?->teacher?->user?->name,
+                    'attendance_percentage' => $subjectAttendance['percentage'] ?? 100,
+                    'attendance_total' => $subjectAttendance['total'] ?? 0,
+                    'marks_average' => $markAverage,
+                    'marks_count' => $subjectMarks->count(),
+                ];
+            })
+            ->sortByDesc('attendance_percentage')
+            ->values();
+
+        $attendanceSummary = [
+            'total' => $attendanceRecords->count(),
+            'present' => $attendanceRecords->where('status', 'present')->count(),
+            'absent' => $attendanceRecords->where('status', 'absent')->count(),
+            'late' => $attendanceRecords->where('status', 'late')->count(),
+            'leave' => $attendanceRecords->whereIn('status', ['leave', 'excused'])->count(),
+            'percentage' => $attendanceRecords->count() > 0
+                ? round(($attendanceRecords->where('status', 'present')->count() / $attendanceRecords->count()) * 100, 1)
+                : 100,
+        ];
+
+        $markSummary = [
+            'total' => $markTimeline->count(),
+            'average' => $averageMark,
+            'pass' => $markTimeline->where('status', 'pass')->count(),
+            'fail' => $markTimeline->where('status', 'fail')->count(),
+            'absent' => $markTimeline->where('status', 'absent')->count(),
+            'latest' => $markTimeline->first(),
+        ];
+
+        $photoUrl = $this->storageUrl($profile?->profile_photo_path ?: $student->profile_photo_path) ?? $student->profile_photo_url;
+        $idDocument = $profile?->id_document_path ? [
+            'name' => basename($profile->id_document_path),
+            'path' => $profile->id_document_path,
+            'url' => $this->storageUrl($profile->id_document_path),
+        ] : null;
+        $certificates = collect($profile?->certificate_paths ?? [])
+            ->filter()
+            ->values()
+            ->map(fn ($path) => [
+                'name' => basename($path),
+                'path' => $path,
+                'url' => $this->storageUrl($path),
+            ]);
+
+        return [
+            'studentProfile' => $profile,
+            'photoUrl' => $photoUrl,
+            'attendanceSummary' => $attendanceSummary,
+            'attendanceRecords' => $attendanceRecords->take(10),
+            'attendanceBySubject' => $attendanceBySubject,
+            'markSummary' => $markSummary,
+            'markTimeline' => $markTimeline->take(10),
+            'subjectPerformance' => $subjectPerformance->take(6),
+            'parentInfo' => [
+                'name' => $parentUser?->name,
+                'email' => $parentUser?->email,
+                'phone' => $parentProfile?->phone ?? $parentUser?->phone,
+                'occupation' => $parentProfile?->occupation,
+                'address' => $parentProfile?->address,
+                'gender' => $parentProfile?->gender,
+                'status' => $parentProfile?->status ?? 'active',
+                'parent_code' => $parentProfile?->parent_code,
+                'bio' => $parentProfile?->bio,
+                'children_count' => $parentUser ? Student::where('parent_id', $parentUser->id)->count() : 0,
+            ],
+            'documents' => [
+                'id_document' => $idDocument,
+                'certificates' => $certificates,
+            ],
+            'quickStats' => [
+                'attendance' => $attendanceSummary['percentage'],
+                'marks' => $averageMark,
+                'subjects' => $subjectPerformance->count(),
+                'documents' => ($idDocument ? 1 : 0) + $certificates->count(),
+            ],
+            'notesValue' => $profile?->notes ?? $profile?->bio ?? $student->bio,
+            'basicInfo' => [
+                'name' => $student->name,
+                'email' => $student->email,
+                'username' => $student->username,
+                'phone' => $profile?->phone ?? $student->phone,
+                'student_id' => $profile?->roll_no,
+                'department' => $profile?->department ?? $student->department,
+                'program' => $profile?->program,
+                'semester' => $profile?->semester,
+                'section' => $profile?->section,
+                'academic_year' => $profile?->academic_year,
+                'academic_year_bs' => $profile?->academic_year_bs,
+                'date_of_birth' => optional($profile?->date_of_birth)?->format('Y-m-d') ?? null,
+                'date_of_birth_bs' => $profile?->date_of_birth_bs,
+                'gender' => $profile?->gender,
+                'blood_group' => $profile?->blood_group,
+                'national_id_number' => $profile?->national_id_number,
+                'secondary_phone' => $profile?->secondary_phone,
+                'emergency_contact' => $profile?->emergency_contact,
+                'emergency_contact_name' => $profile?->emergency_contact_name,
+                'emergency_relationship' => $profile?->emergency_relationship,
+                'address' => $profile?->address,
+                'city' => $profile?->city,
+                'state_province' => $profile?->state_province,
+                'postal_code' => $profile?->postal_code,
+                'country' => $profile?->country,
+                'medical_conditions' => $profile?->medical_conditions,
+                'allergies' => $profile?->allergies,
+                'disability_status' => $profile?->disability_status,
+                'status' => $profile?->status ?? 'active',
+                'is_active' => (bool) ($profile?->is_active ?? true),
+                'is_alumni' => (bool) ($profile?->is_alumni ?? false),
+                'enrollment_date' => optional($profile?->enrollment_date)?->format('Y-m-d') ?? null,
+                'expected_graduation_year' => $profile?->expected_graduation_year,
+            ],
+        ];
+    }
+
     private function validateStudentData(Request $request, ?User $user = null): array
     {
         $userId = $user?->id;
+        $parentRules = $userId
+            ? ['nullable', 'string', 'max:255']
+            : ['required', 'string', 'max:255'];
+        $parentEmailRules = $userId
+            ? ['nullable', 'email', 'max:255']
+            : ['required', 'email', 'max:255'];
+        $parentPhoneRules = $userId
+            ? ['nullable', 'digits:10']
+            : ['required', 'digits:10'];
 
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -692,6 +1087,15 @@ class StudentController extends Controller
             'academic_year_bs' => ['nullable', 'string', 'max:20'],
             'enrollment_date' => ['nullable', 'date'],
             'expected_graduation_year' => ['nullable', 'digits:4'],
+            'parent_name' => $parentRules,
+            'parent_email' => $parentEmailRules,
+            'parent_phone' => $parentPhoneRules,
+            'parent_gender' => ['nullable', 'string', 'max:20'],
+            'parent_occupation' => ['nullable', 'string', 'max:100'],
+            'parent_address' => ['nullable', 'string'],
+            'parent_bio' => ['nullable', 'string'],
+            'parent_status' => ['nullable', Rule::in(['active', 'pending', 'inactive'])],
+            'parent_relationship' => ['nullable', 'string', 'max:100'],
             'date_of_birth' => ['required', 'date'],
             'date_of_birth_bs' => ['nullable', 'string', 'max:20'],
             'gender' => ['nullable', 'string', 'max:20'],
@@ -753,7 +1157,7 @@ class StudentController extends Controller
         ];
     }
 
-    private function buildStudentData(array $data): array
+    private function buildStudentData(array $data, ?int $parentId = null): array
     {
         $notes = $data['notes'] ?? null;
 
@@ -761,7 +1165,7 @@ class StudentController extends Controller
             'roll_no' => $data['student_id'] ?? null,
             'semester' => $data['semester'] ?? null,
             'section' => $data['section'] ?? null,
-            'parent_id' => null,
+            'parent_id' => $parentId,
             'date_of_birth' => $data['date_of_birth'] ?? null,
             'date_of_birth_bs' => $data['date_of_birth_bs'] ?? null,
             'batch_year' => $data['batch_year'] ?? null,

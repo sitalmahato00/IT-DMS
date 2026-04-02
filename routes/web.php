@@ -293,6 +293,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/parents', [\App\Http\Controllers\Admin\ParentController::class, 'index'])->name('parents');
     Route::get('/parents/export', [\App\Http\Controllers\Admin\ParentController::class, 'export'])->name('parents.export');
     Route::get('/parents/students', [\App\Http\Controllers\Admin\ParentController::class, 'getStudents'])->name('parents.students');
+    Route::get('/parents/lookup', [\App\Http\Controllers\Admin\ParentController::class, 'lookupByEmail'])->name('parents.lookup');
     Route::post('/parents', [\App\Http\Controllers\Admin\ParentController::class, 'store'])->name('parents.store');
     Route::get('/parents/{id}/edit', [\App\Http\Controllers\Admin\ParentController::class, 'edit'])->name('parents.edit');
     Route::put('/parents/{id}', [\App\Http\Controllers\Admin\ParentController::class, 'update'])->name('parents.update');

@@ -8,6 +8,22 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('styles')
+    <style>
+        @media (max-width: 640px) {
+            #adminLayoutShell .fixed.inset-0.pointer-events-none {
+                opacity: 0.04;
+            }
+
+            #adminLayoutShell .fixed.inset-0.pointer-events-none img {
+                width: 180px;
+                height: 180px;
+            }
+
+            #adminLayoutShell .fixed.inset-0.pointer-events-none i {
+                font-size: 9rem;
+            }
+        }
+    </style>
     <script>
         // Early initialization to prevent sidebar from showing on mobile on page load
         (function() {
@@ -33,7 +49,7 @@
         })();
     </script>
 </head>
-<body class="admin-panel font-sans antialiased bg-gray-50">
+<body class="admin-panel font-sans antialiased bg-gray-50 overflow-x-hidden max-w-full">
     <!-- Department Logo Background for All Pages -->
     <div class="fixed inset-0 pointer-events-none opacity-10 z-0 flex items-center justify-center">
         @if(isset($departmentLogoUrl))
@@ -77,7 +93,7 @@
     @endif
 
     <!-- Main Container -->
-    <div id="adminLayoutShell" class="flex h-screen w-screen">
+    <div id="adminLayoutShell" class="flex h-screen w-full max-w-full overflow-x-hidden">
         <!-- Sidebar Component -->
         @include('admin.components.sidebar')
 

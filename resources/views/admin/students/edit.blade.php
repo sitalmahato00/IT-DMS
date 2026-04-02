@@ -5,12 +5,18 @@
 @section('styles')
 <script>document.documentElement.classList.add('students-ui-enhanced');</script>
 <style>
-    .student-page-shell{max-width:96rem;margin:0 auto}
+    .student-page-shell{max-width:96rem;margin:0 auto;padding-inline:clamp(.5rem,1vw,1rem);width:100%;max-width:100%;overflow-x:hidden}
     .student-page-card,.student-page-section,.student-side-card,.student-sticky-bar{border:1px solid #e2e8f0;border-radius:1.5rem;background:linear-gradient(180deg,#fff 0%,#f8fafc 100%);box-shadow:0 24px 45px -34px rgba(15,23,42,.24)}
     .student-page-hero{position:relative;overflow:hidden;border:1px solid #fecdd3;border-radius:1.5rem;background:linear-gradient(135deg,#fff1f2 0%,#fff 50%,#eff6ff 100%);box-shadow:0 24px 45px -34px rgba(15,23,42,.24)}
     .student-page-hero:after{content:'';position:absolute;right:-3rem;bottom:-4rem;width:13rem;height:13rem;border-radius:999px;background:radial-gradient(circle,rgba(244,63,94,.16),rgba(244,63,94,0) 72%)}
     .student-page-grid{display:grid;grid-template-columns:minmax(0,21rem) minmax(0,1fr);gap:1.5rem;align-items:start}
     .student-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+    .student-page-grid > div,
+    .student-form-grid > div,
+    .student-page-card,
+    .student-page-section,
+    .student-side-card,
+    .student-sticky-bar{min-width:0}
     .student-label{display:block;margin-bottom:.45rem;font-size:.76rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#64748b}
     .student-input,.student-select,.student-textarea,.student-file{width:100%;border:1px solid #cbd5e1;border-radius:1rem;background:#fff;color:#0f172a;transition:border-color .2s ease,box-shadow .2s ease}
     .student-input,.student-select,.student-file{min-height:3rem;padding:.82rem 1rem}
@@ -36,8 +42,20 @@
     #isActiveToggle:checked + .student-toggle{background:#22c55e}
     #isActiveToggle:checked + .student-toggle:after{transform:translateX(1.48rem)}
     .student-sticky-bar{position:sticky;bottom:0;z-index:5;padding:1rem 1.2rem;background:rgba(255,255,255,.94);backdrop-filter:blur(10px)}
+    .student-footer-actions{display:flex;flex-direction:column;gap:.75rem;width:100%}
+    .student-footer-actions > *{width:100%}
+    @media (min-width:640px){.student-footer-actions{width:auto;flex-direction:row}.student-footer-actions > *{width:auto;min-width:9rem}}
     @media (max-width:1024px){.student-page-grid{grid-template-columns:1fr}}
-    @media (max-width:640px){.student-form-grid{grid-template-columns:1fr}.student-sticky-bar{padding:1rem}}
+    @media (max-width:640px){
+        .student-form-grid{grid-template-columns:1fr}
+        .student-page-hero{padding:1rem !important}
+        .student-side-card,.student-page-section{padding:.9rem !important}
+        .student-photo-dropzone{padding:1rem !important}
+        .student-photo-frame{width:6.75rem;height:6.75rem}
+        .student-photo-frame i{font-size:3.5rem}
+        .student-sticky-bar{position:static;bottom:auto;padding:1rem}
+        .student-btn-primary,.student-btn-secondary,.student-btn-soft{width:100%}
+    }
 </style>
 @endsection
 
@@ -104,7 +122,7 @@
         <datalist id="academic-year-list">@foreach($academicYears as $option)<option value="{{ $option }}"></option>@endforeach</datalist>
 
         <div class="student-page-grid">
-            <div class="space-y-6">
+            <div class="space-y-6 min-w-0">
                 <div class="student-side-card p-5">
                     <p class="student-label">Profile Photo</p>
                     <div id="studentPhotoDropzone" class="student-photo-dropzone mt-4 cursor-pointer p-5 text-center">
@@ -152,7 +170,7 @@
                 </div>
             </div>
 
-            <div class="space-y-6">
+            <div class="space-y-6 min-w-0">
                 <div class="student-page-section p-5">
                     <p class="student-label">Basic Information</p>
                     <div class="student-form-grid mt-4">
@@ -283,7 +301,7 @@
 
                 <div class="student-sticky-bar flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <p class="text-sm text-slate-500">Changes are protected with a leave warning until the update is submitted.</p>
-                    <div class="flex flex-col gap-3 sm:flex-row">
+                    <div class="student-footer-actions">
                         <a href="{{ route('admin.students.show', $student->id) }}" class="student-btn-secondary">View Student</a>
                         <a href="{{ route('admin.students') }}" class="student-btn-secondary">Cancel</a>
                         <button type="submit" class="student-btn-primary"><i class="bi bi-arrow-repeat"></i>Update Student</button>

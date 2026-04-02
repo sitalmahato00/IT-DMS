@@ -70,6 +70,14 @@ class Student extends Model
     }
 
     /**
+     * Get the linked parent user account.
+     */
+    public function parentUser()
+    {
+        return $this->belongsTo(User::class, 'parent_id');
+    }
+
+    /**
      * Get attendance records for this student
      */
     public function attendanceRecords()

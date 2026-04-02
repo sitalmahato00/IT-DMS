@@ -190,6 +190,13 @@
 @endsection
 
 @section('content')
+@php
+    $nonAlumniStudentScope = function ($query) {
+        $query->where(function ($subQuery) {
+            $subQuery->where('is_alumni', 0)->orWhereNull('is_alumni');
+        });
+    };
+@endphp
 
 <!-- Page Header -->
 @include('admin.components.admin-page-header', [
@@ -210,9 +217,9 @@
     <div class="students-stats">
         @include('admin.components.admin-stats-cards', [
             'cards' => [
-                ['title' => 'Active Students', 'value' => \App\Models\User::where('role','student')->whereHas('student', fn($q) => $q->where('status','active')->whereNull('is_alumni'))->count(), 'icon' => 'bi-check-circle', 'color' => 'green'],
-                ['title' => 'Inactive Students', 'value' => \App\Models\User::where('role','student')->whereHas('student', fn($q) => $q->where('status','inactive')->whereNull('is_alumni'))->count(), 'icon' => 'bi-x-circle', 'color' => 'red'],
-                ['title' => 'Suspended Students', 'value' => \App\Models\User::where('role','student')->whereHas('student', fn($q) => $q->where('status','suspended')->whereNull('is_alumni'))->count(), 'icon' => 'bi-pause-circle', 'color' => 'yellow'],
+                ['title' => 'Active Students', 'value' => \App\Models\User::where('role','student')->whereHas('student', function ($q) use ($nonAlumniStudentScope) { $nonAlumniStudentScope($q); $q->where('status', 'active'); })->count(), 'icon' => 'bi-check-circle', 'color' => 'green', 'subtitle' => 'Excludes alumni records'],
+                ['title' => 'Inactive Students', 'value' => \App\Models\User::where('role','student')->whereHas('student', function ($q) use ($nonAlumniStudentScope) { $nonAlumniStudentScope($q); $q->where('status', 'inactive'); })->count(), 'icon' => 'bi-x-circle', 'color' => 'red', 'subtitle' => 'Excludes alumni records'],
+                ['title' => 'Suspended Students', 'value' => \App\Models\User::where('role','student')->whereHas('student', function ($q) use ($nonAlumniStudentScope) { $nonAlumniStudentScope($q); $q->where('status', 'suspended'); })->count(), 'icon' => 'bi-pause-circle', 'color' => 'yellow', 'subtitle' => 'Excludes alumni records'],
                 ['title' => 'Alumni', 'value' => \App\Models\User::where('role','student')->whereHas('student', fn($q) => $q->where('is_alumni', 1))->count(), 'icon' => 'bi-mortarboard', 'color' => 'purple'],
             ]
         ])

@@ -16,6 +16,29 @@
     
     <p>Your parent/guardian account has been successfully created by the administrator. You now have access to the IT Department Management System where you can monitor your child's academic progress, attendance, examination results, and important notifications from the department.</p>
 
+    @php
+        $linkedStudentName = $context['student_name'] ?? null;
+        $linkedStudentRollNo = $context['student_roll_no'] ?? null;
+        $relationship = $context['relationship'] ?? null;
+    @endphp
+
+    @if($linkedStudentName || $linkedStudentRollNo || $relationship)
+    <div class="info-box" style="margin-top: 18px;">
+        <strong>Linked Student Information</strong>
+        <div style="margin-top: 10px; line-height: 1.7;">
+            @if($linkedStudentName)
+                <div><strong>Student:</strong> {{ $linkedStudentName }}</div>
+            @endif
+            @if($linkedStudentRollNo)
+                <div><strong>Student ID:</strong> {{ $linkedStudentRollNo }}</div>
+            @endif
+            @if($relationship)
+                <div><strong>Relationship:</strong> {{ $relationship }}</div>
+            @endif
+        </div>
+    </div>
+    @endif
+
     <!-- Credentials Section -->
     <div class="credentials-box">
         <strong>Your Login Credentials:</strong>
@@ -68,4 +91,3 @@
     </p>
 </div>
 @endsection
-
