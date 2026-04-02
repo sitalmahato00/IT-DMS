@@ -49,7 +49,8 @@
             this.activeGroup = this.activeGroup === group ? null : group;
         }
     }"
-    class="hidden lg:flex lg:w-60 bg-white text-slate-900 flex-col fixed lg:static w-64 left-0 z-30 overflow-y-auto transition-all duration-300 shadow-xl border-r border-red-500/40">
+    class="hidden lg:flex lg:w-60 bg-white text-slate-900 flex-col fixed lg:static w-64 max-w-[85vw] left-0 z-[50] overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out shadow-xl border-r border-red-500/40 -translate-x-full lg:translate-x-0 top-0 h-screen lg:h-auto"
+    style="top: 0; height: 100vh; width: 256px;">
     <div
         class="hidden lg:flex flex-col items-center justify-center px-4 py-2 min-h-[88px] bg-[#FF0037] text-white border-b border-red-500">
         @if($department && $department->logo_path)
@@ -361,9 +362,12 @@
 
     @media (max-width: 1023px) {
         #sidebar {
-            top: 40px;
-            height: calc(100vh - 40px);
-            max-height: calc(100vh - 40px);
+            top: 4rem !important;
+            height: calc(100vh - 4rem) !important;
+            max-height: calc(100vh - 4rem) !important;
+            width: min(16rem, 85vw) !important;
+            max-width: 85vw !important;
+            z-index: 60 !important;
         }
     }
 

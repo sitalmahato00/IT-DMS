@@ -8,6 +8,30 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('styles')
+    <script>
+        // Early initialization to prevent sidebar from showing on mobile on page load
+        (function() {
+            const mobileBreakpoint = 1024;
+            const isMobileViewport = function() {
+                return window.innerWidth < mobileBreakpoint;
+            };
+            
+            // Immediately hide sidebar on mobile on page load
+            if (isMobileViewport()) {
+                document.addEventListener('DOMContentLoaded', function() {
+                    const sidebar = document.getElementById('sidebar');
+                    const backdrop = document.getElementById('sidebarBackdrop');
+                    if (sidebar) {
+                        sidebar.classList.add('hidden');
+                        sidebar.classList.add('-translate-x-full');
+                    }
+                    if (backdrop) {
+                        backdrop.classList.add('hidden');
+                    }
+                }, { once: true });
+            }
+        })();
+    </script>
 </head>
 <body class="admin-panel font-sans antialiased bg-gray-50">
     <!-- Department Logo Background for All Pages -->
@@ -53,21 +77,21 @@
     @endif
 
     <!-- Main Container -->
-    <div class="flex h-screen overflow-hidden">
+    <div id="adminLayoutShell" class="flex h-screen w-screen">
         <!-- Sidebar Component -->
         @include('admin.components.sidebar')
 
         <!-- Sidebar Backdrop (for mobile) -->
-        <div id="sidebarBackdrop" class="hidden lg:hidden fixed inset-0 z-20 bg-black bg-opacity-40"></div>
+        <div id="sidebarBackdrop" class="hidden lg:hidden fixed inset-0 z-[45] bg-black/40"></div>
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div id="adminMainPanel" class="flex-1 min-w-0 flex flex-col">
             <!-- Header Component -->
             @include('admin.components.header')
 
             <!-- Page Content -->
-            <main class="flex-1 overflow-y-auto min-h-0">
-                <div class="px-6 py-3 min-h-full">
+            <main id="adminPageContent" class="flex-1 min-w-0 overflow-y-auto overflow-x-hidden min-h-0">
+                <div class="min-h-full w-full px-3 py-3 sm:px-6">
                     @yield('content')
                 </div>
             </main>
@@ -292,62 +316,24 @@
         .animate-slide-in-right { animation: slide-in-right 300ms ease-out; }
     </style>
 
+    <style>
+        @media (max-width: 1023px) {
+            #adminLayoutShell {
+                display: block !important;
+            }
+
+            #adminMainPanel,
+            #adminPageContent,
+            #adminTopHeader {
+                min-width: 100% !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+    </style>
+
     <script>
-        // Mobile Sidebar Toggle
         document.addEventListener('DOMContentLoaded', function() {
-            const sidebarToggle = document.getElementById('sidebarToggle');
-            const sidebar = document.getElementById('sidebar');
-
-                    if (sidebarToggle && sidebar) {
-                        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-
-                        function openSidebar() {
-                            sidebar.classList.remove('hidden');
-                            if (sidebarBackdrop) sidebarBackdrop.classList.remove('hidden');
-                            document.body.classList.add('overflow-hidden');
-                        }
-
-                        function closeSidebar() {
-                            sidebar.classList.add('hidden');
-                            if (sidebarBackdrop) sidebarBackdrop.classList.add('hidden');
-                            document.body.classList.remove('overflow-hidden');
-                        }
-
-                        sidebarToggle.addEventListener('click', function() {
-                            if (sidebar.classList.contains('hidden')) openSidebar();
-                            else closeSidebar();
-                        });
-
-                        // Close sidebar when clicking on a navigation link (mobile)
-                        const navLinks = sidebar.querySelectorAll('a');
-                        navLinks.forEach(link => {
-                            link.addEventListener('click', function() {
-                                if (window.innerWidth < 1024) {
-                                    closeSidebar();
-                                }
-                            });
-                        });
-
-                        // Close when clicking on backdrop
-                        if (sidebarBackdrop) {
-                            sidebarBackdrop.addEventListener('click', function() {
-                                closeSidebar();
-                            });
-                        }
-
-                        // Handle window resize
-                        window.addEventListener('resize', function() {
-                            if (window.innerWidth >= 1024) {
-                                // ensure sidebar visible on desktop and backdrop hidden
-                                sidebar.classList.remove('hidden');
-                                if (sidebarBackdrop) sidebarBackdrop.classList.add('hidden');
-                                document.body.classList.remove('overflow-hidden');
-                            } else if (sidebar.classList.contains('lg:flex')) {
-                                sidebar.classList.add('hidden');
-                            }
-                        });
-                    }
-
             // Handle flash messages from Laravel
             const flashSuccess = document.getElementById('flashSuccess');
             const flashError = document.getElementById('flashError');

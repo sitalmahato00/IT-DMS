@@ -1614,3 +1614,229 @@ html.dark .text-teal-700 {
 html.dark #headerScrollProgressBar {
     background: linear-gradient(to right, #FF0037, #fb923c, #fde047) !important;
 }
+
+/* ================================
+   MOBILE SIDEBAR RESPONSIVE STYLES
+   ================================ */
+
+/* Sidebar animation for mobile */
+#sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 40;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#sidebar.-translate-x-full {
+    transform: translateX(-100%);
+}
+
+#sidebar:not(.-translate-x-full) {
+    transform: translateX(0);
+}
+
+/* Show sidebar on lg screens */
+@media (min-width: 1024px) {
+    #sidebar {
+        position: static;
+        transform: translateX(0) !important;
+        height: auto;
+    }
+}
+
+/* Sidebar backdrop for mobile */
+#sidebarBackdrop {
+    transition: opacity 0.3s ease-in-out;
+}
+
+#sidebarBackdrop.hidden {
+    pointer-events: none;
+}
+
+/* Tables responsive */
+@media (max-width: 640px) {
+    table {
+        font-size: 0.875rem;
+    }
+    
+    table th,
+    table td {
+        padding: 0.5rem 0.25rem;
+    }
+}
+
+/* Modal responsive fixes */
+@media (max-width: 640px) {
+    .fixed.inset-0.z-50 {
+        padding: 0.5rem;
+    }
+    
+    .max-w-2xl {
+        max-width: 95vw;
+    }
+    
+    .max-w-3xl {
+        max-width: 95vw;
+    }
+}
+
+/* ================================
+   MOBILE LAYOUT & OVERFLOW FIXES
+   ================================ */
+
+/* Fix body overflow on mobile */
+body {
+    overflow-x: hidden !important;
+}
+
+html, body {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Sidebar mobile fixes */
+#sidebar {
+    box-sizing: border-box;
+    max-width: 100vw !important;
+}
+
+#sidebar.hidden {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 256px;
+    height: 100vh;
+    transform: translateX(-256px) !important;
+}
+
+#sidebar:not(.hidden) {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 256px;
+    height: 100vh;
+    transform: translateX(0) !important;
+}
+
+/* Ensure main layout doesn't overflow */
+#adminLayoutShell {
+    width: 100vw;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+#adminMainPanel {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+/* Mobile viewport fixes */
+@media (max-width: 1024px) {
+    #sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 256px;
+        max-width: 85vw;
+        height: 100vh;
+        z-index: 50;
+    }
+    
+    #sidebar.hidden {
+        transform: translateX(-100%) !important;
+        visibility: hidden;
+    }
+    
+    #sidebar:not(.hidden) {
+        transform: translateX(0) !important;
+        visibility: visible;
+    }
+    
+    body.overflow-hidden {
+        overflow: hidden !important;
+    }
+}
+
+/* Mobile responsive - allow scrolling */
+@media (max-width: 640px) {
+    html {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    
+    body {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    
+    #adminLayoutShell {
+        width: 100%;
+        overflow-y: auto;
+    }
+}
+
+/* Mobile layout fixes - allow vertical scroll, prevent horizontal */
+#adminLayoutShell {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#adminMainPanel {
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+main#adminPageContent {
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* Mobile viewport fixes */
+@media (max-width: 1024px) {
+    #sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 50;
+        max-width: 85vw;
+    }
+    
+    #sidebar.hidden {
+        transform: translateX(-256px) !important;
+    }
+}
+
+/* Prevent horizontal scroll and ensure no extra space */
+@media (max-width: 640px) {
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    html {
+        width: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    
+    body {
+        width: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    
+    #adminLayoutShell {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+}

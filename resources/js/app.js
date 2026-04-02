@@ -1,6 +1,7 @@
 import './bootstrap';
 
 import Alpine from 'alpinejs';
+import collapse from '@alpinejs/collapse';
 import Chart from 'chart.js/auto';
 import $ from 'jquery';
 
@@ -9,6 +10,9 @@ globalThis.$ = globalThis.jQuery = $;
 
 window.Alpine = Alpine;
 window.Chart = Chart;
+
+// Register Alpine plugins
+Alpine.plugin(collapse);
 
 Alpine.start();
 

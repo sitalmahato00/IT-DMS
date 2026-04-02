@@ -21,6 +21,7 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "@alpinejs/collapse": "^3.15.10",
         "chart.js": "^4.5.1",
         "jquery": "^3.7.1",
         "nepali-date-picker": "^2.0.2"

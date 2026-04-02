@@ -1,7 +1,12 @@
 <!-- Header -->
-<header class="bg-[#FF0037] dark:bg-[#FF0037] shadow-sm border-b border-[#D90033] dark:border-[#D90033] text-white red-header">
-    <div class="px-6 py-0 h-16">
+<header id="adminTopHeader" class="w-full bg-[#FF0037] dark:bg-[#FF0037] shadow-sm border-b border-[#D90033] dark:border-[#D90033] text-white red-header">
+    <div class="px-3 py-0 h-16 sm:px-6">
         <div class="flex items-center justify-between gap-4 h-full">
+            <!-- Mobile Sidebar Toggle Button -->
+            <button id="mobileSidebarToggle" class="lg:hidden p-2 text-white hover:bg-white/15 rounded-lg transition-colors" aria-label="Toggle sidebar menu" title="Toggle menu">
+                <i class="bi bi-list text-xl"></i>
+            </button>
+
             <div class="flex-1 min-w-0">
                 <!-- Quick Action Buttons -->
                 <div class="hidden lg:flex items-center gap-2">
@@ -138,6 +143,159 @@
     document.addEventListener('DOMContentLoaded', function() {
         const localeSelect = document.getElementById('locale-select');
         const notifDropdown = document.getElementById('notifDropdown');
+        
+        // Mobile Sidebar Toggle
+        const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+        const desktopSidebarToggle = document.getElementById('desktopSidebarToggle');
+        const mobileBreakpoint = 1024;
+        let hideSidebarTimer = null;
+
+        function isMobileViewport() {
+            return window.innerWidth < mobileBreakpoint;
+        }
+
+        function clearSidebarHideTimer() {
+            if (hideSidebarTimer) {
+                window.clearTimeout(hideSidebarTimer);
+                hideSidebarTimer = null;
+            }
+        }
+
+        function openMobileSidebar() {
+            if (!sidebar) {
+                return;
+            }
+
+            clearSidebarHideTimer();
+            sidebar.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                sidebar.classList.remove('-translate-x-full');
+            });
+            if (sidebarBackdrop) {
+                sidebarBackdrop.classList.remove('hidden');
+                sidebarBackdrop.style.display = 'block';
+            }
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeMobileSidebar() {
+            if (!sidebar) {
+                return;
+            }
+
+            clearSidebarHideTimer();
+            sidebar.classList.add('-translate-x-full');
+            if (sidebarBackdrop) {
+                sidebarBackdrop.classList.add('hidden');
+                sidebarBackdrop.style.display = '';
+            }
+            document.body.classList.remove('overflow-hidden');
+
+            if (isMobileViewport()) {
+                hideSidebarTimer = window.setTimeout(() => {
+                    if (sidebar.classList.contains('-translate-x-full')) {
+                        sidebar.classList.add('hidden');
+                    }
+                }, 300);
+            } else {
+                sidebar.classList.remove('hidden');
+            }
+        }
+
+        function syncSidebarForViewport() {
+            if (!sidebar) {
+                return;
+            }
+
+            clearSidebarHideTimer();
+
+            if (isMobileViewport()) {
+                sidebar.classList.add('hidden');
+                sidebar.classList.add('-translate-x-full');
+                if (sidebarBackdrop) {
+                    sidebarBackdrop.classList.add('hidden');
+                    sidebarBackdrop.style.display = '';
+                }
+                document.body.classList.remove('overflow-hidden');
+                return;
+            }
+
+            sidebar.classList.remove('hidden');
+            sidebar.classList.remove('-translate-x-full');
+            if (sidebarBackdrop) {
+                sidebarBackdrop.classList.add('hidden');
+                sidebarBackdrop.style.display = '';
+            }
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        syncSidebarForViewport();
+
+        if (mobileSidebarToggle && sidebar) {
+            mobileSidebarToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+
+                if (sidebar.classList.contains('hidden') || sidebar.classList.contains('-translate-x-full')) {
+                    openMobileSidebar();
+                    return;
+                }
+
+                closeMobileSidebar();
+            });
+        }
+
+        if (sidebarBackdrop) {
+            sidebarBackdrop.addEventListener('click', function() {
+                closeMobileSidebar();
+            });
+        }
+
+        const mainPanel = document.getElementById('adminMainPanel');
+        const pageContent = document.getElementById('adminPageContent');
+        [mainPanel, pageContent].forEach((target) => {
+            target?.addEventListener('click', function() {
+                if (!isMobileViewport()) {
+                    return;
+                }
+
+                if (!sidebar.classList.contains('hidden') && !sidebar.classList.contains('-translate-x-full')) {
+                    closeMobileSidebar();
+                }
+            });
+        });
+
+        document.addEventListener('pointerdown', function(e) {
+            if (!isMobileViewport() || !sidebar || sidebar.classList.contains('hidden') || sidebar.classList.contains('-translate-x-full')) {
+                return;
+            }
+
+            if (sidebar.contains(e.target) || mobileSidebarToggle?.contains(e.target)) {
+                return;
+            }
+
+            closeMobileSidebar();
+        });
+
+        window.addEventListener('resize', function() {
+            syncSidebarForViewport();
+        });
+
+        window.adminCloseMobileSidebar = closeMobileSidebar;
+
+        // Close sidebar when clicking on a sidebar navigation link or logout button
+        const sidebarLinks = sidebar?.querySelectorAll('a, form button[type="submit"]');
+        if (sidebarLinks) {
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (isMobileViewport()) {
+                        closeMobileSidebar();
+                    }
+                });
+            });
+        }
+
         if (localeSelect) {
             localeSelect.addEventListener('change', function() {
                 const locale = this.value;
@@ -179,8 +337,6 @@
         }
 
         // Desktop sidebar collapse
-        const desktopSidebarToggle = document.getElementById('desktopSidebarToggle');
-        const sidebar = document.getElementById('sidebar');
         if (desktopSidebarToggle && sidebar) {
             desktopSidebarToggle.addEventListener('click', function() {
                 sidebar.classList.toggle('sidebar-collapsed');
