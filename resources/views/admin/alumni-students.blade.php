@@ -352,8 +352,8 @@
 						</td>
 						<td class="px-6 py-4">
 							<div class="flex items-center gap-3">
-								@if(!empty($student->profile_photo_path))
-									<img src="{{ asset('storage/' . $student->profile_photo_path) }}" alt="avatar" class="alumni-avatar w-10 h-10 rounded-full object-cover">
+								@if(!empty($student->profile_photo_url))
+									<img src="{{ $student->profile_photo_url }}" alt="avatar" class="alumni-avatar w-10 h-10 rounded-full object-cover">
 								@else
 									<div class="alumni-avatar w-10 h-10 bg-gray-100 dark:bg-slate-600 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-300 font-medium text-sm">
 										{{ substr($student->name ?? '', 0, 1) }}

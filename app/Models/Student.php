@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\User;
 use App\Models\ExamMark;
 use Illuminate\Support\Facades\DB;
+use App\Support\Media;
 
 class Student extends Model
 {
@@ -104,6 +105,26 @@ class Student extends Model
     public function marks()
     {
         return $this->hasMany(Mark::class, 'student_id');
+    }
+
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        return Media::publicUrl($this->profile_photo_path);
+    }
+
+    public function getIdDocumentUrlAttribute(): ?string
+    {
+        return Media::publicUrl($this->id_document_path);
+    }
+
+    public function getCertificateUrlsAttribute(): array
+    {
+        return collect($this->certificate_paths ?? [])
+            ->filter()
+            ->map(fn ($path) => Media::publicUrl($path))
+            ->filter()
+            ->values()
+            ->all();
     }
 
     /**

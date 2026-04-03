@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Traits\LogsActivity;
 use App\Models\Course;
 use App\Models\Exam;
+use App\Models\Semester;
 use App\Models\SubjectTeacher;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -33,6 +34,53 @@ class CourseController extends Controller
             $cache[$table] = Schema::hasTable($table);
         }
         return (bool) $cache[$table];
+    }
+
+    private function buildCoursePageData(?Course $course = null): array
+    {
+        $semesters = Semester::orderBy('number')->get();
+
+        $teachers = DB::table('teachers')
+            ->leftJoin('users', 'teachers.user_id', '=', 'users.id')
+            ->select('teachers.id', DB::raw("COALESCE(users.name, 'Unassigned') as name"))
+            ->orderBy('name')
+            ->get();
+
+        $selectedTeacherId = null;
+        if ($course) {
+            if ($this->subjectsHasColumn('teacher_id')) {
+                $selectedTeacherId = $course->teacher_id ?? null;
+            }
+
+            if (!$selectedTeacherId && $this->hasTable('subject_teacher')) {
+                $selectedTeacherId = DB::table('subject_teacher')
+                    ->where('subject_id', $course->id)
+                    ->orderByRaw("CASE WHEN role = 'primary' THEN 0 ELSE 1 END")
+                    ->orderByDesc('assigned_at')
+                    ->orderByDesc('id')
+                    ->value('teacher_id');
+            }
+        }
+
+        return [
+            'course' => $course ?? new Course(),
+            'allTeachers' => $teachers,
+            'labTechnicians' => $teachers,
+            'semesters' => $semesters,
+            'selectedTeacherId' => $selectedTeacherId,
+        ];
+    }
+
+    public function create()
+    {
+        return view('admin.courses.create', $this->buildCoursePageData());
+    }
+
+    public function show(Course $course)
+    {
+        $course->loadMissing(['teacher.user', 'labTechnician.user']);
+
+        return view('admin.course-show', compact('course'));
     }
 
     public function index(Request $request)
@@ -375,13 +423,20 @@ class CourseController extends Controller
                 "credits" => "nullable|integer|min:1|max:10",
                 "status" => "nullable|string|in:active,archived",
                 "description" => "nullable|string|max:500",
+                "description_ne" => "nullable|string|max:500",
                 "prerequisite" => "nullable|string|max:255",
+                "start_date" => "nullable|date",
+                "end_date" => "nullable|date",
                 "remarks" => "nullable|string|max:500",
-                "subject_type" => "nullable|string|in:core,elective,optional",
+                "subject_type" => "nullable|string|in:core,elective,optional,major,project",
                 "has_lab" => "nullable|boolean",
                 "lab_technician_id" => "nullable|exists:teachers,id",
                 "lab_document" => "nullable|file|mimes:pdf,doc,docx,xls,xlsx,zip",
                 "syllabus_document" => "nullable|file|mimes:pdf,doc,docx,xls,xlsx,zip",
+                "theory_percentage" => "nullable|integer|min:0|max:100",
+                "practical_percentage" => "nullable|integer|min:0|max:100",
+                "internal_percentage" => "nullable|integer|min:0|max:100",
+                "external_percentage" => "nullable|integer|min:0|max:100",
                 "practical_full_marks" => "nullable|integer|min:0",
                 "practical_pass_marks" => "nullable|integer|min:0",
                 "practical_obtained_marks" => "nullable|integer|min:0",
@@ -425,13 +480,20 @@ class CourseController extends Controller
                 "credits" => $data["credits"] ?? 3,
                 "status" => $data["status"] ?? "active",
                 "description" => $data["description"] ?? null,
+                "description_ne" => $data["description_ne"] ?? null,
                 "prerequisite" => $data["prerequisite"] ?? null,
+                "start_date" => $data["start_date"] ?? null,
+                "end_date" => $data["end_date"] ?? null,
                 "remarks" => $data["remarks"] ?? null,
                 "subject_type" => $data["subject_type"] ?? "core",
                 "has_lab" => $data["has_lab"] ?? false,
                 "lab_technician_id" => $data["lab_technician_id"] ?? null,
                 "lab_document" => $labDocumentPath,
                 "syllabus_document_path" => $syllabusDocumentPath,
+                "theory_percentage" => $data["theory_percentage"] ?? null,
+                "practical_percentage" => $data["practical_percentage"] ?? null,
+                "internal_percentage" => $data["internal_percentage"] ?? null,
+                "external_percentage" => $data["external_percentage"] ?? null,
                 "practical_full_marks" => $data["practical_full_marks"] ?? null,
                 "practical_pass_marks" => $data["practical_pass_marks"] ?? null,
                 "practical_obtained_marks" => $data["practical_obtained_marks"] ?? null,
@@ -539,11 +601,18 @@ class CourseController extends Controller
                 "credits" => $data["credits"] ?? 3,
                 "status" => $data["status"] ?? "active",
                 "description" => $data["description"] ?? null,
+                "description_ne" => $data["description_ne"] ?? null,
                 "prerequisite" => $data["prerequisite"] ?? null,
+                "start_date" => $data["start_date"] ?? null,
+                "end_date" => $data["end_date"] ?? null,
                 "remarks" => $data["remarks"] ?? null,
                 "subject_type" => $data["subject_type"] ?? "core",
                 "has_lab" => $data["has_lab"] ?? false,
                 "lab_technician_id" => $data["lab_technician_id"] ?? null,
+                "theory_percentage" => $data["theory_percentage"] ?? null,
+                "practical_percentage" => $data["practical_percentage"] ?? null,
+                "internal_percentage" => $data["internal_percentage"] ?? null,
+                "external_percentage" => $data["external_percentage"] ?? null,
                 "practical_full_marks" => $data["practical_full_marks"] ?? null,
                 "practical_pass_marks" => $data["practical_pass_marks"] ?? null,
                 "practical_obtained_marks" => $data["practical_obtained_marks"] ?? null,
@@ -615,11 +684,17 @@ class CourseController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         try {
+            $courseModel = Course::with(['teacher.user', 'labTechnician.user'])->findOrFail($id);
+
+            if (!($request->expectsJson() || $request->ajax())) {
+                return view('admin.courses.edit', $this->buildCoursePageData($courseModel));
+            }
+
             $course = DB::table("subjects")->where("id", $id)->first();
-            
+             
             if (!$course) {
                 return response()->json(["success" => false, "message" => "Course not found"], 404);
             }

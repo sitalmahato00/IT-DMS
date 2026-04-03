@@ -118,11 +118,9 @@
                     <button id="profileToggle" class="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-white/15 transition text-white">
                         @php
                             $user = Auth::user();
-                            $photoPath = $user->profile_photo_path;
-                            $hasFile = !empty($photoPath) && \Illuminate\Support\Facades\Storage::disk('public')->exists($photoPath);
                         @endphp
-                        @if($hasFile)
-                            <img src="{{ asset('storage/' . $photoPath) }}" alt="{{ $user->name }}" class="w-7 h-7 rounded-full object-cover border border-white/30">
+                        @if($user?->profile_photo_url)
+                            <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="w-7 h-7 rounded-full object-cover border border-white/30">
                         @else
                             <div class="w-7 h-7 rounded-full bg-white/20 text-white flex items-center justify-center text-xs font-bold">
                                 {{ substr($user->name ?? 'A', 0, 1) }}

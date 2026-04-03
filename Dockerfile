@@ -45,8 +45,9 @@ COPY docker/app/entrypoint.sh /usr/local/bin/docker-app-entrypoint
 COPY docker/app/start-vite.sh /usr/local/bin/docker-vite-start
 
 # Create necessary directories with proper permissions
-RUN mkdir -p /app/storage /app/bootstrap/cache && \
+RUN mkdir -p /app/storage/framework/sessions /app/storage/framework/views /app/storage/framework/cache/data /app/bootstrap/cache && \
     chown -R www-data:www-data /app /app/storage /app/bootstrap/cache && \
+    chmod -R 775 /app/storage /app/bootstrap/cache && \
     chmod +x /usr/local/bin/docker-app-entrypoint /usr/local/bin/docker-vite-start
 
 # Configure PHP-FPM with increased limits

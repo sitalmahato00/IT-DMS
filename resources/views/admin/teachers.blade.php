@@ -3,6 +3,7 @@
 @section('title', 'Teachers')
 
 @section('styles')
+<script>document.documentElement.classList.add('teachers-ui-enhanced');</script>
 <style>
     .teachers-page .teachers-stats .grid > div,
     .teachers-page .teachers-table-panel,
@@ -138,6 +139,35 @@
             padding: 0.5rem 0.25rem;
         }
     }
+
+    /* Dark mode overrides (admin teachers table) */
+    html.dark .teachers-page .teacher-directory-head th {
+        background: #1f2937 !important;
+        border-bottom: 1px solid #4b5563 !important;
+        color: #e5e7eb !important;
+    }
+
+    html.dark .teachers-page .teacher-row td {
+        border-bottom: 1px solid #475569 !important;
+        color: #d1d5db !important;
+        background: transparent !important;
+    }
+
+    html.dark .teachers-page .teacher-row:nth-child(even) td {
+        background: rgba(148, 163, 184, 0.08) !important;
+    }
+
+    html.dark .teachers-page .teacher-row:hover td {
+        background: rgba(148, 163, 184, 0.15) !important;
+    }
+
+    html.dark .teachers-page .teacher-avatar,
+    html.dark .teachers-page .teacher-photo-frame {
+        border-color: #475569 !important;
+        background: #1f2937 !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+    }
+
 </style>
 @endsection
 
@@ -267,8 +297,7 @@
                             <td class="px-6 py-4 text-sm">
                                 <div class="flex items-center gap-3">
                                     @php
-                                        $teacherPhoto = $teacher->teacher->profile_photo_path ?? null;
-                                        $teacherPhotoUrl = $teacherPhoto ? (\Illuminate\Support\Str::startsWith($teacherPhoto, 'storage/') ? asset($teacherPhoto) : asset('storage/' . $teacherPhoto)) : null;
+                                        $teacherPhotoUrl = $teacher->teacher->profile_photo_url ?? null;
                                     @endphp
                                     @if($teacherPhotoUrl)
                                         <img src="{{ $teacherPhotoUrl }}" alt="avatar" class="teacher-avatar-image h-10 w-10 rounded-full object-cover">

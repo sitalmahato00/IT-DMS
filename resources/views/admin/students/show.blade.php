@@ -82,14 +82,14 @@
 @section('content')
 @php
     $studentProfile = $studentProfile ?? $student->student ?? new \App\Models\Student();
-    $photoUrl = $photoUrl ?? ($studentProfile?->profile_photo_path ? asset('storage/' . $studentProfile->profile_photo_path) : null);
+    $photoUrl = $photoUrl ?? ($studentProfile?->profile_photo_url ?: $student->profile_photo_url ?? null);
     $documents = $documents ?? [];
-    $idDocument = $documents['id_document'] ?? ($studentProfile?->id_document_path ? [
+    $idDocument = $documents['id_document'] ?? ($studentProfile?->id_document_url ? [
         'name' => basename($studentProfile->id_document_path),
         'path' => $studentProfile->id_document_path,
-        'url' => asset('storage/' . $studentProfile->id_document_path),
+        'url' => $studentProfile->id_document_url,
     ] : null);
-    $certificates = collect($documents['certificates'] ?? collect($studentProfile?->certificate_paths ?? []))
+    $certificates = collect($documents['certificates'] ?? collect($studentProfile?->certificate_urls ?? []))
         ->filter()
         ->map(function ($certificate) {
             if (is_array($certificate)) {
@@ -103,7 +103,7 @@
             return [
                 'name' => basename($certificate),
                 'path' => $certificate,
-                'url' => asset('storage/' . ltrim($certificate, '/')),
+                'url' => $certificate,
             ];
         })
         ->values();
@@ -338,8 +338,8 @@
                 <div class="student-detail-grid mt-4">
                     <div class="student-detail-box"><label class="student-label">Role</label><p>Student</p></div>
                     <div class="student-detail-box"><label class="student-label">Account Activation</label><p>{{ ($studentProfile?->is_active ?? true) ? 'Enabled' : 'Disabled' }}</p></div>
-                    <div class="student-detail-box"><label class="student-label">ID Document</label><div>@if($idDocument)<a href="{{ $idDocument['url'] ?? asset('storage/' . ltrim($idDocument['path'] ?? '', '/')) }}" target="_blank" rel="noreferrer" class="student-file-pill"><i class="bi bi-file-earmark-text"></i>{{ $idDocument['name'] ?? basename($idDocument['path'] ?? '') }}</a>@else Not uploaded @endif</div></div>
-                    <div class="student-detail-box"><label class="student-label">Certificates</label><div class="flex flex-wrap gap-2">@forelse($certificates as $certificate)<a href="{{ $certificate['url'] ?? asset('storage/' . ltrim($certificate['path'] ?? '', '/')) }}" target="_blank" rel="noreferrer" class="student-file-pill"><i class="bi bi-file-earmark-check"></i>{{ $certificate['name'] ?? basename($certificate['path'] ?? '') }}</a>@empty<span>Not uploaded</span>@endforelse</div></div>
+                    <div class="student-detail-box"><label class="student-label">ID Document</label><div>@if($idDocument)<a href="{{ $idDocument['url'] ?? '#' }}" target="_blank" rel="noreferrer" class="student-file-pill"><i class="bi bi-file-earmark-text"></i>{{ $idDocument['name'] ?? basename($idDocument['path'] ?? '') }}</a>@else Not uploaded @endif</div></div>
+                    <div class="student-detail-box"><label class="student-label">Certificates</label><div class="flex flex-wrap gap-2">@forelse($certificates as $certificate)<a href="{{ $certificate['url'] ?? '#' }}" target="_blank" rel="noreferrer" class="student-file-pill"><i class="bi bi-file-earmark-check"></i>{{ $certificate['name'] ?? basename($certificate['path'] ?? '') }}</a>@empty<span>Not uploaded</span>@endforelse</div></div>
                 </div>
             </div>
 
@@ -642,7 +642,7 @@
                         <div class="student-list-card">
                             <label class="student-label">ID Document</label>
                             @if($idDocument)
-                                <a href="{{ $idDocument['url'] ?? asset('storage/' . $idDocument['path']) }}" target="_blank" rel="noreferrer" class="student-file-pill mt-2"><i class="bi bi-file-earmark-text"></i>{{ $idDocument['name'] ?? basename($idDocument['path'] ?? '') }}</a>
+                                <a href="{{ $idDocument['url'] ?? '#' }}" target="_blank" rel="noreferrer" class="student-file-pill mt-2"><i class="bi bi-file-earmark-text"></i>{{ $idDocument['name'] ?? basename($idDocument['path'] ?? '') }}</a>
                             @else
                                 <div class="student-empty-state mt-2">No ID document uploaded.</div>
                             @endif
@@ -651,7 +651,7 @@
                             <label class="student-label">Certificates</label>
                             <div class="mt-2 flex flex-wrap gap-2">
                                 @forelse($certificates as $certificate)
-                                    <a href="{{ $certificate['url'] ?? asset('storage/' . $certificate['path']) }}" target="_blank" rel="noreferrer" class="student-file-pill"><i class="bi bi-file-earmark-check"></i>{{ $certificate['name'] ?? basename($certificate['path'] ?? '') }}</a>
+                                    <a href="{{ $certificate['url'] ?? '#' }}" target="_blank" rel="noreferrer" class="student-file-pill"><i class="bi bi-file-earmark-check"></i>{{ $certificate['name'] ?? basename($certificate['path'] ?? '') }}</a>
                                 @empty
                                     <div class="student-empty-state">No certificate files uploaded.</div>
                                 @endforelse

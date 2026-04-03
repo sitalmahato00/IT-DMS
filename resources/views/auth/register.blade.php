@@ -8,7 +8,7 @@
         ? (($locale === 'ne' && !empty($department->name_nepali)) ? $department->name_nepali : $department->name)
         : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Information Technology');
     $departmentShort = $department?->short_name ?: ($locale === 'ne' ? 'आईटी' : 'IT');
-    $departmentLogoUrl = $department?->getLogoUrl() ?? asset('images/default-logo.svg');
+    $departmentLogoUrl = $department?->getLogoUrl() ?? '/images/default-logo.svg';
     $addressText = $department
         ? (($locale === 'ne' && !empty($department->address_nepali)) ? $department->address_nepali : $department->address)
         : null;

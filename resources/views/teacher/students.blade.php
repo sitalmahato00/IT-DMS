@@ -279,7 +279,7 @@
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @foreach($students as $student)
                         @php
-                        $profilePhotoPath = $student->profile_photo_path ? asset('storage/'.$student->profile_photo_path) : '';
+                        $profilePhotoPath = $student->profile_photo_url ?? '';
                         $dob = $student->date_of_birth ?? null;
                         $dobFormatted = $dob ? ($dob instanceof \Carbon\Carbon ? $dob->format('Y-m-d') : $dob) : '';
                         $studentJson = json_encode([
@@ -303,15 +303,15 @@
                             'blood_group' => $student->blood_group ?? '',
                             'emergency_contact' => $student->emergency_contact ?? '',
                             'role' => $student->role ?? '',
-                            'profile_photo_path' => $profilePhotoPath
+                            'profile_photo_url' => $profilePhotoPath
                         ]);
                         @endphp
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                                 <td class="px-4 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-9 h-9 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                                            @if($student->profile_photo_path)
-                                                <img src="{{ asset('storage/'.$student->profile_photo_path) }}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\'bi bi-person-fill text-gray-400\'></i>';">
+                                            @if($student->profile_photo_url)
+                                                <img src="{{ $student->profile_photo_url }}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\'bi bi-person-fill text-gray-400\'></i>';">
                                             @else
                                                 <i class="bi bi-person-fill text-gray-400"></i>
                                             @endif
@@ -424,8 +424,8 @@
 
         const viewAvatarImg = document.getElementById('viewStudentAvatarImg');
         const viewInitial = document.getElementById('viewStudentInitial');
-        if (student.profile_photo_path) {
-            viewAvatarImg.src = student.profile_photo_path;
+        if (student.profile_photo_url) {
+            viewAvatarImg.src = student.profile_photo_url;
             viewAvatarImg.style.display = 'block';
             viewInitial.style.display = 'none';
         } else {

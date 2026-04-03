@@ -26,10 +26,10 @@
     class="hidden lg:flex lg:w-60 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex-col fixed lg:static w-64 left-0 top-0 z-30 overflow-y-auto transition-all duration-300 shadow-xl border-r border-red-500/40"
 >
     <div class="hidden lg:flex flex-col items-center justify-center px-4 py-2 min-h-[88px] bg-[#FF0037] text-white border-b border-red-500">
-        @if($department && $department->logo_path)
+        @if($department && $department->logo_url)
             <img src="{{ $departmentLogoUrl }}" alt="{{ $department->name ?? 'Department Logo' }}" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg">
         @else
-            <img src="{{ asset('images/default-logo.svg') }}" alt="Default Logo" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg">
+            <img src="/images/default-logo.svg" alt="Default Logo" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg">
         @endif
 
         <div class="sidebar-brand-text mt-3 text-center">

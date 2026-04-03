@@ -45,7 +45,7 @@
                             <p class="text-xs text-gray-600 dark:text-gray-400">{{ __('Attached document') }}</p>
                         </div>
                     </div>
-                    <a href="{{ asset('storage/' . $notice->file_path) }}" download class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 dark:bg-amber-800 dark:hover:bg-amber-700 text-white rounded-lg font-medium transition">
+                    <a href="{{ \App\Support\Media::publicUrl($notice->file_path) }}" download class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 dark:bg-amber-800 dark:hover:bg-amber-700 text-white rounded-lg font-medium transition">
                         <i class="bi bi-download"></i>
                         {{ __('Download') }}
                     </a>

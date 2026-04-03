@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use App\Support\Media;
 
 class Department extends Model
 {
@@ -66,23 +67,21 @@ class Department extends Model
 
     public function getLogoUrl()
     {
-        if ($this->logo_path && Storage::disk('public')->exists($this->logo_path)) {
-            return Storage::url($this->logo_path);
-        }
+        return $this->logo_url;
+    }
 
-        return asset('images/default-logo.svg');
+    public function getLogoUrlAttribute(): string
+    {
+        return Media::publicUrl($this->logo_path, '/images/default-logo.svg');
     }
 
     public function getProgramsImageUrl(): ?string
     {
-        if (!$this->programs_image_path) {
-            return null;
-        }
+        return $this->programs_image_url;
+    }
 
-        if (Storage::disk('public')->exists($this->programs_image_path)) {
-            return Storage::url($this->programs_image_path);
-        }
-
-        return asset('storage/' . ltrim($this->programs_image_path, '/'));
+    public function getProgramsImageUrlAttribute(): ?string
+    {
+        return Media::publicUrl($this->programs_image_path);
     }
 }

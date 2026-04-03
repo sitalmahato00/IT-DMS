@@ -11,7 +11,7 @@
     $sheetSection = $displaySection ?: ($selectedSection ?: __('All'));
     $logoUrl = $college && method_exists($college, 'getLogoUrl')
         ? $college->getLogoUrl()
-        : asset('images/default-logo.svg');
+        : '/images/default-logo.svg';
     $timeRowsCollection = collect($timeRows ?? []);
     $departmentLine = $student->department ?: ($college?->short_name ?: __('Department'));
 @endphp

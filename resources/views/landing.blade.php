@@ -1,5 +1,4 @@
     @php
-    use Illuminate\Support\Facades\Storage;
     use Illuminate\Support\Str;
 
     $locale = app()->getLocale();
@@ -9,7 +8,7 @@
         : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Information Technology Department');
 
     $departmentShort = $department?->short_name ?: ($locale === 'ne' ? 'आईटी' : 'IT');
-    $departmentLogoUrl = $department?->getLogoUrl() ?? asset('images/default-logo.svg');
+    $departmentLogoUrl = $department?->getLogoUrl() ?? '/images/default-logo.svg';
     $heroTitle = trim((string) Str::of($departmentName)->replace([' Department', ' विभाग'], ''));
 
     if (blank($heroTitle)) {
@@ -19,28 +18,21 @@
     $heroSlides = collect($department?->hero_images ?? [])
         ->filter()
         ->map(function ($path) {
-            try {
-                if (Storage::disk('public')->exists($path)) {
-                    return Storage::url($path);
-                }
-            } catch (\Throwable $e) {
-            }
-
-            return asset('storage/' . ltrim((string) $path, '/'));
+            return \App\Support\Media::publicUrl($path) ?? asset('storage/' . ltrim((string) $path, '/'));
         })
         ->values();
 
     $referenceHeroRelativePath = 'images/landing-hero-reference.jpeg';
 
     if (is_file(public_path($referenceHeroRelativePath))) {
-        $heroSlides = collect([asset($referenceHeroRelativePath)])
+        $heroSlides = collect(['/' . $referenceHeroRelativePath])
             ->merge($heroSlides)
             ->unique()
             ->values();
     }
 
     if ($heroSlides->isEmpty()) {
-        $heroSlides = collect([asset('images/hero-image.jpg')]);
+        $heroSlides = collect(['/images/hero-image.jpg']);
     }
 
     $tagline = $locale === 'ne'
@@ -161,11 +153,7 @@
         $url = null;
         $downloadUrl = null;
         if (!empty($d->file_path)) {
-            try {
-                $url = Storage::disk('public')->url($d->file_path);
-            } catch (\Throwable $e) {
-                $url = asset('storage/' . ltrim($d->file_path, '/'));
-            }
+            $url = \App\Support\Media::publicUrl($d->file_path);
 
             $downloadUrl = route('materials.download', ['id' => $d->id]);
         }

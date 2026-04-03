@@ -23,6 +23,10 @@
             color: #0f172a;
         }
 
+        html.teacher-ui-enhanced:not(.dark) .teacher-page-body {
+            color: inherit;
+        }
+
         html.teacher-ui-enhanced:not(.dark) .teacher-page-header {
             margin-bottom: 1.75rem;
         }
@@ -75,16 +79,51 @@
             color: inherit;
         }
 
+        html.teacher-ui-enhanced:not(.dark) .teacher-page-body > div[class*="space-y-"] > div:first-of-type:not([id]),
+        html.teacher-ui-enhanced:not(.dark) .teacher-page-body > div[class*="space-y-"] > section:first-of-type {
+            color: inherit;
+        }
+
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded-lg.border,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded.border,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded.shadow-sm.border,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded-lg.shadow-sm,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded-xl.shadow-sm,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded-lg.shadow-xl,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded-lg.shadow-2xl,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded.shadow-2xl,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.relative.bg-white.rounded-lg.shadow-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.relative.bg-white.rounded.shadow-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.relative.bg-white.rounded.shadow-2xl,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded-xl.border,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-white.rounded-2xl.border,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell section.bg-white.rounded-lg.border,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell section.bg-white.rounded-xl.border,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell form.bg-white.rounded-lg.border,
-        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell form.bg-white.rounded-xl.border {
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell form.bg-white.rounded-xl.border,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .bg-white.rounded-lg.shadow-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .bg-white.rounded-xl.shadow-xl,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .bg-white.rounded-2xl.shadow-2xl,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .relative.bg-white.rounded-lg.shadow-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .relative.bg-white.rounded-xl.shadow-xl {
             border-color: var(--teacher-surface-border);
             background: var(--teacher-surface-bg);
             box-shadow: var(--teacher-surface-shadow);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .bg-white.rounded-lg.shadow-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .bg-white.rounded-xl.shadow-xl,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .bg-white.rounded-2xl.shadow-2xl,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .relative.bg-white.rounded-lg.shadow-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .relative.bg-white.rounded-xl.shadow-xl {
+            box-shadow: 0 34px 70px -38px rgba(15, 23, 42, 0.42);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .sticky.top-0.bg-red-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .bg-gradient-to-r.from-red-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .bg-gradient-to-r.from-blue-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .fixed.inset-0 .bg-gradient-to-r.from-green-600 {
+            border-bottom: none;
         }
 
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell table thead,
@@ -97,6 +136,14 @@
 
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell tbody tr:hover {
             background: linear-gradient(90deg, rgba(255, 241, 242, 0.72), rgba(255, 255, 255, 0.97));
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .border-t.bg-gray-50,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .border-t.dark\:bg-slate-700\/50,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .border-b.bg-gray-50,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .bg-gray-50.dark\:bg-slate-700\/50,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .bg-gray-50.dark\:bg-gray-700\/50 {
+            background: linear-gradient(180deg, #fff7f8, #fffdfd);
         }
 
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
@@ -118,12 +165,18 @@
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.bg-red-600,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.bg-blue-600,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.bg-green-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.bg-yellow-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.bg-purple-600,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-red-600,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-blue-600,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-green-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-yellow-600,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-purple-600,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .bg-red-600.text-white,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .bg-blue-600.text-white,
-        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .bg-green-600.text-white {
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .bg-green-600.text-white,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .bg-yellow-600.text-white,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .bg-purple-600.text-white {
             border-radius: 999px;
             box-shadow: 0 16px 28px -20px rgba(15, 23, 42, 0.34);
         }
@@ -133,11 +186,70 @@
             border-radius: 999px;
         }
 
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.rounded,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.rounded-md,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.rounded-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.rounded,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.rounded-md,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.rounded-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell label.inline-flex.rounded-md,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell label.inline-flex.rounded-lg {
+            border-radius: 999px;
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.inline-flex,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.inline-flex,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell label.inline-flex {
+            border-radius: 999px;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.inline-flex:hover,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell button.inline-flex:hover,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell label.inline-flex:hover {
+            transform: translateY(-1px);
+        }
+
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .rounded-full.bg-red-100,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .rounded-full.bg-blue-100,
         html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .rounded-full.bg-green-100,
-        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .rounded-full.bg-purple-100 {
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .rounded-full.bg-purple-100,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell span.rounded-full,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell span.inline-flex.rounded-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell span.inline-flex.rounded-full {
             box-shadow: var(--teacher-soft-shadow);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .w-10.h-10.rounded-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .w-10.h-10.rounded-full,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .w-9.h-9.rounded-full,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .w-8.h-8.rounded-full {
+            box-shadow: 0 16px 28px -22px rgba(15, 23, 42, 0.26);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .rounded-lg.bg-white,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell .rounded-xl.bg-white {
+            box-shadow: var(--teacher-soft-shadow);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-red-50,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-blue-50,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-green-50,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-purple-50,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell a.bg-amber-50,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-red-50.rounded-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-blue-50.rounded-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-green-50.rounded-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-purple-50.rounded-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-amber-50.rounded-lg,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-gray-50.rounded,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-gray-50.rounded-md,
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell div.bg-gray-50.rounded-lg {
+            box-shadow: var(--teacher-soft-shadow);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-content-shell canvas {
+            filter: saturate(1.02);
         }
     </style>
     @yield('styles')
@@ -195,7 +307,7 @@
 
             <!-- Page Content -->
             <main class="teacher-content-shell flex-1 overflow-auto">
-                <div class="p-6 lg:p-8">
+                <div class="teacher-page-body p-6 lg:p-8">
                     @yield('content')
                 </div>
             </main>

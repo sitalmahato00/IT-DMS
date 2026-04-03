@@ -168,6 +168,11 @@ success "Migrations completed"
 
 log "Setting up storage..."
 
+# Create Laravel runtime directories
+log "Creating Laravel runtime directories..."
+mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data bootstrap/cache || error "Failed to create Laravel cache directories"
+success "Laravel runtime directories ready"
+
 # Create storage link
 if [ ! -L "public/storage" ]; then
     log "Creating storage symlink..."
@@ -179,8 +184,7 @@ fi
 
 # Set permissions
 log "Setting file permissions..."
-chmod -R 755 storage bootstrap/cache
-chmod -R 644 storage bootstrap/cache/*
+chmod -R 775 storage bootstrap/cache || error "Failed to set permissions"
 success "File permissions set"
 
 # ============================================================================
@@ -201,10 +205,10 @@ success "Frontend assets built"
 log "Optimizing application cache..."
 
 # Clear caches
-php artisan cache:clear
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
+php artisan config:clear || error "Config clear failed"
+php artisan cache:clear || error "Cache clear failed"
+php artisan route:clear || error "Route clear failed"
+php artisan view:clear || error "View clear failed"
 
 # Cache configs
 log "Caching configuration..."

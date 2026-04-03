@@ -252,6 +252,7 @@
                         <option value="">Bulk actions</option>
                         <option value="set_status_active">Set Active</option>
                         <option value="set_status_inactive">Set Inactive</option>
+                        <option value="move_alumni">Move to Alumni</option>
                         <option value="export_csv">Export (CSV)</option>
                     </select>
                     <button id="apply_bulk" class="students-toolbar-btn px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Apply</button>
@@ -293,8 +294,7 @@
                             <td class="px-4 py-4">
                                 <div class="flex items-center gap-2">
                                     @php
-                                        $studentPhotoPath = $student->student->profile_photo_path ?? null;
-                                        $studentPhotoUrl = $studentPhotoPath ? asset('storage/' . $studentPhotoPath) : null;
+                                        $studentPhotoUrl = $student->student->profile_photo_url ?? null;
                                     @endphp
                                     @if($studentPhotoUrl)
                                         <img src="{{ $studentPhotoUrl }}" alt="{{ $student->name }}" class="student-avatar w-8 h-8 rounded-full object-cover">
@@ -382,7 +382,55 @@ document.getElementById('apply_bulk')?.addEventListener('click', function() {
         alert('Please select action and students');
         return;
     }
-    console.log('Action:', action, 'Students:', selected);
+
+    if (action === 'export_csv') {
+        document.getElementById('exportForm')?.submit();
+        return;
+    }
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route('admin.students.bulk') }}';
+    form.style.display = 'none';
+
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (token) {
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = token;
+        form.appendChild(csrf);
+    }
+
+    const actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'action';
+    actionInput.value = action;
+    form.appendChild(actionInput);
+
+    selected.forEach((id) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = id;
+        form.appendChild(input);
+    });
+
+    if (action === 'remove_alumni' || action === 'set_semester') {
+        const semester = prompt('Enter semester (1-6):');
+        if (!semester) {
+            return;
+        }
+
+        const semesterInput = document.createElement('input');
+        semesterInput.type = 'hidden';
+        semesterInput.name = 'semester';
+        semesterInput.value = semester;
+        form.appendChild(semesterInput);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
 });
 </script>
 

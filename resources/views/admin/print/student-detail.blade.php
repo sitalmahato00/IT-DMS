@@ -78,7 +78,7 @@
         <div class="header-section">
             <div class="school-logo">
                 @if(!empty($college) && !empty($college->logo_path))
-                    <img src="{{ asset($college->logo_path) }}" alt="College Logo">
+                    <img src="{{ \App\Support\Media::publicUrl($college->logo_path) }}" alt="College Logo">
                 @else
                     <div class="logo-placeholder">🎓</div>
                 @endif
@@ -91,8 +91,8 @@
         <div class="student-photo-section">
             @if($student->photo_base64)
                 <img src="{{ $student->photo_base64 }}" alt="{{ $student->name }}" class="student-photo">
-            @elseif($student->student && $student->student->profile_photo_path)
-                <img src="{{ asset($student->student->profile_photo_path) }}" alt="{{ $student->name }}" class="student-photo">
+            @elseif($student->student && $student->student->profile_photo_url)
+                <img src="{{ $student->student->profile_photo_url }}" alt="{{ $student->name }}" class="student-photo">
             @else
                 <div class="photo-placeholder">{{ substr($student->name ?? 'S', 0, 1) }}</div>
             @endif

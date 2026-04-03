@@ -11,7 +11,7 @@
         : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Information Technology Department');
 
     $departmentShort = $department?->short_name ?: ($locale === 'ne' ? 'आईटी' : 'IT');
-    $departmentLogo = $departmentLogoUrl ?? ($department?->getLogoUrl() ?? asset('images/default-logo.svg'));
+    $departmentLogo = $departmentLogoUrl ?? ($department?->getLogoUrl() ?? '/images/default-logo.svg');
 
     $brandTitle = trim((string) Str::of($departmentName)->replace([' Department', ' विभाग'], ''));
     if (blank($brandTitle)) {

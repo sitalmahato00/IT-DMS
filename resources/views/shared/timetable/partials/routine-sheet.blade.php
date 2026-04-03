@@ -10,7 +10,7 @@
     $timeRowsCollection = collect($timeRows ?? []);
     $logoUrl = !empty($college) && method_exists($college, 'getLogoUrl')
         ? $college->getLogoUrl()
-        : asset('images/default-logo.svg');
+        : '/images/default-logo.svg';
     $summaryItems = collect($summaryItems ?? [])
         ->filter(fn ($item) => filled(data_get($item, 'label')))
         ->values();

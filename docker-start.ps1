@@ -14,6 +14,7 @@ $commands = @{
     "vite-logs" = "docker-compose logs -f vite"
     "shell" = "docker-compose exec app bash"
     "migrate" = "docker-compose exec app php artisan migrate"
+    "prepare" = "docker-compose exec app sh -lc 'mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data bootstrap/cache && chmod -R 775 storage bootstrap/cache && php artisan config:clear && php artisan cache:clear && php artisan config:cache'"
     "seed" = "docker-compose exec app php artisan db:seed"
     "tinker" = "docker-compose exec app php artisan tinker"
     "test" = "docker-compose exec app php artisan test"
@@ -28,6 +29,7 @@ if ($commands.ContainsKey($Command)) {
     $commands.Keys | ForEach-Object {
         Write-Host "  .\docker-start.ps1 $_"
     }
-    Write-Host ""
-    Write-Host "Usage: .\docker-start.ps1 [command]" -ForegroundColor Cyan
-}
+        Write-Host ""
+        Write-Host "Usage: .\docker-start.ps1 [command]" -ForegroundColor Cyan
+        Write-Host "  prepare - Prepare cache/runtime directories"
+    }

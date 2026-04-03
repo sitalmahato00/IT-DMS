@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Student;
 use App\Notifications\PasswordResetNotification;
+use App\Support\Media;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -82,28 +83,27 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get the profile photo URL.
      */
-    public function getProfilePhotoUrlAttribute(): string
+    public function getProfilePhotoUrlAttribute(): ?string
     {
         // First check if profile photo is stored directly on user
         if (!empty($this->profile_photo_path)) {
-            return asset('storage/' . $this->profile_photo_path);
+            return Media::publicUrl($this->profile_photo_path);
         }
         
         // Check related models for profile photo (using optional to avoid errors if not loaded)
         if ($this->role === 'student' && optional($this->student)->profile_photo_path) {
-            return asset('storage/' . $this->student->profile_photo_path);
+            return Media::publicUrl($this->student->profile_photo_path);
         }
         
         if ($this->role === 'teacher' && optional($this->teacher)->profile_photo_path) {
-            return asset('storage/' . $this->teacher->profile_photo_path);
+            return Media::publicUrl($this->teacher->profile_photo_path);
         }
         
         if ($this->role === 'parent' && optional($this->parent)->profile_photo_path) {
-            return asset('storage/' . $this->parent->profile_photo_path);
+            return Media::publicUrl($this->parent->profile_photo_path);
         }
         
-        // Fallback to ui-avatars
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&size=150&background=random';
+        return null;
     }
 
     /**

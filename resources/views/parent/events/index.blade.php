@@ -20,7 +20,7 @@
                     <!-- Image -->
                     @if($event->image_path)
                         <div class="md:col-span-1 h-48 md:h-auto bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                            <img src="{{ asset('storage/' . $event->image_path) }}" alt="{{ $event->title ?? 'Event' }}" class="w-full h-full object-cover">
+                            <img src="{{ \App\Support\Media::publicUrl($event->image_path) }}" alt="{{ $event->title ?? 'Event' }}" class="w-full h-full object-cover">
                         </div>
                     @endif
 

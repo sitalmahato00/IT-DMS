@@ -72,7 +72,7 @@
     $semesterOptions = $semesterOptions ?? [];
     $statusValue = old('status', $studentProfile->status ?? 'active');
     $isActive = old('is_active', (string) (($studentProfile->is_active ?? true) ? 1 : 0)) === '1';
-    $currentPhotoUrl = $studentProfile?->profile_photo_path ? asset('storage/' . $studentProfile->profile_photo_path) : null;
+    $currentPhotoUrl = $studentProfile?->profile_photo_url;
     $showPhoto = $currentPhotoUrl && old('remove_profile_photo', '0') !== '1';
     $currentIdDocument = $studentProfile?->id_document_path;
     $currentCertificates = collect($studentProfile?->certificate_paths ?? [])->filter()->values();
@@ -270,7 +270,7 @@
                             <div class="rounded-2xl border border-slate-200 bg-white p-4">
                                 <p class="text-sm font-semibold text-slate-900">Current ID Document</p>
                                 @if($currentIdDocument)
-                                    <a href="{{ asset('storage/' . $currentIdDocument) }}" target="_blank" rel="noreferrer" class="mt-3 inline-flex text-sm font-medium text-rose-600 hover:text-rose-700">{{ basename($currentIdDocument) }}</a>
+                                    <a href="{{ $studentProfile?->id_document_url ?? '#' }}" target="_blank" rel="noreferrer" class="mt-3 inline-flex text-sm font-medium text-rose-600 hover:text-rose-700">{{ basename($currentIdDocument) }}</a>
                                     <label class="mt-3 flex items-center gap-2 text-sm text-slate-600"><input id="removeIdDocumentToggle" type="checkbox" class="rounded border-slate-300" {{ old('remove_id_document', '0') === '1' ? 'checked' : '' }}> Remove current ID document</label>
                                 @else
                                     <p class="mt-2 text-sm text-slate-500">No ID document uploaded yet.</p>
@@ -281,7 +281,7 @@
                                 @if($currentCertificates->isNotEmpty())
                                     <div class="mt-3 flex flex-wrap gap-2">
                                         @foreach($currentCertificates as $path)
-                                            <a href="{{ asset('storage/' . $path) }}" target="_blank" rel="noreferrer" class="student-file-pill"><i class="bi bi-file-earmark-text"></i>{{ basename($path) }}</a>
+                                            <a href="{{ \App\Support\Media::publicUrl($path) ?? '#' }}" target="_blank" rel="noreferrer" class="student-file-pill"><i class="bi bi-file-earmark-text"></i>{{ basename($path) }}</a>
                                         @endforeach
                                     </div>
                                     <label class="mt-3 flex items-center gap-2 text-sm text-slate-600"><input id="removeCertificatesToggle" type="checkbox" class="rounded border-slate-300" {{ old('remove_certificates', '0') === '1' ? 'checked' : '' }}> Remove current certificates</label>

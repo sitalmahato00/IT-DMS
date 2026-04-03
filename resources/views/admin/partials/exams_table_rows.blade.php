@@ -19,9 +19,9 @@
             <a href="{{ route('admin.exam.show', $exam->id) }}" class="text-blue-600 hover:text-blue-800 text-xs px-2 py-1 rounded hover:bg-blue-50" title="View">
                 <i class="bi bi-eye text-xs"></i>
             </a>
-            <button class="text-yellow-600 hover:text-yellow-800 text-xs px-2 py-1 rounded hover:bg-yellow-50" onclick="openEditExamModal({{ $exam->id }})" title="Edit">
+            <a href="{{ route('admin.exam.edit', $exam->id) }}" class="text-yellow-600 hover:text-yellow-800 text-xs px-2 py-1 rounded hover:bg-yellow-50" title="Edit">
                 <i class="bi bi-pencil text-xs"></i>
-            </button>
+            </a>
             <form method="POST" action="{{ route('admin.exam.destroy', $exam->id) }}" onsubmit="return confirm('Are you sure you want to delete this exam?');" class="inline-block">
                 @csrf
                 @method('DELETE')
@@ -40,4 +40,3 @@
     <td colspan="9" class="px-3 py-3 text-center text-gray-500">No exams found.</td>
 </tr>
 @endforelse
-

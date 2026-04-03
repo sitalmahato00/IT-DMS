@@ -6,7 +6,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "deploy:prepare": "mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data bootstrap/cache && chmod -R 775 storage bootstrap/cache && php artisan config:clear && php artisan cache:clear && php artisan config:cache"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",

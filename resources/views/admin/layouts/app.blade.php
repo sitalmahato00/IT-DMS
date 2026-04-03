@@ -23,6 +23,547 @@
                 font-size: 9rem;
             }
         }
+
+        html.dark .student-page-card,
+        html.dark .student-page-section,
+        html.dark .student-side-card,
+        html.dark .student-sticky-bar,
+        html.dark .student-view-card,
+        html.dark .student-view-section,
+        html.dark .student-stat-card,
+        html.dark .student-list-card,
+        html.dark .student-detail-box,
+        html.dark .student-exam-accordion {
+            border-color: rgba(51, 65, 85, 0.95);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(17, 24, 39, 0.96) 100%);
+            box-shadow: 0 24px 48px -34px rgba(2, 6, 23, 0.78);
+            color: #e2e8f0;
+        }
+
+        html.dark .student-page-hero,
+        html.dark .student-view-hero {
+            border-color: rgba(251, 113, 133, 0.38);
+            background: linear-gradient(135deg, rgba(69, 10, 10, 0.6) 0%, rgba(15, 23, 42, 0.96) 55%, rgba(30, 41, 59, 0.96) 100%);
+            box-shadow: 0 26px 52px -36px rgba(2, 6, 23, 0.82);
+        }
+
+        html.dark .student-page-hero:after,
+        html.dark .student-view-hero:after {
+            background: radial-gradient(circle, rgba(251, 113, 133, 0.2), rgba(251, 113, 133, 0) 72%);
+        }
+
+        html.dark .student-label {
+            color: #94a3b8;
+        }
+
+        html.dark .student-input,
+        html.dark .student-select,
+        html.dark .student-textarea,
+        html.dark .student-file {
+            border-color: rgba(51, 65, 85, 0.95);
+            background: rgba(15, 23, 42, 0.84);
+            color: #e5e7eb;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.5);
+            color-scheme: dark;
+        }
+
+        html.dark .student-input::placeholder,
+        html.dark .student-textarea::placeholder {
+            color: #64748b;
+        }
+
+        html.dark .student-input:focus,
+        html.dark .student-select:focus,
+        html.dark .student-textarea:focus,
+        html.dark .student-file:focus {
+            border-color: #fb7185;
+            box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.18);
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        html.dark .student-file::file-selector-button {
+            border: 1px solid rgba(71, 85, 105, 0.9);
+            border-radius: 999px;
+            background: rgba(30, 41, 59, 0.95);
+            color: #e2e8f0;
+            padding: 0.45rem 0.9rem;
+            margin-right: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        html.dark .student-photo-dropzone {
+            border-color: rgba(251, 113, 133, 0.52);
+            background: linear-gradient(180deg, rgba(127, 29, 29, 0.16) 0%, rgba(15, 23, 42, 0.86) 100%);
+        }
+
+        html.dark .student-photo-dropzone:hover,
+        html.dark .student-photo-dropzone.is-dragover {
+            border-color: rgba(251, 113, 133, 0.76);
+            box-shadow: 0 20px 38px -28px rgba(2, 6, 23, 0.74);
+        }
+
+        html.dark .student-photo-frame {
+            border-color: rgba(51, 65, 85, 0.95);
+            background: rgba(15, 23, 42, 0.96);
+            box-shadow: 0 22px 44px -30px rgba(2, 6, 23, 0.82);
+        }
+
+        html.dark .student-btn-secondary,
+        html.dark .student-btn-soft {
+            border-color: rgba(71, 85, 105, 0.9);
+            background: rgba(15, 23, 42, 0.84);
+            color: #e2e8f0;
+        }
+
+        html.dark .student-btn-soft {
+            border-color: rgba(251, 113, 133, 0.42);
+            background: rgba(136, 19, 55, 0.26);
+            color: #fecdd3;
+        }
+
+        html.dark .student-chip.active,
+        html.dark .student-chip.pass {
+            background: rgba(22, 101, 52, 0.25);
+            color: #bbf7d0;
+        }
+
+        html.dark .student-chip.inactive,
+        html.dark .student-chip.fail {
+            background: rgba(153, 27, 27, 0.24);
+            color: #fecaca;
+        }
+
+        html.dark .student-chip.pending,
+        html.dark .student-chip.absent,
+        html.dark .student-chip.suspended {
+            background: rgba(120, 53, 15, 0.28);
+            color: #fcd34d;
+        }
+
+        html.dark .student-chip.soft {
+            background: rgba(30, 41, 59, 0.78);
+            color: #cbd5e1;
+        }
+
+        html.dark .student-file-pill {
+            border-color: rgba(71, 85, 105, 0.9);
+            background: rgba(15, 23, 42, 0.84);
+            color: #e2e8f0;
+        }
+
+        html.dark .student-toggle {
+            background: rgba(71, 85, 105, 0.95);
+        }
+
+        html.dark .student-toggle:after {
+            background: #e2e8f0;
+            box-shadow: 0 10px 16px -12px rgba(2, 6, 23, 0.72);
+        }
+
+        html.dark .student-tab-bar,
+        html.dark .student-view-tabs {
+            border-color: rgba(51, 65, 85, 0.95);
+            background: rgba(15, 23, 42, 0.92);
+            box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.05);
+        }
+
+        html.dark .student-tab-button,
+        html.dark .student-view-tab {
+            color: #cbd5e1;
+        }
+
+        html.dark .student-tab-button:hover,
+        html.dark .student-view-tab:hover {
+            background: rgba(136, 19, 55, 0.18);
+            color: #fecdd3;
+        }
+
+        html.dark .student-tab-button.is-active,
+        html.dark .student-view-tab.is-active {
+            border: 1px solid rgba(251, 113, 133, 0.7);
+            background: linear-gradient(180deg, rgba(136, 19, 55, 0.42) 0%, rgba(127, 29, 29, 0.28) 100%);
+            color: #ffe4e6;
+            box-shadow: 0 12px 28px -20px rgba(244, 63, 94, 0.42);
+        }
+
+        html.dark .student-empty-state {
+            border-color: rgba(71, 85, 105, 0.9);
+            background: rgba(15, 23, 42, 0.72);
+            color: #94a3b8;
+        }
+
+        html.dark .student-parent-status {
+            border-color: rgba(245, 158, 11, 0.38);
+            background: rgba(120, 53, 15, 0.26);
+            color: #fcd34d;
+        }
+
+        html.dark .student-parent-status.is-success {
+            border-color: rgba(34, 197, 94, 0.34);
+            background: rgba(20, 83, 45, 0.3);
+            color: #bbf7d0;
+        }
+
+        html.dark .student-parent-status.is-error {
+            border-color: rgba(248, 113, 113, 0.35);
+            background: rgba(127, 29, 29, 0.3);
+            color: #fecaca;
+        }
+
+        html.dark .student-parent-status.is-muted {
+            border-color: rgba(71, 85, 105, 0.9);
+            background: rgba(15, 23, 42, 0.72);
+            color: #cbd5e1;
+        }
+
+        html.dark .student-table th {
+            border-bottom-color: rgba(51, 65, 85, 0.95);
+            background: rgba(15, 23, 42, 0.86);
+            color: #94a3b8;
+        }
+
+        html.dark .student-table td {
+            border-bottom-color: rgba(51, 65, 85, 0.75);
+            color: #e2e8f0;
+        }
+
+        html.dark .student-table tbody tr:hover td {
+            background: rgba(136, 19, 55, 0.12);
+        }
+
+        html.dark .student-exam-summary {
+            background: rgba(15, 23, 42, 0.92);
+        }
+
+        html.dark .student-exam-summary:hover {
+            background: rgba(136, 19, 55, 0.12);
+        }
+
+        html.dark .student-exam-title {
+            color: #f8fafc;
+        }
+
+        html.dark .student-exam-meta {
+            color: #94a3b8;
+        }
+
+        html.dark .student-exam-body {
+            border-top-color: rgba(51, 65, 85, 0.95);
+            background: rgba(15, 23, 42, 0.82);
+        }
+
+        html.dark .student-exam-footer td {
+            background: rgba(15, 23, 42, 0.92) !important;
+            color: #f8fafc;
+        }
+
+        html.dark .student-page-shell .text-slate-900,
+        html.dark .student-view-shell .text-slate-900 {
+            color: #f8fafc !important;
+        }
+
+        html.dark .student-page-shell .text-slate-700,
+        html.dark .student-view-shell .text-slate-700 {
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .student-page-shell .text-slate-600,
+        html.dark .student-page-shell .text-slate-500,
+        html.dark .student-page-shell .text-slate-400,
+        html.dark .student-view-shell .text-slate-600,
+        html.dark .student-view-shell .text-slate-500,
+        html.dark .student-view-shell .text-slate-400 {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .student-page-shell .bg-white,
+        html.dark .student-view-shell .bg-white {
+            background: rgba(15, 23, 42, 0.72) !important;
+        }
+
+        html.dark .student-page-shell .bg-rose-50,
+        html.dark .student-view-shell .bg-rose-50 {
+            background: rgba(136, 19, 55, 0.2) !important;
+        }
+
+        html.dark .student-page-shell .border-slate-200,
+        html.dark .student-view-shell .border-slate-200 {
+            border-color: rgba(51, 65, 85, 0.95) !important;
+        }
+
+        html.dark .student-page-shell .border-rose-200,
+        html.dark .student-view-shell .border-rose-200 {
+            border-color: rgba(251, 113, 133, 0.34) !important;
+        }
+
+        html.dark .student-page-shell .text-rose-700,
+        html.dark .student-view-shell .text-rose-700 {
+            color: #fecdd3 !important;
+        }
+
+        html.dark .student-page-shell .text-rose-300,
+        html.dark .student-view-shell .text-rose-300 {
+            color: rgba(251, 113, 133, 0.72) !important;
+        }
+
+        html.dark .parent-panel,
+        html.dark .parent-card,
+        html.dark .parent-section,
+        html.dark .parent-view-hero,
+        html.dark .parent-view-card,
+        html.dark .parent-view-section,
+        html.dark .parent-summary,
+        html.dark .parent-child-card {
+            border-color: rgba(51, 65, 85, 0.95);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(17, 24, 39, 0.96) 100%);
+            box-shadow: 0 24px 48px -34px rgba(2, 6, 23, 0.78);
+            color: #e2e8f0;
+        }
+
+        html.dark .parent-label,
+        html.dark .parent-title {
+            color: #94a3b8;
+        }
+
+        html.dark .parent-input {
+            border-color: rgba(51, 65, 85, 0.95);
+            background: rgba(15, 23, 42, 0.84);
+            color: #e5e7eb;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.5);
+            color-scheme: dark;
+        }
+
+        html.dark .parent-input::placeholder {
+            color: #64748b;
+        }
+
+        html.dark .parent-input:focus {
+            border-color: #fb7185;
+            box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.18);
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        html.dark .parent-input::file-selector-button {
+            border: 1px solid rgba(71, 85, 105, 0.9);
+            border-radius: 999px;
+            background: rgba(30, 41, 59, 0.95);
+            color: #e2e8f0;
+            padding: 0.45rem 0.9rem;
+            margin-right: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        html.dark .parent-tab-bar,
+        html.dark .parent-view-tabs {
+            border-color: rgba(51, 65, 85, 0.95);
+            background: rgba(15, 23, 42, 0.92);
+            box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.05);
+        }
+
+        html.dark .parent-tab-btn,
+        html.dark .parent-view-tab {
+            color: #cbd5e1;
+        }
+
+        html.dark .parent-tab-btn:hover,
+        html.dark .parent-view-tab:hover {
+            background: rgba(136, 19, 55, 0.18);
+            color: #fecdd3;
+        }
+
+        html.dark .parent-tab-btn.is-active,
+        html.dark .parent-view-tab.is-active {
+            border: 1px solid rgba(251, 113, 133, 0.7);
+            background: linear-gradient(180deg, rgba(136, 19, 55, 0.42) 0%, rgba(127, 29, 29, 0.28) 100%);
+            color: #ffe4e6;
+            box-shadow: 0 12px 28px -20px rgba(244, 63, 94, 0.42);
+        }
+
+        html.dark .parent-photo-frame {
+            border-color: rgba(51, 65, 85, 0.95);
+            background: rgba(15, 23, 42, 0.96);
+            box-shadow: 0 22px 44px -30px rgba(2, 6, 23, 0.82);
+        }
+
+        html.dark .parent-btn-secondary {
+            border-color: rgba(71, 85, 105, 0.9);
+            background: rgba(15, 23, 42, 0.84);
+            color: #e2e8f0;
+        }
+
+        html.dark .parent-children-menu {
+            background: rgba(15, 23, 42, 0.97) !important;
+            border-color: rgba(51, 65, 85, 0.95);
+            box-shadow: 0 20px 38px -28px rgba(2, 6, 23, 0.74);
+        }
+
+        html.dark .parent-children-option:hover {
+            background: rgba(136, 19, 55, 0.12);
+        }
+
+        html.dark .parent-chip.active {
+            background: rgba(22, 101, 52, 0.25);
+            color: #bbf7d0;
+        }
+
+        html.dark .parent-chip.inactive {
+            background: rgba(153, 27, 27, 0.24);
+            color: #fecaca;
+        }
+
+        html.dark .parent-chip.pending {
+            background: rgba(120, 53, 15, 0.28);
+            color: #fcd34d;
+        }
+
+        html.dark .parent-page-shell .text-slate-900,
+        html.dark .parent-view-shell .text-slate-900 {
+            color: #f8fafc !important;
+        }
+
+        html.dark .parent-page-shell .text-slate-800,
+        html.dark .parent-page-shell .text-slate-700,
+        html.dark .parent-view-shell .text-slate-800,
+        html.dark .parent-view-shell .text-slate-700 {
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .parent-page-shell .text-slate-600,
+        html.dark .parent-page-shell .text-slate-500,
+        html.dark .parent-page-shell .text-slate-400,
+        html.dark .parent-view-shell .text-slate-600,
+        html.dark .parent-view-shell .text-slate-500,
+        html.dark .parent-view-shell .text-slate-400 {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .parent-page-shell .bg-white,
+        html.dark .parent-view-shell .bg-white {
+            background: rgba(15, 23, 42, 0.72) !important;
+        }
+
+        html.dark .parent-page-shell .bg-slate-50,
+        html.dark .parent-view-shell .bg-slate-50 {
+            background: rgba(30, 41, 59, 0.68) !important;
+        }
+
+        html.dark .parent-page-shell .bg-rose-50,
+        html.dark .parent-view-shell .bg-rose-50 {
+            background: rgba(136, 19, 55, 0.2) !important;
+        }
+
+        html.dark .parent-page-shell .border-slate-200,
+        html.dark .parent-view-shell .border-slate-200 {
+            border-color: rgba(51, 65, 85, 0.95) !important;
+        }
+
+        html.dark .parent-page-shell .border-rose-200,
+        html.dark .parent-view-shell .border-rose-200 {
+            border-color: rgba(251, 113, 133, 0.34) !important;
+        }
+
+        html.dark .parent-page-shell .text-rose-700,
+        html.dark .parent-view-shell .text-rose-700,
+        html.dark .parent-page-shell .text-rose-600,
+        html.dark .parent-view-shell .text-rose-600 {
+            color: #fda4af !important;
+        }
+
+        html.dark .parent-page-shell .text-rose-300,
+        html.dark .parent-view-shell .text-rose-300 {
+            color: rgba(251, 113, 133, 0.72) !important;
+        }
+
+        html.dark .teacher-show-shell,
+        html.dark .teacher-show-card,
+        html.dark .teacher-stat,
+        html.dark .teacher-doc-item,
+        html.dark .teacher-detail-grid > div,
+        html.dark .teacher-detail-block {
+            border-color: rgba(51, 65, 85, 0.95);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(17, 24, 39, 0.96) 100%);
+            box-shadow: 0 24px 48px -34px rgba(2, 6, 23, 0.78);
+            color: #e2e8f0;
+        }
+
+        html.dark .teacher-show-nav a {
+            border-color: rgba(71, 85, 105, 0.9);
+            background: rgba(15, 23, 42, 0.84);
+            color: #cbd5e1;
+        }
+
+        html.dark .teacher-show-nav a:hover {
+            border-color: rgba(251, 113, 133, 0.6);
+            background: rgba(136, 19, 55, 0.18);
+            color: #fecdd3;
+        }
+
+        html.dark .teacher-detail-label {
+            color: #94a3b8;
+        }
+
+        html.dark .teacher-photo-frame {
+            border-color: rgba(251, 113, 133, 0.34);
+            background: rgba(15, 23, 42, 0.96);
+            box-shadow: 0 22px 44px -30px rgba(2, 6, 23, 0.82);
+        }
+
+        html.dark .teacher-chip-active {
+            background: rgba(22, 101, 52, 0.25);
+            color: #bbf7d0;
+        }
+
+        html.dark .teacher-chip-inactive {
+            background: rgba(153, 27, 27, 0.24);
+            color: #fecaca;
+        }
+
+        html.dark .teacher-chip-muted {
+            background: rgba(30, 41, 59, 0.78);
+            color: #cbd5e1;
+        }
+
+        html.dark .teacher-show-shell .text-slate-900,
+        html.dark .teacher-show-card .text-slate-900 {
+            color: #f8fafc !important;
+        }
+
+        html.dark .teacher-show-shell .text-slate-700,
+        html.dark .teacher-show-card .text-slate-700 {
+            color: #cbd5e1 !important;
+        }
+
+        html.dark .teacher-show-shell .text-slate-600,
+        html.dark .teacher-show-shell .text-slate-500,
+        html.dark .teacher-show-card .text-slate-600,
+        html.dark .teacher-show-card .text-slate-500 {
+            color: #94a3b8 !important;
+        }
+
+        html.dark .teacher-show-shell .bg-white,
+        html.dark .teacher-show-card .bg-white {
+            background: rgba(15, 23, 42, 0.72) !important;
+        }
+
+        html.dark .teacher-show-shell .border-slate-200,
+        html.dark .teacher-show-card .border-slate-200 {
+            border-color: rgba(51, 65, 85, 0.95) !important;
+        }
+
+        html.dark .teacher-show-shell .text-blue-700 {
+            color: #bfdbfe !important;
+        }
+
+        html.dark .teacher-show-shell .text-emerald-700 {
+            color: #a7f3d0 !important;
+        }
+
+        html.dark .teacher-show-shell .text-rose-300,
+        html.dark .teacher-show-card .text-rose-300 {
+            color: rgba(251, 113, 133, 0.72) !important;
+        }
     </style>
     <script>
         // Early initialization to prevent sidebar from showing on mobile on page load

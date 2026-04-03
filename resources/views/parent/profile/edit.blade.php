@@ -23,11 +23,11 @@
                     <div class="flex flex-col items-center">
                         <label class="block text-sm font-medium text-gray-900 mb-3">Profile Photo</label>
                         @php
-                            $photoPath = $user->profile_photo_path;
-                            $hasFile = !empty($photoPath) && \Illuminate\Support\Facades\Storage::disk('public')->exists($photoPath);
+                            $photoPath = $user->profile_photo_url;
+                            $hasFile = !empty($photoPath);
                         @endphp
                         @if($hasFile)
-                            <img id="profilePhotoPreview" src="{{ asset('storage/' . $photoPath) }}" alt="Profile photo" class="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow-sm" />
+                            <img id="profilePhotoPreview" src="{{ $photoPath }}" alt="Profile photo" class="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow-sm" />
                         @else
                             <div id="profilePhotoPreview" class="w-32 h-32 rounded-full bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white text-5xl font-bold border-4 border-gray-100 shadow-sm">
                                 {{ substr($user->name ?? 'A', 0, 1) }}
@@ -245,4 +245,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
-

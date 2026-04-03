@@ -28,6 +28,27 @@ Route::get('/gallery/fetch', [GalleryPortalController::class, 'fetch'])->name('g
 Route::get('/gallery', [GalleryPortalController::class, 'index'])->name('gallery.index');
 Route::get('/gallery/download/{id}', [PublicGalleryController::class, 'download'])->name('gallery.download');
 
+Route::get('/media/{path}', function (string $path) {
+    $normalized = str_replace('\\', '/', $path);
+    $normalized = ltrim(str_replace('storage/', '', $normalized), '/');
+
+    $disk = \Illuminate\Support\Facades\Storage::disk('public');
+
+    if ($normalized === '') {
+        abort(404);
+    }
+
+    if ($disk->exists($normalized)) {
+        return response()->file($disk->path($normalized));
+    }
+
+    if (file_exists(public_path($normalized))) {
+        return response()->file(public_path($normalized));
+    }
+
+    abort(404);
+})->where('path', '.*')->name('media.show');
+
 // Language switcher: sets the locale in the session and redirects back
 Route::post('locale', function (Illuminate\Http\Request $request) {
     $locale = $request->input('locale');
@@ -293,6 +314,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     });
 
     Route::get('/parents', [\App\Http\Controllers\Admin\ParentController::class, 'index'])->name('parents');
+    Route::get('/parents/create', [\App\Http\Controllers\Admin\ParentController::class, 'create'])->name('parents.create');
+    Route::get('/parents/{id}', [\App\Http\Controllers\Admin\ParentController::class, 'show'])->name('parents.show');
     Route::get('/parents/export', [\App\Http\Controllers\Admin\ParentController::class, 'export'])->name('parents.export');
     Route::get('/parents/students', [\App\Http\Controllers\Admin\ParentController::class, 'getStudents'])->name('parents.students');
     Route::get('/parents/lookup', [\App\Http\Controllers\Admin\ParentController::class, 'lookupByEmail'])->name('parents.lookup');
@@ -325,6 +348,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/attendance/export', [\App\Http\Controllers\Admin\AttendanceController::class, 'export'])->name('attendance.export');
 
     Route::get('/exam', [App\Http\Controllers\Admin\ExamController::class, 'index'])->name('exam');
+    Route::get('/exam/create', [App\Http\Controllers\Admin\ExamController::class, 'create'])->name('exam.create');
     Route::post('/exam', [App\Http\Controllers\Admin\ExamController::class, 'store'])->name('exam.store');
     Route::get('/exam/data', [App\Http\Controllers\Admin\ExamController::class, 'index'])->name('exam.data');
     
@@ -334,6 +358,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/exam/subjects/by-semester', [App\Http\Controllers\Admin\ExamController::class, 'getSubjectsBySemester'])->name('exam.subjects');
     Route::get('/exam/all-subjects', [App\Http\Controllers\Admin\ExamController::class, 'getAllSubjects'])->name('exam.all-subjects');
     Route::get('/exam/{exam}/edit-data', [App\Http\Controllers\Admin\ExamController::class, 'getEditExamData'])->name('exam.edit-data');
+    Route::get('/exam/{exam}/edit', [App\Http\Controllers\Admin\ExamController::class, 'edit'])->name('exam.edit');
     
     // Generic routes come last
     Route::put('/exam/{exam}', [App\Http\Controllers\Admin\ExamController::class, 'update'])->name('exam.update');
@@ -370,6 +395,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     })->name('convert.bs-to-ad');
 
     Route::get('/courses', [App\Http\Controllers\Admin\CourseController::class, 'index'])->name('courses');
+    Route::get('/courses/create', [App\Http\Controllers\Admin\CourseController::class, 'create'])->name('courses.create');
     Route::post('/courses', [App\Http\Controllers\Admin\CourseController::class, 'store'])->name('courses.store');
     Route::get('/courses/{course}', [App\Http\Controllers\Admin\CourseController::class, 'show'])->name('courses.show');
     Route::get('/courses/{course}/view', [App\Http\Controllers\Admin\CourseController::class, 'showView'])->name('courses.view');

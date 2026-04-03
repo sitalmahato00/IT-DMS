@@ -9,7 +9,7 @@
     if (!in_array($currentAccessLevel, ['teacher', 'admin'], true)) {
         $currentAccessLevel = 'teacher';
     }
-    $currentPhotoUrl = $currentPhotoUrl ?? ($teacherProfile?->profile_photo_path ? asset('storage/' . $teacherProfile->profile_photo_path) : null);
+    $currentPhotoUrl = $currentPhotoUrl ?? $teacherProfile?->profile_photo_url;
     $currentResume = $currentResume ?? ($teacherProfile?->resume_path ? basename($teacherProfile->resume_path) : null);
     $currentCertificates = collect($currentCertificates ?? ($teacherProfile?->certificate_paths ?? []))->filter()->values();
     $currentIdProof = $currentIdProof ?? ($teacherProfile?->id_proof_path ? basename($teacherProfile->id_proof_path) : null);

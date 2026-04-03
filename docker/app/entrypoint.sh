@@ -16,6 +16,17 @@ mkdir -p \
     "$APP_DIR/storage/framework/views" \
     "$APP_DIR/bootstrap/cache"
 
+chmod -R 775 "$APP_DIR/storage" "$APP_DIR/bootstrap/cache" || true
+
+if command -v php >/dev/null 2>&1 && [ -f "$APP_DIR/artisan" ]; then
+    (
+        cd "$APP_DIR"
+        php artisan config:clear || true
+        php artisan cache:clear || true
+        php artisan config:cache || true
+    )
+fi
+
 if [ ! -f "$BUILD_MANIFEST" ]; then
     echo "Warning: $BUILD_MANIFEST is missing."
     echo "Run 'docker compose exec app npm run build' for production assets"

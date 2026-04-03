@@ -102,7 +102,7 @@
     ],
     'addButton' => [
         'label' => 'Add Exam',
-        'onclick' => 'openAddAssessmentModal()',
+        'route' => route('admin.exam.create'),
         'color' => 'green'
     ]
 ])
@@ -328,23 +328,12 @@
                     </td>
                     <td class="px-4 py-4 text-center text-sm">
                         <div class="flex gap-1 justify-center">
-                            <button onclick="openViewAssessmentModal({{ $exam->id }});" class="exam-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 rounded transition" title="View">
+                            <a href="{{ route('admin.exam.show', $exam->id) }}" class="exam-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 rounded transition" title="View">
                                 <i class="bi bi-eye"></i>
-                            </button>
-<button onclick="openEditExamModal({{ $exam->id }})" class="exam-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-yellow-700 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50 rounded transition" title="Edit" id="edit-btn-{{ $exam->id }}">
+                            </a>
+                            <a href="{{ route('admin.exam.edit', $exam->id) }}" class="exam-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-yellow-700 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50 rounded transition" title="Edit">
                                 <i class="bi bi-pencil"></i>
-                            </button>
-                            <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                const btn = document.getElementById('edit-btn-{{ $exam->id }}');
-                                if (btn) {
-                                    btn.addEventListener('click', function(e) {
-                                        e.preventDefault();
-                                        openEditExamModal({{ $exam->id }});
-                                    });
-                                }
-                            });
-                            </script>
+                            </a>
                             <button onclick="toggleExamStatusConfirm({{ $exam->id }}, '{{ $exam->status }}')" class="exam-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-purple-700 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:hover:bg-purple-900/50 rounded transition" title="Toggle Status">
                                 <i class="bi bi-toggle-{{ $exam->status === 'published' ? 'on' : 'off' }}"></i>
                             </button>
@@ -1891,7 +1880,5 @@ function updateCreateExamPracticalFieldsVisibility() {
         registerCreateExamComponentListeners();
     });
 </script>
-<!-- Include shared edit exam modal -->
-@include('admin.partials.edit-exam-modal', ['academicYears' => $academicYears, 'semesters' => $semesters, 'activeSemesters' => ($activeSemesters ?? $semesters)])
 
 @endsection

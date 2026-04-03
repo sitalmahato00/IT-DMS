@@ -2,8 +2,8 @@
     $resolvedTitle = trim($__env->yieldContent('title', __('Dashboard')));
     $resolvedSubtitle = trim($__env->yieldContent('subtitle', __('Parent Portal Overview')));
     $user = auth()->user();
-    $photoPath = $user?->profile_photo_path ?: $user?->parent?->profile_photo_path;
-    $hasProfilePhoto = !empty($photoPath) && \Illuminate\Support\Facades\Storage::disk('public')->exists($photoPath);
+    $photoPath = $user?->profile_photo_url ?: $user?->parent?->profile_photo_url;
+    $hasProfilePhoto = !empty($photoPath);
 
     $__notifList = $user ? $user->notifications()->latest()->take(6)->get() : collect();
     $__unreadCount = $user ? $user->unreadNotifications()->count() : 0;
@@ -91,7 +91,7 @@
                 <div class="relative">
                     <button id="profileToggle" class="flex items-center gap-2 p-1.5 border border-gray-200 bg-white text-gray-900 rounded-lg transition shadow-sm hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white dark:hover:bg-slate-800">
                         @if($hasProfilePhoto)
-                            <img src="{{ asset('storage/' . $photoPath) }}" alt="{{ $user->name }}" class="w-8 h-8 rounded-full object-cover border border-white/60">
+                            <img src="{{ $photoPath }}" alt="{{ $user->name }}" class="w-8 h-8 rounded-full object-cover border border-white/60">
                         @else
                             <div class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-bold">
                                 {{ strtoupper(substr($user->name ?? 'P', 0, 1)) }}
@@ -211,4 +211,3 @@
         });
     });
 </script>
-

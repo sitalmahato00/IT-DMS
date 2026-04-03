@@ -15,7 +15,7 @@
     <!-- Event Banner -->
     @if($event->image_path)
         <div class="relative h-96 rounded-xl overflow-hidden shadow-lg">
-            <img src="{{ asset('storage/' . $event->image_path) }}" alt="{{ $event->title ?? 'Event' }}" class="w-full h-full object-cover">
+            <img src="{{ \App\Support\Media::publicUrl($event->image_path) }}" alt="{{ $event->title ?? 'Event' }}" class="w-full h-full object-cover">
         </div>
     @endif
 

@@ -87,7 +87,7 @@
                     <table class="sheet-header border-collapse">
                         <tr>
                             <td class="w-24 text-center align-middle p-3">
-                                <img src="{{ $departmentLogoUrl ?? asset('images/default-logo.svg') }}" alt="Logo" class="logo-box mx-auto">
+                                <img src="{{ $departmentLogoUrl ?? '/images/default-logo.svg' }}" alt="Logo" class="logo-box mx-auto">
                             </td>
                             <td class="text-center py-3 px-2">
                                 <div class="report-title break-words">{{ $departmentName }}</div>

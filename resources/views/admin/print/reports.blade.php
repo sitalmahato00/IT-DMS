@@ -132,7 +132,7 @@
         <div class="header-section">
             <div class="school-logo">
                 @if(!empty($college) && !empty($college->logo_path))
-                    <img src="{{ asset($college->logo_path) }}" alt="College Logo" style="max-height: 60px; max-width: 60px;">
+                    <img src="{{ \App\Support\Media::publicUrl($college->logo_path) }}" alt="College Logo" style="max-height: 60px; max-width: 60px;">
                 @else
                     <div class="logo-placeholder" style="font-size: 48px;">🎓</div>
                 @endif

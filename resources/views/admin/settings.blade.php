@@ -72,11 +72,9 @@
                 <div class="flex items-start gap-4">
                     @php
                         $user = Auth::user();
-                        $photoPath = $user->profile_photo_path ?? null;
-                        $hasFile = !empty($photoPath) && \Illuminate\Support\Facades\Storage::disk('public')->exists($photoPath);
                     @endphp
-                    @if($hasFile)
-                        <img src="{{ asset('storage/' . $photoPath) }}" alt="{{ $user->name }}" class="w-16 h-16 rounded-full object-cover border-2 border-gray-300 flex-shrink-0">
+                    @if($user?->profile_photo_url)
+                        <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="w-16 h-16 rounded-full object-cover border-2 border-gray-300 flex-shrink-0">
                     @else
                         <div class="w-16 h-16 bg-gradient-to-br from-red-600 to-orange-600 rounded-full flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
                             {{ substr($user->name ?? 'A', 0, 1) }}

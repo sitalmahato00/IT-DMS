@@ -39,6 +39,10 @@ case $COMMAND in
         echo "Running migrations..."
         docker-compose exec app php artisan migrate
         ;;
+    prepare)
+        echo "Preparing Laravel runtime directories and cache..."
+        docker-compose exec app sh -lc 'mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data bootstrap/cache && chmod -R 775 storage bootstrap/cache && php artisan config:clear && php artisan cache:clear && php artisan config:cache'
+        ;;
     seed)
         echo "Running seeders..."
         docker-compose exec app php artisan db:seed
@@ -67,6 +71,7 @@ case $COMMAND in
         echo "  ./docker-start.sh vite-logs - Show Vite logs"
         echo "  ./docker-start.sh shell    - Access app shell"
         echo "  ./docker-start.sh migrate  - Run migrations"
+        echo "  ./docker-start.sh prepare  - Prepare cache/runtime directories"
         echo "  ./docker-start.sh seed     - Run seeders"
         echo "  ./docker-start.sh tinker   - Open Tinker"
         echo "  ./docker-start.sh test     - Run tests"

@@ -188,8 +188,8 @@
                                     </label>
                                     <div class="relative">
                                         <div id="logoPreview" class="w-full h-40 border-2 border-dashed border-blue-300 rounded-xl flex items-center justify-center bg-blue-50 overflow-hidden cursor-pointer hover:bg-blue-100 transition group">
-                                            @if($department && $department->logo_path)
-                                                <img src="{{ $department->getLogoUrl() }}" alt="Department Logo" class="h-full w-full object-contain p-2">
+                                            @if($department && $department->logo_url)
+                                                <img src="{{ $department->logo_url }}" alt="Department Logo" class="h-full w-full object-contain p-2">
                                             @else
                                                 <div class="text-center">
                                                     <i class="bi bi-cloud-arrow-up text-4xl text-blue-400 group-hover:text-blue-500 transition"></i>
@@ -199,7 +199,7 @@
                                             @endif
                                         </div>
                                         <input type="file" id="logoInput" name="logo" class="hidden" accept="image/*" onchange="handleLogoUpload(event)">
-                                        @if($department && $department->logo_path)
+                                        @if($department && $department->logo_url)
                                             <button type="button" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 shadow-lg transition" onclick="deleteLogo()">
                                                 <i class="bi bi-trash"></i>
                                             </button>
@@ -490,7 +490,7 @@
                                                 @if(!empty($img))
                                                     <div class="relative group">
                                                         <div class="aspect-[4/3] overflow-hidden rounded-lg border-2 border-gray-200 bg-gray-50 shadow-sm">
-                                                            <img src="{{ asset('storage/' . ltrim($img, '/')) }}" alt="Hero photo" class="h-full w-full object-cover">
+                                                            <img src="{{ \App\Support\Media::publicUrl($img) }}" alt="Hero photo" class="h-full w-full object-cover">
                                                         </div>
                                                         <button type="button"
                                                             class="absolute inset-0 m-auto w-10 h-10 rounded-full bg-red-500 text-white shadow-lg transition opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-red-600"

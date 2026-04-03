@@ -6,6 +6,7 @@ use App\Models\Subject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Schema;
+use App\Support\Media;
 
 class Teacher extends Model
 {
@@ -131,5 +132,30 @@ class Teacher extends Model
             ->pluck('semester')
             ->sort()
             ->values();
+    }
+
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        return Media::publicUrl($this->profile_photo_path);
+    }
+
+    public function getResumeUrlAttribute(): ?string
+    {
+        return Media::publicUrl($this->resume_path);
+    }
+
+    public function getIdProofUrlAttribute(): ?string
+    {
+        return Media::publicUrl($this->id_proof_path);
+    }
+
+    public function getCertificateUrlsAttribute(): array
+    {
+        return collect($this->certificate_paths ?? [])
+            ->filter()
+            ->map(fn ($path) => Media::publicUrl($path))
+            ->filter()
+            ->values()
+            ->all();
     }
 }

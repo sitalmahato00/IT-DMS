@@ -186,6 +186,14 @@ class ExamController extends Controller
     }
 
     /**
+     * Show the exam creation page.
+     */
+    public function create()
+    {
+        return view('admin.exams.create', $this->getExamFormContext());
+    }
+
+    /**
      * Get subjects by semester for exam views/modals.
      * Returns both a flat list and a "grouped" map (by category) for optgroups.
      */
@@ -445,6 +453,7 @@ class ExamController extends Controller
                 'status' => 'sometimes|required|in:draft,published,archived,faculty',
                 'description' => 'sometimes|nullable|string',
                 'description_ne' => 'sometimes|nullable|string',
+                'instructions' => 'sometimes|nullable|string',
             ]);
 
             if ($validator->fails()) {
@@ -609,6 +618,26 @@ $exam->load(['subject', 'marks.student']);
             Log::error('Error showing exam: ' . $e->getMessage());
             return redirect()->back()
                 ->with('error', 'Failed to load exam details: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show the exam edit page.
+     */
+    public function edit(Exam $exam)
+    {
+        try {
+            $exam->load(['subject']);
+
+            return view('admin.exams.edit', array_merge(
+                $this->getExamFormContext($exam),
+                ['exam' => $exam]
+            ));
+        } catch (\Exception $e) {
+            Log::error('Error loading exam edit page: ' . $e->getMessage());
+
+            return redirect()->route('admin.exam')
+                ->with('error', 'Failed to load exam edit page: ' . $e->getMessage());
         }
     }
 
@@ -1303,6 +1332,7 @@ $exam->load(['subject', 'marks.student.user']);
                     'exam_date_bs' => $exam->exam_date_bs,
                     'status' => $exam->status,
                     'description' => $exam->description,
+                    'instructions' => $exam->instructions,
                     'theory_internal_max_marks' => $exam->theory_internal_max_marks,
                     'theory_external_max_marks' => $exam->theory_external_max_marks,
                     'practical_internal_max_marks' => $exam->practical_internal_max_marks,
@@ -1320,6 +1350,20 @@ $exam->load(['subject', 'marks.student.user']);
                 'message' => 'Failed to load exam data',
             ], 500);
         }
+    }
+
+    /**
+     * Shared data for exam create/edit pages.
+     */
+    private function getExamFormContext(?Exam $exam = null): array
+    {
+        return [
+            'academicYears' => $this->getAcademicYears(),
+            'semesters' => $this->getSemesters(),
+            'activeSemesters' => $this->getActiveSemesters(),
+            'subjects' => Subject::active()->orderBy('semester')->orderBy('subject_name')->get(),
+            'exam' => $exam,
+        ];
     }
 
     /**

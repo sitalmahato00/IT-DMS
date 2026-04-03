@@ -405,11 +405,10 @@
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-2">
                                 @php
-                                    $photoPath = $student->profile_photo_path ?? null;
-                                    $hasPhoto = !empty($photoPath);
+                                    $photoUrl = $student->profile_photo_url ?? null;
                                 @endphp
-                                @if($hasPhoto)
-                                    <img src="{{ asset('storage/' . $photoPath) }}" alt="{{ $student->name }}" 
+                                @if($photoUrl)
+                                    <img src="{{ $photoUrl }}" alt="{{ $student->name }}" 
                                          class="w-8 h-8 rounded-full object-cover"
                                          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold hidden" style="background-color: {{ $redColor }}20; color: {{ $redColor }};">
@@ -474,7 +473,7 @@
                         </td>
                         <td class="px-4 py-3 text-center">
                             <div class="flex items-center justify-center gap-1">
-                                <button type="button" onclick="viewTopPerformer({{ $student->id }}, '{{ $student->name }}', '{{ $student->roll_no }}', '{{ $student->program }}', '{{ $student->semester }}', {{ $student->avg_percentage ?? 0 }}, {{ $student->attendance_percentage ?? 0 }}, '{{ $student->grade ?? 'N/A' }}', '{{ $student->email ?? '' }}', '{{ $student->profile_photo_path ?? '' }}')" class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded" style="background: {{ $redColor }}10; color: {{ $redColor }};" title="View Details">
+                                <button type="button" onclick="viewTopPerformer({{ $student->id }}, '{{ $student->name }}', '{{ $student->roll_no }}', '{{ $student->program }}', '{{ $student->semester }}', {{ $student->avg_percentage ?? 0 }}, {{ $student->attendance_percentage ?? 0 }}, '{{ $student->grade ?? 'N/A' }}', '{{ $student->email ?? '' }}', '{{ $student->profile_photo_url ?? '' }}')" class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded" style="background: {{ $redColor }}10; color: {{ $redColor }};" title="View Details">
                                     <i class="bi bi-eye"></i> View
                                 </button>
                             </div>
@@ -968,7 +967,7 @@
             email: email,
             phone: '',
             status: 'active',
-            profile_photo_path: profilePhoto
+            profile_photo_url: profilePhoto
         };
         
         document.getElementById('modalStudentName').textContent = name || 'N/A';
@@ -998,7 +997,7 @@
         // Handle profile photo in modal
         const modalAvatar = document.getElementById('modalStudentAvatar');
         if (profilePhoto) {
-            modalAvatar.innerHTML = '<img src="/storage/' + profilePhoto + '" alt="profile" class="w-full h-full object-cover" onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\';"><span style="display:none;"><i class="bi bi-person text-5xl"></i></span>';
+            modalAvatar.innerHTML = '<img src="' + profilePhoto + '" alt="profile" class="w-full h-full object-cover" onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\';"><span style="display:none;"><i class="bi bi-person text-5xl"></i></span>';
         } else {
             modalAvatar.innerHTML = '<i class="bi bi-person text-5xl"></i>';
         }
@@ -1025,8 +1024,8 @@
         // Handle photo
         const viewAvatarImg = document.getElementById('viewStudentAvatarImg');
         const viewInitial = document.getElementById('viewStudentInitial');
-        if (student.profile_photo_path) {
-            viewAvatarImg.src = '/storage/' + student.profile_photo_path;
+        if (student.profile_photo_url) {
+            viewAvatarImg.src = student.profile_photo_url;
             viewAvatarImg.style.display = 'block';
             viewInitial.style.display = 'none';
         } else {

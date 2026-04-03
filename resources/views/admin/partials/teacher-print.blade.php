@@ -142,9 +142,8 @@
 
 @section('content')
 @php
-    $photoPath = $teacher->teacher->profile_photo_path ?? $teacher->profile_photo_path ?? null;
-    $photoUrl = $photoPath ? (\Illuminate\Support\Str::startsWith($photoPath, 'storage/') ? asset($photoPath) : asset('storage/' . $photoPath)) : null;
-    $certificatePaths = collect($teacher->teacher->certificate_paths ?? [])->filter()->values();
+    $photoUrl = $teacher->teacher->profile_photo_url ?? $teacher->profile_photo_url ?? null;
+    $certificatePaths = collect($teacher->teacher->certificate_urls ?? [])->filter()->values();
     $assignedSubjects = collect($teacher->teacher->subjects ?? collect());
 @endphp
 

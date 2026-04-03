@@ -251,7 +251,7 @@
     ],
     'addButton' => [
         'label' => 'Add Course',
-        'onclick' => "openAddCourseModal()",
+        'route' => route('admin.courses.create'),
         'color' => 'green'
     ]
 ])
@@ -483,12 +483,12 @@
                         </td>
                         <td class="px-6 py-4 text-sm text-center">
                             <div class="course-actions flex items-center gap-1 justify-center">
-                                <button type="button" onclick="event.preventDefault(); event.stopPropagation(); openSubjectDetailModal({{ $course->id }});" class="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30" title="View Details">
+                                <a href="{{ route('admin.courses.show', $course->id) }}" onclick="event.stopPropagation();" class="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30" title="View Details">
                                     <i class="bi bi-eye"></i>
-                                </button>
-                                <button type="button" onclick="event.preventDefault(); event.stopPropagation(); editCourse({{ $course->id }});" class="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/30" title="Edit">
+                                </a>
+                                <a href="{{ route('admin.courses.edit', $course->id) }}" onclick="event.stopPropagation();" class="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/30" title="Edit">
                                     <i class="bi bi-pencil"></i>
-                                </button>
+                                </a>
                                 <button type="button" onclick="event.preventDefault(); event.stopPropagation(); deleteCourse({{ $course->id }});" class="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30" title="Delete">
                                     <i class="bi bi-trash"></i>
                                 </button>
