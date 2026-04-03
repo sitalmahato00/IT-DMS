@@ -55,6 +55,8 @@
             <div class="p-6">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ __('Subject-wise Attendance') }}</h2>
                 
+
+
                 <div class="space-y-4">
                     @foreach($subjects as $subject)
                         <div class="student-smooth-list-card flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-4 border-red-400">
@@ -79,17 +81,14 @@
                             <div class="text-center">
                                 <div class="space-y-2">
                                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Attendance') }}</p>
-                                    <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                                        @php
-                                            $subjectAttendance = $student->getAttendancePercentage($subject['id']);
-                                        @endphp
-                                        {{ $subjectAttendance }}%
-                                    </p>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($subject['attendance'], 1) }}%</p>
                                 </div>
                             </div>
                         </div>
                     @endforeach
                 </div>
+
+
             </div>
         </div>
     @endif
@@ -118,6 +117,7 @@
                         ">
                             <div class="flex-1">
                                 <div class="flex items-start gap-3">
+
                                     <div class="flex-shrink-0">
                                         <i class="bi bi-calendar-date text-2xl 
                                             @if($record->status === 'present')
@@ -133,13 +133,14 @@
                                         <p class="font-medium text-gray-900 dark:text-white mb-1">{{ $record->subject_name }} ({{ $record->subject_code }})</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400">
                                             <i class="bi bi-clock"></i>
-                                            {{ $record->date->format('M d, Y') }}
+                                            {{ \Carbon\Carbon::parse($record->date)->format('M d, Y') }}
                                         </p>
                                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                             <i class="bi bi-clock"></i>
-                                            {{ $record->time_in }} - {{ $record->time_out }}
+                                            {{ $record->time_in ?? 'N/A' }} - {{ $record->time_out ?? 'N/A' }}
                                         </p>
                                     </div>
+
                                 </div>
                             </div>
                             <div class="text-center">

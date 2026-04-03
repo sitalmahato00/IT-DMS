@@ -23,11 +23,13 @@ class StudentAttendanceController extends Controller
         }
         
         // Get subjects enrolled by the student
+
+
         $subjects = $student->subjects()
             ->with(['teacherAssignments.teacher.user'])
             ->orderBy('semester')
             ->get()
-            ->map(function ($subject) {
+            ->map(function ($subject) use ($student) {
                 // Get primary teacher for the subject
                 $primaryTeacher = $subject->teacherAssignments()
                     ->where('role', 'primary')
@@ -41,8 +43,10 @@ class StudentAttendanceController extends Controller
                     'semester' => $subject->semester,
                     'course' => $subject->category ?? $subject->subject_name,
                     'teacher' => $primaryTeacher ? $primaryTeacher->name : 'TBA',
+                    'attendance' => $student->getAttendancePercentage($subject->id),
                 ];
             });
+
         
         // Get overall attendance percentage
         $overallAttendance = $student->getAttendancePercentage();
@@ -57,7 +61,8 @@ class StudentAttendanceController extends Controller
             ->limit(10)
             ->get();
         
-        return view('student.attendance.index', compact('subjects', 'overallAttendance', 'recentAttendance'));
+        return view('student.attendance.index', compact('student', 'subjects', 'overallAttendance', 'recentAttendance'));
+
     }
     
     /**

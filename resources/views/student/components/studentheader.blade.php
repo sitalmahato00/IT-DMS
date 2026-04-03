@@ -27,20 +27,10 @@
                 </div>
             </div>
 
+
             <div class="hidden md:flex flex-1 justify-center">
-                <form id="studentHeaderSearchForm" class="relative w-full max-w-xl" role="search">
-                    <label for="studentHeaderSearchInput" class="sr-only">{{ __('Search this page') }}</label>
-                    <input
-                        id="studentHeaderSearchInput"
-                        type="search"
-                        placeholder="{{ __('Search this page...') }}"
-                        class="w-full px-4 py-2 pl-10 pr-4 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0037] focus:border-transparent bg-white text-slate-900 placeholder:text-rose-400 shadow-sm transition dark:bg-slate-900/80 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400"
-                    >
-                    <button type="submit" class="absolute left-2.5 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-100 transition" aria-label="{{ __('Search') }}">
-                        <i class="bi bi-search text-[#FF0037] text-sm"></i>
-                    </button>
-                </form>
             </div>
+
 
             <div class="flex items-center gap-2 flex-shrink-0 h-full">
                 <div class="hidden md:block">
