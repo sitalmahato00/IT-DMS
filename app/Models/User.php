@@ -116,7 +116,7 @@ class User extends Authenticatable implements MustVerifyEmail
             }
         }
         
-        return null;
+        return asset('images/default-logo.svg');
     }
 
     /**

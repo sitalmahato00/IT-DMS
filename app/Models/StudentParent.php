@@ -68,12 +68,12 @@ class StudentParent extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getProfilePhotoUrlAttribute(): ?string
+    public function getProfilePhotoUrlAttribute(): string
     {
         if (!empty($this->profile_photo_path) && Storage::disk('public')->exists($this->profile_photo_path)) {
             return Storage::url($this->profile_photo_path);
         }
-        return null;
+        return asset('images/default-logo.svg');
     }
 
     public function getIdProofUrlAttribute(): ?string
