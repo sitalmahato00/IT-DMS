@@ -3,7 +3,7 @@
 @section('title', 'Edit Profile')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6 max-w-none">
     <!-- Profile Info Card -->
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200">
@@ -67,6 +67,13 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
+                                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                <input type="text" id="username" name="username" value="{{ old('username', $user->username ?? '') }}" autocomplete="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" placeholder="Optional username" />
+                                @error('username')
+                                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
                                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                                 <input type="tel" id="phone" name="phone" value="{{ old('phone', $user->phone ?? '') }}" autocomplete="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
                                 @error('phone')
@@ -79,6 +86,31 @@
                                 @error('department')
                                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                            <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">Role</div>
+                                <div class="mt-1 text-sm font-semibold text-gray-900">{{ ucfirst($user->role ?? 'user') }}</div>
+                            </div>
+                            <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">Email Status</div>
+                                <div class="mt-1 text-sm font-semibold {{ $user->hasVerifiedEmail() ? 'text-green-600' : 'text-amber-600' }}">
+                                    {{ $user->hasVerifiedEmail() ? 'Verified' : 'Unverified' }}
+                                </div>
+                            </div>
+                            <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">Member Since</div>
+                                <div class="mt-1 text-sm font-semibold text-gray-900">
+                                    {{ optional($user->created_at)->format('M d, Y') ?? 'Not available' }}
+                                </div>
+                            </div>
+                            <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                                <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">Last Updated</div>
+                                <div class="mt-1 text-sm font-semibold text-gray-900">
+                                    {{ optional($user->updated_at)->format('M d, Y h:i A') ?? 'Not available' }}
+                                </div>
                             </div>
                         </div>
 
@@ -102,76 +134,20 @@
                                 </p>
                             @endif
                         </div>
-                    </div>
-                </div>
-            </form>
-
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div class="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                    <div class="flex items-start gap-3">
-                        <i class="bi bi-exclamation-triangle text-yellow-600 mt-0.5"></i>
-                        <div>
-                            <p class="text-sm font-medium text-yellow-800">Your email address is unverified.</p>
-                            <p class="text-xs text-yellow-700 mt-1">Please verify your email address to access all features.</p>
-                            <form method="post" action="{{ route('verification.send') }}" class="mt-2">
-                                @csrf
-                                <button type="submit" class="text-xs text-yellow-800 hover:text-yellow-900 underline">Resend verification email</button>
-                            </form>
+                    @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+                        <div class="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <div class="flex items-start gap-3">
+                                <i class="bi bi-exclamation-triangle text-yellow-600 mt-0.5"></i>
+                                <div>
+                                    <p class="text-sm font-medium text-yellow-800">Your email address is unverified.</p>
+                                    <p class="text-xs text-yellow-700 mt-1">Please verify your email address to access all features.</p>
+                                    <form method="post" action="{{ route('verification.send') }}" class="mt-2">
+                                        @csrf
+                                        <button type="submit" class="text-xs text-yellow-800 hover:text-yellow-900 underline">Resend verification email</button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    <!-- Password Update Card -->
-    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div class="px-4 py-3 border-b border-gray-200">
-            <h3 class="text-gray-900 font-semibold text-sm flex items-center gap-2">
-                <i class="bi bi-key text-gray-500"></i>
-                Update Password
-            </h3>
-        </div>
-        <div class="p-6">
-            <form method="post" action="{{ route('password.update') }}" class="space-y-4">
-                @csrf
-                @method('put')
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="update_password_current_password" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                        <input type="password" id="update_password_current_password" name="current_password" autocomplete="current-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                        @error('current_password', 'updatePassword')
-                            <p class="text-xs text-red-600 mt-1">{{ $errors->updatePassword->first('current_password') }}</p>
-                        @enderror
-                    </div>
-                    <div></div>
-                    <div>
-                        <label for="update_password_password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                        <input type="password" id="update_password_password" name="password" autocomplete="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                        @error('password', 'updatePassword')
-                            <p class="text-xs text-red-600 mt-1">{{ $errors->updatePassword->first('password') }}</p>
-                        @enderror
-                    </div>
-                    <div>
-                        <label for="update_password_password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                        <input type="password" id="update_password_password_confirmation" name="password_confirmation" autocomplete="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-                        @error('password_confirmation', 'updatePassword')
-                            <p class="text-xs text-red-600 mt-1">{{ $errors->updatePassword->first('password_confirmation') }}</p>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3 pt-2">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition">
-                        <i class="bi bi-shield-check mr-1"></i>
-                        Update Password
-                    </button>
-                    @if(session('status') === 'password-updated')
-                        <p class="text-sm text-green-600 flex items-center gap-1">
-                            <i class="bi bi-check-circle"></i>
-                            Password updated!
-                        </p>
                     @endif
                 </div>
             </form>

@@ -2,10 +2,13 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\UsesNotificationEmailSettings;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ResultNotification extends Notification
 {
+    use UsesNotificationEmailSettings;
 
     protected $exam;
     protected $totalStudents;
@@ -18,7 +21,20 @@ class ResultNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->notificationEmailEnabled('notification_email_result')
+            ? ['database', 'mail']
+            : ['database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $data = $this->toArray($notifiable);
+
+        return (new MailMessage)
+            ->subject('Results Published - ' . $this->exam->exam_name)
+            ->greeting('Results Published')
+            ->line($data['message'])
+            ->action('View Marksheet', $data['url'] ?? url('/'));
     }
 
     public function toArray(object $notifiable): array

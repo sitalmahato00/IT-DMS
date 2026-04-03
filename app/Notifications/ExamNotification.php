@@ -3,10 +3,13 @@
 namespace App\Notifications;
 
 use App\Models\Exam;
+use App\Notifications\Concerns\UsesNotificationEmailSettings;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ExamNotification extends Notification
 {
+    use UsesNotificationEmailSettings;
 
     protected $exam;
     protected $action;
@@ -27,7 +30,18 @@ class ExamNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->notificationEmailEnabled('notification_email_exam')
+            ? ['database', 'mail']
+            : ['database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Exam Notification - ' . $this->exam->exam_name)
+            ->greeting('Exam ' . ucfirst($this->action))
+            ->line($this->toArray($notifiable)['message'])
+            ->action('View Exam', route('admin.exam.show', $this->exam->id));
     }
 
     /**

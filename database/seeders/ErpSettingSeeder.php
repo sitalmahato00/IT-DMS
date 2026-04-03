@@ -22,6 +22,20 @@ class ErpSettingSeeder extends Seeder
             ['key' => 'bilingual_support', 'value' => '1'],
             ['key' => 'attendance_type', 'value' => 'subject'],
             ['key' => 'marks_types', 'value' => 'internal,assessment,final'],
+            ['key' => 'security_password_min_length', 'value' => '10'],
+            ['key' => 'security_password_require_uppercase', 'value' => '1'],
+            ['key' => 'security_password_require_lowercase', 'value' => '1'],
+            ['key' => 'security_password_require_number', 'value' => '1'],
+            ['key' => 'security_password_require_symbol', 'value' => '1'],
+            ['key' => 'security_two_factor_enabled', 'value' => '0'],
+            ['key' => 'security_two_factor_roles', 'value' => json_encode(['admin'])],
+            ['key' => 'security_two_factor_expiry_minutes', 'value' => '10'],
+            ['key' => 'notification_email_enabled', 'value' => '1'],
+            ['key' => 'notification_email_exam', 'value' => '1'],
+            ['key' => 'notification_email_attendance', 'value' => '1'],
+            ['key' => 'notification_email_student', 'value' => '1'],
+            ['key' => 'notification_email_assignment', 'value' => '1'],
+            ['key' => 'notification_email_result', 'value' => '1'],
         ];
 
         foreach ($settings as $setting) {

@@ -37,6 +37,53 @@ class TeacherMarksController extends Controller
             ->toArray();
     }
 
+    private function normalizeSemesterValue(?string $semester): string
+    {
+        $normalized = strtolower(trim((string) $semester));
+
+        $numberToKey = [
+            '1' => 'first',
+            '2' => 'second',
+            '3' => 'third',
+            '4' => 'fourth',
+            '5' => 'fifth',
+            '6' => 'sixth',
+            '7' => 'seventh',
+            '8' => 'eighth',
+            'first semester' => 'first',
+            'second semester' => 'second',
+            'third semester' => 'third',
+            'fourth semester' => 'fourth',
+            'fifth semester' => 'fifth',
+            'sixth semester' => 'sixth',
+            'seventh semester' => 'seventh',
+            'eighth semester' => 'eighth',
+        ];
+
+        return $numberToKey[$normalized] ?? $normalized;
+    }
+
+    private function getSemesterFilterCandidates(string $semester): array
+    {
+        $normalized = $this->normalizeSemesterValue($semester);
+        $keyToNumber = [
+            'first' => '1',
+            'second' => '2',
+            'third' => '3',
+            'fourth' => '4',
+            'fifth' => '5',
+            'sixth' => '6',
+            'seventh' => '7',
+            'eighth' => '8',
+        ];
+
+        return array_values(array_unique(array_filter([
+            strtolower(trim($semester)),
+            $normalized,
+            $normalized ? ($keyToNumber[$normalized] ?? null) : null,
+        ])));
+    }
+
     /**
      * Display marks for teacher's subjects - using new simplified view
      */
@@ -53,6 +100,7 @@ class TeacherMarksController extends Controller
                     'semesters' => collect([]),
                     'academicYears' => collect([]),
                     'assessments' => [],
+                    'availableAssessments' => collect([]),
                     'selectedCategory' => 'assessment',
                     'currentFilters' => [],
                 ]);
@@ -67,6 +115,7 @@ class TeacherMarksController extends Controller
                     'semesters' => collect([]),
                     'academicYears' => collect([]),
                     'assessments' => [],
+                    'availableAssessments' => collect([]),
                     'selectedCategory' => 'assessment',
                     'currentFilters' => [],
                 ]);
@@ -74,6 +123,9 @@ class TeacherMarksController extends Controller
             
             // Get filter parameters
             $category = $request->get('category', 'assessment');
+            if (!in_array($category, ['assessment', 'ctevt'], true)) {
+                $category = 'assessment';
+            }
             $semester = $request->get('semester', '');
             $subjectId = $request->get('subject_id', '');
             $academicYear = $request->get('academic_year', '');
@@ -89,22 +141,27 @@ class TeacherMarksController extends Controller
                 ->values();
             
             // Get unique academic years from exam marks for teacher's subjects
-            $academicYears = ExamMark::whereHas('exam', function ($q) use ($subjectIds) {
-                $q->whereIn('subject_id', $subjectIds);
-            })
+            $academicYears = Exam::whereIn('subject_id', $subjectIds)
                 ->distinct()
                 ->orderBy('academic_year', 'desc')
                 ->pluck('academic_year')
                 ->filter()
                 ->values();
+
+            $semesterCandidates = $semester !== ''
+                ? $this->getSemesterFilterCandidates((string) $semester)
+                : [];
             
-            // Get unique assessments (Assessment category only)
-            $assessments = Exam::whereIn('subject_id', $subjectIds)
+            $allAssessmentOptions = Exam::whereIn('subject_id', $subjectIds)
                 ->where('exam_category', 'assessment')
-                ->distinct()
                 ->orderBy('exam_date', 'asc')
-                ->pluck('exam_name', 'id')
-                ->toArray();
+                ->get([
+                    'id',
+                    'exam_name',
+                    'subject_id',
+                    'semester',
+                    'academic_year',
+                ]);
             
             // Get subjects for teacher (format for display)
             $subjects = SubjectTeacher::where('teacher_id', $teacher->id)
@@ -118,6 +175,44 @@ class TeacherMarksController extends Controller
                         'semester' => $st->subject->semester,
                     ];
                 })
+                ->values();
+
+            $filteredAssessmentOptions = $allAssessmentOptions
+                ->when($semester !== '', function ($collection) use ($semester, $semesterCandidates) {
+                    return $collection->filter(function ($exam) use ($semester, $semesterCandidates) {
+                        $examSemester = strtolower(trim((string) ($exam->semester ?? '')));
+
+                        if ($semester === 'all') {
+                            return $examSemester === 'all';
+                        }
+
+                        return in_array($examSemester, $semesterCandidates, true)
+                            || $examSemester === 'all'
+                            || $examSemester === '';
+                    });
+                })
+                ->when($subjectId !== '', fn ($collection) => $collection->filter(fn ($exam) => (string) $exam->subject_id === (string) $subjectId))
+                ->when($academicYear !== '', fn ($collection) => $collection->filter(fn ($exam) => (string) ($exam->academic_year ?? '') === (string) $academicYear))
+                ->values();
+
+            if ($category !== 'assessment') {
+                $assessmentId = '';
+            } elseif ($assessmentId !== '' && !$filteredAssessmentOptions->contains(fn ($exam) => (string) $exam->id === (string) $assessmentId)) {
+                $assessmentId = '';
+            }
+
+            $assessments = $filteredAssessmentOptions
+                ->pluck('exam_name', 'id')
+                ->toArray();
+
+            $availableAssessments = $allAssessmentOptions
+                ->map(fn ($exam) => [
+                    'id' => $exam->id,
+                    'name' => $exam->exam_name,
+                    'subject_id' => $exam->subject_id,
+                    'semester' => $exam->semester,
+                    'academic_year' => $exam->academic_year,
+                ])
                 ->values();
             
             // Get students with marks if subject is selected
@@ -286,6 +381,7 @@ class TeacherMarksController extends Controller
                 'semesters' => $semesters,
                 'academicYears' => $academicYears,
                 'assessments' => $assessments,
+                'availableAssessments' => $availableAssessments,
                 'selectedCategory' => $category,
                 'currentFilters' => [
                     'category' => $category,
@@ -304,6 +400,7 @@ class TeacherMarksController extends Controller
                 'semesters' => collect([]),
                 'academicYears' => collect([]),
                 'assessments' => [],
+                'availableAssessments' => collect([]),
                 'selectedCategory' => 'assessment',
                 'currentFilters' => [],
             ]);

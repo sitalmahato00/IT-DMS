@@ -3,10 +3,13 @@
 namespace App\Notifications;
 
 use App\Models\Student;
+use App\Notifications\Concerns\UsesNotificationEmailSettings;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class AttendanceNotification extends Notification
 {
+    use UsesNotificationEmailSettings;
 
     protected $student;
     protected $attendanceData;
@@ -21,7 +24,20 @@ class AttendanceNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->notificationEmailEnabled('notification_email_attendance')
+            ? ['database', 'mail']
+            : ['database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $data = $this->toArray($notifiable);
+
+        return (new MailMessage)
+            ->subject('Attendance Notification - ' . ($this->student->user?->name ?? 'Student'))
+            ->greeting(ucfirst($this->action) . ' Attendance')
+            ->line($data['message'])
+            ->action('Open Attendance', route('admin.attendance'));
     }
 
     public function toArray(object $notifiable): array

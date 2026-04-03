@@ -177,7 +177,11 @@
                     <tbody>
                         @forelse($students as $student)
                             @php
-                                $examMark = $student->getExamMarkForSubject($selectedSubject->id, $category);
+                                $selectedAssessmentNumber = $currentFilters['assessment_number'] ?? null;
+                                if ($selectedAssessmentNumber === '') {
+                                    $selectedAssessmentNumber = null;
+                                }
+                                $examMark = $student->getExamMarkForSubject($selectedSubject->id, $category, null, $selectedAssessmentNumber);
                                 $totalFull = $examMark ? $examMark->calculateFullMarks() : 0;
                                 $totalObtained = $examMark ? $examMark->calculateTotalMarks() : 0;
                                 $percentage = $totalFull > 0 ? round(($totalObtained / $totalFull) * 100, 1) : 0;
@@ -189,12 +193,12 @@
                                 <td>{{ $student->roll_no }}</td>
                                 <td>{{ $student->user->name ?? 'N/A' }}</td>
                                 <td class="text-center">{{ $attendancePercentage }}%</td>
-                                <td class="text-center">{{ $examMark ? ($examMark->full_marks ?? '-') : '-' }}</td>
-                                <td class="text-center">{{ $examMark ? ($examMark->passing_marks ?? '-') : '-' }}</td>
-                                <td class="text-center">{{ $examMark ? ($examMark->marks_obtained ?? '-') : '-' }}</td>
+                                <td class="text-center">{{ $examMark ? ($examMark->full_marks ?? $examMark->exam->full_marks ?? '-') : '-' }}</td>
+                                <td class="text-center">{{ $examMark ? ($examMark->passing_marks ?? $examMark->exam->passing_marks ?? '-') : '-' }}</td>
+                                <td class="text-center">{{ $examMark ? ($examMark->isAbsent() ? 'ABS' : ($examMark->marks_obtained ?? '-')) : '-' }}</td>
                                 <td class="text-center">{{ $examMark ? ($percentage . '%') : '-' }}</td>
                                 <td class="text-center">
-                                    <span class="{{ $badgeClass }}">{{ $examMark ? $resultLabel : 'Pending' }}</span>
+                                    <span class="{{ $badgeClass }}">{{ $examMark ? ($examMark->isAbsent() ? 'ABS' : $resultLabel) : 'Pending' }}</span>
                                 </td>
                             </tr>
                         @empty

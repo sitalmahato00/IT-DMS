@@ -97,11 +97,15 @@ class DepartmentController extends Controller
 
         $department->fill($validated)->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Department details updated successfully',
-            'department' => $department,
-        ]);
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Department details updated successfully',
+                'department' => $department,
+            ]);
+        }
+
+        return redirect()->route('admin.settings')->with('status', 'Department details updated successfully');
     }
 
     public function deleteLogo()

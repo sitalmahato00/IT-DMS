@@ -2,12 +2,63 @@
 
 @section('title', __('Marks/Results'))
 
+@section('styles')
+<style>
+    html.teacher-ui-enhanced:not(.dark) .teacher-marks-page .teacher-marks-category-panel,
+    html.teacher-ui-enhanced:not(.dark) .teacher-marks-page .teacher-marks-filter-panel,
+    html.teacher-ui-enhanced:not(.dark) .teacher-marks-page .teacher-marks-table-shell {
+        box-shadow: 0 28px 56px -40px rgba(15, 23, 42, 0.22);
+    }
+
+    html.teacher-ui-enhanced:not(.dark) .teacher-marks-page .teacher-marks-category-switch {
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: inset 0 0 0 1px rgba(226, 232, 240, 0.92);
+    }
+
+    html.teacher-ui-enhanced:not(.dark) .teacher-marks-page .teacher-marks-category-btn:not(.bg-blue-600) {
+        background: rgba(255, 255, 255, 0.94);
+    }
+
+    html.teacher-ui-enhanced:not(.dark) .teacher-marks-page .teacher-marks-category-btn.bg-blue-600,
+    html.teacher-ui-enhanced:not(.dark) .teacher-marks-page .teacher-marks-toolbar-btn {
+        box-shadow: 0 16px 28px -22px rgba(37, 99, 235, 0.34);
+    }
+
+    html.teacher-ui-enhanced:not(.dark) .teacher-marks-page .teacher-marks-filter-panel .teacher-marks-panel-head,
+    html.teacher-ui-enhanced:not(.dark) .teacher-marks-page .teacher-marks-table-shell .teacher-marks-table-head {
+        background: linear-gradient(180deg, #fff7f8, #fffdfd);
+    }
+
+    html.teacher-ui-enhanced:not(.dark) .teacher-marks-page .teacher-marks-info {
+        background: linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 247, 237, 0.98));
+        box-shadow: 0 22px 36px -30px rgba(217, 119, 6, 0.24);
+    }
+
+    html.teacher-ui-enhanced:not(.dark) .teacher-marks-page .teacher-marks-row:hover {
+        background: linear-gradient(90deg, rgba(255, 241, 242, 0.8), rgba(255, 255, 255, 0.98));
+    }
+
+    html.teacher-ui-enhanced:not(.dark) .teacher-marks-page .teacher-marks-empty {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 249, 250, 0.96));
+    }
+
+    html.teacher-ui-enhanced.dark .teacher-marks-page .teacher-marks-info {
+        background: rgba(120, 53, 15, 0.24);
+        border-color: rgba(251, 191, 36, 0.18);
+        color: #fde68a;
+    }
+</style>
+@endsection
+
 @section('content')
 {{-- Page Header --}}
-<div class="space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif" id="teacherMarksApp">
-    <div>
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ __('Student Marks') }}</h1>
+<div class="teacher-marks-page space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif" id="teacherMarksApp">
+    <div class="teacher-page-header">
+        <div>
+        <h1 class="teacher-page-header-title text-3xl font-bold text-gray-900 dark:text-white">{{ __('Student Marks') }}</h1>
         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('Check and view marks for the subjects assigned to your semesters.') }}</p>
+        </div>
     </div>
 
     <script>
@@ -15,6 +66,51 @@
         const baseUrl = '{{ route("teacher.marks") }}';
         const availableSemesters = @json($semesters ?? []);
         const availableSubjects = @json($subjects ?? []);
+        const availableAssessments = @json($availableAssessments ?? []);
+
+        function normalizeSemesterValue(value) {
+            const normalized = String(value ?? '').trim().toLowerCase();
+            const numberToKey = {
+                '1': 'first',
+                '2': 'second',
+                '3': 'third',
+                '4': 'fourth',
+                '5': 'fifth',
+                '6': 'sixth',
+                '7': 'seventh',
+                '8': 'eighth',
+                'first semester': 'first',
+                'second semester': 'second',
+                'third semester': 'third',
+                'fourth semester': 'fourth',
+                'fifth semester': 'fifth',
+                'sixth semester': 'sixth',
+                'seventh semester': 'seventh',
+                'eighth semester': 'eighth',
+            };
+
+            return numberToKey[normalized] || normalized;
+        }
+
+        function getSemesterCandidates(value) {
+            const normalized = normalizeSemesterValue(value);
+            const keyToNumber = {
+                first: '1',
+                second: '2',
+                third: '3',
+                fourth: '4',
+                fifth: '5',
+                sixth: '6',
+                seventh: '7',
+                eighth: '8',
+            };
+
+            return [...new Set([
+                String(value ?? '').trim().toLowerCase(),
+                normalized,
+                keyToNumber[normalized] || '',
+            ].filter(Boolean))];
+        }
 
         function buildFilterParams(overrides = {}) {
             const form = document.getElementById('marksFilterForm');
@@ -27,6 +123,10 @@
                     params.set(key, value);
                 }
             });
+
+            if ((overrides.category ?? currentCategory) !== 'assessment') {
+                params.delete('assessment_id');
+            }
 
             const finalOverrides = Object.assign({ category: currentCategory }, overrides);
             Object.entries(finalOverrides).forEach(([key, value]) => {
@@ -41,7 +141,12 @@
         }
 
         function switchCategory(category) {
-            const params = buildFilterParams({ category });
+            const params = buildFilterParams({
+                category,
+                assessment_id: category === 'assessment'
+                    ? document.getElementById('filterAssessmentId')?.value || ''
+                    : ''
+            });
             const url = new URL(baseUrl, window.location.origin);
             url.search = params.toString();
             window.location.href = url.toString();
@@ -63,36 +168,131 @@
         function updateSubjects() {
             const semesterSelect = document.getElementById('filterSemester');
             const subjectSelect = document.getElementById('filterSubjectId');
-            
+             
             if (!semesterSelect || !subjectSelect) return;
-            
+             
             const selectedSemester = semesterSelect.value;
+            const previousSubject = subjectSelect.value;
+            const semesterCandidates = getSemesterCandidates(selectedSemester);
             const filteredSubjects = selectedSemester 
-                ? availableSubjects.filter(s => String(s.semester) === String(selectedSemester))
+                ? availableSubjects.filter((subject) => semesterCandidates.includes(String(subject.semester ?? '').trim().toLowerCase()))
                 : availableSubjects;
-            
+             
             subjectSelect.innerHTML = '<option value="">' + (selectedSemester ? '{{ __("Select Subject") }}' : '{{ __("Select semester first") }}') + '</option>';
             
             filteredSubjects.forEach(subject => {
                 const option = document.createElement('option');
                 option.value = subject.id;
-                option.textContent = subject.name;
+                option.textContent = subject.code ? `${subject.code} - ${subject.name}` : subject.name;
                 subjectSelect.appendChild(option);
             });
-            
+             
             subjectSelect.disabled = !selectedSemester;
+            if (filteredSubjects.some(subject => String(subject.id) === String(previousSubject))) {
+                subjectSelect.value = previousSubject;
+            }
+
+            updateAssessments();
         }
+
+        function toggleAssessmentFilter() {
+            const assessmentBlock = document.getElementById('assessmentFilterBlock');
+            const assessmentSelect = document.getElementById('filterAssessmentId');
+            const isAssessment = currentCategory === 'assessment';
+
+            if (assessmentBlock) {
+                assessmentBlock.classList.toggle('hidden', !isAssessment);
+            }
+
+            if (!assessmentSelect) {
+                return;
+            }
+
+            if (!isAssessment) {
+                assessmentSelect.value = '';
+                assessmentSelect.dataset.selectedValue = '';
+                assessmentSelect.disabled = true;
+            }
+        }
+
+        function updateAssessments() {
+            const assessmentSelect = document.getElementById('filterAssessmentId');
+            const semesterSelect = document.getElementById('filterSemester');
+            const subjectSelect = document.getElementById('filterSubjectId');
+            const academicYearSelect = document.getElementById('filterAcademicYear');
+
+            if (!assessmentSelect) {
+                return;
+            }
+
+            if (currentCategory !== 'assessment') {
+                assessmentSelect.innerHTML = '<option value="">{{ __("Not used for CTEVT") }}</option>';
+                assessmentSelect.disabled = true;
+                return;
+            }
+
+            const selectedSemester = semesterSelect?.value || '';
+            const selectedSubjectId = subjectSelect?.value || '';
+            const selectedAcademicYear = academicYearSelect?.value || '';
+            const previousAssessment = assessmentSelect.value || assessmentSelect.dataset.selectedValue || '';
+            const semesterCandidates = getSemesterCandidates(selectedSemester);
+
+            const filteredAssessments = availableAssessments.filter((assessment) => {
+                const assessmentSemester = String(assessment.semester ?? '').trim().toLowerCase();
+                const semesterMatch = !selectedSemester
+                    || (selectedSemester === 'all'
+                        ? assessmentSemester === 'all'
+                        : semesterCandidates.includes(assessmentSemester) || assessmentSemester === '' || assessmentSemester === 'all');
+                const subjectMatch = !selectedSubjectId || String(assessment.subject_id ?? '') === String(selectedSubjectId);
+                const yearMatch = !selectedAcademicYear || String(assessment.academic_year ?? '') === String(selectedAcademicYear);
+                return semesterMatch && subjectMatch && yearMatch;
+            });
+
+            assessmentSelect.innerHTML = '<option value="">{{ __("All Assessments") }}</option>';
+
+            filteredAssessments.forEach((assessment) => {
+                const option = document.createElement('option');
+                option.value = assessment.id;
+                option.textContent = assessment.name;
+                assessmentSelect.appendChild(option);
+            });
+
+            const hasSelected = filteredAssessments.some((assessment) => String(assessment.id) === String(previousAssessment));
+            assessmentSelect.value = hasSelected ? previousAssessment : '';
+            assessmentSelect.dataset.selectedValue = assessmentSelect.value;
+            assessmentSelect.disabled = filteredAssessments.length === 0;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            toggleAssessmentFilter();
+            updateSubjects();
+
+            const semesterSelect = document.getElementById('filterSemester');
+            const subjectSelect = document.getElementById('filterSubjectId');
+            const academicYearSelect = document.getElementById('filterAcademicYear');
+            const assessmentSelect = document.getElementById('filterAssessmentId');
+
+            subjectSelect?.addEventListener('change', updateAssessments);
+            academicYearSelect?.addEventListener('change', updateAssessments);
+            assessmentSelect?.addEventListener('change', function () {
+                this.dataset.selectedValue = this.value;
+            });
+            semesterSelect?.addEventListener('change', function () {
+                updateSubjects();
+            });
+            updateAssessments();
+        });
     </script>
 
     <div class="space-y-4" id="marksContainer">
         {{-- Category Toggle --}}
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+        <div class="teacher-filter-panel teacher-marks-category-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4">
             <div class="flex items-center gap-4">
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ __('Category') }}:</span>
-                <div class="flex rounded-lg overflow-hidden border border-gray-300 dark:border-slate-600">
+                <div class="teacher-marks-category-switch flex rounded-lg overflow-hidden border border-gray-300 dark:border-slate-600">
                     <button 
                         type="button"
-                        class="category-btn px-6 py-2 text-sm font-medium transition-colors {{ $selectedCategory === 'assessment' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600' }}"
+                        class="teacher-marks-category-btn category-btn px-6 py-2 text-sm font-medium transition-colors {{ $selectedCategory === 'assessment' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600' }}"
                         data-category="assessment"
                         onclick="switchCategory('assessment')"
                     >
@@ -100,7 +300,7 @@
                     </button>
                     <button 
                         type="button"
-                        class="category-btn px-6 py-2 text-sm font-medium transition-colors {{ $selectedCategory === 'ctevt' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600' }}"
+                        class="teacher-marks-category-btn category-btn px-6 py-2 text-sm font-medium transition-colors {{ $selectedCategory === 'ctevt' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600' }}"
                         data-category="ctevt"
                         onclick="switchCategory('ctevt')"
                     >
@@ -119,18 +319,18 @@
                 $filteredSubjects = $filteredSubjects->filter(fn($subject) => (string) $subject['semester'] === (string) $currentFilters['semester']);
             }
         @endphp
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
-            <div class="p-4 border-b border-gray-200 dark:border-slate-700 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <div class="teacher-filter-panel teacher-marks-filter-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+            <div class="teacher-marks-panel-head p-4 border-b border-gray-200 dark:border-slate-700 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ __('Filters & Exports') }}</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Use the filters below to target marks from your assigned semester subjects.') }}</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <button type="button" onclick="printMarks()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition">
+                    <button type="button" onclick="printMarks()" class="teacher-marks-toolbar-btn inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition">
                         <i class="bi bi-printer"></i>
                         <span>{{ __('Print') }}</span>
                     </button>
-                    <button type="button" onclick="exportMarks('csv')" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition">
+                    <button type="button" onclick="exportMarks('csv')" class="teacher-marks-toolbar-btn inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition">
                         <i class="bi bi-file-earmark-text"></i>
                         <span>{{ __('CSV') }}</span>
                     </button>
@@ -197,12 +397,14 @@
                             @endforeach
                         </select>
                     </div>
-                    <div>
+                    <div id="assessmentFilterBlock" class="{{ $selectedCategory !== 'assessment' ? 'hidden' : '' }}">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Assessment') }}</label>
                         <select 
                             name="assessment_id" 
                             id="filterAssessmentId"
+                            data-selected-value="{{ $currentFilters['assessment_id'] ?? '' }}"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-white"
+                            {{ $selectedCategory !== 'assessment' ? 'disabled' : '' }}
                         >
                             <option value="">{{ __('All Assessments') }}</option>
                             @foreach($assessments as $id => $name)
@@ -214,11 +416,11 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-3 border-t border-gray-100 dark:border-slate-700 pt-3">
-                    <button type="button" onclick="applyFilters()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition">
+                    <button type="button" onclick="applyFilters()" class="teacher-marks-toolbar-btn inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition">
                         <i class="bi bi-funnel"></i>
                         <span>{{ __('Apply Filters') }}</span>
                     </button>
-                    <button type="button" onclick="resetFilters()" class="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition">
+                    <button type="button" onclick="resetFilters()" class="teacher-page-secondary-btn inline-flex items-center gap-2 px-5 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition">
                         <i class="bi bi-arrow-counterclockwise"></i>
                         <span>{{ __('Reset') }}</span>
                     </button>
@@ -228,7 +430,7 @@
 
         {{-- Results Table --}}
         @if(!($currentFilters['subject_id'] ?? null))
-        <div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl shadow-sm p-6 flex items-center gap-3">
+        <div class="teacher-marks-info bg-amber-50 border border-amber-200 text-amber-900 rounded-xl shadow-sm p-6 flex items-center gap-3">
             <i class="bi bi-info-circle text-2xl"></i>
             <div>
                 <p class="font-semibold">{{ __('Select Semester & Subject') }}</p>
@@ -246,8 +448,8 @@
                 }
             @endphp
             @if($selectedCategory === 'assessment')
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
-                <div class="p-4 border-b border-gray-200 dark:border-slate-700">
+            <div class="teacher-marks-table-shell bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="teacher-marks-table-head p-4 border-b border-gray-200 dark:border-slate-700">
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ __('Assessment Marks') }} - {{ $subjectLabel }}</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Filtered by the current selection.') }}</p>
                 </div>
@@ -260,7 +462,7 @@
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead>
-                            <tr class="bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
+                            <tr class="teacher-marks-table-head bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">{{ __('Roll') }}</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">{{ __('Student Name') }}</th>
                                 <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-200">{{ __('Attendance %') }}</th>
@@ -299,7 +501,7 @@
                                         ? ($isPassed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400')
                                         : 'text-gray-400';
                                 @endphp
-                                <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 border-b border-gray-200 dark:border-slate-600">
+                                <tr class="teacher-marks-row hover:bg-gray-50 dark:hover:bg-slate-700/50 border-b border-gray-200 dark:border-slate-600">
                                     <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{{ $student['roll_no'] }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-200">{{ $student['name'] ?? 'N/A' }}</td>
                                     <td class="px-4 py-3 text-center">
@@ -324,7 +526,7 @@
                             @empty
                                 <tr>
                                     <td colspan="8" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
-                                        <div class="flex flex-col items-center justify-center">
+                                        <div class="teacher-marks-empty flex flex-col items-center justify-center rounded-2xl px-6 py-8">
                                             <i class="bi bi-search text-4xl mb-2"></i>
                                             <p>{{ __('No student marks found. Try adjusting your filters.') }}</p>
                                         </div>
@@ -339,8 +541,8 @@
                 </div>
             </div>
             @else
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
-                <div class="p-4 border-b border-gray-200 dark:border-slate-700">
+            <div class="teacher-marks-table-shell bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+                <div class="teacher-marks-table-head p-4 border-b border-gray-200 dark:border-slate-700">
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ __('CTEVT Marks') }} - {{ $subjectLabel }}</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Each component lists Full, Pass, and Obtained marks.') }}</p>
                 </div>
@@ -384,7 +586,7 @@
                                     $isPassed = $student['is_passed'] ?? false;
                                     $resultLabel = $isPassed ? 'PASS' : 'FAIL';
                                 @endphp
-                                <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 border-b border-gray-200 dark:border-slate-600">
+                                <tr class="teacher-marks-row hover:bg-gray-50 dark:hover:bg-slate-700/50 border-b border-gray-200 dark:border-slate-600">
                                     <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">{{ $student['roll_no'] }}</td>
                                     <td class="px-4 py-3 text-gray-700 dark:text-gray-200">{{ $student['name'] ?? 'N/A' }}</td>
                                     @foreach(['ti', 'te', 'pi', 'pe'] as $component)
@@ -404,7 +606,7 @@
                             @empty
                                 <tr>
                                     <td colspan="16" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
-                                        <div class="flex flex-col items-center justify-center">
+                                        <div class="teacher-marks-empty flex flex-col items-center justify-center rounded-2xl px-6 py-8">
                                             <i class="bi bi-search text-4xl mb-2"></i>
                                             <p>{{ __('No student marks found. Try adjusting your filters.') }}</p>
                                         </div>
