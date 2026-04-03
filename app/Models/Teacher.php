@@ -6,6 +6,7 @@ use App\Models\Subject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use App\Support\Media;
 
 class Teacher extends Model
@@ -136,24 +137,38 @@ class Teacher extends Model
 
     public function getProfilePhotoUrlAttribute(): ?string
     {
-        return Media::publicUrl($this->profile_photo_path);
+        if (!empty($this->profile_photo_path) && Storage::disk('public')->exists($this->profile_photo_path)) {
+            return Storage::url($this->profile_photo_path);
+        }
+        return null;
     }
 
     public function getResumeUrlAttribute(): ?string
     {
-        return Media::publicUrl($this->resume_path);
+        if (!empty($this->resume_path) && Storage::disk('public')->exists($this->resume_path)) {
+            return Storage::url($this->resume_path);
+        }
+        return null;
     }
 
     public function getIdProofUrlAttribute(): ?string
     {
-        return Media::publicUrl($this->id_proof_path);
+        if (!empty($this->id_proof_path) && Storage::disk('public')->exists($this->id_proof_path)) {
+            return Storage::url($this->id_proof_path);
+        }
+        return null;
     }
 
     public function getCertificateUrlsAttribute(): array
     {
         return collect($this->certificate_paths ?? [])
             ->filter()
-            ->map(fn ($path) => Media::publicUrl($path))
+            ->map(function ($path) {
+                if (Storage::disk('public')->exists($path)) {
+                    return Storage::url($path);
+                }
+                return null;
+            })
             ->filter()
             ->values()
             ->all();

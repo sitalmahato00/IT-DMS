@@ -5,9 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
-use App\Models\User;
-use App\Models\ExamMark;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Support\Media;
 
 class Student extends Model
@@ -109,19 +108,30 @@ class Student extends Model
 
     public function getProfilePhotoUrlAttribute(): ?string
     {
-        return Media::publicUrl($this->profile_photo_path);
+        if (!empty($this->profile_photo_path) && Storage::disk('public')->exists($this->profile_photo_path)) {
+            return Storage::url($this->profile_photo_path);
+        }
+        return null;
     }
 
     public function getIdDocumentUrlAttribute(): ?string
     {
-        return Media::publicUrl($this->id_document_path);
+        if (!empty($this->id_document_path) && Storage::disk('public')->exists($this->id_document_path)) {
+            return Storage::url($this->id_document_path);
+        }
+        return null;
     }
 
     public function getCertificateUrlsAttribute(): array
     {
         return collect($this->certificate_paths ?? [])
             ->filter()
-            ->map(fn ($path) => Media::publicUrl($path))
+            ->map(function ($path) {
+                if (Storage::disk('public')->exists($path)) {
+                    return Storage::url($path);
+                }
+                return null;
+            })
             ->filter()
             ->values()
             ->all();

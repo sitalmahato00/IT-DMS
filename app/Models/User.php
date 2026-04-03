@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Student;
 use App\Notifications\PasswordResetNotification;
@@ -87,20 +88,32 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         // First check if profile photo is stored directly on user
         if (!empty($this->profile_photo_path)) {
-            return Media::publicUrl($this->profile_photo_path);
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($this->profile_photo_path)) {
+                return \Illuminate\Support\Facades\Storage::url($this->profile_photo_path);
+            }
+            return null;
         }
         
         // Check related models for profile photo (using optional to avoid errors if not loaded)
         if ($this->role === 'student' && optional($this->student)->profile_photo_path) {
-            return Media::publicUrl($this->student->profile_photo_path);
+            $path = $this->student->profile_photo_path;
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+                return \Illuminate\Support\Facades\Storage::url($path);
+            }
         }
         
         if ($this->role === 'teacher' && optional($this->teacher)->profile_photo_path) {
-            return Media::publicUrl($this->teacher->profile_photo_path);
+            $path = $this->teacher->profile_photo_path;
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+                return \Illuminate\Support\Facades\Storage::url($path);
+            }
         }
         
         if ($this->role === 'parent' && optional($this->parent)->profile_photo_path) {
-            return Media::publicUrl($this->parent->profile_photo_path);
+            $path = $this->parent->profile_photo_path;
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+                return \Illuminate\Support\Facades\Storage::url($path);
+            }
         }
         
         return null;

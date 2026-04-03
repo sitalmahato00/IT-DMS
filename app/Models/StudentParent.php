@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use App\Support\Media;
 
 class StudentParent extends Model
@@ -69,16 +70,25 @@ class StudentParent extends Model
 
     public function getProfilePhotoUrlAttribute(): ?string
     {
-        return Media::publicUrl($this->profile_photo_path);
+        if (!empty($this->profile_photo_path) && Storage::disk('public')->exists($this->profile_photo_path)) {
+            return Storage::url($this->profile_photo_path);
+        }
+        return null;
     }
 
     public function getIdProofUrlAttribute(): ?string
     {
-        return Media::publicUrl($this->id_proof_path);
+        if (!empty($this->id_proof_path) && Storage::disk('public')->exists($this->id_proof_path)) {
+            return Storage::url($this->id_proof_path);
+        }
+        return null;
     }
 
     public function getAddressProofUrlAttribute(): ?string
     {
-        return Media::publicUrl($this->address_proof_path);
+        if (!empty($this->address_proof_path) && Storage::disk('public')->exists($this->address_proof_path)) {
+            return Storage::url($this->address_proof_path);
+        }
+        return null;
     }
 }

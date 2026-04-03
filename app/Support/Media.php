@@ -35,8 +35,9 @@ class Media
         $disk = Storage::disk('public');
 
         if ($disk->exists($normalized)) {
-            // Prefer standard storage URL (links to /storage via storage:link if available).
-            return $disk->url($normalized);
+            // Serve through the application proxy route so this works even when public/storage link is broken.
+            $encoded = implode('/', array_map('rawurlencode', explode('/', $normalized)));
+            return '/media/' . $encoded;
         }
 
         // If the file exists directly in public folder, serve it directly.
@@ -48,7 +49,7 @@ class Media
             return asset($normalized);
         }
 
-        // Fallback to /media custom route for older paths.
+        // Fallback to /media custom route for legacy paths.
         $encoded = implode('/', array_map('rawurlencode', explode('/', $normalized)));
 
         return '/media/' . $encoded;
