@@ -471,6 +471,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Settings management
     Route::get('/settings', [SettingController::class, 'index'])->name('settings');
+    Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::patch('/settings/profile', [SettingController::class, 'updateProfile'])->name('settings.profile.update');
+    Route::post('/settings/password', [SettingController::class, 'updatePassword'])->name('settings.password');
 
     // Department details (renamed from "college" settings)
     Route::get('/department', [DepartmentController::class, 'edit'])->name('department.edit');

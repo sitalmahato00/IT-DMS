@@ -161,12 +161,13 @@
     $twoFactorRoles = $twoFactorRoles ?? ['admin'];
     $user = Auth::user();
     $heroImages = collect($department?->hero_images ?? [])->filter()->values();
+    $statusMessage = session('status') === 'profile-updated' ? 'Profile updated successfully.' : session('status');
 @endphp
 
 <div class="settings-page grid grid-cols-1 gap-6">
-    @if(session('status') || session('password_status'))
+    @if($statusMessage || session('password_status'))
         <div class="rounded-3xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700">
-            {{ session('status') ?: 'Password updated successfully.' }}
+            {{ $statusMessage ?: 'Password updated successfully.' }}
         </div>
     @endif
 
@@ -195,9 +196,9 @@
 
         <div class="p-6 space-y-6">
             <section id="department-pane" class="tab-pane space-y-6">
-                @if(session('status'))
+                @if($statusMessage)
                     <div class="rounded-3xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700">
-                        {{ session('status') }}
+                        {{ $statusMessage }}
                     </div>
                 @endif
                 <form id="departmentSettingsForm" method="POST" action="{{ route('admin.department.update') }}" enctype="multipart/form-data" class="space-y-6">
@@ -305,29 +306,117 @@
             </section>
 
             <section id="profile-pane" class="tab-pane hidden space-y-6">
-                <div class="settings-card border border-slate-200">
-                    <div class="settings-card-header border-b border-slate-200 px-5 py-4"><h3 class="flex items-center gap-2 text-sm font-semibold text-slate-900"><i class="bi bi-person-circle text-blue-600"></i>Admin Profile</h3></div>
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
-                            <div class="settings-field flex flex-col items-center justify-center text-center">
-                                @if($user?->profile_photo_url)
-                                    <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="h-28 w-28 rounded-full border-2 border-slate-200 object-cover">
-                                @else
-                                    <div class="flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-4xl font-bold text-white">{{ strtoupper(substr($user->name ?? 'A', 0, 1)) }}</div>
-                                @endif
-                                <div class="mt-4 text-lg font-bold text-slate-900">{{ $user->name }}</div>
-                                <div class="text-sm text-slate-600">{{ $user->email }}</div>
-                                <div class="mt-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700"><i class="bi bi-shield-check"></i>Role: {{ ucfirst($user->role ?? 'user') }}</div>
-                            </div>
-                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                                @foreach(['Full Name' => $user->name ?? '—','Username' => $user->username ?? '—','Email' => $user->email ?? '—','Phone' => $user->phone ?? '—','Department' => $user->department ?? '—','Email Status' => $user?->hasVerifiedEmail() ? 'Verified' : 'Unverified','Member Since' => optional($user->created_at)->format('M d, Y') ?? '—','Last Updated' => optional($user->updated_at)->format('M d, Y h:i A') ?? '—'] as $label => $value)
-                                    <div class="settings-field"><div class="settings-field-label">{{ $label }}</div><div class="settings-field-value {{ $label === 'Email Status' && !$user?->hasVerifiedEmail() ? 'text-amber-600' : ($label === 'Email Status' ? 'text-emerald-600' : '') }}">{{ $value }}</div></div>
-                                @endforeach
-                                <div class="settings-field sm:col-span-2 xl:col-span-3"><div class="settings-field-label">Bio</div><div class="settings-field-value whitespace-pre-line">{{ $user->bio ?? '—' }}</div></div>
+                <form method="POST" action="{{ route('admin.settings.profile.update') }}" enctype="multipart/form-data" class="space-y-6">
+                    @csrf
+                    @method('PATCH')
+
+                    <div class="settings-card border border-slate-200">
+                        <div class="settings-card-header border-b border-slate-200 px-5 py-4">
+                            <h3 class="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                                <i class="bi bi-person-circle text-blue-600"></i>Admin Profile
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-6">
+                            @if(session('status') === 'profile-updated')
+                                <div class="rounded-3xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700">
+                                    Profile updated successfully.
+                                </div>
+                            @endif
+
+                            <div class="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+                                <div class="settings-field">
+                                    <div class="settings-field-label text-center">Profile Photo</div>
+                                    <div class="mt-4 flex flex-col items-center justify-center">
+                                        @if(!empty($user?->profile_photo_path) && $user?->profile_photo_url)
+                                            <img src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" class="h-32 w-32 rounded-full border-2 border-slate-200 object-cover shadow-sm">
+                                        @else
+                                            <div class="flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-5xl font-bold text-white shadow-sm">
+                                                {{ strtoupper(substr($user->name ?? 'A', 0, 1)) }}
+                                            </div>
+                                        @endif
+                                        <div class="mt-4 w-full">
+                                            <label for="admin_profile_photo" class="settings-action-btn secondary w-full justify-center">
+                                                <i class="bi bi-upload"></i>Choose Photo
+                                            </label>
+                                            <input id="admin_profile_photo" name="photo" type="file" accept="image/*" class="hidden">
+                                            <p class="mt-2 text-xs text-slate-500">JPG, PNG, GIF, or SVG. Max 5 MB.</p>
+                                            @error('photo')
+                                                <p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        <div class="settings-field">
+                                            <label class="settings-field-label" for="admin_name">Full Name</label>
+                                            <input id="admin_name" name="name" type="text" value="{{ old('name', $user->name) }}" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" required autofocus>
+                                            @error('name')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
+                                        </div>
+                                        <div class="settings-field">
+                                            <label class="settings-field-label" for="admin_username">Username</label>
+                                            <input id="admin_username" name="username" type="text" value="{{ old('username', $user->username ?? '') }}" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="Optional username">
+                                            @error('username')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
+                                        </div>
+                                        <div class="settings-field">
+                                            <label class="settings-field-label" for="admin_email">Email</label>
+                                            <input id="admin_email" name="email" type="email" value="{{ old('email', $user->email) }}" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" required>
+                                            @error('email')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
+                                            <p class="mt-2 text-xs text-slate-500">Changing the email will require verification again.</p>
+                                        </div>
+                                        <div class="settings-field">
+                                            <label class="settings-field-label" for="admin_phone">Phone</label>
+                                            <input id="admin_phone" name="phone" type="tel" value="{{ old('phone', $user->phone ?? '') }}" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2">
+                                            @error('phone')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
+                                        </div>
+                                        <div class="settings-field sm:col-span-2">
+                                            <label class="settings-field-label" for="admin_department">Department</label>
+                                            <input id="admin_department" name="department" type="text" value="{{ old('department', $user->department ?? '') }}" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2">
+                                            @error('department')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                                        <div class="settings-field">
+                                            <div class="settings-field-label">Role</div>
+                                            <div class="settings-field-value">{{ ucfirst($user->role ?? 'user') }}</div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <div class="settings-field-label">Email Status</div>
+                                            <div class="settings-field-value {{ $user?->hasVerifiedEmail() ? 'text-emerald-600' : 'text-amber-600' }}">
+                                                {{ $user?->hasVerifiedEmail() ? 'Verified' : 'Unverified' }}
+                                            </div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <div class="settings-field-label">Member Since</div>
+                                            <div class="settings-field-value">{{ optional($user->created_at)->format('M d, Y') ?? '—' }}</div>
+                                        </div>
+                                        <div class="settings-field">
+                                            <div class="settings-field-label">Last Updated</div>
+                                            <div class="settings-field-value">{{ optional($user->updated_at)->format('M d, Y h:i A') ?? '—' }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="settings-field">
+                                        <label class="settings-field-label" for="admin_bio">Bio</label>
+                                        <textarea id="admin_bio" name="bio" rows="4" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="Short bio...">{{ old('bio', $user->bio ?? '') }}</textarea>
+                                        @error('bio')<p class="mt-2 text-xs font-medium text-red-600">{{ $message }}</p>@enderror
+                                    </div>
+
+                                    <div class="flex flex-wrap items-center gap-3">
+                                        <button type="submit" class="settings-action-btn inline-flex items-center gap-2 bg-blue-600 px-5 py-3 text-sm text-white hover:bg-blue-700">
+                                            <i class="bi bi-save"></i>Save Profile
+                                        </button>
+                                        <a href="{{ route('admin.settings') }}" class="settings-action-btn inline-flex items-center gap-2 border border-slate-300 bg-white px-5 py-3 text-sm text-slate-700 hover:bg-slate-50">
+                                            <i class="bi bi-arrow-clockwise"></i>Reset View
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </form>
             </section>
 
             <section id="security-pane" class="tab-pane hidden">
@@ -480,7 +569,11 @@ document.addEventListener('DOMContentLoaded', function () {
     tabButtons.forEach((button) => button.addEventListener('click', () => showTab(button.dataset.tab)));
     showTab('department');
 
-    @if($errors->has('current_password') || $errors->has('password'))
+    @if($statusMessage === 'Profile updated successfully.')
+        showTab('profile');
+    @elseif($errors->hasAny(['name', 'username', 'email', 'phone', 'department', 'bio', 'photo']))
+        showTab('profile');
+    @elseif($errors->has('current_password') || $errors->has('password'))
         showTab('password');
     @elseif($errors->has('notification_email_enabled') || $errors->has('notification_email_exam') || $errors->has('notification_email_attendance') || $errors->has('notification_email_student') || $errors->has('notification_email_assignment') || $errors->has('notification_email_result'))
         showTab('notifications');
