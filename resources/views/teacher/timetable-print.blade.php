@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ __('Teacher Routine') }} - {{ auth()->user()?->name ?? __('Teacher') }}</title>
     @include('shared.timetable.partials.routine-styles')
+    <script>
+        try {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        } catch (error) {}
+    </script>
     <style>
         body {
             margin: 0;
@@ -23,6 +30,7 @@
             display: flex;
             justify-content: flex-end;
             gap: 12px;
+            flex-wrap: wrap;
             margin-bottom: 16px;
         }
 
@@ -37,6 +45,18 @@
             font-weight: 600;
             text-decoration: none;
             cursor: pointer;
+        }
+
+        html.dark body {
+            background: #020817;
+            color: #e2e8f0;
+        }
+
+        html.dark .routine-print-actions button,
+        html.dark .routine-print-actions a {
+            border-color: #334155;
+            background: #0f172a;
+            color: #e2e8f0;
         }
 
         @media print {
@@ -65,7 +85,7 @@
         $paperClass = 'routine-paper--compact';
         $sheetTitle = __('Teacher Routine');
         $sheetHeading = $selectedSemester
-            ? __('Semester') . ' ' . $selectedSemester
+            ? __('Semester') . ' ' . $selectedSemester . (filled($selectedSection) ? ' / ' . __('Section') . ' ' . $selectedSection : '')
             : __('All Assigned Semesters');
         $institutionName = $college?->name ?? 'IT-DMS';
         $departmentLine = $college?->short_name ?? __('Department');
@@ -75,16 +95,20 @@
         ];
         $summaryItems = [
             ['label' => __('Teacher'), 'value' => auth()->user()?->name ?? __('Teacher')],
-            ['label' => __('Subjects'), 'value' => $totalSubjects],
+            ['label' => __('Highlighted Subjects'), 'value' => $highlightedSubjectCount ?? 0],
+            ['label' => __('Visible Subjects'), 'value' => $totalSubjects],
             ['label' => __('Slots'), 'value' => $totalSlots],
             ['label' => __('Semester Filter'), 'value' => $selectedSemester ?: __('All')],
+            ['label' => __('Section Filter'), 'value' => $selectedSection ?: __('All')],
         ];
         $footerLeft = collect($subjects ?? [])->count() . ' ' . __('subjects');
+        $showSlotSection = blank($selectedSection);
+        $fallbackTeacherName = null;
     @endphp
 
     <div class="routine-print-shell">
         <div class="routine-print-actions">
-            <a href="{{ route('teacher.timetable', array_filter(['semester' => $selectedSemester], fn ($value) => filled($value))) }}">
+            <a href="{{ route('teacher.timetable', array_filter(['semester' => $selectedSemester, 'section' => $selectedSection], fn ($value) => filled($value))) }}">
                 {{ __('Back to timetable') }}
             </a>
             <button type="button" onclick="window.print()">{{ __('Print') }}</button>

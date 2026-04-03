@@ -3,9 +3,9 @@
 @section('title', __('Attendance'))
 
 @section('content')
-<div class="space-y-6">
+<div class="student-smooth-page space-y-6">
     <!-- Welcome Banner -->
-    <div class="bg-gradient-to-r from-red-600 to-red-700 dark:from-red-800 dark:to-red-900 rounded-xl shadow-lg p-6 text-white">
+    <div class="student-smooth-hero bg-gradient-to-r from-red-600 to-red-700 dark:from-red-800 dark:to-red-900 rounded-xl shadow-lg p-6 text-white">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold mb-2">{{ __('Attendance Records') }}</h1>
@@ -18,7 +18,7 @@
     </div>
 
     <!-- Overall Attendance -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+    <div class="student-smooth-panel bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="p-6">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ __('Overall Attendance') }}</h2>
             
@@ -45,19 +45,19 @@
 
     <!-- Subjects -->
     @if(empty($subjects))
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
+        <div class="student-smooth-empty bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
             <i class="bi bi-book text-4xl text-gray-400 mb-4"></i>
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('No Subjects Enrolled') }}</h3>
             <p class="text-gray-600 dark:text-gray-400">{{ __('You are not currently enrolled in any subjects.') }}</p>
         </div>
     @else
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <div class="student-smooth-panel bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
             <div class="p-6">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ __('Subject-wise Attendance') }}</h2>
                 
                 <div class="space-y-4">
                     @foreach($subjects as $subject)
-                        <div class="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-4 border-red-400">
+                        <div class="student-smooth-list-card flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-4 border-red-400">
                             <div class="flex-1">
                                 <div class="flex items-start gap-3">
                                     <div class="flex-shrink-0">
@@ -95,19 +95,19 @@
     @endif
 
     <!-- Recent Attendance Records -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+    <div class="student-smooth-table-card bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="p-6">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ __('Recent Attendance Records') }}</h2>
             
             @if($recentAttendance->isEmpty())
-                <div class="text-center py-8">
+                <div class="student-smooth-empty text-center py-8">
                     <i class="bi bi-calendar-x text-3xl text-gray-400 mb-4"></i>
                     <p class="text-gray-500 dark:text-gray-400">{{ __('No attendance records found') }}</p>
                 </div>
             @else
                 <div class="space-y-3">
                     @foreach($recentAttendance as $record)
-                        <div class="flex items-start justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-3 
+                        <div class="student-smooth-list-card flex items-start justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border-l-3 
                             @if($record->status === 'present')
                                 border-green-400
                             @elseif($record->status === 'absent')

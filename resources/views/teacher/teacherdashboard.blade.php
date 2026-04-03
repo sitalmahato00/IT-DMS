@@ -193,6 +193,9 @@
                                     </div>
 <span class="text-sm font-bold text-red-700 dark:text-red-400">{{ $class['attendance_rate'] }}%</span>
                                 </div>
+                                <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                                    {{ __('Marked on') }} {{ $class['date_label'] ?? \Carbon\Carbon::now('Asia/Kathmandu')->format('M d, Y') }}
+                                </p>
                                 <div class="grid grid-cols-3 gap-2 mt-3 text-[11px] text-center">
 <span class="rounded bg-red-50 dark:bg-red-900/30 py-1 text-red-700 dark:text-red-300">{{ $class['present_count'] }} {{ __('Present') }}</span>
                                     <span class="rounded bg-red-50 dark:bg-red-900/30 py-1 text-red-700 dark:text-red-300">{{ $class['absent_count'] }} {{ __('Absent') }}</span>

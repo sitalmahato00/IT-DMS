@@ -3,9 +3,9 @@
 @section('title', $subject['name'] . ' - ' . __('Attendance Details'))
 
 @section('content')
-<div class="space-y-6">
+<div class="student-smooth-page space-y-6">
     <!-- Attendance Header -->
-    <div class="bg-gradient-to-r from-green-600 to-green-700 dark:from-green-800 dark:to-green-900 rounded-xl shadow-lg p-6 text-white">
+    <div class="student-smooth-hero bg-gradient-to-r from-green-600 to-green-700 dark:from-green-800 dark:to-green-900 rounded-xl shadow-lg p-6 text-white">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold mb-2">{{ $subject['name'] }}</h1>
@@ -22,7 +22,7 @@
     </div>
 
     <!-- Subject Info -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+    <div class="student-smooth-panel bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="p-6">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ __('Subject Information') }}</h2>
             
@@ -44,7 +44,7 @@
     </div>
 
     <!-- Attendance Summary -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+    <div class="student-smooth-panel bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="p-6">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ __('Attendance Summary') }}</h2>
             
@@ -70,12 +70,12 @@
     </div>
 
     <!-- Attendance Records -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+    <div class="student-smooth-table-card bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="p-6">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ __('Attendance Records') }}</h2>
             
             @if($attendanceRecords->isEmpty())
-                <div class="text-center py-8">
+                <div class="student-smooth-empty text-center py-8">
                     <i class="bi bi-calendar-x text-3xl text-gray-400 mb-4"></i>
                     <p class="text-gray-500 dark:text-gray-400">{{ __('No attendance records found for this subject') }}</p>
                 </div>

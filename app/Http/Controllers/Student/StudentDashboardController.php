@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\NepaliContentHelper;
 use App\Models\TimetableSlot;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -55,6 +57,38 @@ class StudentDashboardController extends Controller
         $overallPercentage = $totalFull > 0 ? round(($totalObtained / $totalFull) * 100, 2) : 0;
         $cgpa = $overallPercentage > 0 ? round($overallPercentage / 25, 2) : 0;
 
+        $todayAd = Carbon::now('Asia/Kathmandu')->toDateString();
+        $todayBs = NepaliContentHelper::convertAdToBs($todayAd);
+
+        $todayAttendance = DB::table('attendance')
+            ->where('student_id', $student->id)
+            ->where('attendance_type', 'class')
+            ->where(function ($query) use ($todayAd, $todayBs) {
+                $query->whereDate('date', $todayAd)
+                    ->orWhere('date_bs', $todayBs);
+            })
+            ->join('subjects', 'attendance.subject_id', '=', 'subjects.id')
+            ->select('attendance.*', 'subjects.subject_name', 'subjects.subject_code')
+            ->orderBy('attendance.date', 'desc')
+            ->orderBy('subjects.subject_name', 'asc')
+            ->get()
+            ->map(function ($record) use ($todayAd, $todayBs) {
+                $recordDate = $record->date instanceof Carbon
+                    ? $record->date
+                    : ($record->date ? Carbon::parse($record->date) : Carbon::parse($todayAd));
+
+                return [
+                    'subject_name' => $record->subject_name ?? __('Subject'),
+                    'subject_code' => $record->subject_code,
+                    'status' => $record->status,
+                    'remarks' => $record->remarks,
+                    'date' => $recordDate,
+                    'date_label' => $recordDate->format('M d, Y'),
+                    'date_bs' => $record->date_bs ?? $todayBs,
+                ];
+            })
+            ->values();
+
         $recentAttendance = DB::table('attendance')
             ->where('student_id', $student->id)
             ->where('attendance_type', 'class')
@@ -104,6 +138,7 @@ class StudentDashboardController extends Controller
             'passedSubjects' => $subjectStats->where('status', 'pass')->count(),
             'failedSubjects' => $subjectStats->where('status', 'fail')->count(),
             'pendingSubjects' => $subjectStats->where('status', 'pending')->count(),
+            'todayAttendance' => $todayAttendance,
             'recentAttendance' => $recentAttendance,
             'timetableByDay' => $timetableByDay,
             'timetableDays' => $timetableDays,

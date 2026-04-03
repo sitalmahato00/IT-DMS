@@ -221,6 +221,51 @@
                                     </div>
                                 </div>
 
+                                @php
+                                    $childTodayAttendance = collect($child['today_attendance'] ?? []);
+                                @endphp
+
+                                <div class="mt-4 rounded-xl border border-cyan-200 dark:border-cyan-900 bg-cyan-50/70 dark:bg-cyan-950/20 p-4">
+                                    <div class="flex items-center justify-between gap-3 mb-3">
+                                        <div>
+                                            <p class="text-xs uppercase tracking-wide text-cyan-700 dark:text-cyan-300 font-semibold">{{ __("Today's Attendance") }}</p>
+                                            <p class="text-xs text-cyan-700/80 dark:text-cyan-200/80 mt-1">{{ $child['today_attendance_date_label'] ?? \Carbon\Carbon::now('Asia/Kathmandu')->format('M d, Y') }}</p>
+                                        </div>
+                                        <span class="inline-flex items-center rounded-full bg-white dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-900">
+                                            {{ $childTodayAttendance->count() }}
+                                        </span>
+                                    </div>
+
+                                    @if($childTodayAttendance->isEmpty())
+                                        <p class="text-sm text-cyan-700 dark:text-cyan-200">{{ __('No attendance has been marked for today yet.') }}</p>
+                                    @else
+                                        <div class="space-y-2">
+                                            @foreach($childTodayAttendance->take(3) as $record)
+                                                @php
+                                                    $statusTone = match ($record['status']) {
+                                                        'present' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+                                                        'absent' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+                                                        default => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+                                                    };
+                                                @endphp
+                                                <div class="flex items-center justify-between gap-3 rounded-lg bg-white/80 dark:bg-slate-800/80 px-3 py-2 border border-cyan-100 dark:border-cyan-900">
+                                                    <div class="min-w-0">
+                                                        <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ $record['subject_name'] }}</p>
+                                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $record['subject_code'] ?: '—' }}</p>
+                                                    </div>
+                                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide {{ $statusTone }}">
+                                                        {{ ucfirst($record['status']) }}
+                                                    </span>
+                                                </div>
+                                            @endforeach
+
+                                            @if($childTodayAttendance->count() > 3)
+                                                <p class="text-xs text-cyan-700 dark:text-cyan-200">{{ __('+ :count more subjects', ['count' => $childTodayAttendance->count() - 3]) }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+
                                 <div class="mt-4 flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
                                     <span class="rounded-full bg-white dark:bg-slate-800 px-3 py-1 border border-gray-200 dark:border-slate-700">{{ trans_choice('{1} :count subject|[2,*] :count subjects', $child['subject_count'], ['count' => $child['subject_count']]) }}</span>
                                     <span class="rounded-full bg-white dark:bg-slate-800 px-3 py-1 border border-gray-200 dark:border-slate-700">{{ __('Pass: :count', ['count' => $child['passed_subjects']]) }}</span>
@@ -493,4 +538,3 @@
     @endif
 </div>
 @endsection
-

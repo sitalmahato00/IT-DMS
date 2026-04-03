@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ __('Class Routine') }} - {{ $student->user->name ?? __('Student') }}</title>
     @include('shared.timetable.partials.routine-styles')
+    <script>
+        try {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        } catch (error) {}
+    </script>
     <style>
         body {
             margin: 0;
@@ -23,6 +30,7 @@
             display: flex;
             justify-content: flex-end;
             gap: 12px;
+            flex-wrap: wrap;
             margin-bottom: 16px;
         }
 
@@ -48,6 +56,18 @@
             width: 100%;
             max-width: 1280px;
             margin: 0 auto;
+        }
+
+        html.dark body {
+            background: #020817;
+            color: #e2e8f0;
+        }
+
+        html.dark .routine-print-actions button,
+        html.dark .routine-print-actions a {
+            border-color: #334155;
+            background: #0f172a;
+            color: #e2e8f0;
         }
 
         @media print {
@@ -98,6 +118,7 @@
                 ['label' => __('Section'), 'value' => $displaySection ?: ($selectedSection ?: __('All'))],
             ];
             $footerLeft = collect($subjects ?? [])->count() . ' ' . __('subjects');
+            $showSlotSection = blank($displaySection ?: $selectedSection);
         @endphp
         @include('shared.timetable.partials.routine-sheet')
     </div>

@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\TimetableSlot;
 use App\Models\TimetableGapOverride;
 use App\Models\Subject;
+use App\Models\SubjectTeacher;
 use App\Models\Teacher;
 use App\Traits\LogsActivity;
 use Carbon\Carbon;
@@ -17,6 +18,91 @@ use Illuminate\Support\Facades\Schema;
 class TimetableController extends Controller
 {
     use LogsActivity;
+
+    private function getAllowedTeacherIdsForSubject(int $subjectId): array
+    {
+        $assignedTeacherIds = SubjectTeacher::query()
+            ->where('subject_id', $subjectId)
+            ->orderByRaw("CASE WHEN role = 'primary' THEN 0 ELSE 1 END")
+            ->pluck('teacher_id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($assignedTeacherIds) && Schema::hasColumn('subjects', 'teacher_id')) {
+            $legacyUserId = Subject::query()
+                ->where('id', $subjectId)
+                ->value('teacher_id');
+
+            if (!empty($legacyUserId)) {
+                $legacyTeacherId = Teacher::query()
+                    ->where('user_id', $legacyUserId)
+                    ->value('id');
+
+                if (!empty($legacyTeacherId)) {
+                    $assignedTeacherIds[] = (int) $legacyTeacherId;
+                }
+            }
+        }
+
+        return array_values(array_unique($assignedTeacherIds));
+    }
+
+    private function validateTeacherAssignment(array &$data): ?array
+    {
+        $subjectId = (int) ($data['subject_id'] ?? 0);
+
+        if ($subjectId <= 0) {
+            return null;
+        }
+
+        $allowedTeacherIds = $this->getAllowedTeacherIdsForSubject($subjectId);
+
+        if (empty($data['teacher_id'])) {
+            if (!empty($allowedTeacherIds)) {
+                $data['teacher_id'] = $allowedTeacherIds[0];
+            }
+
+            return null;
+        }
+
+        $selectedTeacherId = (int) $data['teacher_id'];
+
+        if (in_array($selectedTeacherId, $allowedTeacherIds, true)) {
+            return null;
+        }
+
+        $subjectName = Subject::query()
+            ->where('id', $subjectId)
+            ->value('subject_name') ?? 'Selected subject';
+
+        if (empty($allowedTeacherIds)) {
+            return [
+                'success' => false,
+                'message' => "Assign {$subjectName} to a teacher first before adding it to the timetable.",
+            ];
+        }
+
+        $allowedTeacherNames = Teacher::query()
+            ->with('user')
+            ->whereIn('id', $allowedTeacherIds)
+            ->get()
+            ->map(fn ($teacher) => $teacher->user->name ?? null)
+            ->filter()
+            ->values()
+            ->all();
+
+        $teacherList = !empty($allowedTeacherNames)
+            ? implode(', ', $allowedTeacherNames)
+            : 'the assigned teacher';
+
+        return [
+            'success' => false,
+            'message' => "Only the teacher assigned to {$subjectName} can be used in this timetable slot. Allowed: {$teacherList}.",
+        ];
+    }
 
     /**
      * Display the enhanced timetable management view.
@@ -247,6 +333,10 @@ class TimetableController extends Controller
             'remarks'      => 'nullable|string',
         ]);
 
+        if ($assignmentError = $this->validateTeacherAssignment($validated)) {
+            return response()->json($assignmentError, 422);
+        }
+
         // Check for teacher conflicts before saving
         $conflictCheck = $this->checkConflict($validated);
         if ($conflictCheck['has_conflict'] && !$request->input('force_save', false)) {
@@ -338,6 +428,10 @@ class TimetableController extends Controller
             'max_capacity' => 'nullable|integer',
             'remarks'      => 'nullable|string',
         ]);
+
+        if ($assignmentError = $this->validateTeacherAssignment($validated)) {
+            return response()->json($assignmentError, 422);
+        }
 
         // Check for teacher conflicts before updating
         $conflictCheck = $this->checkConflict($validated, $id);
@@ -723,12 +817,24 @@ class TimetableController extends Controller
             return ['has_conflict' => false];
         }
 
-        // Check if there's a theory slot at the same time
+        $section = trim((string) ($data['section'] ?? ''));
+
+        // Check if there's a theory slot at the same time for the same semester/section only.
         $query = TimetableSlot::where('day_of_week', $data['day_of_week'])
+            ->where('semester', (string) $data['semester'])
             ->where('slot_type', 'theory')
             ->where('is_active', true)
             ->where('start_time', '<', $data['end_time'])
             ->where('end_time', '>', $data['start_time']);
+
+        if ($section === '') {
+            $query->where(function ($sectionQuery) {
+                $sectionQuery->whereNull('section')
+                    ->orWhere('section', '');
+            });
+        } else {
+            $query->where('section', $section);
+        }
 
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);

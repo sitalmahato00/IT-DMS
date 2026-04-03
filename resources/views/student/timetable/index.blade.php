@@ -17,8 +17,8 @@
     $printUrl = route('student.timetable.print', $filterParams);
 @endphp
 
-<div class="routine-page space-y-6" data-student-search-root>
-    <section class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+<div class="student-smooth-page routine-page space-y-6" data-student-search-root>
+    <section class="student-smooth-panel rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div class="max-w-3xl space-y-3">
                 <span class="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-red-700">
@@ -110,7 +110,7 @@
     </section>
 
     @if($totalSlots === 0)
-        <section class="rounded-[28px] border border-amber-200 bg-amber-50 p-6 shadow-sm">
+        <section class="student-smooth-empty rounded-[28px] border border-amber-200 bg-amber-50 p-6 shadow-sm">
             <div class="flex items-start gap-4">
                 <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
                     <i class="bi bi-exclamation-circle text-xl"></i>
@@ -141,6 +141,7 @@
                 ['label' => __('Section'), 'value' => $displaySection ?: ($selectedSection ?: __('All'))],
             ];
             $footerLeft = collect($subjects ?? [])->count() . ' ' . __('subjects');
+            $showSlotSection = blank($displaySection ?: $selectedSection);
         @endphp
         @include('shared.timetable.partials.routine-sheet')
     @endif

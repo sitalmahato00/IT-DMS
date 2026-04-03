@@ -3,9 +3,9 @@
 @section('title', $subject['name'] . ' - ' . __('Course Details'))
 
 @section('content')
-<div class="space-y-6">
+<div class="student-smooth-page space-y-6">
     <!-- Course Header -->
-    <div class="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-800 dark:to-blue-900 rounded-xl shadow-lg p-6 text-white">
+    <div class="student-smooth-hero bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-800 dark:to-blue-900 rounded-xl shadow-lg p-6 text-white">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold mb-2">{{ $subject['name'] }}</h1>
@@ -30,7 +30,7 @@
     </div>
 
     <!-- Course Info -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+    <div class="student-smooth-panel bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="p-6">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ __('Course Information') }}</h2>
             
@@ -53,13 +53,13 @@
 
     <!-- Instructors -->
     @if($teachers->isNotEmpty())
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <div class="student-smooth-panel bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
             <div class="p-6">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ __('Instructors') }}</h2>
                 
                 <div class="space-y-4">
                     @foreach($teachers as $teacher)
-                        <div class="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div class="student-smooth-list-card flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div class="flex-shrink-0">
                                 <i class="bi bi-person text-blue-600 dark:text-blue-400 text-2xl"></i>
                             </div>
@@ -81,7 +81,7 @@
     @endif
 
     <!-- Attendance -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+    <div class="student-smooth-panel bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="p-6">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ __('Attendance') }}</h2>
             
@@ -107,7 +107,7 @@
     </div>
 
     <!-- Marks -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+    <div class="student-smooth-panel bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="p-6">
             <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">{{ __('Examination Results') }}</h2>
             

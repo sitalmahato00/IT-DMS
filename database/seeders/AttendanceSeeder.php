@@ -2,11 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Helpers\NepaliContentHelper;
 use App\Models\Attendance;
 use App\Models\Student;
 use App\Models\Subject;
-use App\Models\SubjectTeacher;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class AttendanceSeeder extends Seeder
 {
@@ -15,89 +16,102 @@ class AttendanceSeeder extends Seeder
      */
     public function run(): void
     {
-        $students = Student::all();
-        $subjects = Subject::all();
-        $statuses = ['present', 'absent', 'late', 'leave', 'excused'];
-        $attendanceTypes = ['class', 'lab'];
+        $students = Student::with([
+            'subjects.teacherAssignments.teacher.user',
+        ])->get();
 
-        $startDate = now()->subDays(60);
+        if ($students->isEmpty()) {
+            $this->command?->warn('AttendanceSeeder skipped: no students found.');
+            return;
+        }
 
-        // Create detailed attendance records for each day of the past 60 days
-        for ($day = 0; $day < 60; $day++) {
-            $date = $startDate->copy()->addDays($day);
-            
-            // Skip Saturdays (day 6) and Sundays (day 0)
-            if ($date->dayOfWeek === 0 || $date->dayOfWeek === 6) {
+        $fallbackSubjectsBySemester = Subject::query()
+            ->whereIn('subject_type', ['core', 'mandatory'])
+            ->where('status', 'active')
+            ->with(['teacherAssignments.teacher.user'])
+            ->get()
+            ->groupBy(fn ($subject) => (string) ($subject->semester ?? ''));
+
+        $startDate = now()->subDays(60)->startOfDay();
+        $createdCount = 0;
+
+        foreach ($students as $student) {
+            $subjects = $student->subjects->isNotEmpty()
+                ? $student->subjects
+                : collect($fallbackSubjectsBySemester->get((string) ($student->semester ?? ''), []));
+
+            if ($subjects->isEmpty()) {
                 continue;
             }
 
-            // For each student
-            foreach ($students as $student) {
-                // Each subject gets attendance markings
-                foreach ($subjects as $subject) {
-                    // Get the assigned teacher for this subject
-                    $subjectTeacher = SubjectTeacher::where('subject_id', $subject->id)->first();
-                    
-                    if (!$subjectTeacher) {
+            foreach ($subjects as $subject) {
+                $primaryAssignment = $subject->teacherAssignments
+                    ->sortBy(fn ($assignment) => $assignment->role === 'primary' ? 0 : 1)
+                    ->first();
+
+                $teacherUserId = $primaryAssignment?->teacher?->user_id;
+
+                if (!$teacherUserId && Schema::hasColumn('subjects', 'teacher_id')) {
+                    $teacherUserId = $subject->teacher_id ?: null;
+                }
+
+                for ($day = 0; $day < 60; $day++) {
+                    $date = $startDate->copy()->addDays($day);
+
+                    if (in_array($date->dayOfWeek, [0, 6], true)) {
                         continue;
                     }
 
-                    // Determine attendance for this day
-                    // 80% present/late, 15% absent, 5% leave/excused
-                    $rand = rand(1, 100);
+                    $rand = random_int(1, 100);
                     if ($rand <= 80) {
-                        $status = rand(1, 10) <= 8 ? 'present' : 'late';
+                        $status = random_int(1, 10) <= 8 ? 'present' : 'late';
                     } elseif ($rand <= 95) {
                         $status = 'absent';
                     } else {
-                        $status = rand(1, 2) === 1 ? 'leave' : 'excused';
+                        $status = random_int(1, 2) === 1 ? 'leave' : 'excused';
                     }
 
-                    // 70% class, 30% lab attendance
-                    $attendanceType = rand(1, 10) <= 7 ? 'class' : 'lab';
+                    $attendanceType = ($subject->has_lab && random_int(1, 10) <= 3) ? 'lab' : 'class';
 
-                    // Realistic time slots based on attendance type
                     if ($attendanceType === 'class') {
-                        // Morning class: 8am - 11am, 11am - 2pm, 2pm - 4pm
-                        $classSlot = rand(1, 3);
                         $times = [
-                            1 => ['08:00', '11:00'],
-                            2 => ['11:00', '14:00'],
-                            3 => ['14:00', '16:00'],
+                            ['08:00', '09:30'],
+                            ['09:45', '11:15'],
+                            ['11:30', '13:00'],
+                            ['13:45', '15:15'],
                         ];
-                        $timeSlot = $times[$classSlot];
+                        $timeSlot = $times[array_rand($times)];
                     } else {
-                        // Lab: flexible time with some variance
-                        $labStartHour = rand(8, 15);
-                        $labEndHour = $labStartHour + 2;
-                        $timeSlot = [sprintf('%02d:00', $labStartHour), sprintf('%02d:00', $labEndHour)];
+                        $labStartHour = random_int(8, 14);
+                        $timeSlot = [sprintf('%02d:00', $labStartHour), sprintf('%02d:00', $labStartHour + 2)];
                     }
 
-                    Attendance::firstOrCreate(
+                    $record = Attendance::updateOrCreate(
                         [
                             'student_id' => $student->id,
                             'subject_id' => $subject->id,
-                            'date' => $date,
+                            'date' => $date->toDateString(),
                             'attendance_type' => $attendanceType,
                         ],
                         [
-                            'student_id' => $student->id,
-                            'teacher_id' => $subjectTeacher->teacher->user_id,
-                            'subject_id' => $subject->id,
-                            'date' => $date,
-                            'date_bs' => $date,
+                            'teacher_id' => $teacherUserId,
+                            'date_bs' => NepaliContentHelper::convertAdToBs($date->toDateString()),
                             'time_in' => $timeSlot[0],
                             'time_out' => $timeSlot[1],
-                            'attendance_type' => $attendanceType,
-                            'academic_year' => '2080-2081',
-                            'academic_year_bs' => '2080-2081',
+                            'academic_year' => $student->academic_year ?: now()->format('Y'),
+                            'academic_year_bs' => $student->academic_year_bs ?: '2080-2081',
                             'status' => $status,
-                            'remarks' => ucfirst($status) . ' in ' . $subject->subject_name . ' (' . strtoupper($attendanceType) . ')',
+                            'remarks' => ucfirst($status) . ' in ' . ($subject->subject_name ?? 'Subject') . ' (' . strtoupper($attendanceType) . ')',
                         ]
                     );
+
+                    if ($record->wasRecentlyCreated) {
+                        $createdCount++;
+                    }
                 }
             }
         }
+
+        $this->command?->info("AttendanceSeeder completed. Newly created records: {$createdCount}");
     }
 }
-

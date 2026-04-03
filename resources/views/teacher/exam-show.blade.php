@@ -21,14 +21,14 @@
     $activeExamCategory = in_array($exam->exam_category ?? '', ['assessment', 'ctevt']) ? $exam->exam_category : 'assessment';
 @endphp
 
-<div class="space-y-4">
+<div class="teacher-smooth-page teacher-exams-page space-y-4">
     <!-- Back Button & Header -->
-    <div class="flex items-center justify-between">
+    <div class="teacher-page-header flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <a href="{{ route('teacher.exams') }}" class="text-gray-600 hover:text-gray-900">
+            <a href="{{ route('teacher.exams') }}" class="teacher-page-secondary-btn text-gray-600 hover:text-gray-900">
                 <i class="bi bi-arrow-left text-lg"></i>
             </a>
-            <h2 class="text-lg font-semibold text-gray-900">{{ $exam->localized_name }}</h2>
+            <h2 class="teacher-page-header-title text-lg font-semibold text-gray-900">{{ $exam->localized_name }}</h2>
         </div>
         <!-- View moved into filter row for alignment with other actions -->
     </div>
@@ -63,7 +63,7 @@
     </div>
 
     <!-- Marks Table with Filters -->
-    <div class="bg-white rounded shadow-sm border border-gray-200">
+    <div class="teacher-smooth-table-card bg-white rounded shadow-sm border border-gray-200">
         <div class="p-3 border-b border-gray-200 flex items-center justify-between flex-wrap gap-3">
             <div class="flex items-center gap-2">
                 <h3 class="text-sm font-semibold text-gray-900">Student Marks</h3>
@@ -118,20 +118,20 @@
                             @endif
                         </div>
                     </div>
-                    <button type="button" onclick="applyMarksFilters()" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 font-medium transition shadow-sm">
+                    <button type="button" onclick="applyMarksFilters()" class="teacher-page-primary-btn px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 font-medium transition shadow-sm">
                         <i class="bi bi-funnel mr-1"></i>Filter
                     </button>
-                    <button type="button" onclick="resetMarksFilters()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50 font-medium transition">
+                    <button type="button" onclick="resetMarksFilters()" class="teacher-page-secondary-btn px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50 font-medium transition">
                         <i class="bi bi-arrow-clockwise mr-1"></i>Reset
                     </button>
                 </form>
 
                 <div class="flex items-center gap-2">
-                    <button onclick="openMarkUploadModal()" class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-sm transition-colors">
+                    <button onclick="openMarkUploadModal()" class="teacher-page-primary-btn px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-sm transition-colors">
                         <i class="bi bi-cloud-upload mr-1"></i>Upload Marks
                     </button>
                     
-                    <button onclick="openViewMarksModal()" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 font-medium transition-colors">
+                    <button onclick="openViewMarksModal()" class="teacher-page-secondary-btn px-4 py-2 text-sm bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 font-medium transition-colors">
                         <i class="bi bi-eye mr-1"></i>View Details
                     </button>
 

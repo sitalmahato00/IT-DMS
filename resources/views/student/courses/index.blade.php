@@ -3,9 +3,9 @@
 @section('title', __('My Courses'))
 
 @section('content')
-<div class="space-y-6">
+<div class="student-smooth-page space-y-6">
     <!-- Welcome Banner -->
-    <div class="bg-gradient-to-r from-red-600 to-red-700 dark:from-red-800 dark:to-red-900 rounded-xl shadow-lg p-6 text-white">
+    <div class="student-smooth-hero bg-gradient-to-r from-red-600 to-red-700 dark:from-red-800 dark:to-red-900 rounded-xl shadow-lg p-6 text-white">
         <div class="flex items-start justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-bold mb-2">{{ __('My Courses') }}</h1>
@@ -18,7 +18,7 @@
     </div>
 
     @if(empty($subjects))
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
+        <div class="student-smooth-empty bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
             <i class="bi bi-book text-4xl text-gray-400 mb-4"></i>
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('No Courses Enrolled') }}</h3>
             <p class="text-gray-600 dark:text-gray-400">{{ __('You are not currently enrolled in any courses. Please contact your academic advisor.') }}</p>
@@ -27,7 +27,7 @@
         <!-- Courses Grid -->
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             @foreach($subjects as $subject)
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow group">
+                <div class="student-smooth-card bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow group">
                     <div class="p-6">
                         <div class="flex items-start justify-between mb-4">
                             <div>

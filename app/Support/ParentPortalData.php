@@ -10,6 +10,7 @@ use App\Models\Notice;
 use App\Models\Student;
 use App\Models\TimetableSlot;
 use App\Models\User;
+use App\Helpers\NepaliContentHelper;
 use App\Traits\BuildsRoutineTimetable;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -145,6 +146,36 @@ class ParentPortalData
             ->with('subject')
             ->orderByDesc('date')
             ->get();
+
+        $todayAd = Carbon::now('Asia/Kathmandu')->toDateString();
+        $todayBs = NepaliContentHelper::convertAdToBs($todayAd);
+
+        $todayAttendance = Attendance::query()
+            ->where('student_id', $student->id)
+            ->where('attendance_type', 'class')
+            ->where(function ($query) use ($todayAd, $todayBs) {
+                $query->whereDate('date', $todayAd)
+                    ->orWhere('date_bs', $todayBs);
+            })
+            ->with('subject')
+            ->orderByDesc('date')
+            ->get()
+            ->map(function (Attendance $record) use ($todayBs) {
+                $recordDate = $record->date instanceof Carbon
+                    ? $record->date
+                    : ($record->date ? Carbon::parse($record->date) : null);
+
+                return [
+                    'subject_name' => $record->subject?->subject_name ?? ($record->subject ?? __('Subject')),
+                    'subject_code' => $record->subject?->subject_code,
+                    'status' => $record->status,
+                    'remarks' => $record->remarks,
+                    'date' => $recordDate,
+                    'date_label' => $recordDate ? $recordDate->format('M d, Y') : __('Date pending'),
+                    'date_bs' => $record->date_bs ?? $todayBs,
+                ];
+            })
+            ->values();
 
         $examMarks = ExamMark::query()
             ->where('student_id', $student->id)
@@ -364,6 +395,9 @@ class ParentPortalData
             'pending_subjects' => $subjectStats->where('status', 'pending')->count(),
             'subjects' => $subjectStats,
             'recent_attendance' => $recentAttendance,
+            'today_attendance' => $todayAttendance,
+            'today_attendance_count' => $todayAttendance->count(),
+            'today_attendance_date_label' => Carbon::now('Asia/Kathmandu')->format('M d, Y'),
             'recent_results' => $recentResults,
             'upcoming_exams' => $upcomingExams
                 ->map(fn (Exam $exam) => $this->formatUpcomingExam($exam))

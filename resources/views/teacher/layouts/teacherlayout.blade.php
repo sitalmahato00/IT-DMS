@@ -605,6 +605,101 @@
         html.teacher-ui-enhanced.dark .teacher-dashboard-page .teacher-dashboard-action-link {
             box-shadow: none;
         }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-panel,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-form-panel,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-table-card,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-empty,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-modal-shell,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-aside {
+            border-radius: 28px;
+            border-color: var(--teacher-surface-border);
+            background: var(--teacher-surface-bg);
+            box-shadow: var(--teacher-surface-shadow);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-list-card,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-quicklink,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-mini-card,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-summary-box {
+            border-radius: 24px;
+            border-color: rgba(229, 213, 218, 0.96);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 249, 250, 0.94));
+            box-shadow: var(--teacher-soft-shadow);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-list-card:hover,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-quicklink:hover,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-mini-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 26px 44px -32px rgba(148, 19, 52, 0.26);
+            border-color: rgba(244, 114, 182, 0.22);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-table-card,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-form-panel {
+            overflow: hidden;
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-panel-header,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-table-card > .border-b,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-form-panel > .border-b,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-aside > .border-b {
+            background: linear-gradient(180deg, #fff5f7, #fffafb);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-icon {
+            border-radius: 18px;
+            box-shadow: 0 18px 30px -24px rgba(15, 23, 42, 0.22);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-photo-frame {
+            border-radius: 32px;
+            border: 1px solid rgba(229, 213, 218, 0.96);
+            background: linear-gradient(180deg, rgba(255, 251, 252, 0.98), rgba(255, 246, 247, 0.95));
+            box-shadow: var(--teacher-soft-shadow);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-upload-trigger {
+            border-radius: 999px;
+            box-shadow: 0 18px 28px -24px rgba(225, 29, 72, 0.34);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-chip,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-summary-box span.inline-flex,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-list-card span.inline-flex,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-table-card span.inline-flex {
+            box-shadow: 0 12px 24px -20px rgba(15, 23, 42, 0.22);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-empty {
+            background: linear-gradient(180deg, rgba(255, 251, 235, 0.96), rgba(255, 247, 237, 0.98));
+            border-color: rgba(253, 224, 71, 0.84);
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-table-card tbody tr:hover td,
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-table-card tbody tr:hover th {
+            background: linear-gradient(90deg, rgba(255, 241, 242, 0.72), rgba(255, 255, 255, 0.97));
+        }
+
+        html.teacher-ui-enhanced:not(.dark) .teacher-smooth-page .teacher-smooth-kpi-bar {
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(255, 228, 230, 0.9), rgba(254, 242, 242, 0.96));
+        }
+
+        html.teacher-ui-enhanced.dark .teacher-smooth-page .teacher-smooth-list-card,
+        html.teacher-ui-enhanced.dark .teacher-smooth-page .teacher-smooth-quicklink,
+        html.teacher-ui-enhanced.dark .teacher-smooth-page .teacher-smooth-mini-card,
+        html.teacher-ui-enhanced.dark .teacher-smooth-page .teacher-smooth-summary-box,
+        html.teacher-ui-enhanced.dark .teacher-smooth-page .teacher-smooth-panel,
+        html.teacher-ui-enhanced.dark .teacher-smooth-page .teacher-smooth-form-panel,
+        html.teacher-ui-enhanced.dark .teacher-smooth-page .teacher-smooth-table-card,
+        html.teacher-ui-enhanced.dark .teacher-smooth-page .teacher-smooth-modal-shell,
+        html.teacher-ui-enhanced.dark .teacher-smooth-page .teacher-smooth-aside,
+        html.teacher-ui-enhanced.dark .teacher-smooth-page .teacher-smooth-photo-frame {
+            border-color: var(--teacher-dark-border);
+        }
     </style>
     @yield('styles')
     @stack('styles')

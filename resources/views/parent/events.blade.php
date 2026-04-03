@@ -8,7 +8,7 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
+<div class="routine-page space-y-6">
     @include('parent.partials.child-tabs', [
         'children' => $children,
         'selectedChildId' => $selectedChildId,
@@ -142,6 +142,7 @@
                         ['label' => __('Section'), 'value' => $selectedChild['display_section'] ?: __('All')],
                     ];
                     $footerLeft = $selectedChild['subject_count'] . ' ' . __('subjects');
+                    $showSlotSection = blank($selectedChild['display_section']);
                 @endphp
                 @include('shared.timetable.partials.routine-sheet')
             @endif
