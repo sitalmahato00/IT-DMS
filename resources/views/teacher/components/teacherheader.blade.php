@@ -20,7 +20,7 @@
                 <!-- Language switcher -->
                 <div class="hidden md:block">
                     <label for="locale-select" class="sr-only">{{ __('Language') }}</label>
-                    <select id="locale-select" class="px-3 py-1.5 border border-gray-200 rounded-full text-sm text-gray-900 bg-white cursor-pointer focus:ring-2 focus:ring-[#FF0037] focus:border-transparent shadow-sm transition">
+                    <select id="locale-select" class="px-3 py-1.5 min-w-[120px] border border-gray-200 rounded-full text-sm text-gray-900 bg-white cursor-pointer focus:ring-2 focus:ring-[#FF0037] focus:border-transparent shadow-sm transition">
                         @foreach (config('locales.supported') as $code => $label)
                             <option value="{{ $code }}" {{ app()->getLocale() === $code ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach

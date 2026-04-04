@@ -47,7 +47,7 @@
             <div class="flex items-center gap-2 flex-shrink-0">
                 <!-- Language Selector -->
                 <div class="hidden sm:block">
-                    <select id="locale-select" class="px-2.5 py-1.5 border border-white/30 rounded-lg text-xs text-white bg-white/10 cursor-pointer hover:bg-white/15 focus:ring-2 focus:ring-white focus:ring-offset-0 focus:border-transparent shadow-sm transition duration-150 dark:bg-white/10 dark:border-white/30">
+                    <select id="locale-select" class="px-3 py-1.5 min-w-[120px] border border-white/30 rounded-lg text-xs text-white bg-white/10 cursor-pointer hover:bg-white/15 focus:ring-2 focus:ring-white focus:ring-offset-0 focus:border-transparent shadow-sm transition duration-150 dark:bg-white/10 dark:border-white/30">
                         @foreach (config('locales.supported') as $code => $label)
                             <option value="{{ $code }}" {{ app()->getLocale() === $code ? 'selected' : '' }} class="text-gray-900">{{ $label }}</option>
                         @endforeach
