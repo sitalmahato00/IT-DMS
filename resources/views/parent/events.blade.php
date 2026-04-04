@@ -8,7 +8,7 @@
 @endsection
 
 @section('content')
-<div class="routine-page space-y-6">
+<div class="parent-smooth-page routine-page space-y-6">
     @include('parent.partials.child-tabs', [
         'children' => $children,
         'selectedChildId' => $selectedChildId,
@@ -19,11 +19,11 @@
     ])
 
     @if(!$selectedChild)
-        <div class="rounded-2xl border border-dashed border-red-300 dark:border-red-800 bg-white dark:bg-gray-800 p-10 text-center text-sm text-gray-500 dark:text-gray-400">
+        <div class="parent-smooth-empty rounded-2xl border border-dashed border-red-300 dark:border-red-800 bg-white dark:bg-gray-800 p-10 text-center text-sm text-gray-500 dark:text-gray-400">
             {{ __('No event or schedule data is available because no students are linked to this parent account yet.') }}
         </div>
     @else
-        <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="parent-smooth-panel rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
             <div class="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
                 <div class="max-w-3xl space-y-3">
                     <span class="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-red-700">
@@ -105,7 +105,7 @@
 
         <div class="routine-page space-y-6">
             @if($selectedChild['timetable_total_slots'] === 0)
-                <section class="rounded-[28px] border border-amber-200 bg-amber-50 p-6 shadow-sm">
+                <section class="parent-smooth-empty rounded-[28px] border border-amber-200 bg-amber-50 p-6 shadow-sm">
                     <div class="flex items-start gap-4">
                         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
                             <i class="bi bi-exclamation-circle text-xl"></i>

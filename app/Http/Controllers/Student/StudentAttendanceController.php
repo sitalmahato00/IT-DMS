@@ -51,6 +51,69 @@ class StudentAttendanceController extends Controller
         
         // Get overall attendance percentage
         $overallAttendance = $student->getAttendancePercentage();
+
+        $attendanceStatusCounts = [
+            'present' => (int) DB::table('attendance')
+                ->where('student_id', $student->id)
+                ->where('attendance_type', 'class')
+                ->where('status', 'present')
+                ->count(),
+            'absent' => (int) DB::table('attendance')
+                ->where('student_id', $student->id)
+                ->where('attendance_type', 'class')
+                ->where('status', 'absent')
+                ->count(),
+            'leave' => (int) DB::table('attendance')
+                ->where('student_id', $student->id)
+                ->where('attendance_type', 'class')
+                ->where('status', 'leave')
+                ->count(),
+        ];
+
+        $attendanceStatusChart = [
+            'labels' => [__('Present'), __('Absent'), __('Leave')],
+            'values' => [
+                $attendanceStatusCounts['present'],
+                $attendanceStatusCounts['absent'],
+                $attendanceStatusCounts['leave'],
+            ],
+        ];
+
+        $sortedSubjects = $subjects->sortByDesc('attendance')->values();
+        $bestSubject = $sortedSubjects->first();
+        $lowestSubject = $sortedSubjects->last();
+
+        $subjectAttendanceChart = [
+            'labels' => $sortedSubjects->pluck('name')->all(),
+            'codes' => $sortedSubjects->pluck('code')->all(),
+            'teachers' => $sortedSubjects->pluck('teacher')->all(),
+            'values' => $sortedSubjects->map(function ($subject) {
+                return round((float) $subject['attendance'], 1);
+            })->all(),
+        ];
+
+        $attendanceInsights = [
+            [
+                'label' => __('Subjects'),
+                'value' => (string) $subjects->count(),
+                'icon' => 'bi-journal-bookmark',
+            ],
+            [
+                'label' => __('Present'),
+                'value' => (string) $attendanceStatusCounts['present'],
+                'icon' => 'bi-check-circle',
+            ],
+            [
+                'label' => __('Absent'),
+                'value' => (string) $attendanceStatusCounts['absent'],
+                'icon' => 'bi-x-circle',
+            ],
+            [
+                'label' => __('Leave'),
+                'value' => (string) $attendanceStatusCounts['leave'],
+                'icon' => 'bi-calendar2-x',
+            ],
+        ];
         
         // Get recent attendance records
         $recentAttendance = DB::table('attendance')
@@ -62,7 +125,18 @@ class StudentAttendanceController extends Controller
             ->limit(10)
             ->get();
         
-        return view('student.attendance.index', compact('student', 'subjects', 'overallAttendance', 'recentAttendance'));
+        return view('student.attendance.index', compact(
+            'student',
+            'subjects',
+            'overallAttendance',
+            'attendanceStatusCounts',
+            'attendanceStatusChart',
+            'subjectAttendanceChart',
+            'attendanceInsights',
+            'bestSubject',
+            'lowestSubject',
+            'recentAttendance'
+        ));
 
     }
     
@@ -116,8 +190,8 @@ class StudentAttendanceController extends Controller
         ];
 
         // Get attendance percentage for this subject
-        $assessmentMarks = $student->getAssessmentMarks($subjectId, 'assessment');
-        $ctevtMarkRecord = $student->getExamMarkForSubject($subjectId, 'ctevt');
+        $assessmentMarks = $student->getAssessmentMarks($subjectId, 'assessment', null, true);
+        $ctevtMarkRecord = $student->getExamMarkForSubject($subjectId, 'ctevt', null, null, true);
 
         $ctevtMarks = $ctevtMarkRecord ? (object) [
             'full' => round((float) $ctevtMarkRecord->calculateFullMarks(), 2),

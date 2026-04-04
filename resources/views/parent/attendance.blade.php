@@ -4,7 +4,7 @@
 @section('subtitle', __('Attendance trends, recent entries, and low-attendance follow-up'))
 
 @section('content')
-<div class="space-y-6">
+<div class="parent-smooth-page space-y-6">
     @include('parent.partials.child-tabs', [
         'children' => $children,
         'selectedChildId' => $selectedChildId,
@@ -12,31 +12,31 @@
     ])
 
     @if(!$selectedChild)
-        <div class="rounded-2xl border border-dashed border-red-300 dark:border-red-800 bg-white dark:bg-gray-800 p-10 text-center text-sm text-gray-500 dark:text-gray-400">
+        <div class="parent-smooth-empty rounded-2xl border border-dashed border-red-300 dark:border-red-800 bg-white dark:bg-gray-800 p-10 text-center text-sm text-gray-500 dark:text-gray-400">
             {{ __('No attendance data is available because no students are linked to this parent account yet.') }}
         </div>
     @else
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <div class="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">{{ __('Overall Attendance') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['attendance_percentage'] }}%</p>
             </div>
-            <div class="rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Tracked Subjects') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['subject_count'] }}</p>
             </div>
-            <div class="rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Below 75%') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['subjects']->where('attendance_percentage', '<', 75)->count() }}</p>
             </div>
-            <div class="rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-card rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-sky-700 dark:text-sky-300 font-semibold">{{ __('Recent Entries') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['recent_attendance']->count() }}</p>
             </div>
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-            <div class="xl:col-span-7 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div class="parent-smooth-table-card xl:col-span-7 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Subject Attendance Breakdown') }}</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Each subject attendance percentage with total present and absent classes.') }}</p>
@@ -76,19 +76,19 @@
             </div>
 
             <div class="xl:col-span-5 space-y-6">
-                <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+                <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Attention Items') }}</h2>
                     <div class="mt-4 space-y-3">
                         @php
                             $lowAttendanceSubjects = $selectedChild['subjects']->where('attendance_percentage', '<', 75);
                         @endphp
                         @forelse($lowAttendanceSubjects as $subject)
-                            <div class="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4">
+                            <div class="parent-smooth-list-card rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4">
                                 <p class="text-sm font-semibold text-red-700 dark:text-red-300">{{ $subject['name'] }}</p>
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ __('Attendance is currently :value%. Early follow-up is recommended.', ['value' => $subject['attendance_percentage']]) }}</p>
                             </div>
                         @empty
-                            <div class="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 p-4">
+                            <div class="parent-smooth-list-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 p-4">
                                 <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{{ __('No low-attendance subjects detected.') }}</p>
                                 <p class="mt-1 text-sm text-emerald-600 dark:text-emerald-400">{{ __('This student is currently meeting the recommended attendance target across all tracked subjects.') }}</p>
                             </div>
@@ -96,7 +96,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+                <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Recommended Parent Actions') }}</h2>
                     <ul class="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300">
                         <li>{{ __('Review the most recent attendance entries at least once each week.') }}</li>
@@ -107,7 +107,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+        <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
             <div class="flex items-center justify-between gap-3">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Recent Attendance Entries') }}</h2>
                 <a href="{{ route('parent.communication') }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Need follow-up?') }}</a>
@@ -115,7 +115,7 @@
 
             <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 @forelse($selectedChild['recent_attendance'] as $record)
-                    <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
+                    <div class="parent-smooth-list-card rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $record['subject_name'] }}</p>
@@ -130,7 +130,7 @@
                         @endif
                     </div>
                 @empty
-                    <div class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-4 text-center text-sm text-gray-500 dark:text-gray-400 md:col-span-2 xl:col-span-3">
+                    <div class="parent-smooth-empty rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-4 text-center text-sm text-gray-500 dark:text-gray-400 md:col-span-2 xl:col-span-3">
                         {{ __('No attendance entries are available yet.') }}
                     </div>
                 @endforelse
@@ -139,4 +139,3 @@
     @endif
 </div>
 @endsection
-

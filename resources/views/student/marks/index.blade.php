@@ -32,11 +32,20 @@
                     <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/15 border border-white/25">
                         <i class="bi bi-award"></i> {{ number_format($cgpa, 2) }} {{ __('CGPA') }}
                     </span>
+                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/15 border border-white/25">
+                        <i class="bi bi-trophy"></i> {{ $marksheetGrade }} {{ __('grade') }}
+                    </span>
                 </div>
             </div>
 
-            <div class="hidden lg:flex items-center justify-center w-24 h-24 rounded-3xl bg-white/10 border border-white/15 shadow-lg">
-                <i class="bi bi-clipboard-data text-5xl text-white/90"></i>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('student.marksheet') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#B2002F] shadow-md hover:bg-[#fff1f3] transition">
+                    <i class="bi bi-journal-text"></i>
+                    <span>{{ __('Open Marksheet') }}</span>
+                </a>
+                <div class="hidden lg:flex items-center justify-center w-24 h-24 rounded-3xl bg-white/10 border border-white/15 shadow-lg">
+                    <i class="bi bi-clipboard-data text-5xl text-white/90"></i>
+                </div>
             </div>
         </div>
     </div>
@@ -89,6 +98,10 @@
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Status Overview') }}</h2>
                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('Live breakdown') }}</span>
+            </div>
+
+            <div class="h-56">
+                <canvas id="studentMarksStatusChart"></canvas>
             </div>
 
             <div class="grid grid-cols-3 gap-3">
@@ -233,12 +246,14 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const chartCanvas = document.getElementById('studentMarksChart');
+        const statusCanvas = document.getElementById('studentMarksStatusChart');
         const chartEmpty = document.getElementById('studentMarksChartEmpty');
 
         if (!chartCanvas || !window.Chart) {
             return;
         }
 
+        const statusData = @json($marksStatusChart);
         const subjectData = @json(
             $gradedSubjects->map(fn ($subject) => [
                 'label' => $subject['code'],
@@ -253,6 +268,39 @@
         }
 
         const isDark = document.documentElement.classList.contains('dark');
+
+        if (statusCanvas) {
+            new window.Chart(statusCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: statusData.labels,
+                    datasets: [{
+                        data: statusData.values,
+                        backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+                        borderColor: ['#ffffff', '#ffffff', '#ffffff'],
+                        borderWidth: 3,
+                        hoverOffset: 8,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: isDark ? '#d1d5db' : '#4b5563',
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                boxWidth: 10,
+                                padding: 14,
+                            },
+                        },
+                    },
+                },
+            });
+        }
 
         new window.Chart(chartCanvas, {
             type: 'bar',

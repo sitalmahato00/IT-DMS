@@ -4,7 +4,7 @@
 @section('subtitle', __('Profile and academic overview for linked students'))
 
 @section('content')
-<div class="space-y-6">
+<div class="parent-smooth-page space-y-6">
     @include('parent.partials.child-tabs', [
         'children' => $children,
         'selectedChildId' => $selectedChildId,
@@ -12,12 +12,12 @@
     ])
 
     @if(!$selectedChild)
-        <div class="rounded-2xl border border-dashed border-red-300 dark:border-red-800 bg-white dark:bg-gray-800 p-10 text-center text-sm text-gray-500 dark:text-gray-400">
+        <div class="parent-smooth-empty rounded-2xl border border-dashed border-red-300 dark:border-red-800 bg-white dark:bg-gray-800 p-10 text-center text-sm text-gray-500 dark:text-gray-400">
             {{ __('No student records are currently linked to this parent account.') }}
         </div>
     @else
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-            <div class="xl:col-span-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6">
+            <div class="parent-smooth-panel xl:col-span-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6">
                 <div class="flex flex-col items-center text-center">
                     <img src="{{ $selectedChild['profile_photo_url'] }}" alt="{{ $selectedChild['name'] }}" class="h-24 w-24 rounded-full object-cover border border-red-200 dark:border-red-800 shadow-sm">
                     <h2 class="mt-4 text-xl font-semibold text-gray-900 dark:text-white">{{ $selectedChild['name'] }}</h2>
@@ -28,23 +28,23 @@
                 </div>
 
                 <div class="mt-6 space-y-3 text-sm">
-                    <div class="flex items-start justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-900/40 px-4 py-3">
+                    <div class="parent-smooth-list-card flex items-start justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-900/40 px-4 py-3">
                         <span class="text-gray-500 dark:text-gray-400">{{ __('Academic Year') }}</span>
                         <span class="font-medium text-gray-900 dark:text-white text-right">{{ $selectedChild['academic_year'] ?: '—' }}</span>
                     </div>
-                    <div class="flex items-start justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-900/40 px-4 py-3">
+                    <div class="parent-smooth-list-card flex items-start justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-900/40 px-4 py-3">
                         <span class="text-gray-500 dark:text-gray-400">{{ __('Department') }}</span>
                         <span class="font-medium text-gray-900 dark:text-white text-right">{{ $selectedChild['department'] ?: '—' }}</span>
                     </div>
-                    <div class="flex items-start justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-900/40 px-4 py-3">
+                    <div class="parent-smooth-list-card flex items-start justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-900/40 px-4 py-3">
                         <span class="text-gray-500 dark:text-gray-400">{{ __('Email') }}</span>
                         <span class="font-medium text-gray-900 dark:text-white text-right break-all">{{ $selectedChild['email'] ?: '—' }}</span>
                     </div>
-                    <div class="flex items-start justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-900/40 px-4 py-3">
+                    <div class="parent-smooth-list-card flex items-start justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-900/40 px-4 py-3">
                         <span class="text-gray-500 dark:text-gray-400">{{ __('Phone') }}</span>
                         <span class="font-medium text-gray-900 dark:text-white text-right">{{ $selectedChild['phone'] ?: '—' }}</span>
                     </div>
-                    <div class="flex items-start justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-900/40 px-4 py-3">
+                    <div class="parent-smooth-list-card flex items-start justify-between gap-3 rounded-xl bg-gray-50 dark:bg-gray-900/40 px-4 py-3">
                         <span class="text-gray-500 dark:text-gray-400">{{ __('Address') }}</span>
                         <span class="font-medium text-gray-900 dark:text-white text-right">{{ $selectedChild['address'] ?: '—' }}</span>
                     </div>
@@ -64,25 +64,25 @@
 
             <div class="xl:col-span-8 space-y-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                    <div class="rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
+                    <div class="parent-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
                         <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Attendance') }}</p>
                         <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['attendance_percentage'] }}%</p>
                     </div>
-                    <div class="rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
+                    <div class="parent-smooth-card rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
                         <p class="text-xs uppercase tracking-wide text-sky-700 dark:text-sky-300 font-semibold">{{ __('Overall Score') }}</p>
                         <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['overall_percentage'] !== null ? $selectedChild['overall_percentage'] . '%' : '—' }}</p>
                     </div>
-                    <div class="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
+                    <div class="parent-smooth-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
                         <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">{{ __('Subjects') }}</p>
                         <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['subject_count'] }}</p>
                     </div>
-                    <div class="rounded-xl border border-violet-200 dark:border-violet-900 bg-white dark:bg-gray-800 p-5">
+                    <div class="parent-smooth-card rounded-xl border border-violet-200 dark:border-violet-900 bg-white dark:bg-gray-800 p-5">
                         <p class="text-xs uppercase tracking-wide text-violet-700 dark:text-violet-300 font-semibold">{{ __('CGPA') }}</p>
                         <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['cgpa'] !== null ? number_format($selectedChild['cgpa'], 2) : '—' }}</p>
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <div class="parent-smooth-table-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                     <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Subject Overview') }}</h2>
@@ -93,7 +93,7 @@
 
                     <div class="p-5 grid gap-4 md:grid-cols-2">
                         @foreach($selectedChild['subjects'] as $subject)
-                            <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
+                            <div class="parent-smooth-list-card rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
                                         <p class="font-semibold text-gray-900 dark:text-white">{{ $subject['name'] }}</p>
@@ -129,7 +129,7 @@
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-            <div class="xl:col-span-7 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-panel xl:col-span-7 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                 <div class="flex items-center justify-between gap-3">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Recent Attendance') }}</h2>
                     <a href="{{ route('parent.attendance', ['child' => $selectedChild['id']]) }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Open attendance') }}</a>
@@ -137,7 +137,7 @@
 
                 <div class="mt-4 space-y-3">
                     @forelse($selectedChild['recent_attendance'] as $record)
-                        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4 flex items-start justify-between gap-3">
+                        <div class="parent-smooth-list-card rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4 flex items-start justify-between gap-3">
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $record['subject_name'] }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $record['subject_code'] ?: '—' }} • {{ $record['date_label'] }}</p>
@@ -147,14 +147,14 @@
                             </span>
                         </div>
                     @empty
-                        <div class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                        <div class="parent-smooth-empty rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                             {{ __('No attendance entries are available yet.') }}
                         </div>
                     @endforelse
                 </div>
             </div>
 
-            <div class="xl:col-span-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-panel xl:col-span-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                 <div class="flex items-center justify-between gap-3">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Teacher Contacts') }}</h2>
                     <a href="{{ route('parent.communication') }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Communication hub') }}</a>
@@ -162,7 +162,7 @@
 
                 <div class="mt-4 space-y-3">
                     @forelse($selectedChild['teachers'] as $teacher)
-                        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
+                        <div class="parent-smooth-list-card rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
                             <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $teacher['name'] }}</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $teacher['subject_name'] }}</p>
                             <div class="mt-3 flex flex-wrap gap-2 text-xs">
@@ -181,7 +181,7 @@
                             </div>
                         </div>
                     @empty
-                        <div class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                        <div class="parent-smooth-empty rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                             {{ __('Teacher contacts will appear here once subjects and assignments are available.') }}
                         </div>
                     @endforelse
@@ -191,4 +191,3 @@
     @endif
 </div>
 @endsection
-

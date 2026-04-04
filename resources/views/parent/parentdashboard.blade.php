@@ -4,8 +4,8 @@
 @section('subtitle', __('Parent Portal Overview'))
 
 @section('content')
-<div class="space-y-6">
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-600 via-red-700 to-red-800 p-6 md:p-8 text-white shadow-xl border border-red-700">
+<div class="parent-smooth-page space-y-6">
+    <div class="parent-smooth-hero relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-600 via-red-700 to-red-800 p-6 md:p-8 text-white shadow-xl border border-red-700">
         <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/15 blur-2xl"></div>
         <div class="absolute -left-16 -bottom-14 h-48 w-48 rounded-full bg-black/10 blur-3xl"></div>
 
@@ -69,25 +69,25 @@
         </div>
     @else
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <div class="rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Linked Children') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $childrenCount }}</p>
                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Profiles available for monitoring') }}</p>
             </div>
 
-            <div class="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">{{ __('Overall Attendance') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $overallAttendance }}%</p>
                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Average class attendance across children') }}</p>
             </div>
 
-            <div class="rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-card rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-sky-700 dark:text-sky-300 font-semibold">{{ __('Published Results') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $overallScore !== null ? $overallScore . '%' : '—' }}</p>
                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Average of available subject results') }}</p>
             </div>
 
-            <div class="rounded-xl border border-violet-200 dark:border-violet-900 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-card rounded-xl border border-violet-200 dark:border-violet-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-violet-700 dark:text-violet-300 font-semibold">{{ __('Portal Alerts') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $academicAlerts->count() }}</p>
                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Attendance, result, and exam reminders') }}</p>
@@ -95,7 +95,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-            <a href="{{ route('parent.children', ['child' => $selectedChildId]) }}" class="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4 hover:bg-red-100 dark:hover:bg-red-950/30 transition">
+            <a href="{{ route('parent.children', ['child' => $selectedChildId]) }}" class="parent-smooth-quicklink rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4 hover:bg-red-100 dark:hover:bg-red-950/30 transition">
                 <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-600 text-white">
                         <i class="bi bi-person-vcard"></i>
@@ -107,7 +107,7 @@
                 </div>
             </a>
 
-            <a href="{{ route('parent.attendance', ['child' => $selectedChildId]) }}" class="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 p-4 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 transition">
+            <a href="{{ route('parent.attendance', ['child' => $selectedChildId]) }}" class="parent-smooth-quicklink rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 p-4 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 transition">
                 <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white">
                         <i class="bi bi-calendar-check"></i>
@@ -119,7 +119,7 @@
                 </div>
             </a>
 
-            <a href="{{ route('parent.results', ['child' => $selectedChildId]) }}" class="rounded-xl border border-sky-200 dark:border-sky-900 bg-sky-50 dark:bg-sky-950/20 p-4 hover:bg-sky-100 dark:hover:bg-sky-950/30 transition">
+            <a href="{{ route('parent.results', ['child' => $selectedChildId]) }}" class="parent-smooth-quicklink rounded-xl border border-sky-200 dark:border-sky-900 bg-sky-50 dark:bg-sky-950/20 p-4 hover:bg-sky-100 dark:hover:bg-sky-950/30 transition">
                 <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-600 text-white">
                         <i class="bi bi-graph-up-arrow"></i>
@@ -131,7 +131,7 @@
                 </div>
             </a>
 
-            <a href="{{ route('parent.communication') }}" class="rounded-xl border border-violet-200 dark:border-violet-900 bg-violet-50 dark:bg-violet-950/20 p-4 hover:bg-violet-100 dark:hover:bg-violet-950/30 transition">
+            <a href="{{ route('parent.communication') }}" class="parent-smooth-quicklink rounded-xl border border-violet-200 dark:border-violet-900 bg-violet-50 dark:bg-violet-950/20 p-4 hover:bg-violet-100 dark:hover:bg-violet-950/30 transition">
                 <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-white">
                         <i class="bi bi-chat-dots"></i>
@@ -146,7 +146,7 @@
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
             <div class="xl:col-span-7 space-y-6">
-                <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+                <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Parent Responsibilities') }}</h2>
@@ -185,7 +185,7 @@
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+                <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Child Snapshot') }}</h2>
@@ -196,7 +196,7 @@
 
                     <div class="mt-5 grid items-start gap-4 lg:grid-cols-2">
                         @foreach($children as $child)
-                            <div class="self-start rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
+                            <div class="parent-smooth-list-card self-start rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
                                         <p class="text-base font-semibold text-gray-900 dark:text-white">{{ $child['name'] }}</p>

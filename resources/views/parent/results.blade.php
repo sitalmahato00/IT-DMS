@@ -4,7 +4,7 @@
 @section('subtitle', __('Published exam outcomes, subject performance, and upcoming assessments'))
 
 @section('content')
-<div class="space-y-6">
+<div class="parent-smooth-page space-y-6">
     @include('parent.partials.child-tabs', [
         'children' => $children,
         'selectedChildId' => $selectedChildId,
@@ -12,31 +12,31 @@
     ])
 
     @if(!$selectedChild)
-        <div class="rounded-2xl border border-dashed border-red-300 dark:border-red-800 bg-white dark:bg-gray-800 p-10 text-center text-sm text-gray-500 dark:text-gray-400">
+        <div class="parent-smooth-empty rounded-2xl border border-dashed border-red-300 dark:border-red-800 bg-white dark:bg-gray-800 p-10 text-center text-sm text-gray-500 dark:text-gray-400">
             {{ __('No result data is available because no students are linked to this parent account yet.') }}
         </div>
     @else
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <div class="rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-card rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-sky-700 dark:text-sky-300 font-semibold">{{ __('Overall Score') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['overall_percentage'] !== null ? $selectedChild['overall_percentage'] . '%' : '—' }}</p>
             </div>
-            <div class="rounded-xl border border-violet-200 dark:border-violet-900 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-card rounded-xl border border-violet-200 dark:border-violet-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-violet-700 dark:text-violet-300 font-semibold">{{ __('CGPA') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['cgpa'] !== null ? number_format($selectedChild['cgpa'], 2) : '—' }}</p>
             </div>
-            <div class="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">{{ __('Passed Subjects') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['passed_subjects'] }}</p>
             </div>
-            <div class="rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Need Attention') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['failed_subjects'] + $selectedChild['pending_subjects'] }}</p>
             </div>
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-            <div class="xl:col-span-7 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div class="parent-smooth-table-card xl:col-span-7 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Subject Result Summary') }}</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Performance status for each subject, with next exam context where available.') }}</p>
@@ -44,7 +44,7 @@
 
                 <div class="p-5 grid gap-4 md:grid-cols-2">
                     @foreach($selectedChild['subjects'] as $subject)
-                        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
+                        <div class="parent-smooth-list-card rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
                             <div class="flex items-start justify-between gap-3">
                                 <div>
                                     <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $subject['name'] }}</p>
@@ -82,7 +82,7 @@
             </div>
 
             <div class="xl:col-span-5 space-y-6">
-                <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+                <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Result Guidance') }}</h2>
                     <ul class="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300">
                         <li>{{ __('Check this page whenever new exam notices are published.') }}</li>
@@ -91,7 +91,7 @@
                     </ul>
                 </div>
 
-                <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+                <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Upcoming Exams') }}</h2>
                         <a href="{{ route('parent.events', ['child' => $selectedChild['id']]) }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Open schedule') }}</a>
@@ -99,7 +99,7 @@
 
                     <div class="mt-4 space-y-3">
                         @forelse($selectedChild['upcoming_exams']->take(4) as $exam)
-                            <div class="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4">
+                            <div class="parent-smooth-list-card rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4">
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $exam['exam_name'] }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $exam['subject_name'] }}</p>
                                 <div class="mt-3 flex items-center justify-between gap-3 text-sm">
@@ -108,7 +108,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                            <div class="parent-smooth-empty rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                                 {{ __('No upcoming exams are scheduled right now.') }}
                             </div>
                         @endforelse
@@ -117,7 +117,7 @@
             </div>
         </div>
 
-        <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+        <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
             <div class="flex items-center justify-between gap-3">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Recent Result Entries') }}</h2>
                 <a href="{{ route('parent.communication') }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Need a meeting?') }}</a>
@@ -125,7 +125,7 @@
 
             <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 @forelse($selectedChild['recent_results'] as $entry)
-                    <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
+                    <div class="parent-smooth-list-card rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $entry['label'] }}</p>
@@ -147,7 +147,7 @@
                         </div>
                     </div>
                 @empty
-                    <div class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-4 text-center text-sm text-gray-500 dark:text-gray-400 md:col-span-2 xl:col-span-3">
+                    <div class="parent-smooth-empty rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-4 text-center text-sm text-gray-500 dark:text-gray-400 md:col-span-2 xl:col-span-3">
                         {{ __('No published result entries are available yet.') }}
                     </div>
                 @endforelse
@@ -156,4 +156,3 @@
     @endif
 </div>
 @endsection
-

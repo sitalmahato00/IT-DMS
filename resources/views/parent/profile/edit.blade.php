@@ -4,10 +4,10 @@
 @section('subtitle', __('Manage your guardian account details and password'))
 
 @section('content')
-<div class="space-y-6">
+<div class="parent-smooth-page space-y-6">
     <!-- Profile Info Card -->
-    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div class="px-6 py-4 border-b border-gray-200">
+    <div class="parent-smooth-form-panel bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div class="parent-smooth-panel-header px-6 py-4 border-b border-gray-200">
             <h3 class="text-gray-900 font-semibold text-base flex items-center gap-2">
                 <i class="bi bi-person-badge text-gray-500"></i>
                 Profile Information
@@ -20,7 +20,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Profile Photo -->
-                    <div class="flex flex-col items-center">
+                    <div class="parent-smooth-photo-frame flex flex-col items-center">
                         <label class="block text-sm font-medium text-gray-900 mb-3">Profile Photo</label>
                         @php
                             $photoPath = $user->profile_photo_url;
@@ -34,7 +34,7 @@
                             </div>
                         @endif
                         <div class="mt-3 flex flex-col items-center w-full">
-                            <label for="photo" class="inline-flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium cursor-pointer transition">
+                            <label for="photo" class="parent-smooth-upload-trigger inline-flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium cursor-pointer transition">
                                 <i class="bi bi-cloud-upload mr-2"></i>
                                 <span id="photoButtonText">Choose Photo</span>
                             </label>
@@ -76,7 +76,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                                <div class="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm text-gray-600">
+                                <div class="parent-smooth-static-field w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm text-gray-600">
                                     Parent
                                 </div>
                             </div>
@@ -101,8 +101,8 @@
     </div>
 
     <!-- Password Update Card -->
-    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div class="px-4 py-3 border-b border-gray-200">
+    <div class="parent-smooth-form-panel bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div class="parent-smooth-panel-header px-4 py-3 border-b border-gray-200">
             <h3 class="text-gray-900 font-semibold text-sm flex items-center gap-2">
                 <i class="bi bi-key text-gray-500"></i>
                 Update Password

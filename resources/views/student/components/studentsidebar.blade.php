@@ -4,12 +4,17 @@
     $isTimetable = request()->routeIs('student.timetable*');
     $isAttendance = request()->routeIs('student.attendance*');
     $isMarks = request()->routeIs('student.marks*');
+    $isMarksheet = request()->routeIs('student.marksheet*');
+    $isResources = request()->routeIs('student.study-materials*');
+    $isNotices = request()->routeIs('student.notices*');
     $isProfile = request()->routeIs('student.profile*');
 
     $activeGroup = match (true) {
         $isCourses => 'academics',
         $isAttendance => 'attendance',
-        $isMarks => 'exam',
+        $isMarks || $isMarksheet => 'exam',
+        $isResources => 'resources',
+        $isNotices => 'announcement',
         $isProfile => 'system',
         default => null,
     };
@@ -90,13 +95,12 @@
                 <i :class="activeGroup === 'resources' ? 'bi-chevron-down' : 'bi-chevron-right'" class="bi text-base"></i>
             </button>
             <div class="collapsible-section space-y-0.5 overflow-hidden transition-all duration-300" x-show="activeGroup === 'resources'" x-transition.opacity>
-                <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/60">
+                <a href="{{ route('student.study-materials') }}" class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-150 {{ $isResources ? 'bg-red-600 text-white' : 'text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 hover:text-[#FF0037] hover:bg-red-500/10' }}">
                     <span class="sidebar-label flex items-center gap-2">
                         <i class="bi bi-journal-richtext text-base flex-shrink-0"></i>
                         <span>{{ __('Study Materials') }}</span>
                     </span>
-                    <span class="sidebar-label inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ __('Soon') }}</span>
-                </div>
+                </a>
             </div>
 
             <button type="button" @click="toggleGroup('announcement')" :class="activeGroup === 'announcement' ? 'text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900 shadow-sm' : 'text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900'" class="w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-150">
@@ -107,13 +111,12 @@
                 <i :class="activeGroup === 'announcement' ? 'bi-chevron-down' : 'bi-chevron-right'" class="bi text-base"></i>
             </button>
             <div class="collapsible-section space-y-0.5 overflow-hidden transition-all duration-300" x-show="activeGroup === 'announcement'" x-transition.opacity>
-                <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/60">
+                <a href="{{ route('student.notices') }}" class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-150 {{ $isNotices ? 'bg-red-600 text-white' : 'text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 hover:text-[#FF0037] hover:bg-red-500/10' }}">
                     <span class="sidebar-label flex items-center gap-2">
                         <i class="bi bi-bell text-base flex-shrink-0"></i>
                         <span>{{ __('Notices') }}</span>
                     </span>
-                    <span class="sidebar-label inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ __('Soon') }}</span>
-                </div>
+                </a>
             </div>
 
             <button type="button" @click="toggleGroup('exam')" :class="activeGroup === 'exam' ? 'text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900 shadow-sm' : 'text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900'" class="w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-150">

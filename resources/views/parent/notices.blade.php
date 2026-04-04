@@ -4,28 +4,28 @@
 @section('subtitle', __('Parent-targeted announcements, important updates, and institutional notices'))
 
 @section('content')
-<div class="space-y-6">
+<div class="parent-smooth-page space-y-6">
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <div class="rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
+        <div class="parent-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
             <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Total Notices') }}</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $recentNotices->count() }}</p>
         </div>
-        <div class="rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
+        <div class="parent-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
             <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Important') }}</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $importantNoticeCount }}</p>
         </div>
-        <div class="rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
+        <div class="parent-smooth-card rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
             <p class="text-xs uppercase tracking-wide text-sky-700 dark:text-sky-300 font-semibold">{{ __('Recent (14 days)') }}</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $recentNoticeCount }}</p>
         </div>
-        <div class="rounded-xl border border-violet-200 dark:border-violet-900 bg-white dark:bg-gray-800 p-5">
+        <div class="parent-smooth-card rounded-xl border border-violet-200 dark:border-violet-900 bg-white dark:bg-gray-800 p-5">
             <p class="text-xs uppercase tracking-wide text-violet-700 dark:text-violet-300 font-semibold">{{ __('Unread Alerts') }}</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $unreadNotificationCount }}</p>
         </div>
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        <div class="xl:col-span-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+        <div class="parent-smooth-panel xl:col-span-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
             <div class="flex items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Notice Board') }}</h2>
@@ -35,7 +35,7 @@
 
             <div class="mt-5 space-y-4">
                 @forelse($recentNotices as $notice)
-                    <div class="rounded-xl border {{ $notice->is_important ? 'border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40' }} p-5">
+                    <div class="parent-smooth-list-card rounded-xl border {{ $notice->is_important ? 'border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40' }} p-5">
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <div class="flex flex-wrap items-center gap-2">
@@ -70,7 +70,7 @@
                         @endif
                     </div>
                 @empty
-                    <div class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                    <div class="parent-smooth-empty rounded-xl border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/40 p-10 text-center text-sm text-gray-500 dark:text-gray-400">
                         {{ __('No notices are available right now.') }}
                     </div>
                 @endforelse
@@ -78,7 +78,7 @@
         </div>
 
         <div class="xl:col-span-4 space-y-6">
-            <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('How Notices Support Parents') }}</h2>
                 <ul class="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300">
                     <li>{{ __('Teachers and administrators can target notices directly to parents.') }}</li>
@@ -87,7 +87,7 @@
                 </ul>
             </div>
 
-            <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+            <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Recommended Reading Routine') }}</h2>
                 <ol class="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300 list-decimal pl-5">
                     <li>{{ __('Check new notices during each portal visit.') }}</li>
@@ -99,4 +99,3 @@
     </div>
 </div>
 @endsection
-

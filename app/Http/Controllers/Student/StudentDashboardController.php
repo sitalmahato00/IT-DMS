@@ -30,8 +30,8 @@ class StudentDashboardController extends Controller
                     ->first()
                     ->teacher?->user;
 
-                $assessmentMarks = $student->getAssessmentMarks($subject->id, 'assessment');
-                $ctevtMarks = $student->getExamMarkForSubject($subject->id, 'ctevt');
+                $assessmentMarks = $student->getAssessmentMarks($subject->id, 'assessment', null, true);
+                $ctevtMarks = $student->getExamMarkForSubject($subject->id, 'ctevt', null, null, true);
                 $primaryMarks = ($assessmentMarks->full ?? 0) > 0 ? $assessmentMarks : (((isset($ctevtMarks->full) ? $ctevtMarks->full : 0) > 0) ? $ctevtMarks : null);
                 $fullMarks = $primaryMarks && ($primaryMarks->full ?? 0) > 0 ? (float) $primaryMarks->full : 0;
                 $obtainedMarks = $primaryMarks && ($primaryMarks->obtained ?? 0) > 0 ? (float) $primaryMarks->obtained : 0;

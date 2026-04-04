@@ -186,7 +186,7 @@ class Student extends Model
     /**
      * Return cached ExamMark for the given subject/category/exam/assessment number.
      */
-    public function getExamMarkForSubject($subjectId, $category = 'assessment', $examId = null, $assessmentNumber = null)
+    public function getExamMarkForSubject($subjectId, $category = 'assessment', $examId = null, $assessmentNumber = null, $publishedOnly = false)
     {
         $cacheKey = "{$subjectId}:{$category}:" . ($examId ?? 'any') . ':' . ($assessmentNumber ?? 'any');
 
@@ -198,8 +198,11 @@ class Student extends Model
             ->where('student_id', $this->id)
             ->where('subject_id', $subjectId)
             ->when($examId, fn($q) => $q->where('exam_id', $examId))
-            ->whereHas('exam', function($q) use ($category) {
+            ->whereHas('exam', function($q) use ($category, $publishedOnly) {
                 $q->where('exam_category', $category);
+                if ($publishedOnly) {
+                    $q->where('status', Exam::STATUS_PUBLISHED);
+                }
             });
 
         $query = $this->scopeAssessmentNumber($query, $assessmentNumber);
@@ -213,9 +216,9 @@ class Student extends Model
     /**
      * Get component marks for CTEVT exams
      */
-    public function getComponentMarks($subjectId, $component)
+    public function getComponentMarks($subjectId, $component, $publishedOnly = false)
     {
-        $examMark = $this->getExamMarkForSubject($subjectId, 'ctevt');
+        $examMark = $this->getExamMarkForSubject($subjectId, 'ctevt', null, null, $publishedOnly);
 
         if (!$examMark) {
             return (object)[
@@ -311,14 +314,17 @@ class Student extends Model
     /**
      * Get assessment marks (sum of all exams for subject/category, optional number filter)
      */
-    public function getAssessmentMarks($subjectId, $category = 'assessment', $assessmentNumber = null)
+    public function getAssessmentMarks($subjectId, $category = 'assessment', $assessmentNumber = null, $publishedOnly = false)
     {
         $query = ExamMark::with('exam')
             ->where('student_id', $this->id)
             ->where('subject_id', $subjectId)
             ->where('marks_status', '!=', 'absent')
-            ->whereHas('exam', function($q) use ($category) {
+            ->whereHas('exam', function($q) use ($category, $publishedOnly) {
                 $q->where('exam_category', $category);
+                if ($publishedOnly) {
+                    $q->where('status', Exam::STATUS_PUBLISHED);
+                }
             });
 
         $marks = $this->scopeAssessmentNumber($query, $assessmentNumber)->get();
@@ -350,7 +356,7 @@ class Student extends Model
     /**
      * Get total marks across subjects for a specific category
      */
-    public function getTotalMarks($subjectIds = [], $category = null, $assessmentNumber = null)
+    public function getTotalMarks($subjectIds = [], $category = null, $assessmentNumber = null, $publishedOnly = false)
     {
         $query = ExamMark::with('exam')
             ->where('student_id', $this->id)
@@ -361,11 +367,14 @@ class Student extends Model
             $query->whereIn('subject_id', $subjectIds);
         }
 
-        if ($category) {
-            $query->whereHas('exam', function($q) use ($category) {
+        $query->whereHas('exam', function ($q) use ($category, $publishedOnly) {
+            if ($category) {
                 $q->where('exam_category', $category);
-            });
-        }
+            }
+            if ($publishedOnly) {
+                $q->where('status', Exam::STATUS_PUBLISHED);
+            }
+        });
 
         if ($category === 'assessment') {
             $query = $this->scopeAssessmentNumber($query, $assessmentNumber);
@@ -377,7 +386,7 @@ class Student extends Model
     /**
      * Get total full marks across subjects for a specific category
      */
-    public function getTotalFullMarks($subjectIds = [], $category = null, $assessmentNumber = null)
+    public function getTotalFullMarks($subjectIds = [], $category = null, $assessmentNumber = null, $publishedOnly = false)
     {
         $query = ExamMark::with('exam')
             ->where('student_id', $this->id);
@@ -386,11 +395,14 @@ class Student extends Model
             $query->whereIn('subject_id', $subjectIds);
         }
 
-        if ($category) {
-            $query->whereHas('exam', function($q) use ($category) {
+        $query->whereHas('exam', function ($q) use ($category, $publishedOnly) {
+            if ($category) {
                 $q->where('exam_category', $category);
-            });
-        }
+            }
+            if ($publishedOnly) {
+                $q->where('status', Exam::STATUS_PUBLISHED);
+            }
+        });
 
         if ($category === 'assessment') {
             $query = $this->scopeAssessmentNumber($query, $assessmentNumber);

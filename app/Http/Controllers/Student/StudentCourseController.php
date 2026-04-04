@@ -113,8 +113,8 @@ class StudentCourseController extends Controller
             'values' => [$attendanceCounts['present'], $attendanceCounts['absent'], $attendanceCounts['leave']],
         ];
 
-        $assessmentMarks = $student->getAssessmentMarks($subject->id, 'assessment');
-        $ctevtMarkRecord = $student->getExamMarkForSubject($subject->id, 'ctevt');
+        $assessmentMarks = $student->getAssessmentMarks($subject->id, 'assessment', null, true);
+        $ctevtMarkRecord = $student->getExamMarkForSubject($subject->id, 'ctevt', null, null, true);
 
         $ctevtMarks = $ctevtMarkRecord ? (object) [
             'full' => round((float) $ctevtMarkRecord->calculateFullMarks(), 2),
