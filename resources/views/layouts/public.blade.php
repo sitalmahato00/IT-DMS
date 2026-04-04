@@ -12,6 +12,42 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+    <!-- Prevent dark mode on auth pages -->
+    <script>
+        @php
+            $isAuthRoute = in_array(Route::currentRouteName(), [
+                'login',
+                'register',
+                'password.request',
+                'password.reset',
+                'password.confirm',
+                'verification.send',
+                'verification.verify',
+                'two-factor.login',
+                'two-factor.confirm',
+            ]);
+        @endphp
+        @if($isAuthRoute)
+            // Force light mode on auth pages
+            localStorage.setItem('theme', 'light');
+            document.documentElement.classList.remove('dark');
+        @endif
+    </script>
+
+    <!-- CSS for auth pages - force light theme -->
+    @if($isAuthRoute)
+    <style>
+        html, html.dark {
+            color-scheme: light;
+        }
+        html.dark, html.dark * {
+            background-color: var(--color-bg-light, #ffffff) !important;
+            color: var(--color-text-light, #111827) !important;
+            border-color: var(--color-border-light, #e5e7eb) !important;
+        }
+    </style>
+    @endif
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 

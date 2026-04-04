@@ -155,6 +155,23 @@ window.openBsDatePicker = function (inputOrId) {
 
 let themeMediaListenerRegistered = false;
 
+const AUTH_ROUTES = [
+    'login',
+    'register',
+    'password.request',
+    'password.reset',
+    'password.confirm',
+    'verification.send',
+    'verification.verify',
+    'two-factor.login',
+    'two-factor.confirm',
+];
+
+function isAuthPage() {
+    const routeName = document.body.getAttribute('data-mobile-route');
+    return AUTH_ROUTES.includes(routeName);
+}
+
 function getThemePreference() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark' || savedTheme === 'light') {
@@ -197,6 +214,12 @@ function updateThemeIcons(theme) {
 function applyTheme(theme) {
     const html = document.documentElement;
 
+    // Force light mode on auth pages
+    if (isAuthPage()) {
+        theme = 'light';
+        localStorage.setItem('theme', 'light');
+    }
+
     if (theme === 'dark') {
         html.classList.add('dark');
     } else {
@@ -208,6 +231,11 @@ function applyTheme(theme) {
 }
 
 function toggleTheme() {
+    // Don't allow toggling theme on auth pages
+    if (isAuthPage()) {
+        return;
+    }
+
     const html = document.documentElement;
     const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
