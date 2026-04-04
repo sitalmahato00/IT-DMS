@@ -81,6 +81,7 @@ Route::middleware(['auth', 'verified', 'role:student'])->prefix('student')->name
     Route::get('/marks', [\App\Http\Controllers\Student\StudentMarkController::class, 'index'])->name('marks');
     Route::get('/marks/{subjectId}', [\App\Http\Controllers\Student\StudentMarkController::class, 'show'])->name('marks.show');
     Route::get('/marksheet', [\App\Http\Controllers\Student\StudentMarkController::class, 'marksheet'])->name('marksheet');
+    Route::get('/exams', [\App\Http\Controllers\Student\StudentMarkController::class, 'exams'])->name('exams');
 
     // Timetable
     Route::get('/timetable/print', [\App\Http\Controllers\Student\StudentTimetableController::class, 'print'])->name('timetable.print');
@@ -178,6 +179,8 @@ Route::middleware(['auth', 'verified', 'role:parent'])->prefix('parent')->name('
     Route::get('/communication', [\App\Http\Controllers\Parent\ParentPortalController::class, 'communication'])->name('communication');
     Route::get('/events', [\App\Http\Controllers\Parent\ParentPortalController::class, 'events'])->name('events');
     Route::get('/report/print', [\App\Http\Controllers\Parent\ParentPortalController::class, 'print'])->name('print');
+    Route::get('/exams', [\App\Http\Controllers\Parent\ParentPortalController::class, 'exams'])->name('exams');
+    Route::get('/exams/print', [\App\Http\Controllers\Parent\ParentPortalController::class, 'examsPrint'])->name('exams.print');
     Route::get('/profile', [\App\Http\Controllers\Parent\ParentProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [\App\Http\Controllers\Parent\ParentProfileController::class, 'update'])->name('profile.update');
     Route::get('/export', [\App\Http\Controllers\Parent\ParentExportController::class, 'export'])->name('export');

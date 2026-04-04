@@ -3,6 +3,7 @@
     $isChildren = request()->routeIs('parent.children');
     $isAttendance = request()->routeIs('parent.attendance');
     $isResults = request()->routeIs('parent.results');
+    $isExams = request()->routeIs('parent.exams*');
     $isCourses = request()->routeIs('parent.courses');
     $isNotices = request()->routeIs('parent.notices');
     $isCommunication = request()->routeIs('parent.communication');
@@ -53,6 +54,11 @@
             <a href="{{ route('parent.results') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isResults ? 'bg-red-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-red-700 hover:bg-red-500/10' }}">
                 <i class="bi bi-clipboard-data text-lg flex-shrink-0 text-red-600 dark:text-red-300"></i>
                 <span class="sidebar-label">{{ __('Marks / Results') }}</span>
+            </a>
+
+            <a href="{{ route('parent.exams') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isExams ? 'bg-red-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-red-700 hover:bg-red-500/10' }}">
+                <i class="bi bi-journal-text text-lg flex-shrink-0 text-red-600 dark:text-red-300"></i>
+                <span class="sidebar-label">{{ __('Exam Marksheet') }}</span>
             </a>
 
             <a href="{{ route('parent.courses') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isCourses ? 'bg-red-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:text-red-700 hover:bg-red-500/10' }}">

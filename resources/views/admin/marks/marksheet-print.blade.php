@@ -136,24 +136,24 @@
                                 <div class="meta-value">{{ $student->semester ?? 'N/A' }}</div>
                             </td>
                         </tr>
-                        <tr>
-                            <td class="p-3">
-                                <div class="meta-label">Academic Year (BS)</div>
-                                <div class="meta-value">{{ $student->academic_year_bs ?? 'N/A' }}</div>
-                            </td>
-                            <td class="p-3">
-                                <div class="meta-label">Date of Birth</div>
-                                <div class="meta-value">{{ $student->date_of_birth ?? 'N/A' }}</div>
-                            </td>
-                            <td class="p-3">
-                                <div class="meta-label">Date of Birth (BS)</div>
-                                <div class="meta-value">{{ $student->date_of_birth_bs ?? 'N/A' }}</div>
-                            </td>
-                            <td class="p-3">
-                                <div class="meta-label">Issue Date</div>
-                                <div class="meta-value">{{ $issueDate }}</div>
-                            </td>
-                        </tr>
+                <tr>
+                    <td class="p-3">
+                        <div class="meta-label">Academic Year (BS)</div>
+                        <div class="meta-value">{{ $student->academic_year_bs ?? 'N/A' }}</div>
+                    </td>
+                    <td class="p-3">
+                        <div class="meta-label">Issue Date</div>
+                        <div class="meta-value">{{ now()->format('Y-m-d') }}</div>
+                    </td>
+                    <td class="p-3">
+                        <div class="meta-label">Exam Category</div>
+                        <div class="meta-value">{{ ucfirst($filters['exam_category'] ?? 'assessment') }}</div>
+                    </td>
+                    <td class="p-3">
+                        <div class="meta-label">Public Entries</div>
+                        <div class="meta-value">{{ $marks->count() }}</div>
+                    </td>
+                </tr>
                     </table>
                 </td>
             </tr>

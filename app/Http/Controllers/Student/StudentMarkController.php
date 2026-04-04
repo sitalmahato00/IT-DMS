@@ -33,17 +33,90 @@ class StudentMarkController extends Controller
     {
         $student = Auth::user()?->student;
 
+        $examId = $request->integer('exam_id');
+
         if (!$student) {
             return redirect()->route('student.dashboard')->with('error', 'Student profile not found.');
         }
 
         $payload = array_merge(
             $this->buildMarksheetPayload($student),
-            $this->buildTranscriptPayload($student)
+            $this->buildTranscriptPayload($student, $examId)
         );
         $payload['generatedAt'] = now();
+        $payload['selectedExamId'] = $examId;
 
         return view('student.marks.marksheet', $payload);
+    }
+
+    /**
+     * Display the list of published exam marksheets.
+     */
+    public function exams(Request $request)
+    {
+        $student = Auth::user()?->student;
+
+        if (!$student) {
+            return redirect()->route('student.dashboard')->with('error', 'Student profile not found.');
+        }
+
+        $examGroups = ExamMark::query()
+            ->with(['exam', 'subject'])
+            ->where('student_id', $student->id)
+            ->whereHas('exam', function ($query) {
+                $query->where('status', Exam::STATUS_PUBLISHED)
+                    ->whereIn('exam_category', ['assessment', 'ctevt']);
+            })
+            ->get()
+            ->groupBy('exam_id')
+            ->map(function ($marks) {
+                $marks = $marks->sortBy(fn ($mark) => sprintf(
+                    '%010d-%06d',
+                    optional($mark->exam?->exam_date)?->timestamp ?? 0,
+                    (int) $mark->id
+                ))->values();
+
+                $first = $marks->first();
+                $exam = $first?->exam;
+                $full = $marks->sum(fn ($mark) => (float) $mark->effective_full_marks);
+                $obtained = $marks->sum(fn ($mark) => $mark->isAbsent() ? 0 : (float) $mark->effective_obtained_marks);
+                $percentage = $full > 0 ? round(($obtained / $full) * 100, 2) : null;
+                $allPass = $marks->isNotEmpty() && $marks->every(function ($mark) {
+                    return strtoupper($mark->result ?? ($mark->percentage >= 40 ? 'PASS' : 'FAIL')) === 'PASS';
+                });
+
+                return [
+                    'exam_id' => $exam?->id,
+                    'exam_name' => $exam?->exam_name ?? __('Exam'),
+                    'exam_category' => $exam?->exam_category ?? 'general',
+                    'exam_category_label' => $exam?->formatted_category ?? ucfirst($exam?->exam_category ?? 'Exam'),
+                    'exam_date' => $exam?->exam_date?->format('M d, Y') ?? __('Date pending'),
+                    'assessment_number' => $exam?->assessment_number,
+                    'subject_count' => $marks->count(),
+                    'full_marks' => $full,
+                    'obtained_marks' => $obtained,
+                    'percentage' => $percentage,
+                    'status' => $percentage === null ? 'pending' : ($allPass ? 'pass' : 'fail'),
+                    'rows' => $marks->map(function ($mark) {
+                        return [
+                            'subject_name' => $mark->subject?->subject_name ?? __('Subject'),
+                            'subject_code' => $mark->subject?->subject_code,
+                            'full_marks' => (float) $mark->effective_full_marks,
+                            'passing_marks' => (float) $mark->effective_passing_marks,
+                            'obtained_marks' => $mark->isAbsent() ? 'ABS' : round((float) $mark->effective_obtained_marks, 2),
+                            'status' => $mark->isAbsent() ? 'absent' : (strtoupper($mark->result ?? ($mark->percentage >= 40 ? 'PASS' : 'FAIL')) === 'PASS' ? 'pass' : 'fail'),
+                            'percentage' => $mark->isAbsent() ? null : round((float) $mark->calculatePercentage(), 2),
+                        ];
+                    }),
+                ];
+            })
+            ->sortByDesc(fn ($exam) => strtotime((string) $exam['exam_date']) ?: 0)
+            ->values();
+
+        return view('student.exams', [
+            'student' => $student,
+            'examGroups' => $examGroups,
+        ]);
     }
 
     /**
@@ -210,7 +283,7 @@ class StudentMarkController extends Controller
     /**
      * Build the transcript payload for the separate marksheet page.
      */
-    private function buildTranscriptPayload(Student $student): array
+    private function buildTranscriptPayload(Student $student, ?int $examId = null): array
     {
         $publicMarks = ExamMark::query()
             ->with(['exam', 'subject'])
@@ -220,6 +293,10 @@ class StudentMarkController extends Controller
                     ->where('status', Exam::STATUS_PUBLISHED);
             })
             ->get();
+
+        if ($examId) {
+            $publicMarks = $publicMarks->where('exam_id', $examId);
+        }
 
         $assessmentMarks = $publicMarks
             ->filter(fn ($mark) => ($mark->exam?->exam_category ?? null) === 'assessment')
@@ -281,6 +358,7 @@ class StudentMarkController extends Controller
 
             return [
                 'sn' => $index + 1,
+                'exam_id' => $mark->exam_id,
                 'subject_name' => $mark->subject?->subject_name ?? 'N/A',
                 'subject_code' => $mark->subject?->subject_code ?? 'N/A',
                 'exam_name' => $mark->exam?->exam_name ?? ($mark->exam?->formatted_assessment ?? 'Assessment'),
@@ -326,6 +404,7 @@ class StudentMarkController extends Controller
 
             return [
                 'sn' => $index + 1,
+                'exam_id' => $mark->exam_id,
                 'subject_name' => $subject?->subject_name ?? 'N/A',
                 'subject_code' => $subject?->subject_code ?? 'N/A',
                 'exam_name' => $exam?->exam_name ?? ($subject?->subject_name ?? 'CTEVT'),
@@ -373,6 +452,8 @@ class StudentMarkController extends Controller
             ? 'PENDING'
             : ($hasFail || $hasAbsent ? 'FAIL' : ($hasPending ? 'PENDING' : 'PASS'));
 
+        $selectedExam = $examId ? $publicMarks->first()?->exam : null;
+
         return [
             'publicExamMarks' => $publicMarks,
             'assessmentTranscriptRows' => $assessmentRows,
@@ -398,6 +479,9 @@ class StudentMarkController extends Controller
             'overallPercentage' => $overallPercentage,
             'marksheetGrade' => $this->calculateMarksheetGrade($overallPercentage),
             'result' => $result,
+            'selectedExamId' => $examId,
+            'selectedExamName' => $selectedExam?->exam_name,
+            'selectedExamCategory' => $selectedExam?->formatted_category,
         ];
     }
 

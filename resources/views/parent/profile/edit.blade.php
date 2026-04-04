@@ -1,7 +1,7 @@
 @extends('parent.layouts.parentlayout')
 
 @section('title', __('Profile Settings'))
-@section('subtitle', __('Manage your guardian account details and password'))
+@section('subtitle', __('Update your name, contact details, and password'))
 
 @section('content')
 <div class="parent-smooth-page space-y-6">

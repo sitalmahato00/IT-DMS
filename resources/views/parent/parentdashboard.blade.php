@@ -1,7 +1,7 @@
 @extends('parent.layouts.parentlayout')
 
 @section('title', __('Dashboard'))
-@section('subtitle', __('Parent Portal Overview'))
+@section('subtitle', __('Simple overview for parents'))
 
 @section('content')
 <div class="parent-smooth-page space-y-6">
@@ -13,28 +13,28 @@
             <div class="max-w-3xl">
                 <h1 class="text-2xl md:text-3xl font-bold">{{ __('Welcome back, :name', ['name' => $parentUser->name ?? __('Parent')]) }}</h1>
                 <p class="mt-2 text-red-100">
-                    {{ __('Monitor attendance, academic results, notices, and communication touchpoints for every linked child from one coordinated workspace.') }}
+                    {{ __('See attendance, marks, notices, and help for your child in one place.') }}
                 </p>
 
                 <div class="mt-4 flex flex-wrap gap-3 text-sm text-red-100">
                     <span class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5">
                         <i class="bi bi-people"></i>
-                        {{ trans_choice('{0} No linked children|{1} :count linked child|[2,*] :count linked children', $childrenCount, ['count' => $childrenCount]) }}
+                        {{ trans_choice('{0} No children|{1} :count child|[2,*] :count children', $childrenCount, ['count' => $childrenCount]) }}
                     </span>
                     <span class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5">
                         <i class="bi bi-calendar2-check"></i>
-                        {{ __('Overall attendance: :value%', ['value' => $overallAttendance]) }}
+                        {{ __('Attendance: :value%', ['value' => $overallAttendance]) }}
                     </span>
                     <span class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5">
                         <i class="bi bi-bell"></i>
-                        {{ __('Unread notifications: :count', ['count' => $unreadNotificationCount]) }}
+                        {{ __('Unread: :count', ['count' => $unreadNotificationCount]) }}
                     </span>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3 text-sm">
                 <div class="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
-                    <p class="text-red-100">{{ __('Upcoming exams') }}</p>
+                    <p class="text-red-100">{{ __('Exams soon') }}</p>
                     <p class="mt-1 text-2xl font-bold">{{ $upcomingExamCount }}</p>
                 </div>
                 <div class="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
@@ -42,11 +42,11 @@
                     <p class="mt-1 text-2xl font-bold">{{ $importantNoticeCount }}</p>
                 </div>
                 <div class="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
-                    <p class="text-red-100">{{ __('Average score') }}</p>
+                    <p class="text-red-100">{{ __('Average marks') }}</p>
                     <p class="mt-1 text-2xl font-bold">{{ $overallScore !== null ? $overallScore . '%' : '—' }}</p>
                 </div>
                 <div class="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
-                    <p class="text-red-100">{{ __('Tracked subjects') }}</p>
+                    <p class="text-red-100">{{ __('Subjects') }}</p>
                     <p class="mt-1 text-2xl font-bold">{{ $totalSubjects }}</p>
                 </div>
             </div>
@@ -72,25 +72,25 @@
             <div class="parent-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Linked Children') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $childrenCount }}</p>
-                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Profiles available for monitoring') }}</p>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Children linked to this account') }}</p>
             </div>
 
             <div class="parent-smooth-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">{{ __('Overall Attendance') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $overallAttendance }}%</p>
-                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Average class attendance across children') }}</p>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Average attendance') }}</p>
             </div>
 
             <div class="parent-smooth-card rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-sky-700 dark:text-sky-300 font-semibold">{{ __('Published Results') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $overallScore !== null ? $overallScore . '%' : '—' }}</p>
-                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Average of available subject results') }}</p>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Average published marks') }}</p>
             </div>
 
             <div class="parent-smooth-card rounded-xl border border-violet-200 dark:border-violet-900 bg-white dark:bg-gray-800 p-5">
                 <p class="text-xs uppercase tracking-wide text-violet-700 dark:text-violet-300 font-semibold">{{ __('Portal Alerts') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $academicAlerts->count() }}</p>
-                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Attendance, result, and exam reminders') }}</p>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Things that need your attention') }}</p>
             </div>
         </div>
 
@@ -101,8 +101,8 @@
                         <i class="bi bi-person-vcard"></i>
                     </div>
                     <div>
-                        <p class="font-semibold text-gray-900 dark:text-white">{{ __('Child Profiles') }}</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Review linked student records') }}</p>
+                        <p class="font-semibold text-gray-900 dark:text-white">{{ __('Children') }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Open child details') }}</p>
                     </div>
                 </div>
             </a>
@@ -114,7 +114,7 @@
                     </div>
                     <div>
                         <p class="font-semibold text-gray-900 dark:text-white">{{ __('Attendance') }}</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Spot irregularities quickly') }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('See attendance status') }}</p>
                     </div>
                 </div>
             </a>
@@ -125,8 +125,8 @@
                         <i class="bi bi-graph-up-arrow"></i>
                     </div>
                     <div>
-                        <p class="font-semibold text-gray-900 dark:text-white">{{ __('Results') }}</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Track marks and exam outcomes') }}</p>
+                        <p class="font-semibold text-gray-900 dark:text-white">{{ __('Marks') }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('See latest marks') }}</p>
                     </div>
                 </div>
             </a>
@@ -137,8 +137,8 @@
                         <i class="bi bi-chat-dots"></i>
                     </div>
                     <div>
-                        <p class="font-semibold text-gray-900 dark:text-white">{{ __('Communication') }}</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Open support and meeting channels') }}</p>
+                        <p class="font-semibold text-gray-900 dark:text-white">{{ __('Help') }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Contact school or teacher') }}</p>
                     </div>
                 </div>
             </a>
@@ -149,38 +149,26 @@
                 <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                     <div class="flex items-center justify-between gap-3">
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Parent Responsibilities') }}</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('A practical view of the guardian role inside IT-DMS.') }}</p>
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('What To Check') }}</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Start with these simple checks.') }}</p>
                         </div>
-                        <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-200">{{ __('Daily focus') }}</span>
+                        <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-200">{{ __('Start here') }}</span>
                     </div>
 
                     <div class="mt-5 grid gap-4 md:grid-cols-3">
                         <div class="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Academic Monitoring') }}</p>
-                            <ul class="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                                <li>{{ __('Monitor attendance and academic progress regularly.') }}</li>
-                                <li>{{ __('Review examination schedules and published results.') }}</li>
-                                <li>{{ __('Track enrolled courses and subject performance.') }}</li>
-                            </ul>
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Attendance') }}</p>
+                            <p class="mt-3 text-sm text-gray-600 dark:text-gray-300">{{ __('Check if any subject is below the safe attendance range.') }}</p>
                         </div>
 
                         <div class="rounded-xl border border-sky-200 dark:border-sky-900 bg-sky-50 dark:bg-sky-950/20 p-4">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Communication & Engagement') }}</p>
-                            <ul class="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                                <li>{{ __('Read institutional notices and announcements promptly.') }}</li>
-                                <li>{{ __('Use the portal to reach teachers or administrators when needed.') }}</li>
-                                <li>{{ __('Respond quickly when attendance or result issues appear.') }}</li>
-                            </ul>
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Marks') }}</p>
+                            <p class="mt-3 text-sm text-gray-600 dark:text-gray-300">{{ __('Review marks and upcoming exams for each child.') }}</p>
                         </div>
 
                         <div class="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 p-4">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Administrative Oversight') }}</p>
-                            <ul class="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                                <li>{{ __('Keep profile details current for reliable communication.') }}</li>
-                                <li>{{ __('Export or print records for offline follow-up.') }}</li>
-                                <li>{{ __('Use help and support channels when guidance is needed.') }}</li>
-                            </ul>
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Need Help') }}</p>
+                            <p class="mt-3 text-sm text-gray-600 dark:text-gray-300">{{ __('Use the help page when you need to talk to the school or a teacher.') }}</p>
                         </div>
                     </div>
                 </div>
@@ -188,8 +176,8 @@
                 <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                     <div class="flex items-center justify-between gap-3">
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Child Snapshot') }}</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Current attendance, results, and next steps for each linked student.') }}</p>
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Children Overview') }}</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Attendance and marks for each child.') }}</p>
                         </div>
                         <a href="{{ route('parent.children') }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Open detailed profiles') }}</a>
                     </div>
@@ -203,7 +191,7 @@
                                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                             {{ __('Roll No: :roll | Semester :semester', ['roll' => $child['roll_no'] ?: '—', 'semester' => $child['semester'] ?: '—']) }}
                                         </p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $child['academic_year'] ?: __('Academic year pending') }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $child['academic_year'] ?: __('Academic year not set') }}</p>
                                     </div>
                                     <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $child['failed_subjects'] > 0 ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300' }}">
                                         {{ $child['failed_subjects'] > 0 ? __('Needs attention') : __('On track') }}
@@ -362,14 +350,14 @@
             <div class="xl:col-span-5 space-y-6">
                 <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                     <div class="flex items-center justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Academic Alerts') }}</h2>
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Alerts') }}</h2>
                         <span class="text-xs text-gray-500 dark:text-gray-400">{{ $academicAlerts->count() }} {{ __('items') }}</span>
                     </div>
 
                     @if($academicAlerts->isEmpty())
                         <div class="mt-4 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 p-4">
-                            <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{{ __('Everything looks steady right now.') }}</p>
-                            <p class="mt-1 text-sm text-emerald-600 dark:text-emerald-400">{{ __('No urgent attendance, result, or exam reminders were detected for your linked children.') }}</p>
+                            <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{{ __('Everything looks fine right now.') }}</p>
+                            <p class="mt-1 text-sm text-emerald-600 dark:text-emerald-400">{{ __('No urgent issues were found for your children.') }}</p>
                         </div>
                     @else
                         <div class="mt-4 space-y-3">
@@ -393,7 +381,7 @@
 
                 <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                     <div class="flex items-center justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Upcoming Exams & Notices') }}</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Coming Soon') }}</h2>
                         <a href="{{ route('parent.events') }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Open schedule') }}</a>
                     </div>
 
@@ -419,14 +407,14 @@
 
                 <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                     <div class="flex items-center justify-between gap-3">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Support & Records') }}</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Help & Downloads') }}</h2>
                         <a href="{{ route('parent.communication') }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Get help') }}</a>
                     </div>
 
                     <div class="mt-4 space-y-3">
                         <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Data access and export') }}</p>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Export child records to CSV or open the print summary to generate a PDF through the browser.') }}</p>
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Download Records') }}</p>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Download or print child records when needed.') }}</p>
                             <div class="mt-3 flex flex-wrap gap-2">
                                 <a href="{{ route('parent.export') }}" class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700 transition">
                                     <i class="bi bi-download"></i>
@@ -440,8 +428,8 @@
                         </div>
 
                         <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Technical support') }}</p>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Use the help center, documentation, department contact details, and teacher contact cards when you need guidance or follow-up.') }}</p>
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Need Help?') }}</p>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Open help or support pages if you need follow-up.') }}</p>
                             <div class="mt-3 flex flex-wrap gap-2">
                                 <a href="{{ route('parent.communication') }}#help" class="inline-flex items-center gap-2 rounded-lg bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:border-red-300 hover:text-red-700 transition">
                                     <i class="bi bi-life-preserver"></i>

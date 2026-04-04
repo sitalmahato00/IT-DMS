@@ -1,7 +1,7 @@
 @extends('parent.layouts.parentlayout')
 
 @section('title', __('Attendance'))
-@section('subtitle', __('Attendance trends, recent entries, and low-attendance follow-up'))
+@section('subtitle', __('Attendance made easy to check'))
 
 @section('content')
 <div class="parent-smooth-page space-y-6">
@@ -22,7 +22,7 @@
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['attendance_percentage'] }}%</p>
             </div>
             <div class="parent-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
-                <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Tracked Subjects') }}</p>
+                <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Subjects') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['subject_count'] }}</p>
             </div>
             <div class="parent-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
@@ -30,7 +30,7 @@
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['subjects']->where('attendance_percentage', '<', 75)->count() }}</p>
             </div>
             <div class="parent-smooth-card rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
-                <p class="text-xs uppercase tracking-wide text-sky-700 dark:text-sky-300 font-semibold">{{ __('Recent Entries') }}</p>
+                <p class="text-xs uppercase tracking-wide text-sky-700 dark:text-sky-300 font-semibold">{{ __('Recent') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['recent_attendance']->count() }}</p>
             </div>
         </div>
@@ -38,8 +38,8 @@
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
             <div class="parent-smooth-table-card xl:col-span-7 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Subject Attendance Breakdown') }}</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Each subject attendance percentage with total present and absent classes.') }}</p>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Attendance By Subject') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Present, absent, and total attendance for each subject.') }}</p>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -77,7 +77,7 @@
 
             <div class="xl:col-span-5 space-y-6">
                 <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Attention Items') }}</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Needs Attention') }}</h2>
                     <div class="mt-4 space-y-3">
                         @php
                             $lowAttendanceSubjects = $selectedChild['subjects']->where('attendance_percentage', '<', 75);
@@ -85,23 +85,23 @@
                         @forelse($lowAttendanceSubjects as $subject)
                             <div class="parent-smooth-list-card rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4">
                                 <p class="text-sm font-semibold text-red-700 dark:text-red-300">{{ $subject['name'] }}</p>
-                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ __('Attendance is currently :value%. Early follow-up is recommended.', ['value' => $subject['attendance_percentage']]) }}</p>
+                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ __('Attendance is :value%. It may need follow-up.', ['value' => $subject['attendance_percentage']]) }}</p>
                             </div>
                         @empty
                             <div class="parent-smooth-list-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 p-4">
                                 <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{{ __('No low-attendance subjects detected.') }}</p>
-                                <p class="mt-1 text-sm text-emerald-600 dark:text-emerald-400">{{ __('This student is currently meeting the recommended attendance target across all tracked subjects.') }}</p>
+                                <p class="mt-1 text-sm text-emerald-600 dark:text-emerald-400">{{ __('Attendance is okay in all subjects right now.') }}</p>
                             </div>
                         @endforelse
                     </div>
                 </div>
 
                 <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Recommended Parent Actions') }}</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('What To Do') }}</h2>
                     <ul class="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300">
-                        <li>{{ __('Review the most recent attendance entries at least once each week.') }}</li>
-                        <li>{{ __('Use the communication page to contact teachers when a subject falls below 75%.') }}</li>
-                        <li>{{ __('Compare attendance with result trends so issues are addressed early.') }}</li>
+                        <li>{{ __('Check this page every week.') }}</li>
+                        <li>{{ __('Contact the teacher if attendance goes below 75%.') }}</li>
+                        <li>{{ __('Compare attendance with marks if a subject needs support.') }}</li>
                     </ul>
                 </div>
             </div>
@@ -109,7 +109,7 @@
 
         <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
             <div class="flex items-center justify-between gap-3">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Recent Attendance Entries') }}</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Latest Attendance') }}</h2>
                 <a href="{{ route('parent.communication') }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Need follow-up?') }}</a>
             </div>
 

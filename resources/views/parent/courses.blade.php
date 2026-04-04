@@ -1,7 +1,7 @@
 @extends('parent.layouts.parentlayout')
 
 @section('title', __('Courses'))
-@section('subtitle', __('Enrolled subjects, teaching contacts, and course load overview'))
+@section('subtitle', __('Subjects and teachers for your child'))
 
 @section('content')
 <div class="parent-smooth-page space-y-6">
@@ -26,7 +26,7 @@
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['subjects']->where('has_lab', true)->count() }}</p>
             </div>
             <div class="parent-smooth-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
-                <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">{{ __('Pass Ready') }}</p>
+                <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">{{ __('Passed') }}</p>
                 <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $selectedChild['passed_subjects'] }}</p>
             </div>
             <div class="parent-smooth-card rounded-xl border border-violet-200 dark:border-violet-900 bg-white dark:bg-gray-800 p-5">
@@ -67,7 +67,7 @@
                                 <p class="mt-1 font-semibold text-gray-900 dark:text-white">{{ $subject['attendance_percentage'] }}%</p>
                             </div>
                             <div class="parent-smooth-mini-card rounded-xl bg-gray-50 dark:bg-gray-900/40 px-4 py-3">
-                                <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Result') }}</p>
+                                <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Marks') }}</p>
                                 <p class="mt-1 font-semibold text-gray-900 dark:text-white">{{ $subject['percentage'] !== null ? $subject['percentage'] . '%' : '—' }}</p>
                             </div>
                         </div>

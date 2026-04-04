@@ -1,7 +1,7 @@
 @extends('parent.layouts.parentlayout')
 
 @section('title', __('Notices'))
-@section('subtitle', __('Parent-targeted announcements, important updates, and institutional notices'))
+@section('subtitle', __('Important notices for parents'))
 
 @section('content')
 <div class="parent-smooth-page space-y-6">
@@ -28,8 +28,8 @@
         <div class="parent-smooth-panel xl:col-span-8 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
             <div class="flex items-center justify-between gap-3">
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Notice Board') }}</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Read all published parent and shared audience notices from the institution.') }}</p>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Notices') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Read the latest important updates from the school.') }}</p>
                 </div>
             </div>
 
@@ -79,20 +79,20 @@
 
         <div class="xl:col-span-4 space-y-6">
             <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('How Notices Support Parents') }}</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Quick Tips') }}</h2>
                 <ul class="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300">
-                    <li>{{ __('Teachers and administrators can target notices directly to parents.') }}</li>
-                    <li>{{ __('Important updates also surface in the header notification area with unread counts.') }}</li>
-                    <li>{{ __('Use notices together with the events page to stay ahead of exams and meetings.') }}</li>
+                    <li>{{ __('Check this page for important updates.') }}</li>
+                    <li>{{ __('Unread notices also appear in notifications.') }}</li>
+                    <li>{{ __('Open the schedule page for exams and meetings.') }}</li>
                 </ul>
             </div>
 
             <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Recommended Reading Routine') }}</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('What To Do') }}</h2>
                 <ol class="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300 list-decimal pl-5">
-                    <li>{{ __('Check new notices during each portal visit.') }}</li>
-                    <li>{{ __('Prioritize items marked Important or tied to a child semester.') }}</li>
-                    <li>{{ __('Follow up with teachers when a notice needs clarification or action.') }}</li>
+                    <li>{{ __('Read new notices whenever you log in.') }}</li>
+                    <li>{{ __('Open notices marked important first.') }}</li>
+                    <li>{{ __('Contact the school if a notice needs action.') }}</li>
                 </ol>
             </div>
         </div>

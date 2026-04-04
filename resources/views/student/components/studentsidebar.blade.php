@@ -5,6 +5,7 @@
     $isAttendance = request()->routeIs('student.attendance*');
     $isMarks = request()->routeIs('student.marks*');
     $isMarksheet = request()->routeIs('student.marksheet*');
+    $isExams = request()->routeIs('student.exams*');
     $isResources = request()->routeIs('student.study-materials*');
     $isNotices = request()->routeIs('student.notices*');
     $isProfile = request()->routeIs('student.profile*');
@@ -130,6 +131,10 @@
                 <a href="{{ route('student.marks') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isMarks ? 'bg-red-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:text-[#FF0037] hover:bg-red-500/10' }}">
                     <i class="bi bi-clipboard-data text-base flex-shrink-0"></i>
                     <span class="sidebar-label">{{ __('Marks / Results') }}</span>
+                </a>
+                <a href="{{ route('student.exams') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isExams ? 'bg-red-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:text-[#FF0037] hover:bg-red-500/10' }}">
+                    <i class="bi bi-journal-text text-base flex-shrink-0"></i>
+                    <span class="sidebar-label">{{ __('Published Exams') }}</span>
                 </a>
             </div>
 

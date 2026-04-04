@@ -1,7 +1,7 @@
 @extends('parent.layouts.parentlayout')
 
 @section('title', __('Events & Schedule'))
-@section('subtitle', __('Formal class routine for parent review'))
+@section('subtitle', __('Class routine for your child'))
 
 @section('styles')
     @include('shared.timetable.partials.routine-styles')
@@ -28,12 +28,12 @@
                 <div class="max-w-3xl space-y-3">
                     <span class="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-red-700">
                         <i class="bi bi-calendar-week"></i>
-                        {{ __('Student Routine') }}
+                        {{ __('Class Routine') }}
                     </span>
                     <div>
                         <h2 class="text-2xl font-bold text-slate-900 md:text-3xl">{{ __('Class routine') }}</h2>
                         <p class="mt-2 text-sm text-slate-600 md:text-base">
-                            {{ __('This student schedule now follows the same formal routine sheet used in the student portal for easier parent review.') }}
+                            {{ __('Check your child’s weekly class routine here.') }}
                         </p>
                     </div>
                     <div class="flex flex-wrap gap-3 text-sm text-slate-600">

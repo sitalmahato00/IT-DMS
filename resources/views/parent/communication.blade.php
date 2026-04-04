@@ -1,7 +1,7 @@
 @extends('parent.layouts.parentlayout')
 
 @section('title', __('Communication'))
-@section('subtitle', __('Department contacts, teacher outreach, meeting requests, and support resources'))
+@section('subtitle', __('Simple contact and help page for parents'))
 
 @section('content')
 @php
@@ -14,7 +14,7 @@
 <div class="parent-smooth-page space-y-6">
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <div class="parent-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
-            <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Teacher Contacts') }}</p>
+            <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Teachers') }}</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $teacherContacts->count() }}</p>
         </div>
         <div class="parent-smooth-card rounded-xl border border-sky-200 dark:border-sky-900 bg-white dark:bg-gray-800 p-5">
@@ -22,7 +22,7 @@
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $childrenCount }}</p>
         </div>
         <div class="parent-smooth-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
-            <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">{{ __('Notice Channels') }}</p>
+            <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">{{ __('Notices') }}</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $recentNotices->count() }}</p>
         </div>
         <div class="parent-smooth-card rounded-xl border border-violet-200 dark:border-violet-900 bg-white dark:bg-gray-800 p-5">
@@ -35,8 +35,8 @@
         <div class="parent-smooth-panel xl:col-span-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
             <div class="flex items-center justify-between gap-3">
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Department Contact') }}</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Primary institution contact details for support, feedback, and escalation.') }}</p>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('School Contact') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Use these details to contact the department directly.') }}</p>
                 </div>
             </div>
 
@@ -82,8 +82,8 @@
         <div class="parent-smooth-panel xl:col-span-7 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
             <div class="flex items-center justify-between gap-3">
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Teacher Outreach') }}</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Quick access to subject teachers connected to your linked students.') }}</p>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Teacher Contacts') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Call or email the teachers linked to your child.') }}</p>
                 </div>
             </div>
 
@@ -118,39 +118,39 @@
 
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <div class="parent-smooth-panel xl:col-span-6 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Communication Strategies') }}</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('When To Contact Us') }}</h2>
             <div class="mt-4 space-y-4 text-sm text-gray-600 dark:text-gray-300">
                 <div class="parent-smooth-list-card rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4">
-                    <p class="font-semibold text-gray-900 dark:text-white">{{ __('Institution to Parent') }}</p>
-                    <p class="mt-2">{{ __('Use the notice board, email outreach, dashboard alerts, and notification badges to stay informed about official updates.') }}</p>
+                    <p class="font-semibold text-gray-900 dark:text-white">{{ __('Attendance Or Marks') }}</p>
+                    <p class="mt-2">{{ __('Contact the school if attendance or marks need follow-up.') }}</p>
                 </div>
                 <div class="parent-smooth-list-card rounded-xl border border-sky-200 dark:border-sky-900 bg-sky-50 dark:bg-sky-950/20 p-4">
-                    <p class="font-semibold text-gray-900 dark:text-white">{{ __('Parent to Institution') }}</p>
-                    <p class="mt-2">{{ __('Use direct email or phone links, request meetings, and provide feedback whenever attendance, marks, or support needs require follow-up.') }}</p>
+                    <p class="font-semibold text-gray-900 dark:text-white">{{ __('Meeting Request') }}</p>
+                    <p class="mt-2">{{ __('Use email or the meeting link when you need to talk in detail.') }}</p>
                 </div>
                 <div class="parent-smooth-list-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 p-4">
-                    <p class="font-semibold text-gray-900 dark:text-white">{{ __('Teacher to Parent') }}</p>
-                    <p class="mt-2">{{ __('Teachers can publish parent-targeted notices and maintain outreach based on subject progress, exams, or events.') }}</p>
+                    <p class="font-semibold text-gray-900 dark:text-white">{{ __('General Help') }}</p>
+                    <p class="mt-2">{{ __('Use this page if you are not sure whom to contact.') }}</p>
                 </div>
             </div>
         </div>
 
         <div class="xl:col-span-6 space-y-6">
             <div id="help" class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Help Center') }}</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Quick Help') }}</h2>
                 <ul class="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300">
-                    <li>{{ __('Check dashboard alerts before escalating an issue.') }}</li>
-                    <li>{{ __('Use the print summary or CSV export when offline discussion is needed.') }}</li>
-                    <li>{{ __('Reach the department directly if a child profile or contact path is missing.') }}</li>
+                    <li>{{ __('Check the dashboard before contacting support.') }}</li>
+                    <li>{{ __('Use print or export if you need records offline.') }}</li>
+                    <li>{{ __('Contact the department if a child record is missing.') }}</li>
                 </ul>
             </div>
 
             <div id="docs" class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Documentation') }}</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Best Place To Start') }}</h2>
                 <ul class="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300">
-                    <li>{{ __('Use the attendance, results, and courses pages as the primary parent workflow.') }}</li>
-                    <li>{{ __('Monitor notices and the schedule page for exams, meetings, and institutional events.') }}</li>
-                    <li>{{ __('Keep your profile accurate so notices and account recovery continue to work smoothly.') }}</li>
+                    <li>{{ __('Open Attendance to check presence and absence.') }}</li>
+                    <li>{{ __('Open Marks to see results and exams.') }}</li>
+                    <li>{{ __('Open Profile to keep your contact details updated.') }}</li>
                 </ul>
             </div>
         </div>

@@ -1,7 +1,7 @@
 @extends('parent.layouts.parentlayout')
 
 @section('title', __('My Children'))
-@section('subtitle', __('Profile and academic overview for linked students'))
+@section('subtitle', __('Simple child details for parents'))
 
 @section('content')
 <div class="parent-smooth-page space-y-6">
@@ -85,8 +85,8 @@
                 <div class="parent-smooth-table-card rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                     <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Subject Overview') }}</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Attendance, teacher, and result status for each enrolled subject.') }}</p>
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Subjects') }}</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Attendance, teacher, and marks for each subject.') }}</p>
                         </div>
                         <a href="{{ route('parent.courses', ['child' => $selectedChild['id']]) }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Open courses') }}</a>
                     </div>
@@ -131,7 +131,7 @@
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
             <div class="parent-smooth-panel xl:col-span-7 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                 <div class="flex items-center justify-between gap-3">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Recent Attendance') }}</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Latest Attendance') }}</h2>
                     <a href="{{ route('parent.attendance', ['child' => $selectedChild['id']]) }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Open attendance') }}</a>
                 </div>
 
@@ -156,7 +156,7 @@
 
             <div class="parent-smooth-panel xl:col-span-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                 <div class="flex items-center justify-between gap-3">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Teacher Contacts') }}</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Teachers') }}</h2>
                     <a href="{{ route('parent.communication') }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Communication hub') }}</a>
                 </div>
 

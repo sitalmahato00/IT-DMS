@@ -9,8 +9,8 @@
     <div class="parent-smooth-panel rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-4">
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Student Focus') }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Switch between children to review specific records and timelines.') }}</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Choose Child') }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Switch child to see attendance, marks, and notices.') }}</p>
             </div>
 
             <div class="flex flex-wrap gap-2">

@@ -1621,8 +1621,6 @@ class TeacherMarksController extends Controller
                 'exam_category' => $request->get('exam_category', 'assessment'),
                 'assessment_number' => $selectedAssessmentNumber,
                 'student_id' => $request->get('student_id', ''),
-                'dob' => $request->get('dob', ''),
-                'dob_bs' => $request->get('dob_bs', ''),
                 'result' => $request->get('result', ''),
             ];
             
@@ -1631,7 +1629,7 @@ class TeacherMarksController extends Controller
             
             // If search parameters are present, search for student
             if ($request->has('search_student')) {
-                $student = $this->findStudentByIdOrDob($request);
+                $student = $this->findStudentByIdOrRollNo($request);
                 
                 if ($student) {
                     $marksheetData = $this->getMarksheetDataForTeacher($student, $request, $subjectIds);
@@ -1656,107 +1654,27 @@ class TeacherMarksController extends Controller
     }
 
     /**
-     * Find student by ID or DOB.
+     * Find student by ID or roll number.
      */
-    private function findStudentByIdOrDob(Request $request)
+    private function findStudentByIdOrRollNo(Request $request)
     {
         $studentId = $request->get('student_id', '');
-        $dob = $request->get('dob', '');
-        $dobBs = $this->normalizeBsDateOfBirth($request->get('dob_bs', ''));
         
         $query = \App\Models\Student::with('user');
         
         if (!empty($studentId)) {
             $query->where(function($q) use ($studentId) {
                 $q->where('id', $studentId)
-                  ->orWhere('roll_no', 'like', "%{$studentId}%");
-            });
-        }
-        
-        $normalizedDob = !empty($dob) ? $this->normalizeDateOfBirth($dob) : null;
-        $convertedDobBs = !empty($dobBs) ? NepaliContentHelper::convertBsToAd($dobBs) : null;
-
-        if ($normalizedDob || !empty($dob) || !empty($dobBs) || $convertedDobBs) {
-            $query->where(function ($q) use ($normalizedDob, $dob, $dobBs, $convertedDobBs) {
-                if ($normalizedDob) {
-                    $q->whereDate('date_of_birth', $normalizedDob);
-                } elseif (!empty($dob)) {
-                    $q->where('date_of_birth', $dob);
-                }
-
-                if (!empty($dobBs)) {
-                    $q->orWhere('date_of_birth_bs', $dobBs);
-                }
-
-                if ($convertedDobBs) {
-                    $q->orWhereDate('date_of_birth', $convertedDobBs);
-                }
+                  ->orWhere('roll_no', 'like', "%{$studentId}%")
+                  ->orWhereHas('user', function ($userQuery) use ($studentId) {
+                      $userQuery->where('id', $studentId);
+                  });
             });
         }
         
         $student = $query->first();
 
-        // If no student found and DOB is in YYYY-MM-DD, try swapping day/month (some browsers/locales may flip them)
-        if (!$student && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $dob, $m)) {
-            $year = $m[1];
-            $month = $m[2];
-            $day = $m[3];
-
-            if (checkdate((int)$day, (int)$month, (int)$year)) {
-                $swappedDob = sprintf('%s-%s-%s', $year, $day, $month);
-                $student = \App\Models\Student::with('user')
-                    ->where(function($q) use ($studentId) {
-                        $q->where('id', $studentId)
-                          ->orWhere('roll_no', 'like', "%{$studentId}%");
-                    })
-                    ->whereDate('date_of_birth', $swappedDob)
-                    ->first();
-            }
-        }
-
         return $student;
-    }
-
-    private function normalizeBsDateOfBirth(?string $dobBs): string
-    {
-        if (empty($dobBs)) {
-            return '';
-        }
-
-        $normalized = NepaliContentHelper::toEnglishNumber(trim($dobBs));
-        $normalized = str_replace(['/', '.'], '-', $normalized);
-
-        return preg_replace('/\s+/', '', $normalized) ?? '';
-    }
-
-    /**
-     * Normalize a date of birth input into YYYY-MM-DD.
-     * Accepts common formats like DD/MM/YYYY, DD-MM-YYYY, YYYY/MM/DD, YYYY-MM-DD.
-     */
-    private function normalizeDateOfBirth(string $dob): ?string
-    {
-        $formats = [
-            'Y-m-d',
-            'Y/m/d',
-            'd/m/Y',
-            'd-m-Y',
-            'd.m.Y',
-            'm/d/Y',
-            'm-d-Y',
-        ];
-
-        foreach ($formats as $format) {
-            try {
-                $parsed = \Carbon\Carbon::createFromFormat($format, trim($dob));
-                if ($parsed) {
-                    return $parsed->format('Y-m-d');
-                }
-            } catch (\Exception $e) {
-                // ignore parse errors, try next format
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -1870,14 +1788,13 @@ class TeacherMarksController extends Controller
     {
         try {
             $studentId = $request->get('student_id', '');
-            $dob = $request->get('dob', '');
-            
-            if (empty($studentId) && empty($dob)) {
+
+            if (empty($studentId)) {
                 return redirect()->route('teacher.marksheet.search')
-                    ->with('error', 'Please provide student ID or Date of Birth');
+                    ->with('error', 'Please provide student ID or roll number');
             }
             
-            $student = $this->findStudentByIdOrDob($request);
+            $student = $this->findStudentByIdOrRollNo($request);
             
             if (!$student) {
                 return redirect()->route('teacher.marksheet.search')
@@ -1906,14 +1823,13 @@ class TeacherMarksController extends Controller
     {
         try {
             $studentId = $request->get('student_id', '');
-            $dob = $request->get('dob', '');
-            
-            if (empty($studentId) && empty($dob)) {
+
+            if (empty($studentId)) {
                 return redirect()->route('teacher.marksheet.search')
-                    ->with('error', 'Please provide student ID or Date of Birth');
+                    ->with('error', 'Please provide student ID or roll number');
             }
             
-            $student = $this->findStudentByIdOrDob($request);
+            $student = $this->findStudentByIdOrRollNo($request);
             
             if (!$student) {
                 return redirect()->route('teacher.marksheet.search')

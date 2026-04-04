@@ -279,6 +279,7 @@
                         <div class="mt-2 text-lg font-bold text-slate-800">{{ __('ACADEMIC TRANSCRIPT') }}</div>
                         <div class="report-small mt-1 break-words">
                             {{ __('Public marks only') }} |
+                            {{ __('Exam') }}: {{ $selectedExamName ?? __('All Published Exams') }} |
                             {{ __('Academic Year') }}: {{ $student->academic_year_bs ?? __('All') }} |
                             {{ __('Semester') }}: {{ $student->semester ?? __('All') }} |
                             {{ __('Generated') }}: {{ $generatedAtDisplay }}
@@ -334,146 +335,154 @@
         </div>
 
         <div class="report-box">
-            <div class="section-bar">{{ __('Assessment Public Marks') }}</div>
-            <table class="report-table">
-                <thead>
-                    <tr>
-                        <th class="text-center" style="width:6%;">{{ __('S.N.') }}</th>
-                        <th style="width:20%;">{{ __('Subject') }}</th>
-                        <th style="width:17%;">{{ __('Exam') }}</th>
-                        <th class="text-center" style="width:10%;">{{ __('Full Marks') }}</th>
-                        <th class="text-center" style="width:10%;">{{ __('Pass Mark') }}</th>
-                        <th class="text-center" style="width:12%;">{{ __('Marks Obtained') }}</th>
-                        <th class="text-center" style="width:8%;">{{ __('Grade') }}</th>
-                        <th class="text-center" style="width:9%;">{{ __('Result') }}</th>
-                        <th class="text-center" style="width:8%;">{{ __('Date') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($assessmentRows as $row)
-                        @php
-                            $status = strtoupper($row['result'] ?? 'PENDING');
-                            $statusClass = $statusClasses[$status] ?? $statusClasses['PENDING'];
-                        @endphp
-                        <tr class="page-break">
-                            <td class="text-center font-bold">{{ $row['sn'] }}</td>
-                            <td class="subject-cell">
-                                <div>{{ $row['subject_name'] }}</div>
-                                <div class="report-small">{{ $row['subject_code'] }}</div>
-                            </td>
-                            <td class="compact-cell">
-                                <div>{{ $row['exam_name'] }}</div>
-                                @if(!empty($row['assessment_number']))
-                                    <div class="report-small">{{ __('Assessment') }} {{ $row['assessment_number'] }}</div>
-                                @endif
-                            </td>
-                            <td class="text-center compact-cell">{{ number_format((float) $row['full_marks'], 2) }}</td>
-                            <td class="text-center compact-cell">{{ number_format((float) $row['passing_marks'], 2) }}</td>
-                            <td class="text-center compact-cell {{ $status === 'ABS' ? 'bg-amber-50 text-amber-700 font-bold' : '' }}">
-                                {{ is_numeric($row['marks_obtained']) ? number_format((float) $row['marks_obtained'], 2) : ($row['marks_obtained'] ?? 'N/A') }}
-                            </td>
-                            <td class="text-center compact-cell font-bold">{{ $row['grade'] }}</td>
-                            <td class="text-center compact-cell">
-                                <span class="inline-flex min-w-[54px] items-center justify-center rounded px-2 py-1 text-[11px] {{ $statusClass }}">
-                                    {{ $status }}
-                                </span>
-                            </td>
-                            <td class="text-center compact-cell">{{ $row['exam_date'] }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="9" class="p-4 text-center text-gray-500">{{ __('No published assessment marks found.') }}</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-                <tfoot>
-                    <tr class="subtle-bar">
-                        <td colspan="9" class="text-right font-bold">
-                            {{ __('Assessment Total') }}:
-                            {{ number_format((float) ($assessmentTotals['obtained'] ?? 0), 2) }}
-                            /
-                            {{ number_format((float) ($assessmentTotals['full'] ?? 0), 2) }}
-                            ({{ number_format($assessmentPercentage, 2) }}%)
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
+            <div class="section-bar">{{ __('Academic Performance') }}</div>
 
-        <div class="report-box">
-            <div class="section-bar">{{ __('CTEVT Public Marks') }}</div>
-            <table class="report-table">
-                <thead>
-                    <tr>
-                        <th class="text-center" style="width:5%;">{{ __('S.N.') }}</th>
-                        <th style="width:18%;">{{ __('Subject') }}</th>
-                        <th class="text-center" style="width:9%;">{{ __('Full Mark (Int)') }}</th>
-                        <th class="text-center" style="width:9%;">{{ __('Full Mark (Ext)') }}</th>
-                        <th class="text-center" style="width:9%;">{{ __('Pass Mark (Int)') }}</th>
-                        <th class="text-center" style="width:9%;">{{ __('Pass Mark (Ext)') }}</th>
-                        <th class="text-center" style="width:13%;">{{ __('Marks Obtained (Int)') }}</th>
-                        <th class="text-center" style="width:13%;">{{ __('Marks Obtained (Ext)') }}</th>
-                        <th class="text-center" style="width:15%;">{{ __('Total') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($ctevtRows as $row)
-                        @php
-                            $status = strtoupper($row['result'] ?? 'PENDING');
-                            $statusClass = $statusClasses[$status] ?? $statusClasses['PENDING'];
-                        @endphp
-                        <tr class="page-break">
-                            <td class="text-center font-bold" rowspan="2">{{ $row['sn'] }}</td>
-                            <td class="subject-cell">
-                                {{ $row['subject_name'] }} (Th.)
-                                <div class="report-small">{{ $row['subject_code'] }}</div>
-                            </td>
-                            <td class="text-center compact-cell">{{ number_format((float) $row['ti_full'], 2) }}</td>
-                            <td class="text-center compact-cell">{{ number_format((float) $row['te_full'], 2) }}</td>
-                            <td class="text-center compact-cell">{{ number_format((float) $row['ti_pass'], 2) }}</td>
-                            <td class="text-center compact-cell">{{ number_format((float) $row['te_pass'], 2) }}</td>
-                                    <td class="text-center compact-cell {{ ($row['ti_obtained'] ?? 0) < ($row['ti_pass'] ?? 0) ? 'bg-red-50 text-red-700 font-bold' : '' }}">
-                                        {{ is_null($row['ti_obtained']) ? 'N/A' : number_format((float) $row['ti_obtained'], 2) }}
-                                    </td>
-                                    <td class="text-center compact-cell {{ ($row['te_obtained'] ?? 0) < ($row['te_pass'] ?? 0) ? 'bg-red-50 text-red-700 font-bold' : '' }}">
-                                        {{ is_null($row['te_obtained']) ? 'N/A' : number_format((float) $row['te_obtained'], 2) }}
-                                    </td>
-                            <td class="text-center compact-cell font-bold">{{ number_format((float) $row['theory_total'], 2) }}</td>
-                        </tr>
-                        <tr class="page-break">
-                            <td class="subject-cell">
-                                {{ $row['subject_name'] }} (Pr.)
-                            </td>
-                            <td class="text-center compact-cell">{{ number_format((float) $row['pi_full'], 2) }}</td>
-                            <td class="text-center compact-cell">{{ number_format((float) $row['pe_full'], 2) }}</td>
-                            <td class="text-center compact-cell">{{ number_format((float) $row['pi_pass'], 2) }}</td>
-                            <td class="text-center compact-cell">{{ number_format((float) $row['pe_pass'], 2) }}</td>
-                                    <td class="text-center compact-cell {{ ($row['pi_obtained'] ?? 0) < ($row['pi_pass'] ?? 0) ? 'bg-red-50 text-red-700 font-bold' : '' }}">
-                                        {{ is_null($row['pi_obtained']) ? 'N/A' : number_format((float) $row['pi_obtained'], 2) }}
-                                    </td>
-                                    <td class="text-center compact-cell {{ ($row['pe_obtained'] ?? 0) < ($row['pe_pass'] ?? 0) ? 'bg-red-50 text-red-700 font-bold' : '' }}">
-                                        {{ is_null($row['pe_obtained']) ? 'N/A' : number_format((float) $row['pe_obtained'], 2) }}
-                                    </td>
-                            <td class="text-center compact-cell font-bold">{{ number_format((float) $row['practical_total'], 2) }}</td>
-                        </tr>
-                    @empty
+            <div class="border-t border-black">
+                <div class="bg-[#f8fafc] px-3 py-2 text-center text-[12px] font-bold uppercase tracking-[0.08em] text-slate-800">
+                    {{ __('Assessment Public Marks') }}
+                </div>
+                <table class="report-table">
+                    <thead>
                         <tr>
-                            <td colspan="9" class="p-4 text-center text-gray-500">{{ __('No published CTEVT marks found.') }}</td>
+                            <th class="text-center" style="width:6%;">{{ __('S.N.') }}</th>
+                            <th style="width:20%;">{{ __('Subject') }}</th>
+                            <th style="width:17%;">{{ __('Exam') }}</th>
+                            <th class="text-center" style="width:10%;">{{ __('Full Marks') }}</th>
+                            <th class="text-center" style="width:10%;">{{ __('Pass Mark') }}</th>
+                            <th class="text-center" style="width:12%;">{{ __('Marks Obtained') }}</th>
+                            <th class="text-center" style="width:8%;">{{ __('Grade') }}</th>
+                            <th class="text-center" style="width:9%;">{{ __('Result') }}</th>
+                            <th class="text-center" style="width:8%;">{{ __('Date') }}</th>
                         </tr>
-                    @endforelse
-                </tbody>
-                <tfoot>
-                    <tr class="subtle-bar">
-                        <td colspan="9" class="text-right font-bold">
-                            {{ __('CTEVT Total') }}:
-                            {{ number_format((float) ($ctevtTotals['obtained'] ?? 0), 2) }}
-                            /
-                            {{ number_format((float) ($ctevtTotals['full'] ?? 0), 2) }}
-                            ({{ number_format($ctevtPercentage, 2) }}%)
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
+                    </thead>
+                    <tbody>
+                        @forelse($assessmentRows as $row)
+                            @php
+                                $status = strtoupper($row['result'] ?? 'PENDING');
+                                $statusClass = $statusClasses[$status] ?? $statusClasses['PENDING'];
+                            @endphp
+                            <tr class="page-break">
+                                <td class="text-center font-bold">{{ $row['sn'] }}</td>
+                                <td class="subject-cell">
+                                    <div>{{ $row['subject_name'] }}</div>
+                                    <div class="report-small">{{ $row['subject_code'] }}</div>
+                                </td>
+                                <td class="compact-cell">
+                                    <div>{{ $row['exam_name'] }}</div>
+                                    @if(!empty($row['assessment_number']))
+                                        <div class="report-small">{{ __('Assessment') }} {{ $row['assessment_number'] }}</div>
+                                    @endif
+                                </td>
+                                <td class="text-center compact-cell">{{ number_format((float) $row['full_marks'], 2) }}</td>
+                                <td class="text-center compact-cell">{{ number_format((float) $row['passing_marks'], 2) }}</td>
+                                <td class="text-center compact-cell {{ $status === 'ABS' ? 'bg-amber-50 text-amber-700 font-bold' : '' }}">
+                                    {{ is_numeric($row['marks_obtained']) ? number_format((float) $row['marks_obtained'], 2) : ($row['marks_obtained'] ?? 'N/A') }}
+                                </td>
+                                <td class="text-center compact-cell font-bold">{{ $row['grade'] }}</td>
+                                <td class="text-center compact-cell">
+                                    <span class="inline-flex min-w-[54px] items-center justify-center rounded px-2 py-1 text-[11px] {{ $statusClass }}">
+                                        {{ $status }}
+                                    </span>
+                                </td>
+                                <td class="text-center compact-cell">{{ $row['exam_date'] }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="9" class="p-4 text-center text-gray-500">{{ __('No published assessment marks found.') }}</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                    <tfoot>
+                        <tr class="subtle-bar">
+                            <td colspan="9" class="text-right font-bold">
+                                {{ __('Assessment Total') }}:
+                                {{ number_format((float) ($assessmentTotals['obtained'] ?? 0), 2) }}
+                                /
+                                {{ number_format((float) ($assessmentTotals['full'] ?? 0), 2) }}
+                                ({{ number_format($assessmentPercentage, 2) }}%)
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="border-t border-black">
+                <div class="bg-[#f8fafc] px-3 py-2 text-center text-[12px] font-bold uppercase tracking-[0.08em] text-slate-800">
+                    {{ __('CTEVT Public Marks') }}
+                </div>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width:5%;">{{ __('S.N.') }}</th>
+                            <th style="width:18%;">{{ __('Subject') }}</th>
+                            <th class="text-center" style="width:9%;">{{ __('Full Mark (Int)') }}</th>
+                            <th class="text-center" style="width:9%;">{{ __('Full Mark (Ext)') }}</th>
+                            <th class="text-center" style="width:9%;">{{ __('Pass Mark (Int)') }}</th>
+                            <th class="text-center" style="width:9%;">{{ __('Pass Mark (Ext)') }}</th>
+                            <th class="text-center" style="width:13%;">{{ __('Marks Obtained (Int)') }}</th>
+                            <th class="text-center" style="width:13%;">{{ __('Marks Obtained (Ext)') }}</th>
+                            <th class="text-center" style="width:15%;">{{ __('Total') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($ctevtRows as $row)
+                            @php
+                                $status = strtoupper($row['result'] ?? 'PENDING');
+                                $statusClass = $statusClasses[$status] ?? $statusClasses['PENDING'];
+                            @endphp
+                            <tr class="page-break">
+                                <td class="text-center font-bold" rowspan="2">{{ $row['sn'] }}</td>
+                                <td class="subject-cell">
+                                    {{ $row['subject_name'] }} (Th.)
+                                    <div class="report-small">{{ $row['subject_code'] }}</div>
+                                </td>
+                                <td class="text-center compact-cell">{{ number_format((float) $row['ti_full'], 2) }}</td>
+                                <td class="text-center compact-cell">{{ number_format((float) $row['te_full'], 2) }}</td>
+                                <td class="text-center compact-cell">{{ number_format((float) $row['ti_pass'], 2) }}</td>
+                                <td class="text-center compact-cell">{{ number_format((float) $row['te_pass'], 2) }}</td>
+                                <td class="text-center compact-cell {{ ($row['ti_obtained'] ?? 0) < ($row['ti_pass'] ?? 0) ? 'bg-red-50 text-red-700 font-bold' : '' }}">
+                                    {{ is_null($row['ti_obtained']) ? 'N/A' : number_format((float) $row['ti_obtained'], 2) }}
+                                </td>
+                                <td class="text-center compact-cell {{ ($row['te_obtained'] ?? 0) < ($row['te_pass'] ?? 0) ? 'bg-red-50 text-red-700 font-bold' : '' }}">
+                                    {{ is_null($row['te_obtained']) ? 'N/A' : number_format((float) $row['te_obtained'], 2) }}
+                                </td>
+                                <td class="text-center compact-cell font-bold">{{ number_format((float) $row['theory_total'], 2) }}</td>
+                            </tr>
+                            <tr class="page-break">
+                                <td class="subject-cell">
+                                    {{ $row['subject_name'] }} (Pr.)
+                                </td>
+                                <td class="text-center compact-cell">{{ number_format((float) $row['pi_full'], 2) }}</td>
+                                <td class="text-center compact-cell">{{ number_format((float) $row['pe_full'], 2) }}</td>
+                                <td class="text-center compact-cell">{{ number_format((float) $row['pi_pass'], 2) }}</td>
+                                <td class="text-center compact-cell">{{ number_format((float) $row['pe_pass'], 2) }}</td>
+                                <td class="text-center compact-cell {{ ($row['pi_obtained'] ?? 0) < ($row['pi_pass'] ?? 0) ? 'bg-red-50 text-red-700 font-bold' : '' }}">
+                                    {{ is_null($row['pi_obtained']) ? 'N/A' : number_format((float) $row['pi_obtained'], 2) }}
+                                </td>
+                                <td class="text-center compact-cell {{ ($row['pe_obtained'] ?? 0) < ($row['pe_pass'] ?? 0) ? 'bg-red-50 text-red-700 font-bold' : '' }}">
+                                    {{ is_null($row['pe_obtained']) ? 'N/A' : number_format((float) $row['pe_obtained'], 2) }}
+                                </td>
+                                <td class="text-center compact-cell font-bold">{{ number_format((float) $row['practical_total'], 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="9" class="p-4 text-center text-gray-500">{{ __('No published CTEVT marks found.') }}</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                    <tfoot>
+                        <tr class="subtle-bar">
+                            <td colspan="9" class="text-right font-bold">
+                                {{ __('CTEVT Total') }}:
+                                {{ number_format((float) ($ctevtTotals['obtained'] ?? 0), 2) }}
+                                /
+                                {{ number_format((float) ($ctevtTotals['full'] ?? 0), 2) }}
+                                ({{ number_format($ctevtPercentage, 2) }}%)
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
 
         <div class="report-box">

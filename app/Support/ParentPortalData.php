@@ -179,6 +179,10 @@ class ParentPortalData
 
         $examMarks = ExamMark::query()
             ->where('student_id', $student->id)
+            ->whereHas('exam', function ($query) {
+                $query->where('status', Exam::STATUS_PUBLISHED);
+                $query->whereIn('exam_category', ['assessment', 'ctevt']);
+            })
             ->with(['exam', 'subject'])
             ->get();
 
@@ -525,9 +529,11 @@ class ParentPortalData
                     : ($mark->isPassedAllComponents() ? 'pass' : 'fail');
 
                 return [
+                    'exam_id' => $mark->exam?->id,
                     'label' => $mark->exam?->exam_name ?? __('Exam'),
                     'category' => $mark->exam?->formatted_category ?? __('Exam'),
                     'type' => $mark->exam?->formatted_type ?? __('Assessment'),
+                    'subject_id' => $mark->subject?->id,
                     'date' => $examDate,
                     'date_label' => $examDate ? $examDate->format('M d, Y') : __('Date pending'),
                     'obtained_marks' => round((float) $mark->effective_obtained_marks, 2),

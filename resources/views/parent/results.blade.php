@@ -1,7 +1,7 @@
 @extends('parent.layouts.parentlayout')
 
 @section('title', __('Marks / Results'))
-@section('subtitle', __('Published exam outcomes, subject performance, and upcoming assessments'))
+@section('subtitle', __('Marks and exam updates made simple'))
 
 @section('content')
 <div class="parent-smooth-page space-y-6">
@@ -38,8 +38,8 @@
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
             <div class="parent-smooth-table-card xl:col-span-7 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Subject Result Summary') }}</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Performance status for each subject, with next exam context where available.') }}</p>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Marks By Subject') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('See marks, status, and next exam for each subject.') }}</p>
                 </div>
 
                 <div class="p-5 grid gap-4 md:grid-cols-2">
@@ -83,11 +83,11 @@
 
             <div class="xl:col-span-5 space-y-6">
                 <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Result Guidance') }}</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('What To Check') }}</h2>
                     <ul class="mt-4 space-y-3 text-sm text-gray-600 dark:text-gray-300">
-                        <li>{{ __('Check this page whenever new exam notices are published.') }}</li>
-                        <li>{{ __('Compare low attendance subjects with weak result areas to decide where support is needed.') }}</li>
-                        <li>{{ __('Use communication tools for teacher follow-up whenever a subject remains pending or below benchmark.') }}</li>
+                        <li>{{ __('Check this page when new marks are published.') }}</li>
+                        <li>{{ __('Look for low marks and low attendance in the same subject.') }}</li>
+                        <li>{{ __('Use the help page if a subject needs follow-up.') }}</li>
                     </ul>
                 </div>
 
@@ -119,7 +119,7 @@
 
         <div class="parent-smooth-panel rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
             <div class="flex items-center justify-between gap-3">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Recent Result Entries') }}</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Latest Marks') }}</h2>
                 <a href="{{ route('parent.communication') }}" class="text-sm font-medium text-red-700 dark:text-red-300 hover:underline">{{ __('Need a meeting?') }}</a>
             </div>
 
