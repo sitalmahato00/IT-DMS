@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Student;
-use App\Models\Subject;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class StudentCourseController extends Controller
 {
@@ -84,14 +83,120 @@ class StudentCourseController extends Controller
                     'role' => $assignment->role,
                 ];
             });
-        
-        // Get attendance stats for this subject
-        $attendancePercentage = $student->getAttendancePercentage($subject->id);
-        
-        // Get marks for this subject
+
+        $primaryTeacher = $subject->teacherAssignments()
+            ->where('role', 'primary')
+            ->with('teacher.user')
+            ->first()?->teacher?->user;
+
+        $attendanceRecords = DB::table('attendance')
+            ->where('attendance.student_id', $student->id)
+            ->where('attendance.subject_id', $subject->id)
+            ->where('attendance.attendance_type', 'class')
+            ->join('subjects', 'attendance.subject_id', '=', 'subjects.id')
+            ->select('attendance.*', 'subjects.subject_name', 'subjects.subject_code')
+            ->orderBy('attendance.date', 'desc')
+            ->orderBy('attendance.time_in', 'desc')
+            ->get();
+
+        $attendanceCounts = [
+            'present' => (int) $attendanceRecords->where('status', 'present')->count(),
+            'absent' => (int) $attendanceRecords->where('status', 'absent')->count(),
+            'leave' => (int) $attendanceRecords->where('status', 'leave')->count(),
+        ];
+
+        $attendanceTotal = array_sum($attendanceCounts);
+        $attendancePercentage = $attendanceTotal > 0 ? $student->getAttendancePercentage($subject->id) : 0;
+
+        $attendanceChart = [
+            'labels' => [__('Present'), __('Absent'), __('Leave')],
+            'values' => [$attendanceCounts['present'], $attendanceCounts['absent'], $attendanceCounts['leave']],
+        ];
+
         $assessmentMarks = $student->getAssessmentMarks($subject->id, 'assessment');
-        $ctevtMarks = $student->getExamMarkForSubject($subject->id, 'ctevt');
-        
-        return view('student.courses.show', compact('subject', 'teachers', 'attendancePercentage', 'assessmentMarks', 'ctevtMarks'));
+        $ctevtMarkRecord = $student->getExamMarkForSubject($subject->id, 'ctevt');
+
+        $ctevtMarks = $ctevtMarkRecord ? (object) [
+            'full' => round((float) $ctevtMarkRecord->calculateFullMarks(), 2),
+            'pass' => round((float) $ctevtMarkRecord->getEffectivePassingMarksAttribute(), 2),
+            'obtained' => round((float) $ctevtMarkRecord->calculateTotalMarks(), 2),
+            'percentage' => round((float) $ctevtMarkRecord->calculatePercentage(), 2),
+            'is_pass' => $ctevtMarkRecord->isAbsent() ? null : ($ctevtMarkRecord->calculatePercentage() >= 40),
+        ] : (object) [
+            'full' => 0,
+            'pass' => 0,
+            'obtained' => 0,
+            'percentage' => 0,
+            'is_pass' => null,
+        ];
+
+        $marksChart = [
+            'labels' => [__('Assessment'), __('CTEVT')],
+            'obtained' => [
+                round((float) $assessmentMarks->obtained, 2),
+                round((float) $ctevtMarks->obtained, 2),
+            ],
+            'full' => [
+                round((float) $assessmentMarks->full, 2),
+                round((float) $ctevtMarks->full, 2),
+            ],
+            'pass' => [
+                round((float) $assessmentMarks->pass, 2),
+                round((float) $ctevtMarks->pass, 2),
+            ],
+        ];
+
+        $syllabusLines = collect(preg_split('/\r\n|\r|\n/', (string) ($subject->syllabus ?? '')))
+            ->map(function ($line) {
+                $line = trim((string) $line);
+                $line = preg_replace('/^\s*(?:[-*•]|\d+[.)])\s*/u', '', $line);
+                return trim((string) $line);
+            })
+            ->filter()
+            ->values();
+
+        $learningObjectives = collect(preg_split('/\r\n|\r|\n/', (string) ($subject->learning_objectives ?? '')))
+            ->map(function ($line) {
+                $line = trim((string) $line);
+                $line = preg_replace('/^\s*(?:[-*•]|\d+[.)])\s*/u', '', $line);
+                return trim((string) $line);
+            })
+            ->filter()
+            ->values();
+
+        $syllabusDocumentUrl = null;
+        if (!empty($subject->syllabus_document_path) && Storage::disk('public')->exists($subject->syllabus_document_path)) {
+            $syllabusDocumentUrl = Storage::url($subject->syllabus_document_path);
+        }
+
+        $recentAttendanceRecords = $attendanceRecords->take(12);
+
+        $subjectHighlights = [
+            ['label' => __('Semester'), 'value' => $subject->formatted_semester ?: ($subject->semester ?? __('N/A')), 'icon' => 'bi-calendar3'],
+            ['label' => __('Credits'), 'value' => (string) ($subject->credits ?? __('N/A')), 'icon' => 'bi-award'],
+            ['label' => __('Type'), 'value' => ucfirst((string) ($subject->subject_type ?? 'core')), 'icon' => 'bi-grid-1x2'],
+            ['label' => __('Lab'), 'value' => $subject->has_lab ? __('Enabled') : __('Not enabled'), 'icon' => 'bi-beaker'],
+            ['label' => __('Hours'), 'value' => sprintf('%s / %s / %s', $subject->lecture_hours ?? 0, $subject->practical_hours ?? 0, $subject->tutorial_hours ?? 0), 'icon' => 'bi-clock-history'],
+            ['label' => __('Prerequisite'), 'value' => $subject->prerequisite ?: __('None'), 'icon' => 'bi-link-45deg'],
+        ];
+
+        return view('student.courses.show', compact(
+            'subject',
+            'teachers',
+            'primaryTeacher',
+            'attendancePercentage',
+            'attendanceRecords',
+            'recentAttendanceRecords',
+            'attendanceCounts',
+            'attendanceTotal',
+            'attendanceChart',
+            'assessmentMarks',
+            'ctevtMarks',
+            'marksChart',
+            'syllabusLines',
+            'learningObjectives',
+            'syllabusDocumentUrl',
+            'subjectHighlights'
+        ));
     }
 }

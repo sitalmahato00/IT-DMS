@@ -50,39 +50,101 @@ class TeacherSubjectController extends Controller
             return redirect()->route('teacher.subjects')->with('error', 'Teacher profile not found.');
         }
 
-        // Verify the teacher is assigned to this subject - check both pivot and legacy
-        // If ID starts with 'legacy_', it's a legacy assignment
-        if (strpos($id, 'legacy_') === 0) {
-            $subjectId = str_replace('legacy_', '', $id);
-            $subject = Subject::where('id', $subjectId)
-                ->where('teacher_id', $teacher->id)
+        $teacherIds = array_values(array_unique(array_filter([
+            $teacher->id ?? null,
+            $user->id ?? null,
+        ])));
+
+        // Resolve either an assignment ID or a direct subject ID.
+        $assignment = null;
+        $subject = null;
+
+        // If ID starts with 'legacy_', it's a legacy assignment reference.
+        if (strpos((string) $id, 'legacy_') === 0) {
+            $subjectId = str_replace('legacy_', '', (string) $id);
+
+            $subject = Subject::query()
+                ->where('id', $subjectId)
+                ->where(function ($q) use ($teacher) {
+                    if (Schema::hasColumn('subjects', 'teacher_id')) {
+                        $q->whereIn('teacher_id', [$teacher->id, auth()->id()]);
+                    } else {
+                        $q->whereRaw('1 = 1');
+                    }
+                })
                 ->first();
-            
+
             if (!$subject) {
-                return redirect()->route('teacher.subjects')->with('error', 'Subject not found or not assigned to you.');
+                $subject = $teacher->subjects()
+                    ->where('subjects.id', $subjectId)
+                    ->first();
             }
-            
-            // Create a pseudo-assignment object for legacy subjects
+
+            if ($subject) {
+                $assignment = SubjectTeacher::query()
+                    ->whereIn('teacher_id', $teacherIds)
+                    ->where('subject_id', $subject->id)
+                    ->with('subject')
+                    ->orderByDesc('assigned_at')
+                    ->orderByDesc('id')
+                    ->first();
+            }
+        } else {
+            // Prefer the pivot assignment ID used by the subjects list.
+            $assignment = SubjectTeacher::query()
+                ->whereIn('teacher_id', $teacherIds)
+                ->where('id', $id)
+                ->with('subject')
+                ->first();
+
+            // Fall back to direct subject ID used by other teacher screens.
+            if (!$assignment) {
+                $subject = $teacher->subjects()
+                    ->where('subjects.id', $id)
+                    ->first();
+
+                if (!$subject && Schema::hasColumn('subjects', 'teacher_id')) {
+                    $subject = Subject::query()
+                        ->where('id', $id)
+                        ->whereIn('teacher_id', [$teacher->id, auth()->id()])
+                        ->first();
+                }
+
+                if ($subject) {
+                    $assignment = SubjectTeacher::query()
+                        ->whereIn('teacher_id', $teacherIds)
+                        ->where('subject_id', $subject->id)
+                        ->with('subject')
+                        ->orderByDesc('assigned_at')
+                        ->orderByDesc('id')
+                        ->first();
+                }
+            }
+        }
+
+        if (!$assignment && !$subject) {
+            return redirect()->route('teacher.subjects')->with('error', 'Subject not found or not assigned to you.');
+        }
+
+        if (!$subject && $assignment) {
+            $subject = $assignment->subject;
+        }
+
+        if (!$subject) {
+            return redirect()->route('teacher.subjects')->with('error', 'Subject not found or not assigned to you.');
+        }
+
+        if (!$assignment) {
             $assignment = new \stdClass();
-            $assignment->assignment_id = $id;
+            $assignment->assignment_id = 'subject_' . $subject->id;
             $assignment->subject_id = $subject->id;
             $assignment->teacher_id = $teacher->id;
             $assignment->semester = $subject->semester;
             $assignment->role = 'primary';
             $assignment->subject = $subject;
-        } else {
-            // Regular pivot table assignment
-            $assignment = $teacher->subjectAssignments()
-                ->where('id', $id)
-                ->with('subject')
-                ->first();
+        } elseif (!$assignment->subject) {
+            $assignment->subject = $subject;
         }
-
-        if (!$assignment) {
-            return redirect()->route('teacher.subjects')->with('error', 'Subject not found or not assigned to you.');
-        }
-
-        $subject = $assignment->subject;
         
         $students = TeacherSubjectRoster::studentRowsForSubject($subject->id)
             ->map(function ($student) {
