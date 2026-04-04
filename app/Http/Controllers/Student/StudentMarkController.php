@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\ExamMark;
 use App\Models\Student;
+use App\Support\PublicMarksheetBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,14 +40,9 @@ class StudentMarkController extends Controller
             return redirect()->route('student.dashboard')->with('error', 'Student profile not found.');
         }
 
-        $payload = array_merge(
-            $this->buildMarksheetPayload($student),
-            $this->buildTranscriptPayload($student, $examId)
-        );
-        $payload['generatedAt'] = now();
-        $payload['selectedExamId'] = $examId;
+        $payload = app(PublicMarksheetBuilder::class)->build($student, $examId ?: null);
 
-        return view('student.marks.marksheet', $payload);
+        return view('admin.marks.marksheet-print', $payload);
     }
 
     /**

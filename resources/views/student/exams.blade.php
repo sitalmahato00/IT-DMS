@@ -1,7 +1,7 @@
 @extends('student.layouts.studentlayout')
 
 @section('title', __('Published Exams'))
-@section('subtitle', __('Open each published exam transcript'))
+@section('subtitle', __('Open each published exam marksheet'))
 
 @section('content')
 @php
@@ -21,7 +21,7 @@
         <div class="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold">{{ __('Published Exams') }}</h1>
-                <p class="text-[#ffe5ea] mt-2">{{ __('Review each published exam and open its printable transcript.') }}</p>
+                <p class="text-[#ffe5ea] mt-2">{{ __('Review each published exam and open its printable marksheet.') }}</p>
                 <div class="mt-3 flex flex-wrap gap-3 text-sm text-[#ffe5ea]">
                     <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/15 border border-white/25">
                         <i class="bi bi-journal-check"></i> {{ $examCount }} {{ __('exams') }}
@@ -51,7 +51,7 @@
         <div class="student-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
             <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Exam Sheets') }}</p>
             <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ $examCount }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('Published transcripts available') }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('Published marksheets available') }}</p>
         </div>
         <div class="student-smooth-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
             <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">{{ __('Passed') }}</p>
@@ -74,7 +74,7 @@
         <div class="student-smooth-empty rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-10 text-center">
             <i class="bi bi-journal-x text-4xl text-gray-300 dark:text-gray-600"></i>
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mt-4">{{ __('No Published Exams') }}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ __('Your published exam transcripts will appear here once the results are posted.') }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ __('Your published exam marksheets will appear here once the results are posted.') }}</p>
         </div>
     @else
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">

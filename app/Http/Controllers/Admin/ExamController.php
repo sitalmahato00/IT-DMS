@@ -2741,6 +2741,36 @@ $exam->load(['subject', 'marks.student.user']);
                 
                 if ($student) {
                     $marksheetData = $this->getMarksheetData($student, $request);
+
+                    // If the selected semester/year no longer matches the student's marks,
+                    // retry with the student's own academic context so the marksheet does not
+                    // disappear behind a stale filter.
+                    if (($marksheetData['exam_marks'] ?? collect())->isEmpty()) {
+                        $studentSemester = trim((string) ($student->semester ?? ''));
+                        $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                        if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                            $fallbackRequest = Request::create($request->url(), 'GET', array_merge(
+                                $request->query(),
+                                [
+                                    'semester' => $studentSemester !== '' ? $studentSemester : $request->get('semester', ''),
+                                    'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $request->get('academic_year', ''),
+                                ]
+                            ));
+
+                            $fallbackData = $this->getMarksheetData($student, $fallbackRequest);
+
+                            if (($fallbackData['exam_marks'] ?? collect())->isNotEmpty()) {
+                                $request->merge([
+                                    'semester' => $fallbackRequest->get('semester', ''),
+                                    'academic_year' => $fallbackRequest->get('academic_year', ''),
+                                ]);
+                                $marksheetData = $fallbackData;
+                                $filters['semester'] = $request->get('semester', '');
+                                $filters['academic_year'] = $request->get('academic_year', '');
+                            }
+                        }
+                    }
                 }
             }
             
@@ -2923,6 +2953,30 @@ $exam->load(['subject', 'marks.student.user']);
             }
             
             $marksheetData = $this->getMarksheetData($student, $request);
+
+            if (($marksheetData['exam_marks'] ?? collect())->isEmpty()) {
+                $studentSemester = trim((string) ($student->semester ?? ''));
+                $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                    $fallbackRequest = Request::create($request->url(), 'GET', array_merge(
+                        $request->query(),
+                        [
+                            'semester' => $studentSemester !== '' ? $studentSemester : $request->get('semester', ''),
+                            'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $request->get('academic_year', ''),
+                        ]
+                    ));
+
+                    $fallbackData = $this->getMarksheetData($student, $fallbackRequest);
+                    if (($fallbackData['exam_marks'] ?? collect())->isNotEmpty()) {
+                        $request->merge([
+                            'semester' => $fallbackRequest->get('semester', ''),
+                            'academic_year' => $fallbackRequest->get('academic_year', ''),
+                        ]);
+                        $marksheetData = $fallbackData;
+                    }
+                }
+            }
             
             return view('admin.marks.marksheet-print', [
                 'student' => $student,
@@ -2963,6 +3017,30 @@ $exam->load(['subject', 'marks.student.user']);
             }
 
             $marksheetData = $this->getMarksheetData($student, $request);
+
+            if (($marksheetData['exam_marks'] ?? collect())->isEmpty()) {
+                $studentSemester = trim((string) ($student->semester ?? ''));
+                $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                    $fallbackRequest = Request::create($request->url(), 'GET', array_merge(
+                        $request->query(),
+                        [
+                            'semester' => $studentSemester !== '' ? $studentSemester : $request->get('semester', ''),
+                            'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $request->get('academic_year', ''),
+                        ]
+                    ));
+
+                    $fallbackData = $this->getMarksheetData($student, $fallbackRequest);
+                    if (($fallbackData['exam_marks'] ?? collect())->isNotEmpty()) {
+                        $request->merge([
+                            'semester' => $fallbackRequest->get('semester', ''),
+                            'academic_year' => $fallbackRequest->get('academic_year', ''),
+                        ]);
+                        $marksheetData = $fallbackData;
+                    }
+                }
+            }
 
             $fileName = sprintf('marksheet_%s_%s.csv', $student->id, now()->format('Ymd_His'));
 

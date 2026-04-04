@@ -1,7 +1,7 @@
 @extends('parent.layouts.parentlayout')
 
 @section('title', __('Exam Marksheet'))
-@section('subtitle', __('Open published exam transcripts for your child'))
+@section('subtitle', __('Open published exam marksheets for your child'))
 
 @section('content')
 @php
@@ -29,7 +29,7 @@
                 <div>
                     <p class="text-xs uppercase tracking-[0.35em] text-red-100">{{ __('Exam Section') }}</p>
                     <h1 class="mt-2 text-3xl font-bold">{{ __('Published Exam Marksheet') }}</h1>
-                    <p class="mt-2 text-red-100">{{ __('Review each published exam transcript for :name and print the board-style marksheet.', ['name' => $selectedChild['name']]) }}</p>
+                    <p class="mt-2 text-red-100">{{ __('Review each published exam marksheet for :name and print the board-style report.', ['name' => $selectedChild['name']]) }}</p>
                 </div>
                 <a href="{{ route('parent.results', ['child' => $selectedChild['id']]) }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#B2002F] shadow-md hover:bg-[#fff1f3] transition">
                     <i class="bi bi-clipboard-data"></i>

@@ -1633,6 +1633,35 @@ class TeacherMarksController extends Controller
                 
                 if ($student) {
                     $marksheetData = $this->getMarksheetDataForTeacher($student, $request, $subjectIds);
+
+                    // Retry with the student's own semester/year when the current filters
+                    // hide an otherwise valid marksheet.
+                    if (($marksheetData['exam_marks'] ?? collect())->isEmpty()) {
+                        $studentSemester = trim((string) ($student->semester ?? ''));
+                        $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                        if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                            $fallbackRequest = Request::create($request->url(), 'GET', array_merge(
+                                $request->query(),
+                                [
+                                    'semester' => $studentSemester !== '' ? $studentSemester : $request->get('semester', ''),
+                                    'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $request->get('academic_year', ''),
+                                ]
+                            ));
+
+                            $fallbackData = $this->getMarksheetDataForTeacher($student, $fallbackRequest, $subjectIds);
+
+                            if (($fallbackData['exam_marks'] ?? collect())->isNotEmpty()) {
+                                $request->merge([
+                                    'semester' => $fallbackRequest->get('semester', ''),
+                                    'academic_year' => $fallbackRequest->get('academic_year', ''),
+                                ]);
+                                $marksheetData = $fallbackData;
+                                $filters['semester'] = $request->get('semester', '');
+                                $filters['academic_year'] = $request->get('academic_year', '');
+                            }
+                        }
+                    }
                 }
             }
             
@@ -1658,7 +1687,7 @@ class TeacherMarksController extends Controller
      */
     private function findStudentByIdOrRollNo(Request $request)
     {
-        $studentId = $request->get('student_id', '');
+        $studentId = trim($request->get('student_id', ''));
         
         $query = \App\Models\Student::with('user');
         
@@ -1803,6 +1832,30 @@ class TeacherMarksController extends Controller
             
             $subjectIds = $this->getTeacherSubjectIds();
             $marksheetData = $this->getMarksheetDataForTeacher($student, $request, $subjectIds);
+
+            if (($marksheetData['exam_marks'] ?? collect())->isEmpty()) {
+                $studentSemester = trim((string) ($student->semester ?? ''));
+                $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                    $fallbackRequest = Request::create($request->url(), 'GET', array_merge(
+                        $request->query(),
+                        [
+                            'semester' => $studentSemester !== '' ? $studentSemester : $request->get('semester', ''),
+                            'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $request->get('academic_year', ''),
+                        ]
+                    ));
+
+                    $fallbackData = $this->getMarksheetDataForTeacher($student, $fallbackRequest, $subjectIds);
+                    if (($fallbackData['exam_marks'] ?? collect())->isNotEmpty()) {
+                        $request->merge([
+                            'semester' => $fallbackRequest->get('semester', ''),
+                            'academic_year' => $fallbackRequest->get('academic_year', ''),
+                        ]);
+                        $marksheetData = $fallbackData;
+                    }
+                }
+            }
             
             return view('teacher.marks.marksheet-print', [
                 'student' => $student,
@@ -1838,6 +1891,30 @@ class TeacherMarksController extends Controller
             
             $subjectIds = $this->getTeacherSubjectIds();
             $marksheetData = $this->getMarksheetDataForTeacher($student, $request, $subjectIds);
+
+            if (($marksheetData['exam_marks'] ?? collect())->isEmpty()) {
+                $studentSemester = trim((string) ($student->semester ?? ''));
+                $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                    $fallbackRequest = Request::create($request->url(), 'GET', array_merge(
+                        $request->query(),
+                        [
+                            'semester' => $studentSemester !== '' ? $studentSemester : $request->get('semester', ''),
+                            'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $request->get('academic_year', ''),
+                        ]
+                    ));
+
+                    $fallbackData = $this->getMarksheetDataForTeacher($student, $fallbackRequest, $subjectIds);
+                    if (($fallbackData['exam_marks'] ?? collect())->isNotEmpty()) {
+                        $request->merge([
+                            'semester' => $fallbackRequest->get('semester', ''),
+                            'academic_year' => $fallbackRequest->get('academic_year', ''),
+                        ]);
+                        $marksheetData = $fallbackData;
+                    }
+                }
+            }
             
             $fileName = sprintf('marksheet_%s_%s.csv', $student->id, now()->format('Ymd_His'));
 

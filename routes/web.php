@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 Route::get('/', [\App\Http\Controllers\LandingController::class, 'index'])->name('home');
+Route::get('/exam-result/print', [\App\Http\Controllers\LandingController::class, 'examResultPrint'])->name('public.exam-result.print');
 Route::get('/department/about/{id?}', [\App\Http\Controllers\LandingController::class, 'about'])->name('department.about');
 Route::get('/subjects', [\App\Http\Controllers\SubjectsController::class, 'index'])->name('subjects.index');
 Route::get('/faculty', [FacultyController::class, 'index'])->name('faculty.index');

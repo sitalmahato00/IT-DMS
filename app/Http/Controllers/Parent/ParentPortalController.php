@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Parent;
 
 use App\Http\Controllers\Controller;
+use App\Models\Student;
 use App\Support\ParentPortalData;
+use App\Support\PublicMarksheetBuilder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -106,39 +108,22 @@ class ParentPortalController extends Controller
     {
         $viewData = $this->buildViewData($request);
         $selectedChild = $viewData['selectedChild'] ?? null;
-        $examId = $request->integer('exam_id');
 
-        $examEntries = collect($selectedChild['recent_results'] ?? [])
-            ->where('exam_id', $examId)
-            ->sortByDesc(fn (array $entry) => $entry['sort_key'] ?? 0)
-            ->values();
+        if (!$selectedChild) {
+            return redirect()->route('parent.exams', array_filter(['child' => $viewData['selectedChildId']]))
+                ->with('error', 'No child is selected for this marksheet.');
+        }
 
-        if ($examEntries->isEmpty()) {
+        $student = Student::with('user')->find($selectedChild['id'] ?? null);
+
+        if (!$student) {
             return redirect()->route('parent.exams', array_filter(['child' => $viewData['selectedChildId']]))
                 ->with('error', 'Exam marksheet not found.');
         }
 
-        $examMeta = $examEntries->first();
-        $obtained = $examEntries->sum('obtained_marks');
-        $full = $examEntries->sum('full_marks');
-        $percentage = $full > 0 ? round(($obtained / $full) * 100, 2) : 0;
-        $hasFail = $examEntries->contains(fn (array $entry) => ($entry['status'] ?? '') === 'fail');
-        $isPending = $examEntries->contains(fn (array $entry) => ($entry['status'] ?? '') === 'pending');
-        $result = $isPending ? 'PENDING' : ($hasFail ? 'FAIL' : 'PASS');
+        $payload = app(PublicMarksheetBuilder::class)->build($student, $request->integer('exam_id') ?: null);
 
-        return view('parent.exams-print', array_merge($viewData, [
-            'examEntries' => $examEntries,
-            'examMeta' => $examMeta,
-            'examTitle' => $examMeta['label'] ?? __('Exam'),
-            'examCategoryLabel' => $examMeta['category'] ?? __('Exam'),
-            'examDateLabel' => $examMeta['date_label'] ?? __('Date pending'),
-            'examTotals' => [
-                'obtained' => $obtained,
-                'full' => $full,
-                'percentage' => $percentage,
-                'result' => $result,
-            ],
-        ]));
+        return view('admin.marks.marksheet-print', $payload);
     }
 
     private function buildViewData(Request $request): array

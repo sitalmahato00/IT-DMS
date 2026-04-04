@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Department;
+use App\Models\Exam;
 use App\Models\Semester;
 use App\Models\Subject;
 use App\Models\Teacher;
@@ -11,6 +12,7 @@ use App\Models\Gallery;
 use App\Models\StudyMaterial;
 use App\Models\Student;
 use App\Models\User;
+use App\Support\PublicMarksheetBuilder;
 use App\Support\SafeCache;
 use Illuminate\Http\Request;
 
@@ -120,6 +122,9 @@ class LandingController extends Controller
             'teachers' => $teachers->count(),
         ];
 
+        $examResultMeta = SafeCache::remember('landing:exam-result-meta:v1', $ttl, fn () => $this->buildExamResultMeta());
+        $examResultSearch = $this->resolveExamResultSearch($request, $examResultMeta);
+
         return view('landing', compact(
             'department',
             'semesters',
@@ -132,7 +137,9 @@ class LandingController extends Controller
             'notices',
             'documents',
             'galleryItems',
-            'stats'
+            'stats',
+            'examResultMeta',
+            'examResultSearch'
         ));
     }
 
@@ -146,5 +153,232 @@ class LandingController extends Controller
         }
 
         return view('department.about', compact('department'));
+    }
+
+    public function examResultPrint(Request $request)
+    {
+        $examResultMeta = SafeCache::remember('landing:exam-result-meta:v1', (int) config('performance.public_data_cache_ttl', 300), fn () => $this->buildExamResultMeta());
+        $examResultSearch = $this->resolveExamResultSearch($request, $examResultMeta, true);
+
+        if (!$examResultSearch['searchAttempted'] || !$examResultSearch['student'] || !$examResultSearch['payload']) {
+            return redirect()->route('home', array_filter($request->query(), fn ($value) => $value !== null && $value !== ''))
+                ->with('error', $examResultSearch['error'] ?: 'Published exam result not found.');
+        }
+
+        $department = Department::first() ?: (object) [
+            'name' => config('app.name', 'IT DMS'),
+            'address' => null,
+            'city' => null,
+            'district' => null,
+            'email' => null,
+            'phone' => null,
+        ];
+
+        return view('admin.marks.marksheet-print', array_merge($examResultSearch['payload'], [
+            'department' => $department,
+            'departmentLogoUrl' => method_exists($department, 'getLogoUrl') ? $department->getLogoUrl() : asset('images/default-logo.svg'),
+        ]));
+    }
+
+    /**
+     * Build the public exam result search metadata used by the landing page.
+     */
+    private function buildExamResultMeta(): array
+    {
+        $publishedExamQuery = Exam::query()
+            ->published()
+            ->whereIn('exam_category', ['assessment', 'ctevt']);
+
+        $years = (clone $publishedExamQuery)
+            ->whereNotNull('academic_year')
+            ->pluck('academic_year')
+            ->filter()
+            ->unique()
+            ->sortDesc()
+            ->values()
+            ->all();
+
+        $semesters = (clone $publishedExamQuery)
+            ->whereNotNull('semester')
+            ->pluck('semester')
+            ->map(fn ($semester) => trim((string) $semester))
+            ->filter()
+            ->unique()
+            ->sort(fn ($left, $right) => (int) $left <=> (int) $right)
+            ->values()
+            ->all();
+
+        $assessmentMap = (clone $publishedExamQuery)
+            ->where('exam_category', 'assessment')
+            ->whereNotNull('assessment_number')
+            ->get(['academic_year', 'semester', 'assessment_number'])
+            ->groupBy(function ($exam) {
+                $year = trim((string) ($exam->academic_year ?? 'all'));
+                $semester = trim((string) ($exam->semester ?? 'all'));
+
+                return $year . '|' . $semester;
+            })
+            ->map(function ($group) {
+                return $group->pluck('assessment_number')
+                    ->filter()
+                    ->unique()
+                    ->sort()
+                    ->values()
+                    ->all();
+            })
+            ->toArray();
+
+        $assessmentMap['all|all'] = (clone $publishedExamQuery)
+            ->where('exam_category', 'assessment')
+            ->whereNotNull('assessment_number')
+            ->pluck('assessment_number')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        return [
+            'years' => $years,
+            'semesters' => $semesters,
+            'assessmentMap' => $assessmentMap,
+        ];
+    }
+
+    /**
+     * Resolve the public exam result search data for the landing page.
+     */
+    private function resolveExamResultSearch(Request $request, array $examResultMeta, bool $searchForced = false): array
+    {
+        $searchAttempted = $request->boolean('search_exam_result') || $searchForced;
+        $filters = [
+            'academic_year' => trim((string) $request->query('academic_year', $examResultMeta['years'][0] ?? '')),
+            'semester' => trim((string) $request->query('semester', $examResultMeta['semesters'][0] ?? '')),
+            'exam_category' => trim((string) $request->query('exam_category', 'assessment')) ?: 'assessment',
+            'assessment_number' => trim((string) $request->query('assessment_number', '')),
+            'student_id' => trim((string) $request->query('student_id', '')),
+            'dob' => trim((string) $request->query('dob', '')),
+        ];
+
+        if ($filters['academic_year'] === '' && !empty($examResultMeta['years'][0])) {
+            $filters['academic_year'] = (string) $examResultMeta['years'][0];
+        }
+
+        if ($filters['semester'] === '' && !empty($examResultMeta['semesters'][0])) {
+            $filters['semester'] = (string) $examResultMeta['semesters'][0];
+        }
+
+        $assessmentNumbers = $this->resolveAssessmentNumbers($examResultMeta['assessmentMap'] ?? [], $filters);
+
+        $student = null;
+        $payload = null;
+        $error = null;
+
+        if ($searchAttempted) {
+            if ($filters['student_id'] === '' || $filters['dob'] === '') {
+                $error = 'Please enter both Student ID / Roll No and DOB.';
+            } else {
+                $student = $this->findPublicExamResultStudent($filters);
+
+                if (!$student) {
+                    $error = 'No student matched the provided ID / Roll No and DOB.';
+                } else {
+                    /** @var PublicMarksheetBuilder $builder */
+                    $builder = app(PublicMarksheetBuilder::class);
+                    $payload = $builder->buildForSearch($student, $filters);
+
+                    if (($payload['marksheetData']['exam_marks'] ?? collect())->isEmpty()) {
+                        $studentSemester = trim((string) ($student->semester ?? ''));
+                        $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                        if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                            $fallbackFilters = array_merge($filters, [
+                                'semester' => $studentSemester !== '' ? $studentSemester : $filters['semester'],
+                                'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $filters['academic_year'],
+                            ]);
+
+                            $fallbackAssessmentNumbers = $this->resolveAssessmentNumbers($examResultMeta['assessmentMap'] ?? [], $fallbackFilters);
+                            $fallbackPayload = $builder->buildForSearch($student, $fallbackFilters);
+
+                            if (($fallbackPayload['marksheetData']['exam_marks'] ?? collect())->isNotEmpty()) {
+                                $filters = $fallbackPayload['filters'];
+                                $assessmentNumbers = $fallbackAssessmentNumbers;
+                                $payload = $fallbackPayload;
+                            }
+                        }
+                    }
+
+                    if (($payload['marksheetData']['exam_marks'] ?? collect())->isEmpty()) {
+                        $error = 'No published exam result was found for the selected filters.';
+                    }
+                }
+            }
+        }
+
+        return [
+            'searchAttempted' => $searchAttempted,
+            'filters' => $filters,
+            'assessmentNumbers' => $assessmentNumbers,
+            'student' => $student,
+            'payload' => $payload,
+            'error' => $error,
+            'printUrl' => route('public.exam-result.print', $filters),
+        ];
+    }
+
+    /**
+     * Find a student using Student ID / Roll No and DOB.
+     */
+    private function findPublicExamResultStudent(array $filters): ?Student
+    {
+        $studentId = trim((string) ($filters['student_id'] ?? ''));
+        $dob = trim((string) ($filters['dob'] ?? ''));
+
+        if ($studentId === '' || $dob === '') {
+            return null;
+        }
+
+        $query = Student::with('user');
+
+        $query->where(function ($builder) use ($studentId) {
+            $builder->where('id', $studentId)
+                ->orWhere('roll_no', 'like', '%' . $studentId . '%')
+                ->orWhereHas('user', function ($userQuery) use ($studentId) {
+                    $userQuery->where('id', $studentId);
+                });
+        });
+
+        $query->whereDate('date_of_birth', $dob);
+
+        return $query->first();
+    }
+
+    /**
+     * Resolve assessment numbers for the currently selected academic year / semester.
+     */
+    private function resolveAssessmentNumbers(array $assessmentMap, array $filters): array
+    {
+        if (($filters['exam_category'] ?? 'assessment') !== 'assessment') {
+            return [];
+        }
+
+        $year = trim((string) ($filters['academic_year'] ?? ''));
+        $semester = trim((string) ($filters['semester'] ?? ''));
+
+        $keysToCheck = [];
+
+        if ($year !== '' || $semester !== '') {
+            $keysToCheck[] = ($year !== '' ? $year : 'all') . '|' . ($semester !== '' ? $semester : 'all');
+        }
+
+        $keysToCheck[] = 'all|all';
+
+        foreach ($keysToCheck as $key) {
+            if (!empty($assessmentMap[$key]) && is_array($assessmentMap[$key])) {
+                return $assessmentMap[$key];
+            }
+        }
+
+        return [];
     }
 }
