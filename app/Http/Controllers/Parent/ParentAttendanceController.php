@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\Student;
 use App\Models\Subject;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class ParentAttendanceController extends Controller
@@ -56,10 +57,35 @@ class ParentAttendanceController extends Controller
                 ->distinct();
         })->get();
 
-        // Calculate attendance percentages for each child
+        // FIX: Batch load all attendance percentages with a single query
         $attendancePercentages = [];
-        foreach ($children as $child) {
-            $attendancePercentages[$child->id] = $child->getAttendancePercentage() ?? 0;
+        if (!$children->isEmpty()) {
+            $attendanceIds = $children->pluck('id')->toArray();
+            
+            // Single batch query for all attendance percentages
+            $stats = DB::table('attendance')
+                ->whereIn('student_id', $attendanceIds)
+                ->select(
+                    'student_id',
+                    DB::raw('COUNT(*) as total'),
+                    DB::raw('SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_count')
+                )
+                ->groupBy('student_id')
+                ->get()
+                ->keyBy('student_id');
+            
+            // Calculate percentages in memory
+            foreach ($children as $child) {
+                $childStats = $stats->get($child->id);
+                if ($childStats && $childStats->total > 0) {
+                    $attendancePercentages[$child->id] = round(
+                        ($childStats->present_count / $childStats->total) * 100,
+                        1
+                    );
+                } else {
+                    $attendancePercentages[$child->id] = 0;
+                }
+            }
         }
 
         return view('parent.attendance.index', compact('children', 'attendance', 'subjects', 'attendancePercentages'));

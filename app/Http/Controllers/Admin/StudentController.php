@@ -144,7 +144,7 @@ class StudentController extends Controller
 
         // Export as CSV if requested
         if (request('export') === 'csv') {
-            $rows = $builder->get();
+            $rows = $builder->with('student')->get();  // FIX: Eager load to avoid N+1 queries
             $filename = 'students_' . date('Ymd_His') . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
@@ -256,7 +256,7 @@ class StudentController extends Controller
 
         // Export as CSV if requested
         if (request('export') === 'csv') {
-            $rows = $builder->get();
+            $rows = $builder->with('student')->get();  // FIX: Eager load to avoid N+1 queries
             $filename = 'alumni_students_' . date('Ymd_His') . '.csv';
             $headers = [
                 'Content-Type' => 'text/csv',

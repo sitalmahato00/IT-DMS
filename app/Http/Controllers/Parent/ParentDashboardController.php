@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\Exam;
 use App\Models\ExamMark;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ParentDashboardController extends Controller
 {
@@ -22,13 +23,40 @@ class ParentDashboardController extends Controller
         $children = Student::where('parent_id', $parentUser->id)->get();
         $childrenCount = $children->count();
 
-        // Calculate overall attendance percentage
+        // FIX: Batch load all attendance data ONCE instead of N queries in loops
+        $attendanceStats = collect();
+        if ($childrenCount > 0) {
+            $childrenIds = $children->pluck('id')->toArray();
+            
+            // Single query for all attendance data
+            $stats = DB::table('attendance')
+                ->whereIn('student_id', $childrenIds)
+                ->select(
+                    'student_id',
+                    DB::raw('COUNT(*) as total'),
+                    DB::raw('SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_count')
+                )
+                ->groupBy('student_id')
+                ->get()
+                ->keyBy('student_id');
+            
+            // Calculate percentages in memory
+            foreach ($children as $child) {
+                $childStats = $stats->get($child->id);
+                $percentage = 0;
+                
+                if ($childStats && $childStats->total > 0) {
+                    $percentage = ($childStats->present_count / $childStats->total) * 100;
+                }
+                
+                $attendanceStats[$child->id] = round($percentage, 1);
+            }
+        }
+
+        // Calculate overall attendance using cached data
         $overallAttendance = 0;
         if ($childrenCount > 0) {
-            $totalAttendance = 0;
-            foreach ($children as $child) {
-                $totalAttendance += $child->getAttendancePercentage() ?? 0;
-            }
+            $totalAttendance = $attendanceStats->sum();
             $overallAttendance = round($totalAttendance / $childrenCount);
         }
 
@@ -66,11 +94,11 @@ class ParentDashboardController extends Controller
             })->unique()->count();
         }
 
-        // Get academic alerts (combine low attendance and low marks)
+        // Create academic alerts using cached attendance data
         $academicAlerts = collect();
         if ($childrenCount > 0) {
             foreach ($children as $child) {
-                $attendance = $child->getAttendancePercentage() ?? 0;
+                $attendance = $attendanceStats->get($child->id, 0);
                 if ($attendance < 75) {
                     $academicAlerts->push([
                         'type' => 'attendance',
