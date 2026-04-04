@@ -602,10 +602,19 @@ class ExamController extends Controller
         try {
 $exam->load(['subject', 'marks.student']);
             
-            // Get statistics
-            $totalStudents = $exam->marks()->count();
-            $averageMarks = $exam->marks()->avg('marks_obtained');
-            $passCount = $exam->marks()->where('percentage', '>=', 35)->count();
+            // Get statistics (FIX #4: Single query instead of 3 separate queries)
+            $stats = DB::table('exam_marks')
+                ->where('exam_id', $exam->id)
+                ->selectRaw('
+                    COUNT(*) as total_students,
+                    AVG(marks_obtained) as average_marks,
+                    SUM(CASE WHEN percentage >= 35 THEN 1 ELSE 0 END) as pass_count
+                ')
+                ->first();
+            
+            $totalStudents = $stats->total_students ?? 0;
+            $averageMarks = $stats->average_marks ?? 0;
+            $passCount = $stats->pass_count ?? 0;
             $passRate = $totalStudents > 0 ? round(($passCount / $totalStudents) * 100, 2) : 0;
 
             // Provide subjects list for upload modal (optional subject override)
@@ -930,10 +939,19 @@ $exam->load(['subject', 'marks.student']);
             // Reload exam with marks
 $exam->load(['subject', 'marks.student.user']);
 
-            // Get updated statistics
-            $totalStudents = $exam->marks()->count();
-            $averageMarks = $exam->marks()->avg('marks_obtained');
-            $passCount = $exam->marks()->where('percentage', '>=', 35)->count();
+            // Get updated statistics (FIX #5: Single query instead of 3 separate)
+            $stats = DB::table('exam_marks')
+                ->where('exam_id', $exam->id)
+                ->selectRaw('
+                    COUNT(*) as total_students,
+                    AVG(marks_obtained) as average_marks,
+                    SUM(CASE WHEN percentage >= 35 THEN 1 ELSE 0 END) as pass_count
+                ')
+                ->first();
+            
+            $totalStudents = $stats->total_students ?? 0;
+            $averageMarks = $stats->average_marks ?? 0;
+            $passCount = $stats->pass_count ?? 0;
             $passRate = $totalStudents > 0 ? round(($passCount / $totalStudents) * 100, 2) : 0;
 
             // Get updated marks rows HTML
@@ -1014,29 +1032,39 @@ $exam->load(['subject', 'marks.student.user']);
             }
             $existingMarks = $existingMarksQuery->pluck('marks_obtained', 'student_id')->toArray();
 
-            // Get attendance percentage for each student (for the exam's subject)
+            // Get attendance percentage for each student (for the exam's subject) - FIX #6: Pre-calculate for all students
             $studentAttendance = [];
             if ($exam->subject_id) {
+                // Fetch all attendance data in ONE query instead of 2*N queries
+                $studentIds = $students->pluck('id')->toArray();
+                $attendanceStats = DB::table('attendance')
+                    ->whereIn('student_id', $studentIds)
+                    ->where('attendance_type', 'class')
+                    ->where('subject_id', $exam->subject_id)
+                    ->selectRaw('
+                        student_id,
+                        COUNT(*) as total_attendance,
+                        SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_attendance
+                    ')
+                    ->groupBy('student_id')
+                    ->pluck(null, 'student_id')
+                    ->map(function($item) {
+                        return [
+                            'total' => $item->total_attendance,
+                            'present' => $item->present_attendance,
+                            'percentage' => $item->total_attendance > 0 
+                                ? round(($item->present_attendance / $item->total_attendance) * 100, 1) 
+                                : 0,
+                        ];
+                    })
+                    ->toArray();
+                
+                // Fill in zeros for students with no attendance records
                 foreach ($students as $student) {
-                    $totalAttendance = Attendance::where('student_id', $student->id)
-                        ->where('attendance_type', 'class')
-                        ->where('subject_id', $exam->subject_id)
-                        ->count();
-                    
-                    $presentAttendance = Attendance::where('student_id', $student->id)
-                        ->where('attendance_type', 'class')
-                        ->where('subject_id', $exam->subject_id)
-                        ->where('status', 'present')
-                        ->count();
-                    
-                    $attendancePercentage = $totalAttendance > 0 
-                        ? round(($presentAttendance / $totalAttendance) * 100, 1) 
-                        : 0;
-                    
-                    $studentAttendance[$student->id] = [
-                        'total' => $totalAttendance,
-                        'present' => $presentAttendance,
-                        'percentage' => $attendancePercentage,
+                    $studentAttendance[$student->id] = $attendanceStats[$student->id] ?? [
+                        'total' => 0,
+                        'present' => 0,
+                        'percentage' => 0,
                     ];
                 }
             }
@@ -1199,37 +1227,38 @@ $exam->load(['subject', 'marks.student.user']);
                 ];
             })->toArray();
 
-            // Get attendance percentage for each student (subject-specific if subject_id is provided)
+            // Get attendance percentage for each student (subject-specific if subject_id is provided) - FIX #7: Pre-calculate all at once
             $studentAttendance = [];
             $subjectId = $request->subject_id && $request->subject_id !== '' ? (int)$request->subject_id : null;
             
+            // Fetch all attendance data in ONE query instead of 2*N queries
+            $studentIds = $students->pluck('id')->toArray();
+            $attendanceQuery = DB::table('attendance')
+                ->whereIn('student_id', $studentIds)
+                ->where('attendance_type', 'class');
+            
+            if ($subjectId) {
+                $attendanceQuery->where('subject_id', $subjectId);
+            }
+            
+            $attendanceStats = $attendanceQuery
+                ->selectRaw('
+                    student_id,
+                    COUNT(*) as total_attendance,
+                    SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_attendance
+                ')
+                ->groupBy('student_id')
+                ->pluck(null, 'student_id')
+                ->map(function($item) {
+                    return $item->total_attendance > 0 
+                        ? round(($item->present_attendance / $item->total_attendance) * 100, 1) 
+                        : 0;
+                })
+                ->toArray();
+            
+            // Fill in zeros for students with no attendance records
             foreach ($students as $student) {
-                $attendanceQuery = Attendance::where('student_id', $student->id)
-                    ->where('attendance_type', 'class');
-                
-                // If a specific subject is selected, filter attendance by that subject
-                if ($subjectId) {
-                    $attendanceQuery->where('subject_id', $subjectId);
-                }
-                
-                $totalAttendance = $attendanceQuery->count();
-                
-                $presentAttendance = Attendance::where('student_id', $student->id)
-                    ->where('attendance_type', 'class')
-                    ->where('status', 'present');
-                
-                // If a specific subject is selected, filter by that subject
-                if ($subjectId) {
-                    $presentAttendance->where('subject_id', $subjectId);
-                }
-                
-                $presentAttendance = $presentAttendance->count();
-                
-                $attendancePercentage = $totalAttendance > 0 
-                    ? round(($presentAttendance / $totalAttendance) * 100, 1) 
-                    : 0;
-                
-                $studentAttendance[$student->id] = $attendancePercentage;
+                $studentAttendance[$student->id] = $attendanceStats[$student->id] ?? 0;
             }
 
             // Get the subject name if subject_id is provided
@@ -1765,12 +1794,25 @@ $exam->load(['subject', 'marks.student.user']);
      */
     public function getStatistics(): array
     {
-        return [
-            'total_exams' => Exam::count(),
-            'published_exams' => Exam::where('status', 'published')->count(),
-            'draft_exams' => Exam::where('status', 'draft')->count(),
-            'total_marks_entries' => ExamMark::count(),
-        ];
+        // FIX #14 + #15: Aggregate stats + cache for 10 minutes
+        return \Illuminate\Support\Facades\Cache::remember('exam_statistics', 600, function() {
+            $stats = DB::table('exams')
+                ->selectRaw('
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = "published" THEN 1 ELSE 0 END) as published,
+                    SUM(CASE WHEN status = "draft" THEN 1 ELSE 0 END) as draft
+                ')
+                ->first();
+            
+            $marksCount = ExamMark::count();
+            
+            return [
+                'total_exams' => $stats->total ?? 0,
+                'published_exams' => $stats->published ?? 0,
+                'draft_exams' => $stats->draft ?? 0,
+                'total_marks_entries' => $marksCount,
+            ];
+        });
     }
 
     /**

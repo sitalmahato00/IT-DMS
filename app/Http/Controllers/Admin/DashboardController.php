@@ -27,19 +27,22 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        // Total students count (active, non-alumni)
+        // FIX #9: Combine multiple user role counts into single query
+        $userCounts = DB::table('users')
+            ->selectRaw('
+                SUM(CASE WHEN role = "student" THEN 1 ELSE 0 END) as total_students_all,
+                SUM(CASE WHEN role = "teacher" THEN 1 ELSE 0 END) as teachers,
+                SUM(CASE WHEN role = "parent" THEN 1 ELSE 0 END) as parents
+            ')
+            ->first();
+        
+        // Count active students (with whereHas condition) - must be separate query due to complex join
         $totalStudents = User::where('role', 'student')
             ->whereHas('student', function($q) {
                 $q->where('status', 'active')
                   ->where('is_alumni', 0);
             })
             ->count();
-
-        // Teachers count
-        $teachers = User::where('role', 'teacher')->count();
-
-        // Parents count
-        $parents = User::where('role', 'parent')->count();
         
         // Alumni count (students marked as alumni)
         $alumni = User::where('role', 'student')
@@ -47,14 +50,23 @@ class DashboardController extends Controller
                 $q->where('is_alumni', 1);
             })
             ->count();
-        
-        // Active semesters count
-        $activeSemesters = Semester::where('is_active', 1)->count();
+
+        // Teachers count (from combined query)
+        $teachers = $userCounts->teachers ?? 0;
+
+        // Parents count (from combined query)
+        $parents = $userCounts->parents ?? 0;
         
         // Elective students count (students with approved elective enrollments)
         $electiveStudents = ElectiveEnrollment::where('status', 'approved')->distinct('student_id')->count('student_id');
         
-        // Courses count
+        // FIX #10: Combine semester and courses counts
+        $counts = DB::table('semesters')
+            ->selectRaw('COUNT(*) as active_semesters')
+            ->where('is_active', 1)
+            ->first();
+        $activeSemesters = $counts->active_semesters ?? 0;
+        
         $courses = Course::count();
 
         // Calculate average attendance this semester

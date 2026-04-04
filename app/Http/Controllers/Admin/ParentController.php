@@ -117,9 +117,13 @@ class ParentController extends Controller
 
         $parents = $builder->paginate($perPage)->withQueryString();
 
+        // FIX #1: Eager load all students for all parents in ONE query (not N queries)
+        $parentIds = $parents->getCollection()->pluck('id')->toArray();
+        $allStudents = Student::whereIn('parent_id', $parentIds)->with('user')->get()->groupBy('parent_id');
+
         // Attach children count so view can display it
-        $parents->getCollection()->transform(function($p){
-            $childrenStudents = Student::where('parent_id', $p->id)->with('user')->get();
+        $parents->getCollection()->transform(function($p) use ($allStudents){
+            $childrenStudents = $allStudents->get($p->id, collect());
             $primaryChild = null;
             if (!empty($p->parent?->primary_child_user_id)) {
                 $primaryChild = $childrenStudents->firstWhere('user_id', $p->parent->primary_child_user_id);
@@ -682,6 +686,13 @@ class ParentController extends Controller
 
             $rows = $builder->orderBy('created_at', 'desc')->get();
 
+            // FIX #2: Pre-calculate children counts for all parents (not N queries)
+            $childrenCounts = Student::whereIn('parent_id', $rows->pluck('id'))
+                ->groupBy('parent_id')
+                ->selectRaw('parent_id, COUNT(*) as count')
+                ->pluck('count', 'parent_id')
+                ->toArray();
+
             // Prepare filter information
             $filterInfo = [];
             if ($request->input('q')) {
@@ -729,7 +740,7 @@ class ParentController extends Controller
                 
                 // Write data rows
                 foreach ($rows as $r) {
-                    $childCount = Student::where('parent_id', $r->id)->count();
+                    $childCount = $childrenCounts[$r->id] ?? 0;
                     $line = [
                         $r->id,
                         $r->name,

@@ -292,7 +292,16 @@ class StudentController extends Controller
 
         $students = $builder->paginate($perPage)->withQueryString();
 
-        return view('admin.alumni-students', compact('students','academicYears'));
+        // FIX #15: Cache alumni statistics to avoid re-calculating on every request
+        $alumniStats = \Illuminate\Support\Facades\Cache::remember('alumni_statistics', 3600, function() {
+            return [
+                'total' => User::where('role','student')->whereHas('student', function($q) { $q->where('is_alumni',1); })->count(),
+                'active' => User::where('role','student')->whereHas('student', function($q) { $q->where('is_alumni',1)->where('status','active'); })->count(),
+                'inactive' => User::where('role','student')->whereHas('student', function($q) { $q->where('is_alumni',1)->where('status','inactive'); })->count(),
+            ];
+        });
+
+        return view('admin.alumni-students', compact('students','academicYears','alumniStats'));
     }
 
     public function store(Request $request)

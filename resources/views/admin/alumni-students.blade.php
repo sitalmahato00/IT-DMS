@@ -201,19 +201,19 @@
 			'cards' => [
 				[
 					'title' => 'Total Alumni',
-					'value' => \App\Models\User::where('role','student')->whereHas('student', function($q) { $q->where('is_alumni',1); })->count(),
+					'value' => $alumniStats['total'] ?? 0,
 					'icon' => 'bi-mortarboard-fill',
 					'color' => 'purple'
 				],
 				[
 					'title' => 'Active Alumni',
-					'value' => \App\Models\User::where('role','student')->whereHas('student', function($q) { $q->where('is_alumni',1)->where('status','active'); })->count(),
+					'value' => $alumniStats['active'] ?? 0,
 					'icon' => 'bi-check-circle',
 					'color' => 'green'
 				],
 				[
 					'title' => 'Inactive Alumni',
-					'value' => \App\Models\User::where('role','student')->whereHas('student', function($q) { $q->where('is_alumni',1)->where('status','inactive'); })->count(),
+					'value' => $alumniStats['inactive'] ?? 0,
 					'icon' => 'bi-x-circle',
 					'color' => 'orange'
 				]
