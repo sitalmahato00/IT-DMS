@@ -31,7 +31,8 @@
 <aside
     id="sidebar"
     x-data="{ activeGroup: @js($activeGroup), toggleGroup(group){ this.activeGroup = this.activeGroup === group ? null : group } }"
-    class="hidden lg:flex lg:w-60 bg-white text-slate-900 flex-col fixed lg:static w-64 left-0 z-30 overflow-y-auto transition-all duration-300 shadow-xl border-r border-red-500/40"
+    data-mobile-sidebar
+    class="hidden lg:flex lg:w-60 bg-white text-slate-900 flex-col fixed lg:static w-64 left-0 z-30 overflow-y-auto shadow-xl border-r border-red-500/40"
 >
     <div class="hidden lg:flex flex-col items-center justify-center px-4 py-2 min-h-[88px] bg-[#FF0037] text-white border-b border-red-500">
         @if($department && $department->logo_url)
@@ -192,71 +193,13 @@
 </aside>
 
 <style>
-    #sidebar.sidebar-collapsed {
-        width: 5rem !important;
-        min-width: 5rem !important;
-    }
-
-    #sidebar.sidebar-collapsed .sidebar-label,
-    #sidebar.sidebar-collapsed .sidebar-brand-text,
-    #sidebar.sidebar-collapsed .sidebar-section-label span {
-        display: none !important;
-    }
-
-    #sidebar.sidebar-collapsed .nav-link {
-        position: relative;
-        padding: 0.35rem 0;
-        border-radius: 999px;
-        gap: 0 !important;
-        width: 100%;
-        justify-content: center;
-    }
-
-    #sidebar.sidebar-collapsed .nav-link i {
-        display: flex !important;
-        margin: 0 auto;
-        color: #FF0037 !important;
-        font-size: 1.4rem;
-        width: 2.25rem;
-        height: 2.25rem;
-        align-items: center;
-        justify-content: center;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-
-    #sidebar.sidebar-collapsed .collapsible-section,
-    #sidebar.sidebar-collapsed .collapsible-section.section-collapsed {
-        max-height: none;
-        opacity: 1;
-        padding-top: 0;
-    }
-
-    #sidebar.sidebar-collapsed .bi {
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-
-    #sidebar.sidebar-collapsed .nav-link.bg-red-600,
-    #sidebar.sidebar-collapsed .nav-link.text-white {
-        background-color: transparent !important;
-        color: #FF0037 !important;
-    }
-
-    @media (max-width: 1023px) {
-        #sidebar {
-            top: 40px;
-            height: calc(100vh - 40px);
-            max-height: calc(100vh - 40px);
-        }
-    }
-
     @media (min-width: 1024px) {
         #sidebar {
             position: static;
             height: 100vh;
             max-height: 100vh;
             top: auto;
+            transform: none !important;
         }
     }
 </style>

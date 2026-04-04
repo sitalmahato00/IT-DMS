@@ -5,6 +5,12 @@ import collapse from '@alpinejs/collapse';
 import Chart from 'chart.js/auto';
 import $ from 'jquery';
 
+if (document.body?.hasAttribute('data-mobile-shell')) {
+    import('./mobile-app').catch((error) => {
+        console.warn('Mobile app runtime failed to load:', error);
+    });
+}
+
 // Make jQuery available globally (nepali-date-picker expects global jQuery)
 globalThis.$ = globalThis.jQuery = $;
 
@@ -147,83 +153,105 @@ window.openBsDatePicker = function (inputOrId) {
     });
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const ok = await ensureBsDatePickerLoaded();
-    if (ok) initBsDatePicker();
+let themeMediaListenerRegistered = false;
 
-    // Dark Mode Toggle Functionality
-    const darkModeButtons = Array.from(document.querySelectorAll('#darkModeToggle'));
+function getThemePreference() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+        return savedTheme;
+    }
+
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+    }
+
+    return 'light';
+}
+
+function getDarkModeButtons(root = document) {
+    return Array.from(root.querySelectorAll('#darkModeToggle'));
+}
+
+function updateThemeIcons(theme) {
+    const isDark = theme === 'dark';
     const darkModeIcon = document.getElementById('darkModeIcon');
     const moonIconSvg = document.getElementById('moonIcon');
     const sunIconSvg = document.getElementById('sunIcon');
+
+    if (darkModeIcon) {
+        darkModeIcon.classList.toggle('bi-moon-fill', !isDark);
+        darkModeIcon.classList.toggle('bi-sun-fill', isDark);
+    }
+
+    if (moonIconSvg && sunIconSvg) {
+        moonIconSvg.classList.toggle('hidden', isDark);
+        sunIconSvg.classList.toggle('hidden', !isDark);
+    }
+
+    getDarkModeButtons().forEach((button) => {
+        button.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+        button.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+    });
+}
+
+function applyTheme(theme) {
     const html = document.documentElement;
 
-    function getThemePreference() {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark' || savedTheme === 'light') {
-            return savedTheme;
-        }
-
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark';
-        }
-
-        return 'light';
+    if (theme === 'dark') {
+        html.classList.add('dark');
+    } else {
+        html.classList.remove('dark');
     }
 
-    function updateThemeIcons(theme) {
-        const isDark = theme === 'dark';
+    localStorage.setItem('theme', theme);
+    updateThemeIcons(theme);
+}
 
-        if (darkModeIcon) {
-            darkModeIcon.classList.toggle('bi-moon-fill', !isDark);
-            darkModeIcon.classList.toggle('bi-sun-fill', isDark);
+function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+}
+
+function initThemeControls(root = document) {
+    applyTheme(getThemePreference());
+
+    getDarkModeButtons(root).forEach((button) => {
+        if (button.dataset.themeToggleBound === 'true') {
+            return;
         }
 
-        if (moonIconSvg && sunIconSvg) {
-            moonIconSvg.classList.toggle('hidden', isDark);
-            sunIconSvg.classList.toggle('hidden', !isDark);
-        }
-
-        darkModeButtons.forEach((button) => {
-            button.setAttribute('aria-pressed', isDark ? 'true' : 'false');
-            button.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
-        });
-    }
-
-    function applyTheme(theme) {
-        if (theme === 'dark') {
-            html.classList.add('dark');
-        } else {
-            html.classList.remove('dark');
-        }
-
-        localStorage.setItem('theme', theme);
-        updateThemeIcons(theme);
-    }
-
-    function toggleTheme() {
-        const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        applyTheme(newTheme);
-    }
-
-    // Initialize theme
-    const initialTheme = getThemePreference();
-    applyTheme(initialTheme);
-
-    // Add toggle event listeners
-    darkModeButtons.forEach((button) => {
+        button.dataset.themeToggleBound = 'true';
         button.addEventListener('click', toggleTheme);
     });
 
-    // Listen for system preference changes only when user hasn't set explicit theme
-    if (window.matchMedia) {
+    if (!themeMediaListenerRegistered && window.matchMedia) {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
             if (!localStorage.getItem('theme')) {
                 applyTheme(e.matches ? 'dark' : 'light');
             }
         });
+
+        themeMediaListenerRegistered = true;
     }
+}
+
+window.reinitializeThemeToggle = initThemeControls;
+window.ensureBsDatePickerLoaded = ensureBsDatePickerLoaded;
+window.reinitializeBaseUi = async function (root = document) {
+    initThemeControls(root);
+
+    const ok = await ensureBsDatePickerLoaded();
+    if (ok) {
+        initBsDatePicker(root);
+    }
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const ok = await ensureBsDatePickerLoaded();
+    if (ok) initBsDatePicker();
+    initThemeControls(document);
 
     // Watch for dynamically added inputs (modals, AJAX content)
     const obs = new MutationObserver((mutations) => {

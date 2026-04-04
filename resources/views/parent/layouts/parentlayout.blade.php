@@ -2,15 +2,16 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'IT Department Management System (IT-DMS)') - Parent</title>
+    @include('partials.pwa-head', ['themeColor' => '#FF0037'])
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script>
+    <script data-mobile-static-script>
         document.documentElement.classList.add('parent-ui-enhanced');
     </script>
-    <style>
+    <style data-mobile-static-style>
         html.parent-ui-enhanced:not(.dark) {
             --parent-surface-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 249, 250, 0.97));
             --parent-surface-border: rgba(241, 213, 219, 0.95);
@@ -279,7 +280,8 @@
     @yield('styles')
     @stack('styles')
 </head>
-<body class="font-sans antialiased bg-gray-50 dark:bg-gray-900">
+<body class="font-sans antialiased bg-gray-50 dark:bg-gray-900" data-mobile-shell="parent" data-mobile-role="parent" data-mobile-route="{{ Route::currentRouteName() ?? '' }}">
+    <div id="mobileAppShellRoot" data-mobile-shell-root>
     <!-- Global Loader -->
     <div id="globalLoader" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
         <div class="bg-white rounded-lg shadow-lg p-8 flex flex-col items-center gap-4">
@@ -311,25 +313,28 @@
     <div id="flashError" class="hidden" data-message="{{ session('error') }}"></div>
     @endif
 
-    <div class="flex h-screen overflow-hidden dark:bg-gray-900">
+    <div class="flex min-h-[100dvh] lg:h-screen overflow-hidden dark:bg-gray-900" data-mobile-shell-layout>
         <!-- Parent Sidebar -->
         @include('parent.components.parentsidebar')
+        <div id="sidebarBackdrop" class="hidden lg:hidden fixed inset-0 z-20 bg-black/50"></div>
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex-1 flex flex-col overflow-hidden" data-mobile-shell-panel>
             <!-- Parent Header -->
             @include('parent.components.parentheader')
 
             <!-- Page Content -->
-            <main class="flex-1 overflow-auto">
+            <main class="flex-1 overflow-auto" data-mobile-main>
                 <div class="parent-content-shell p-6 lg:p-8">
                     @yield('content')
                 </div>
             </main>
         </div>
     </div>
+    @include('partials.mobile-bottom-nav', ['role' => 'parent'])
+    </div>
 
-    <script>
+    <script data-mobile-static-script>
         // Toast notification system
         function showToast(message, type = 'success', subMessage = '') {
             const toast = document.getElementById('toastNotification');
@@ -377,4 +382,3 @@
     @yield('scripts')
 </body>
 </html>
-

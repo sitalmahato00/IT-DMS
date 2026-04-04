@@ -2,13 +2,14 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'IT Department Management System (IT-DMS)') - Admin</title>
+    @include('partials.pwa-head', ['themeColor' => '#FF0037'])
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('styles')
-    <style>
+    <style data-mobile-static-style>
         @media (max-width: 640px) {
             #adminLayoutShell .fixed.inset-0.pointer-events-none {
                 opacity: 0.04;
@@ -565,7 +566,7 @@
             color: rgba(251, 113, 133, 0.72) !important;
         }
     </style>
-    <script>
+    <script data-mobile-static-script>
         // Early initialization to prevent sidebar from showing on mobile on page load
         (function() {
             const mobileBreakpoint = 1024;
@@ -590,7 +591,8 @@
         })();
     </script>
 </head>
-<body class="admin-panel font-sans antialiased bg-gray-50 overflow-x-hidden max-w-full">
+<body class="admin-panel font-sans antialiased bg-gray-50 overflow-x-hidden max-w-full" data-mobile-shell="admin" data-mobile-role="admin" data-mobile-route="{{ Route::currentRouteName() ?? '' }}">
+    <div id="mobileAppShellRoot" data-mobile-shell-root>
     <!-- Department Logo Background for All Pages -->
     <div class="fixed inset-0 pointer-events-none opacity-10 z-0 flex items-center justify-center">
         @if(isset($departmentLogoUrl))
@@ -634,7 +636,7 @@
     @endif
 
     <!-- Main Container -->
-    <div id="adminLayoutShell" class="flex h-screen w-full max-w-full overflow-x-hidden">
+    <div id="adminLayoutShell" class="flex min-h-[100dvh] lg:h-screen w-full max-w-full overflow-x-hidden" data-mobile-shell-layout>
         <!-- Sidebar Component -->
         @include('admin.components.sidebar')
 
@@ -642,12 +644,12 @@
         <div id="sidebarBackdrop" class="hidden lg:hidden fixed inset-0 z-[45] bg-black/40"></div>
 
         <!-- Main Content -->
-        <div id="adminMainPanel" class="flex-1 min-w-0 flex flex-col">
+        <div id="adminMainPanel" class="flex-1 min-w-0 flex flex-col" data-mobile-shell-panel>
             <!-- Header Component -->
             @include('admin.components.header')
 
             <!-- Page Content -->
-            <main id="adminPageContent" class="flex-1 min-w-0 overflow-y-auto overflow-x-hidden min-h-0">
+            <main id="adminPageContent" class="flex-1 min-w-0 overflow-y-auto overflow-x-hidden min-h-0" data-mobile-main>
                 <div class="min-h-full w-full px-3 py-3 sm:px-6">
                     @yield('content')
                 </div>
@@ -690,14 +692,18 @@
     </div>
 
     @yield('ajax-modal')
+    @include('partials.mobile-bottom-nav', ['role' => 'admin'])
+    </div>
 
     @yield('scripts')
     @stack('scripts')
 
-    <script>
+    <script data-mobile-static-script>
         window.adminPrintPreviewState = {
             url: '',
             previousOverflow: '',
+            ready: false,
+            pendingPrint: false,
         };
 
         function adminOpenPrintPreview(url, options = {}) {
@@ -712,6 +718,8 @@
 
             window.adminPrintPreviewState.url = url;
             window.adminPrintPreviewState.previousOverflow = document.body.style.overflow;
+            window.adminPrintPreviewState.ready = false;
+            window.adminPrintPreviewState.pendingPrint = false;
 
             if (title) {
                 title.textContent = options.title || '{{ __('Print Preview') }}';
@@ -720,6 +728,15 @@
             if (subtitle) {
                 subtitle.textContent = options.subtitle || '{{ __('A4 preview (use Print to open dialog)') }}';
             }
+
+            frame.onload = () => {
+                window.adminPrintPreviewState.ready = true;
+
+                if (window.adminPrintPreviewState.pendingPrint) {
+                    window.adminPrintPreviewState.pendingPrint = false;
+                    adminPrintPreviewFrame();
+                }
+            };
 
             frame.src = url;
             modal.classList.remove('hidden');
@@ -756,8 +773,27 @@
 
         function adminPrintPreviewFrame() {
             const frame = document.getElementById('adminPrintPreviewFrame');
-            if (frame && frame.contentWindow) {
-                frame.contentWindow.print();
+            if (!frame || !frame.contentWindow) {
+                return;
+            }
+
+            if (!window.adminPrintPreviewState.ready) {
+                window.adminPrintPreviewState.pendingPrint = true;
+                return;
+            }
+
+            try {
+                frame.contentWindow.focus();
+                setTimeout(() => {
+                    try {
+                        frame.contentWindow.focus();
+                        frame.contentWindow.print();
+                    } catch (error) {
+                        console.error('Admin print preview failed', error);
+                    }
+                }, 100);
+            } catch (error) {
+                console.error('Admin print preview failed', error);
             }
         }
 
@@ -889,7 +925,7 @@
         }
     </style>
 
-    <script>
+    <script data-mobile-static-script>
         document.addEventListener('DOMContentLoaded', function() {
             // Handle flash messages from Laravel
             const flashSuccess = document.getElementById('flashSuccess');

@@ -1,15 +1,11 @@
 <!-- Teacher Header -->
-<header class="bg-[#FF0037] dark:bg-[#FF0037] shadow-sm border-b border-red-500 text-white">
+<header class="bg-[#FF0037] dark:bg-[#FF0037] shadow-sm border-b border-red-500 text-white" data-mobile-app-header>
     <div class="px-6 py-0 h-16">
         <div class="flex items-center justify-between gap-4 h-full">
             <div class="flex-1 min-w-0 flex items-center h-full gap-3">
                 <!-- Mobile sidebar toggle -->
                 <button id="sidebarToggle" class="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-white text-[#FF0037] border border-white/80 shadow-sm hover:bg-gray-100 transition flex-shrink-0" title="Toggle Sidebar">
                     <i class="bi bi-list text-[#FF0037] text-lg"></i>
-                </button>
-                <!-- Desktop sidebar collapse toggle -->
-                <button id="desktopSidebarToggle" class="hidden lg:flex items-center justify-center w-9 h-9 rounded-lg hover:bg-red-500 transition flex-shrink-0" title="Toggle Sidebar">
-                    <i class="bi bi-layout-sidebar text-white/80 text-lg"></i>
                 </button>
                 <div class="space-y-0 flex flex-col justify-center h-full">
                     <h2 class="text-lg font-bold text-white truncate leading-tight">{{ trim($__env->yieldContent('title', 'Dashboard')) }}</h2>
@@ -126,7 +122,7 @@
     </div>
 </header>
 
-<script>
+<script data-mobile-static-script>
     // Profile dropdown toggle
     document.getElementById('profileToggle').addEventListener('click', function(e) {
         e.stopPropagation();

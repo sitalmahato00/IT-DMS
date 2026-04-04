@@ -2,17 +2,18 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', 'IT Department Management System (IT-DMS)') - Student</title>
+    @include('partials.pwa-head', ['themeColor' => '#FF0037'])
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script>
+    <script data-mobile-static-script>
         document.documentElement.classList.add('student-ui-enhanced');
     </script>
-    <style>
+    <style data-mobile-static-style>
         html.student-ui-enhanced:not(.dark) {
             --student-surface-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 249, 250, 0.97));
             --student-surface-border: rgba(241, 213, 219, 0.95);
@@ -281,7 +282,8 @@
     @yield('styles')
     @stack('styles')
 </head>
-<body class="student-panel font-sans antialiased bg-gray-50 dark:bg-gray-900">
+<body class="student-panel font-sans antialiased bg-gray-50 dark:bg-gray-900" data-mobile-shell="student" data-mobile-role="student" data-mobile-route="{{ Route::currentRouteName() ?? '' }}">
+    <div id="mobileAppShellRoot" data-mobile-shell-root>
     <div class="fixed inset-0 pointer-events-none opacity-10 z-0 flex items-center justify-center">
         @if(isset($departmentLogoUrl))
             <img src="{{ $departmentLogoUrl }}" alt="{{ __('Department Logo') }}" class="w-[600px] h-[600px] object-contain">
@@ -321,15 +323,15 @@
         <div id="flashWarning" class="hidden" data-message="{{ session('warning') }}"></div>
     @endif
 
-    <div class="flex h-screen overflow-hidden dark:bg-gray-900">
+    <div class="flex min-h-[100dvh] lg:h-screen overflow-hidden dark:bg-gray-900" data-mobile-shell-layout>
         @include('student.components.studentsidebar')
 
         <div id="sidebarBackdrop" class="hidden lg:hidden fixed inset-0 z-20 bg-black/50"></div>
 
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex-1 flex flex-col overflow-hidden" data-mobile-shell-panel>
             @include('student.components.studentheader')
 
-            <main class="flex-1 overflow-y-auto min-h-0">
+            <main class="flex-1 overflow-y-auto min-h-0" data-mobile-main>
                 <div class="student-content-shell px-6 py-3 min-h-full">
                     @yield('content')
                 </div>
@@ -372,10 +374,12 @@
     </div>
 
     @yield('ajax-modal')
+    @include('partials.mobile-bottom-nav', ['role' => 'student'])
+    </div>
     @yield('scripts')
     @stack('scripts')
 
-    <script>
+    <script data-mobile-static-script>
         window.studentPrintPreviewState = {
             url: '',
             previousOverflow: '',
@@ -528,71 +532,9 @@
         document.addEventListener('DOMContentLoaded', function () {
             const sidebar = document.getElementById('sidebar');
             const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-            const mobileToggle = document.getElementById('sidebarToggle');
-            const desktopToggle = document.getElementById('desktopSidebarToggle');
-            const collapsedStorageKey = 'student-sidebar-collapsed';
-
-            const openMobileSidebar = () => {
-                if (!sidebar) {
-                    return;
-                }
-
-                sidebar.classList.remove('hidden');
-                sidebarBackdrop?.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            };
-
-            const closeMobileSidebar = () => {
-                if (!sidebar || window.innerWidth >= 1024) {
-                    sidebarBackdrop?.classList.add('hidden');
-                    document.body.style.overflow = '';
-                    return;
-                }
-
-                sidebar.classList.add('hidden');
-                sidebarBackdrop?.classList.add('hidden');
-                document.body.style.overflow = '';
-            };
-
-            mobileToggle?.addEventListener('click', function () {
-                if (!sidebar) {
-                    return;
-                }
-
-                if (sidebar.classList.contains('hidden')) {
-                    openMobileSidebar();
-                } else {
-                    closeMobileSidebar();
-                }
-            });
-
-            sidebarBackdrop?.addEventListener('click', closeMobileSidebar);
-
-            desktopToggle?.addEventListener('click', function () {
-                if (!sidebar) {
-                    return;
-                }
-
-                sidebar.classList.toggle('sidebar-collapsed');
-
-                const icon = desktopToggle.querySelector('i');
-                if (sidebar.classList.contains('sidebar-collapsed')) {
-                    icon?.classList.remove('bi-layout-sidebar');
-                    icon?.classList.add('bi-layout-sidebar-reverse');
-                    localStorage.setItem(collapsedStorageKey, '1');
-                } else {
-                    icon?.classList.remove('bi-layout-sidebar-reverse');
-                    icon?.classList.add('bi-layout-sidebar');
-                    localStorage.removeItem(collapsedStorageKey);
-                }
-            });
-
-            if (sidebar && localStorage.getItem(collapsedStorageKey) === '1') {
-                sidebar.classList.add('sidebar-collapsed');
-                const icon = desktopToggle?.querySelector('i');
-                icon?.classList.remove('bi-layout-sidebar');
-                icon?.classList.add('bi-layout-sidebar-reverse');
-            }
+            sidebar?.classList.remove('sidebar-collapsed');
+            localStorage.removeItem('student-sidebar-collapsed');
+            sidebarBackdrop?.classList.add('hidden');
 
             window.addEventListener('resize', function () {
                 if (window.innerWidth >= 1024) {

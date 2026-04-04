@@ -9,16 +9,12 @@
     $__unreadCount = $user ? $user->unreadNotifications()->count() : 0;
 @endphp
 
-<header class="bg-[#FF0037] dark:bg-[#FF0037] shadow-sm border-b border-red-500 text-white">
+<header class="bg-[#FF0037] dark:bg-[#FF0037] shadow-sm border-b border-red-500 text-white" data-mobile-app-header>
     <div class="px-6 py-0 h-16">
         <div class="flex items-center justify-between gap-4 h-full">
             <div class="flex min-w-0 flex-1 items-center gap-3">
                 <button id="sidebarToggle" class="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-white text-[#FF0037] border border-white/80 shadow-sm hover:bg-gray-100 transition flex-shrink-0" title="{{ __('Toggle Sidebar') }}">
                     <i class="bi bi-list text-lg"></i>
-                </button>
-
-                <button id="desktopSidebarToggle" class="hidden lg:flex items-center justify-center w-9 h-9 rounded-lg hover:bg-red-500 transition flex-shrink-0" title="{{ __('Toggle Sidebar') }}">
-                    <i class="bi bi-layout-sidebar text-white/80 text-lg"></i>
                 </button>
 
                 <div class="min-w-0">
@@ -134,7 +130,7 @@
     </div>
 </header>
 
-<script>
+<script data-mobile-static-script>
     document.addEventListener('DOMContentLoaded', function () {
         const localeSelect = document.getElementById('locale-select');
         const notifToggle = document.getElementById('notifToggle');

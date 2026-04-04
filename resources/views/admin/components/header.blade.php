@@ -1,5 +1,5 @@
 <!-- Header -->
-<header id="adminTopHeader" class="w-full bg-[#FF0037] dark:bg-[#FF0037] shadow-md border-b border-[#D90033] dark:border-[#D90033] text-white red-header">
+<header id="adminTopHeader" class="w-full bg-[#FF0037] dark:bg-[#FF0037] shadow-md border-b border-[#D90033] dark:border-[#D90033] text-white red-header" data-mobile-app-header>
     <div class="px-3 py-3 sm:px-6 sm:py-4">
         <div class="flex items-center justify-between gap-4">
             <!-- Left Section: Title & Department -->
@@ -77,7 +77,7 @@
                             <p class="text-sm font-semibold text-gray-900 flex items-center gap-2">
                                 <i class="bi bi-bell text-red-700"></i> {{ __('Notifications') }}
                             </p>
-                            <button id="markAllReadBtn" class="text-xs text-[#D5002C] hover:text-[#B00029] font-medium">{{ __('Mark all read') }}</button>
+                            <button id="markAllReadBtn" class="text-xs text-[#D5002C] hover:text-[#B00029] font-medium" data-mark-all-read-url="{{ route('admin.notifications.markRead') }}">{{ __('Mark all read') }}</button>
                         </div>
                         <div class="max-h-72 overflow-y-auto divide-y divide-gray-50">
                             @forelse($__notifList as $n)
@@ -153,162 +153,13 @@
     </div>
 </header>
 
-<script>
+<script data-mobile-static-script>
     document.addEventListener('DOMContentLoaded', function() {
         const localeSelect = document.getElementById('locale-select');
         const notifDropdown = document.getElementById('notifDropdown');
-        
-        // Mobile Sidebar Toggle
-        const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
         const sidebar = document.getElementById('sidebar');
-        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-        const desktopSidebarToggle = document.getElementById('desktopSidebarToggle');
-        const mobileBreakpoint = 1024;
-        let hideSidebarTimer = null;
-
-        function isMobileViewport() {
-            return window.innerWidth < mobileBreakpoint;
-        }
-
-        function clearSidebarHideTimer() {
-            if (hideSidebarTimer) {
-                window.clearTimeout(hideSidebarTimer);
-                hideSidebarTimer = null;
-            }
-        }
-
-        function openMobileSidebar() {
-            if (!sidebar) {
-                return;
-            }
-
-            clearSidebarHideTimer();
-            sidebar.classList.remove('hidden');
-            requestAnimationFrame(() => {
-                sidebar.classList.remove('-translate-x-full');
-            });
-            if (sidebarBackdrop) {
-                sidebarBackdrop.classList.remove('hidden');
-                sidebarBackdrop.style.display = 'block';
-            }
-            document.body.classList.add('overflow-hidden');
-        }
-
-        function closeMobileSidebar() {
-            if (!sidebar) {
-                return;
-            }
-
-            clearSidebarHideTimer();
-            sidebar.classList.add('-translate-x-full');
-            if (sidebarBackdrop) {
-                sidebarBackdrop.classList.add('hidden');
-                sidebarBackdrop.style.display = '';
-            }
-            document.body.classList.remove('overflow-hidden');
-
-            if (isMobileViewport()) {
-                hideSidebarTimer = window.setTimeout(() => {
-                    if (sidebar.classList.contains('-translate-x-full')) {
-                        sidebar.classList.add('hidden');
-                    }
-                }, 300);
-            } else {
-                sidebar.classList.remove('hidden');
-            }
-        }
-
-        function syncSidebarForViewport() {
-            if (!sidebar) {
-                return;
-            }
-
-            clearSidebarHideTimer();
-
-            if (isMobileViewport()) {
-                sidebar.classList.add('hidden');
-                sidebar.classList.add('-translate-x-full');
-                if (sidebarBackdrop) {
-                    sidebarBackdrop.classList.add('hidden');
-                    sidebarBackdrop.style.display = '';
-                }
-                document.body.classList.remove('overflow-hidden');
-                return;
-            }
-
-            sidebar.classList.remove('hidden');
-            sidebar.classList.remove('-translate-x-full');
-            if (sidebarBackdrop) {
-                sidebarBackdrop.classList.add('hidden');
-                sidebarBackdrop.style.display = '';
-            }
-            document.body.classList.remove('overflow-hidden');
-        }
-
-        syncSidebarForViewport();
-
-        if (mobileSidebarToggle && sidebar) {
-            mobileSidebarToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-
-                if (sidebar.classList.contains('hidden') || sidebar.classList.contains('-translate-x-full')) {
-                    openMobileSidebar();
-                    return;
-                }
-
-                closeMobileSidebar();
-            });
-        }
-
-        if (sidebarBackdrop) {
-            sidebarBackdrop.addEventListener('click', function() {
-                closeMobileSidebar();
-            });
-        }
-
-        const mainPanel = document.getElementById('adminMainPanel');
-        const pageContent = document.getElementById('adminPageContent');
-        [mainPanel, pageContent].forEach((target) => {
-            target?.addEventListener('click', function() {
-                if (!isMobileViewport()) {
-                    return;
-                }
-
-                if (!sidebar.classList.contains('hidden') && !sidebar.classList.contains('-translate-x-full')) {
-                    closeMobileSidebar();
-                }
-            });
-        });
-
-        document.addEventListener('pointerdown', function(e) {
-            if (!isMobileViewport() || !sidebar || sidebar.classList.contains('hidden') || sidebar.classList.contains('-translate-x-full')) {
-                return;
-            }
-
-            if (sidebar.contains(e.target) || mobileSidebarToggle?.contains(e.target)) {
-                return;
-            }
-
-            closeMobileSidebar();
-        });
-
-        window.addEventListener('resize', function() {
-            syncSidebarForViewport();
-        });
-
-        window.adminCloseMobileSidebar = closeMobileSidebar;
-
-        // Close sidebar when clicking on a sidebar navigation link or logout button
-        const sidebarLinks = sidebar?.querySelectorAll('a, form button[type="submit"]');
-        if (sidebarLinks) {
-            sidebarLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    if (isMobileViewport()) {
-                        closeMobileSidebar();
-                    }
-                });
-            });
-        }
+        sidebar?.classList.remove('sidebar-collapsed');
+        localStorage.removeItem('sidebar-collapsed');
 
         if (localeSelect) {
             localeSelect.addEventListener('change', function() {
@@ -350,34 +201,10 @@
             });
         }
 
-        // Desktop sidebar collapse
-        if (desktopSidebarToggle && sidebar) {
-            desktopSidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('sidebar-collapsed');
-                // Toggle icon
-                const icon = desktopSidebarToggle.querySelector('i');
-                if (sidebar.classList.contains('sidebar-collapsed')) {
-                    icon.classList.remove('bi-layout-sidebar');
-                    icon.classList.add('bi-layout-sidebar-reverse');
-                    localStorage.setItem('sidebar-collapsed', '1');
-                } else {
-                    icon.classList.remove('bi-layout-sidebar-reverse');
-                    icon.classList.add('bi-layout-sidebar');
-                    localStorage.removeItem('sidebar-collapsed');
-                }
-            });
-            // Restore state
-            if (localStorage.getItem('sidebar-collapsed') === '1') {
-                sidebar.classList.add('sidebar-collapsed');
-                const icon = desktopSidebarToggle.querySelector('i');
-                icon.classList.remove('bi-layout-sidebar');
-                icon.classList.add('bi-layout-sidebar-reverse');
-            }
-        }
     });
 </script>
 
-<script>
+<script data-mobile-static-script>
     // Notifications dropdown, polling & actions
     let notificationPollingInitialized = false;
     

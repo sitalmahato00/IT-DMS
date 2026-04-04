@@ -2,15 +2,16 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'IT Department Management System (IT-DMS)') - Teacher</title>
+    @include('partials.pwa-head', ['themeColor' => '#FF0037'])
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script>
+    <script data-mobile-static-script>
         document.documentElement.classList.add('teacher-ui-enhanced');
     </script>
-    <style>
+    <style data-mobile-static-style>
         html.teacher-ui-enhanced:not(.dark) {
             --teacher-surface-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 249, 250, 0.97));
             --teacher-surface-border: rgba(241, 213, 219, 0.95);
@@ -421,15 +422,6 @@
             border-color: rgba(148, 163, 184, 0.16);
         }
 
-        html.teacher-ui-enhanced.dark #sidebar.sidebar-collapsed .nav-link i {
-            color: #fda4af !important;
-        }
-
-        html.teacher-ui-enhanced.dark #sidebar.sidebar-collapsed .nav-link.bg-red-600,
-        html.teacher-ui-enhanced.dark #sidebar.sidebar-collapsed .nav-link.text-white {
-            color: #fecaca !important;
-        }
-
         html.teacher-ui-enhanced.dark .teacher-panel header {
             box-shadow: 0 22px 44px -28px rgba(2, 6, 23, 0.78);
         }
@@ -704,7 +696,8 @@
     @yield('styles')
     @stack('styles')
 </head>
-<body class="teacher-panel font-sans antialiased bg-gray-50 dark:bg-gray-900">
+<body class="teacher-panel font-sans antialiased bg-gray-50 dark:bg-gray-900" data-mobile-shell="teacher" data-mobile-role="teacher" data-mobile-route="{{ Route::currentRouteName() ?? '' }}">
+    <div id="mobileAppShellRoot" data-mobile-shell-root>
     <!-- Department Logo Background for All Pages -->
     <div class="fixed inset-0 pointer-events-none opacity-10 z-0 flex items-center justify-center">
         @if(isset($departmentLogoUrl))
@@ -745,17 +738,18 @@
     <div id="flashError" class="hidden" data-message="{{ session('error') }}"></div>
     @endif
 
-    <div class="flex h-screen overflow-hidden dark:bg-gray-900">
+    <div class="flex min-h-[100dvh] lg:h-screen overflow-hidden dark:bg-gray-900" data-mobile-shell-layout>
         <!-- Teacher Sidebar -->
         @include('teacher.components.teachersidebar')
+        <div id="sidebarBackdrop" class="hidden lg:hidden fixed inset-0 z-20 bg-black/50"></div>
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex-1 flex flex-col overflow-hidden" data-mobile-shell-panel>
             <!-- Teacher Header -->
             @include('teacher.components.teacherheader')
 
             <!-- Page Content -->
-            <main class="teacher-content-shell flex-1 overflow-auto">
+            <main class="teacher-content-shell flex-1 overflow-auto" data-mobile-main>
                 <div class="teacher-page-body p-6 lg:p-8">
                     @yield('content')
                 </div>
@@ -796,8 +790,10 @@
             </div>
         </div>
     </div>
+    @include('partials.mobile-bottom-nav', ['role' => 'teacher'])
+    </div>
 
-    <script>
+    <script data-mobile-static-script>
         window.teacherPrintPreviewState = {
             url: '',
             previousOverflow: '',
@@ -919,51 +915,7 @@
         // Sidebar Toggle Functionality
         (function() {
             const sidebar = document.getElementById('sidebar');
-            const mobileToggle = document.getElementById('sidebarToggle');
-            const desktopToggle = document.getElementById('desktopSidebarToggle');
-            
-            // Mobile sidebar toggle
-            if (mobileToggle && sidebar) {
-                mobileToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('hidden');
-                    sidebar.classList.toggle('fixed');
-                    sidebar.classList.toggle('inset-0');
-                    sidebar.classList.toggle('z-40');
-                    sidebar.classList.toggle('w-64');
-                    
-                    if (!sidebar.classList.contains('hidden')) {
-                        sidebar.style.height = 'calc(100vh - 40px)';
-                        sidebar.style.top = '40px';
-                    }
-                });
-            }
-            
-            // Desktop sidebar collapse toggle
-            if (desktopToggle && sidebar) {
-                desktopToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('sidebar-collapsed');
-                    
-                    // Update toggle icon
-                    const icon = desktopToggle.querySelector('i');
-                    if (sidebar.classList.contains('sidebar-collapsed')) {
-                        icon.classList.remove('bi-layout-sidebar');
-                        icon.classList.add('bi-layout-sidebar-inset');
-                    } else {
-                        icon.classList.remove('bi-layout-sidebar-inset');
-                        icon.classList.add('bi-layout-sidebar');
-                    }
-                });
-            }
-
-            // Close mobile sidebar when clicking outside
-            document.addEventListener('click', function(e) {
-                if (sidebar && !sidebar.classList.contains('hidden') && !sidebar.classList.contains('lg:flex')) {
-                    if (!sidebar.contains(e.target) && !mobileToggle?.contains(e.target)) {
-                        sidebar.classList.add('hidden');
-                        sidebar.classList.remove('fixed', 'inset-0', 'z-40');
-                    }
-                }
-            });
+            sidebar?.classList.remove('sidebar-collapsed', 'fixed', 'inset-0', 'z-40');
         })();
     </script>
 
