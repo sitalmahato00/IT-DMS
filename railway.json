@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "deploy": {
+    "startCommand": "vendor/bin/heroku-php-apache2 public/",
+    "restartPolicyMaxRetries": 5,
+    "restartPolicyWindowSeconds": 60
+  },
+  "build": {
+    "builder": "nixpacks"
+  }
+}
