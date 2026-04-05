@@ -2038,6 +2038,10 @@
                                     </div>
 
                                     <div class="mt-5 flex flex-wrap gap-3 justify-center">
+                                        <button type="button" onclick="document.getElementById('landingExamResultStudentId').scrollIntoView({ behavior: 'smooth', block: 'center' });" class="inline-flex items-center justify-center gap-2 rounded-full border border-blue-300 bg-blue-50 px-5 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/60">
+                                            <i class="bi bi-pencil"></i>
+                                            {{ $locale === 'ne' ? 'फिल्टर सम्पादन गर्नुहोस्' : 'Edit Filters' }}
+                                        </button>
                                         <a href="{{ $examResultPrintUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/15 transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400">
                                             <i class="bi bi-printer"></i>
                                             {{ $locale === 'ne' ? 'Print' : 'Print' }}
