@@ -1841,7 +1841,7 @@
                                 </div>
                             @endif
 
-                            <form method="GET" action="{{ route('home') }}" class="mt-6 space-y-5 rounded-[1.75rem] border border-[var(--landing-border)] bg-white/90 p-5 shadow-[0_20px_40px_rgba(15,23,42,0.08)] backdrop-blur dark:bg-slate-950/80" @submit="setTimeout(() => { const elem = document.getElementById('exam-result'); if(elem) elem.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100)">
+                            <form method="GET" action="{{ route('home') }}" class="mt-6 space-y-5 rounded-[1.75rem] border border-[var(--landing-border)] bg-white/90 p-5 shadow-[0_20px_40px_rgba(15,23,42,0.08)] backdrop-blur dark:bg-slate-950/80" @submit="setTimeout(() => { const elem = document.getElementById('exam-result-panel'); if(elem) elem.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300)">
                                 <input type="hidden" name="search_exam_result" value="1">
 
                                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -1933,7 +1933,7 @@
                         </div>
 
                         <div class="lg:col-span-5">
-                            <div class="landing-panel lift-card rounded-[2rem] p-5 sm:p-6 dark:bg-slate-950/80">
+                            <div id="exam-result-panel" class="landing-panel lift-card rounded-[2rem] p-5 sm:p-6 dark:bg-slate-950/80">
                                 @if($examResultSearchPerformed && $examResultPayload)
                                     @php
                                         $examResultMarks = $examResultPayload['marksheetData']['exam_marks'] ?? collect();
@@ -2038,6 +2038,10 @@
                                     </div>
 
                                     <div class="mt-5 flex flex-wrap gap-3 justify-center">
+                                        <a href="{{ route('student.profile.edit') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-900/15 transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                            <i class="bi bi-pencil"></i>
+                                            {{ $locale === 'ne' ? 'जानकारी सम्पादन गर्नुहोस्' : 'Edit Information' }}
+                                        </a>
                                         <a href="{{ $examResultPrintUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/15 transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400">
                                             <i class="bi bi-printer"></i>
                                             {{ $locale === 'ne' ? 'Print' : 'Print' }}
@@ -2695,6 +2699,20 @@
                     }));
                 });
             </script>
+
+            {{-- Auto-scroll to exam results panel on page load if results are present --}}
+            @if($examResultSearchPerformed && $examResultPayload)
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const resultPanel = document.getElementById('exam-result-panel');
+                    if (resultPanel) {
+                        setTimeout(() => {
+                            resultPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                    }
+                });
+            </script>
+            @endif
         </main>
     </div>
 @endsection
