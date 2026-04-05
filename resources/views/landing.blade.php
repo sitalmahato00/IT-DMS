@@ -200,29 +200,29 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <style>
         :root {
-            --landing-bg: linear-gradient(180deg, #f4f6fa 0%, #eef2f7 32%, #f8fafc 66%, #fdfefe 100%);
+            --landing-bg: #f8fafc;
             --landing-red: #dc2626;
             --landing-red-deep: #b91c1c;
             --landing-red-soft: #fee2e2;
-            --landing-surface: rgba(255, 255, 255, 0.985);
-            --landing-surface-soft: linear-gradient(180deg, rgba(249, 250, 251, 0.99) 0%, rgba(241, 245, 249, 0.99) 100%);
-            --landing-surface-muted: linear-gradient(180deg, rgba(255, 255, 255, 0.99) 0%, rgba(248, 250, 252, 0.99) 100%);
-            --landing-border: rgba(148, 163, 184, 0.16);
-            --landing-border-strong: rgba(220, 38, 38, 0.2);
-            --landing-shadow: 0 20px 44px rgba(15, 23, 42, 0.08);
-            --landing-shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.05);
+            --landing-surface: rgba(255, 255, 255, 0.995);
+            --landing-surface-soft: #ffffff;
+            --landing-surface-muted: #ffffff;
+            --landing-border: rgba(226, 232, 240, 0.6);
+            --landing-border-strong: rgba(220, 38, 38, 0.15);
+            --landing-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+            --landing-shadow-soft: 0 2px 8px rgba(15, 23, 42, 0.04);
             --landing-text-soft: #64748b;
         }
 
         .dark {
-            --landing-bg: linear-gradient(180deg, #020617 0%, #111827 35%, #0f172a 100%);
-            --landing-surface: rgba(15, 23, 42, 0.84);
-            --landing-surface-soft: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(17, 24, 39, 0.9) 100%);
-            --landing-surface-muted: rgba(15, 23, 42, 0.88);
-            --landing-border: rgba(148, 163, 184, 0.14);
-            --landing-border-strong: rgba(248, 113, 113, 0.26);
-            --landing-shadow: 0 26px 70px rgba(2, 6, 23, 0.55);
-            --landing-shadow-soft: 0 18px 40px rgba(2, 6, 23, 0.32);
+            --landing-bg: #0f172a;
+            --landing-surface: rgba(15, 23, 42, 0.95);
+            --landing-surface-soft: rgba(17, 24, 39, 0.98);
+            --landing-surface-muted: rgba(15, 23, 42, 0.96);
+            --landing-border: rgba(51, 65, 85, 0.5);
+            --landing-border-strong: rgba(220, 38, 38, 0.2);
+            --landing-shadow: 0 4px 16px rgba(2, 6, 23, 0.2);
+            --landing-shadow-soft: 0 2px 8px rgba(2, 6, 23, 0.1);
             --landing-text-soft: #94a3b8;
         }
 
@@ -242,17 +242,16 @@
         .landing-stage {
             position: relative;
             overflow: hidden;
-            border: 1px solid var(--landing-border);
-            border-radius: 2rem;
-            background: var(--landing-surface-soft);
-            box-shadow: var(--landing-shadow);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            border-radius: 1.75rem;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
             padding: clamp(1.5rem, 2.5vw, 2.5rem);
-            transition: transform 220ms ease, box-shadow 220ms ease;
+            transition: box-shadow 280ms ease;
         }
 
         .landing-stage:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 24px 46px rgba(15, 23, 42, 0.1);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
         }
 
         .landing-stage::before {
@@ -260,92 +259,147 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            background:
-                radial-gradient(circle at top right, rgba(248, 113, 113, 0.08), transparent 34%),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.7), transparent 26%);
+            background: transparent;
             background-size: 140% 140%, auto;
         }
 
         .dark .landing-stage {
-            background: linear-gradient(180deg, rgba(8, 15, 30, 0.96) 0%, rgba(11, 18, 32, 0.98) 52%, rgba(17, 24, 39, 0.98) 100%);
-            border-color: rgba(255, 0, 55, 0.12);
-            box-shadow: 0 26px 54px rgba(2, 6, 23, 0.42);
+            background: rgba(17, 24, 39, 0.95);
+            border-color: rgba(51, 65, 85, 0.5);
+            box-shadow: 0 4px 16px rgba(2, 6, 23, 0.2);
+        }
+
+        .dark .landing-stage:hover {
+            box-shadow: 0 8px 24px rgba(2, 6, 23, 0.3);
         }
 
         .dark .landing-stage::before {
-            background:
-                radial-gradient(circle at top right, rgba(255, 0, 55, 0.14), transparent 32%),
-                radial-gradient(circle at bottom left, rgba(251, 146, 60, 0.04), transparent 26%),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 18%);
-            opacity: 0.95;
+            background: transparent;
+            opacity: 1;
         }
 
         .landing-toolbar {
             display: flex;
             flex-wrap: wrap;
             gap: 0.875rem;
-            border: 1px solid var(--landing-border);
-            border-radius: 1.5rem;
-            background: var(--landing-surface-muted);
-            box-shadow: var(--landing-shadow-soft);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            border-radius: 1.25rem;
+            background: rgba(248, 250, 252, 0.6);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
             padding: 1rem;
+            transition: all 200ms ease;
+        }
+
+        .landing-toolbar:hover {
+            border-color: rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
         }
 
         .dark .landing-toolbar {
-            background: linear-gradient(180deg, rgba(18, 27, 45, 0.94) 0%, rgba(10, 17, 30, 0.98) 100%);
-            border-color: rgba(148, 163, 184, 0.12);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 34px rgba(2, 6, 23, 0.28);
+            background: rgba(17, 24, 39, 0.7);\n            border-color: rgba(51, 65, 85, 0.5);
+            box-shadow: 0 2px 8px rgba(2, 6, 23, 0.15);
+        }
+
+        .dark .landing-toolbar:hover {
+            border-color: rgba(51, 65, 85, 0.7);
+            box-shadow: 0 4px 12px rgba(2, 6, 23, 0.2);
         }
 
         .landing-input,
         .landing-select {
-            border-radius: 1rem;
-            border: 1px solid rgba(148, 163, 184, 0.18);
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 6px 18px rgba(15, 23, 42, 0.04);
+            border-radius: 0.875rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            background: #ffffff;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+            transition: all 200ms ease;
+        }
+
+        .landing-input:hover,
+        .landing-select:hover {
+            border-color: rgba(226, 232, 240, 1);
         }
 
         .landing-input:focus,
         .landing-select:focus {
-            border-color: #ef4444;
-            --tw-ring-color: rgb(248 113 113 / 0.25);
+            border-color: #dc2626;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04), 0 0 0 3px rgba(220, 38, 38, 0.1);
+            --tw-ring-color: rgb(220 38 38 / 0.1);
         }
 
         .dark .landing-input,
         .dark .landing-select {
-            border-color: rgba(248, 113, 113, 0.18);
-            background: rgba(15, 23, 42, 0.88);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            border-color: rgba(51, 65, 85, 0.6);
+            background: rgba(17, 24, 39, 0.95);
+            box-shadow: inset 0 1px 2px rgba(2, 6, 23, 0.1);
+        }
+
+        .dark .landing-input:hover,
+        .dark .landing-select:hover {
+            border-color: rgba(51, 65, 85, 0.8);
+        }
+
+        .dark .landing-input:focus,
+        .dark .landing-select:focus {
+            border-color: #f87171;
+            box-shadow: inset 0 1px 2px rgba(2, 6, 23, 0.15), 0 0 0 3px rgba(220, 38, 38, 0.1);
         }
 
         .landing-subtle {
             color: var(--landing-text-soft);
         }
 
+        /* Faculty Star Display */
+        .faculty-star-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1.5rem 0;
+        }
+
+        .faculty-star {
+            font-size: 3.5rem;
+            color: #dc2626;
+            line-height: 1;
+            filter: drop-shadow(0 4px 8px rgba(220, 38, 38, 0.2));
+        }
+
+        .faculty-star-border {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 5rem;
+            height: 5rem;
+            border: 2.5px solid #dc2626;
+            border-radius: 50%;
+            background: rgba(254, 226, 226, 0.2);
+            margin: 0 auto;
+        }
+
         .landing-panel {
             position: relative;
             overflow: hidden;
-            border: 1px solid var(--landing-border);
-            border-radius: 1.5rem;
-            background: var(--landing-surface);
-            box-shadow: var(--landing-shadow);
-            backdrop-filter: blur(14px);
-            transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+            border: 1px solid rgba(226, 232, 240, 0.7);
+            border-radius: 1.25rem;
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            backdrop-filter: none;
+            transition: box-shadow 280ms ease, border-color 280ms ease;
         }
 
         .landing-panel:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1);
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+            border-color: rgba(226, 232, 240, 0.9);
         }
 
         .dark .landing-panel {
-            background: linear-gradient(180deg, rgba(14, 23, 41, 0.94) 0%, rgba(11, 18, 32, 0.98) 100%);
-            border-color: rgba(148, 163, 184, 0.12);
-            box-shadow: 0 18px 40px rgba(2, 6, 23, 0.3);
+            background: rgba(17, 24, 39, 0.95);
+            border-color: rgba(51, 65, 85, 0.5);
+            box-shadow: 0 2px 8px rgba(2, 6, 23, 0.2);
         }
 
         .dark .landing-panel:hover {
-            box-shadow: 0 22px 50px rgba(2, 6, 23, 0.45);
+            box-shadow: 0 4px 16px rgba(2, 6, 23, 0.3);
+            border-color: rgba(51, 65, 85, 0.7);
         }
 
         .landing-panel::before {
@@ -353,22 +407,33 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), transparent 24%);
+            background: transparent;
         }
 
         .dark .landing-panel::before {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 18%);
+            background: transparent;
         }
 
         .landing-panel.lift-card {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.995) 0%, rgba(248, 250, 252, 0.995) 100%);
-            border-color: rgba(226, 232, 240, 0.95);
-            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.06);
+            background: #ffffff;
+            border-color: rgba(226, 232, 240, 0.7);
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        }
+
+        .landing-panel.lift-card:hover {
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+            border-color: rgba(226, 232, 240, 0.9);
         }
 
         .dark .landing-panel.lift-card {
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(17, 24, 39, 0.95) 62%, rgba(69, 10, 10, 0.25) 100%);
-            border-color: rgba(248, 113, 113, 0.14);
+            background: rgba(17, 24, 39, 0.95);
+            border-color: rgba(51, 65, 85, 0.5);
+            box-shadow: 0 2px 8px rgba(2, 6, 23, 0.2);
+        }
+
+        .dark .landing-panel.lift-card:hover {
+            box-shadow: 0 4px 16px rgba(2, 6, 23, 0.3);
+            border-color: rgba(51, 65, 85, 0.7);
         }
 
         .landing-grid-accent {
@@ -396,7 +461,7 @@
         }
 
         .landing-hero-floor-shadow {
-            background: linear-gradient(180deg, rgba(2, 6, 23, 0.08) 0%, rgba(2, 6, 23, 0.64) 100%);
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.4), rgba(2, 6, 23, 0.8));
         }
 
         .landing-hero-content {
@@ -445,7 +510,7 @@
             flex: 0 0 4px;
             align-self: stretch;
             border-radius: 9999px;
-            background: linear-gradient(180deg, #ff0037 0%, #ff7b8e 100%);
+            background: #dc2626;
             box-shadow: 0 0 18px rgba(255, 0, 55, 0.38);
         }
 
@@ -482,7 +547,7 @@
         }
 
         .landing-hero-action--primary {
-            background: linear-gradient(90deg, #ff2454 0%, #db0d42 100%);
+            background: #dc2626;
             color: #ffffff;
         }
 
@@ -508,36 +573,40 @@
 
         .landing-hero-stat-card {
             min-height: 6rem;
-            border: 1px solid rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 1.2rem;
-            padding: 0.72rem 0.85rem 0.8rem;
-            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.24);
-            backdrop-filter: blur(18px);
-            transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease, filter 200ms ease;
-            will-change: transform;
+            padding: 0.9rem 1rem 1rem;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
+            backdrop-filter: blur(12px);
+            transition: all 280ms ease;
+            will-change: auto;
         }
 
         .landing-hero-stat-card:hover {
-            transform: translateY(-6px) scale(1.02);
+            transform: translateY(-2px);
             border-color: rgba(255, 255, 255, 0.28);
-            box-shadow: 0 24px 42px rgba(15, 23, 42, 0.34);
-            filter: saturate(1.06) brightness(1.05);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
+            filter: brightness(1.04);
         }
 
         .landing-hero-stat-card--students {
-            background: linear-gradient(180deg, rgba(235, 28, 74, 0.94) 0%, rgba(187, 24, 78, 0.88) 100%);
+            background: #dc2626;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
         }
 
         .landing-hero-stat-card--faculty {
-            background: linear-gradient(180deg, rgba(51, 83, 227, 0.94) 0%, rgba(31, 69, 198, 0.88) 100%);
+            background: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
         }
 
         .landing-hero-stat-card--subjects {
-            background: linear-gradient(180deg, rgba(245, 131, 31, 0.95) 0%, rgba(221, 103, 24, 0.88) 100%);
+            background: #f97316;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);
         }
 
         .landing-hero-stat-card--labs {
-            background: linear-gradient(180deg, rgba(26, 176, 82, 0.94) 0%, rgba(17, 142, 71, 0.88) 100%);
+            background: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
         }
 
         .landing-hero-stat-icon {
@@ -585,12 +654,18 @@
         .landing-hero-panel {
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: 1.3rem;
-            background: linear-gradient(180deg, rgba(57, 45, 34, 0.58) 0%, rgba(32, 26, 21, 0.72) 100%);
-            box-shadow: 0 20px 34px rgba(15, 23, 42, 0.24);
-            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 1rem;
+            background: rgba(30, 30, 35, 0.4);
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
             padding: 0.9rem;
+            transition: all 200ms ease;
+        }
+
+        .landing-hero-panel:hover {
+            border-color: rgba(255, 255, 255, 0.18);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
         }
 
         .landing-hero-panel::before {
@@ -598,7 +673,7 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 26%);
+            background: transparent;
         }
 
         .landing-hero-panel-title {
@@ -737,8 +812,8 @@
         }
 
         .dark .landing-hero-panel {
-            background: linear-gradient(180deg, rgba(43, 33, 27, 0.58) 0%, rgba(19, 18, 22, 0.78) 100%);
-            border-color: rgba(255, 255, 255, 0.12);
+            background: rgba(17, 24, 39, 0.95);
+            border-color: rgba(51, 65, 85, 0.5);
         }
 
         .landing-hero-stat:nth-child(2) { animation-delay: 0.9s; }
@@ -762,22 +837,34 @@
         .section-chip {
             display: inline-flex;
             align-items: center;
-            gap: 0.625rem;
-            border-radius: 9999px;
-            padding: 0.45rem 0.9rem;
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.14em;
+            gap: 0.5rem;
+            border-radius: 99px;
+            padding: 0.375rem 0.875rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: #b42318;
-            background: rgba(255, 244, 241, 0.98);
-            box-shadow: inset 0 0 0 1px rgba(180, 35, 24, 0.1);
+            color: #dc2626;
+            background: rgba(254, 226, 226, 0.8);
+            box-shadow: none;
+            border: 1px solid rgba(254, 202, 202, 0.5);
+            transition: all 200ms ease;
+        }
+
+        .section-chip:hover {
+            background: rgba(254, 226, 226, 1);
+            border-color: rgba(254, 202, 202, 0.8);
         }
 
         .dark .section-chip {
-            color: #ff9ab0;
-            background: rgba(255, 0, 55, 0.12);
-            box-shadow: inset 0 0 0 1px rgba(255, 0, 55, 0.24);
+            color: #fca5a5;
+            background: rgba(127, 29, 29, 0.3);
+            border-color: rgba(153, 27, 27, 0.4);
+        }
+
+        .dark .section-chip:hover {
+            background: rgba(127, 29, 29, 0.4);
+            border-color: rgba(153, 27, 27, 0.6);
         }
 
         .section-title {
@@ -794,21 +881,21 @@
         }
 
         .stagger-rise {
-            animation: riseIn 0.75s ease-out both;
+            animation: riseIn 0.6s ease-out both;
         }
 
-        .stagger-rise:nth-child(2) { animation-delay: 0.08s; }
-        .stagger-rise:nth-child(3) { animation-delay: 0.16s; }
-        .stagger-rise:nth-child(4) { animation-delay: 0.24s; }
-        .stagger-rise:nth-child(5) { animation-delay: 0.32s; }
+        .stagger-rise:nth-child(2) { animation-delay: 0.06s; }
+        .stagger-rise:nth-child(3) { animation-delay: 0.12s; }
+        .stagger-rise:nth-child(4) { animation-delay: 0.18s; }
+        .stagger-rise:nth-child(5) { animation-delay: 0.24s; }
 
         .lift-card {
-            transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, background-color 220ms ease;
+            transition: box-shadow 280ms ease, border-color 280ms ease;
         }
 
         .lift-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 22px 44px rgba(102, 14, 24, 0.12);
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+            border-color: rgba(226, 232, 240, 0.9);
         }
 
         .dark .lift-card:hover {
@@ -818,23 +905,17 @@
         .shine-button {
             position: relative;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15) !important;
+            transition: all 240ms ease !important;
         }
 
-        .shine-button::after {
-            content: "";
-            position: absolute;
-            inset: -120% auto auto -30%;
-            width: 38%;
-            height: 280%;
-            transform: rotate(20deg);
-            background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.45), transparent);
-            opacity: 0;
-            transition: opacity 200ms ease, transform 320ms ease;
+        .shine-button:hover {
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.25) !important;
+            transform: translateY(-1px) !important;
         }
 
-        .shine-button:hover::after {
-            opacity: 1;
-            transform: translateX(240%) rotate(20deg);
+        .shine-button:active {
+            transform: scale(0.98) !important;
         }
 
         .leaflet-control-layers,
@@ -924,14 +1005,14 @@
         }
 
         @keyframes floatOrb {
-            0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-            50% { transform: translate3d(0, -14px, 0) scale(1.05); }
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.6; }
+            50% { transform: translate3d(0, -18px, 0) scale(1.08); opacity: 0.7; }
         }
 
         @keyframes riseIn {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(16px);
             }
             to {
                 opacity: 1;
@@ -939,24 +1020,14 @@
             }
         }
 
-        @keyframes stageGlow {
-            0% { background-position: 0% 0%, 100% 100%, 0 0; }
-            100% { background-position: 100% 10%, 0% 90%, 0 0; }
-        }
-
-        @keyframes heroCardFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-
         @keyframes heroStatFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
+            50% { transform: translateY(-4px); }
         }
 
         @keyframes heroKenBurns {
             0%, 100% { transform: scale(1.02); }
-            50% { transform: scale(1.08); }
+            50% { transform: scale(1.06); }
         }
 
         @media (max-width: 1023px) {
@@ -1271,7 +1342,7 @@
                         </div>
                         <div class="mt-4">
                                 <a href="{{ route('department.about', ['id' => $department?->id ?? 1]) }}"
-                               class="shine-button inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red-500 to-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                               class="shine-button inline-flex items-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
                                 <span>{{ $locale === 'ne' ? 'थप पढ्नुहोस्' : 'Read More' }}</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
                                     <path fill-rule="evenodd" d="M16.72 7.72a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 1 1-1.06-1.06L21.44 12l-4.72-4.28a.75.75 0 0 1 0-1.06zM12 7a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-1.5 0V7.75A.75.75 0 0 1 12 7z" clip-rule="evenodd" />
@@ -1338,7 +1409,7 @@
                                         {{ $locale === 'ne' ? 'कार्यक्रम र सिकाइ यात्राको छोटो परिचय।' : 'A short overview of our programs and learning path.' }}
                                     </p>
                                 </div>
-                                <a href="#curriculum" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-500 to-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                                <a href="#curriculum" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
                                     <span>{{ $locale === 'ne' ? 'पाठ्यक्रम हेर्नुहोस्' : 'View Curriculum' }}</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
                                         <path fill-rule="evenodd" d="M13.28 5.97a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 1 1-1.06-1.06l3.97-3.97H4.5a.75.75 0 0 1 0-1.5h12.75l-3.97-3.97a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
@@ -1346,7 +1417,7 @@
                                 </a>
                             </div>
 
-                            <div class="landing-panel mt-5 rounded-[2rem] bg-gradient-to-br from-white/90 via-red-50/70 to-white p-6 text-sm leading-7 text-gray-700 dark:from-[#191919]/90 dark:via-slate-900 dark:to-[#191919] dark:text-gray-50">
+                            <div class="landing-panel mt-5 rounded-[2rem] bg-white p-6 text-sm leading-7 text-gray-700 dark:from-[#191919]/90 dark:to-[#191919] dark:text-gray-50">
                                 {!! nl2br(e($programsContent ?: ($locale === 'ne'
                                     ? 'हाम्रो विभागले विद्यार्थीहरूको सीप विकास, व्यावहारिक प्रयोगशाला अभ्यास र उद्योगसँग जोडिएको सिकाइलाई प्राथमिकता दिने शैक्षिक कार्यक्रमहरू सञ्चालन गर्दछ।'
                                     : 'Our department runs academic programs focused on practical learning, lab-based skills, and industry-ready outcomes.'))) !!}
@@ -1396,12 +1467,15 @@
 
                 <div class="mt-8 grid gap-6 md:grid-cols-3">
                     <template x-for="s in visibleSubjects" :key="s.id">
-                        <div class="landing-panel lift-card flex flex-col overflow-hidden rounded-[1.75rem] border-l-4 bg-gradient-to-br from-red-50 via-white to-red-100 duration-300 dark:bg-gradient-to-br dark:from-[#191919]/95 dark:via-red-950/25 dark:to-[#191919]" 
+                        <div class="landing-panel lift-card flex flex-col overflow-hidden rounded-[1.75rem] border-l-4 bg-white duration-300 dark:bg-slate-900" 
                              :class="[
-                                 s.has_lab ? 'border-l-red-500 dark:border-l-red-400' : 'border-l-red-300 dark:border-l-red-500'
+                                 s.category === 'Core' ? 'border-l-red-500 dark:border-l-red-400' : 
+                                 s.category === 'Elective' ? 'border-l-orange-500 dark:border-l-orange-400' : 
+                                 s.category === 'Graduate' ? 'border-l-green-600 dark:border-l-green-400' : 
+                                 'border-l-blue-500 dark:border-l-blue-400'
                              ]">
-                            <div class="flex items-center justify-between border-b border-red-100 bg-gradient-to-r px-6 py-3 dark:border-red-900/30"
-                                 :class="s.has_lab ? 'from-red-200 to-red-100 dark:from-red-900/40 dark:to-red-950/20' : 'from-red-100 to-red-50 dark:from-red-950/25 dark:to-[#191919]/30'">
+                            <div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3 dark:border-gray-700 dark:bg-gray-800"
+                                 :class="s.has_lab ? 'dark:bg-gray-800' : 'dark:bg-gray-900'">
                                 <div class="text-base font-bold text-gray-900 dark:text-white" x-text="s.title"></div>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" :class="s.has_lab ? 'text-red-600 dark:text-red-400' : 'text-red-400 dark:text-red-300'">
                                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
@@ -1415,7 +1489,7 @@
                                 </div>
                                 <div class="mt-3 line-clamp-3 text-sm text-gray-900 dark:text-white" x-text="s.description || fallbackDescription"></div>
 
-                                <div x-show="openId === s.id" x-cloak class="mt-4 rounded-xl border border-red-200 bg-gradient-to-br from-red-100 to-white p-4 text-sm text-gray-700 dark:border-red-900/40 dark:from-red-950/30 dark:to-[#191919]/40 dark:text-gray-50">
+                                <div x-show="openId === s.id" x-cloak class="mt-4 rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-50">
                                     <div class="flex flex-wrap gap-2 text-xs font-semibold">
                                         <template x-if="s.code">
                                             <span class="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300" x-text="s.code"></span>
@@ -1460,7 +1534,7 @@
 
                 <div class="mt-8 flex justify-center">
                     <a :href="viewAllUrl"
-                       class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-500 to-red-700 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                       class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
                         <span>{{ $locale === 'ne' ? 'सबै पाठ्यक्रम हेर्नुहोस्' : 'Explore All Courses' }}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
                             <path fill-rule="evenodd" d="M13.28 5.97a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 1 1-1.06-1.06l3.97-3.97H4.5a.75.75 0 0 1 0-1.5h12.75l-3.97-3.97a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
@@ -1568,7 +1642,7 @@
 
                             <div x-show="showViewAll" class="border-t border-gray-200 px-6 py-4 dark:border-gray-800">
                                 <a :href="viewAllUrl"
-                                   class="shine-button inline-flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-500 to-red-700 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                                   class="shine-button inline-flex w-full items-center justify-center gap-2 rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
                                     <span>{{ $locale === 'ne' ? 'सबै विषय हेर्नुहोस्' : 'View all subjects' }}</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
                                         <path fill-rule="evenodd" d="M13.28 5.97a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 1 1-1.06-1.06l3.97-3.97H4.5a.75.75 0 0 1 0-1.5h12.75l-3.97-3.97a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
@@ -1645,22 +1719,26 @@
                                         $leaderPhoto = $leader->profile_photo_url ?? null;
                                         $leaderMeta = $leaderDept ?: ($leader->email ?: null);
                                     @endphp
-                                    <div class="landing-panel lift-card overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-red-50 via-white to-red-100 dark:bg-gradient-to-br dark:from-[#191919]/95 dark:via-red-950/25 dark:to-[#191919]">
-                                        <div class="flex h-52 items-center justify-center bg-gradient-to-br from-slate-100 via-rose-100 to-red-200 dark:from-red-900/50 dark:via-red-800/40 dark:to-red-950/40 sm:h-56">
+                                    <div class="landing-panel lift-card overflow-hidden rounded-[1.75rem] bg-white dark:bg-[#191919]">
+                                        <div class="flex h-52 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 sm:h-56">
                                             @if (!empty($leaderPhoto))
                                                 <img src="{{ $leaderPhoto }}" alt="{{ $leaderName }}" class="h-full w-full object-cover" />
                                             @else
-                                                <div class="flex h-20 w-24 items-center justify-center rounded-lg bg-white/20 text-white ring-1 ring-white/25 dark:bg-white/30 dark:text-red-100">
+                                                <div class="flex h-20 w-24 items-center justify-center rounded-lg bg-red-100/20 text-red-600 ring-1 ring-red-200/30 dark:bg-red-950/20 dark:text-red-400">
                                                     <span class="text-sm font-bold">{{ $leaderInitial }}</span>
                                                 </div>
                                             @endif
                                         </div>
-                                        <div class="border-t border-red-100 bg-gradient-to-br from-red-100 via-red-50 to-white p-5 dark:border-red-900/30 dark:bg-gradient-to-br dark:from-red-950/35 dark:via-slate-950 dark:to-[#191919]">
-                                            <div class="truncate text-sm font-bold text-gray-900 dark:text-white">{{ $leaderName }}</div>
-                                            <div class="mt-1 text-xs font-semibold text-gray-800 dark:text-white">{{ $locale === 'ne' ? 'विभाग प्रमुख' : 'HOD / Admin' }}</div>
-                                            <div class="mt-2 text-xs text-gray-800 dark:text-white">
-                                                {{ $locale === 'ne' ? 'विवरण' : 'Detail' }}:
-                                                <span class="font-medium text-gray-800 dark:text-gray-50">{{ $leaderMeta ?: ($locale === 'ne' ? 'उपलब्ध छैन' : 'Not specified') }}</span>
+                                        <div class="faculty-star-display">
+                                            <div class="faculty-star-border">
+                                                <span class="faculty-star">★</span>
+                                            </div>
+                                        </div>
+                                        <div class="border-t border-slate-100 bg-white p-5 dark:border-slate-800 dark:bg-[#191919]">
+                                            <div class="truncate text-sm font-bold text-gray-900 text-center dark:text-white">{{ $leaderName }}</div>
+                                            <div class="mt-1 text-xs font-semibold text-red-600 text-center dark:text-red-400">{{ $locale === 'ne' ? 'विभाग प्रमुख' : 'HOD / Admin' }}</div>
+                                            <div class="mt-3 text-xs text-gray-600 text-center dark:text-gray-400">
+                                                {{ $leaderMeta ?: ($locale === 'ne' ? 'उपलब्ध छैन' : 'Not specified') }}
                                             </div>
                                         </div>
                                     </div>
@@ -1678,22 +1756,26 @@
                                 $titleText = $t->qualification ?: ($locale === 'ne' ? 'शिक्षक' : 'Professor');
                                 $expertiseText = $t->bio ?: ($t->department ?: ($t->user?->department ?: null));
                             @endphp
-                            <div class="landing-panel lift-card overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-red-50 via-white to-red-100 dark:bg-gradient-to-br dark:from-[#191919]/95 dark:via-red-950/25 dark:to-[#191919]">
-                                <div class="flex h-52 items-center justify-center bg-gradient-to-br from-slate-100 via-rose-100 to-red-200 dark:from-red-900/45 dark:via-red-800/35 dark:to-red-950/35 sm:h-56">
+                            <div class="landing-panel lift-card overflow-hidden rounded-[1.75rem] bg-white dark:bg-[#191919]">
+                                <div class="flex h-52 items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 sm:h-56">
                                     @if (!empty($photoUrl))
                                         <img src="{{ $photoUrl }}" alt="{{ $name }}" class="h-full w-full object-cover" />
                                     @else
-                                        <div class="flex h-20 w-24 items-center justify-center rounded-lg bg-white/20 text-white ring-1 ring-white/25 dark:bg-white/30 dark:text-red-100">
+                                        <div class="flex h-20 w-24 items-center justify-center rounded-lg bg-red-100/20 text-red-600 ring-1 ring-red-200/30 dark:bg-red-950/20 dark:text-red-400">
                                             <span class="text-sm font-bold">{{ $initials ?: Str::of($name)->substr(0, 1)->upper() }}</span>
                                         </div>
                                     @endif
                                 </div>
-                                <div class="border-t border-red-100 bg-gradient-to-br from-red-100 via-red-50 to-white p-4 dark:border-red-900/30 dark:bg-gradient-to-br dark:from-red-950/35 dark:via-slate-950 dark:to-[#191919]">
-                                    <div class="truncate text-sm font-bold text-gray-900 dark:text-white">{{ $name }}</div>
-                                    <div class="mt-1 text-xs font-semibold text-gray-800 dark:text-white">{{ $titleText }}</div>
-                                    <div class="mt-2 text-xs text-gray-800 dark:text-white">
-                                        {{ $locale === 'ne' ? 'विशेषज्ञता' : 'Expertise Area' }}:
-                                        <span class="font-medium text-gray-800 dark:text-gray-50">{{ $expertiseText ?: ($locale === 'ne' ? 'उपलब्ध छैन' : 'Not specified') }}</span>
+                                <div class="faculty-star-display">
+                                    <div class="faculty-star-border">
+                                        <span class="faculty-star">★</span>
+                                    </div>
+                                </div>
+                                <div class="border-t border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-[#191919]">
+                                    <div class="truncate text-sm font-bold text-gray-900 text-center dark:text-white">{{ $name }}</div>
+                                    <div class="mt-1 text-xs font-semibold text-red-600 text-center dark:text-red-400">{{ $titleText }}</div>
+                                    <div class="mt-3 text-xs text-gray-600 text-center dark:text-gray-400">
+                                        {{ $expertiseText ?: ($locale === 'ne' ? 'उपलब्ध छैन' : 'Not specified') }}
                                     </div>
                                 </div>
                             </div>
@@ -1706,7 +1788,7 @@
 
                     <div class="mt-8 flex justify-center">
                         <a href="{{ route('faculty.index') }}"
-                           class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-500 to-red-700 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                           class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
                             <span>{{ $locale === 'ne' ? 'सबै शिक्षक हेर्नुहोस्' : 'View All Faculty' }}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
                                 <path fill-rule="evenodd" d="M13.28 5.97a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 1 1-1.06-1.06l3.97-3.97H4.5a.75.75 0 0 1 0-1.5h12.75l-3.97-3.97a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
@@ -1731,7 +1813,7 @@
                             {{ $locale === 'ne' ? 'नयाँ सूचना र घोषणा।' : 'Latest announcements and updates.' }}
                         </p>
                     </div>
-                    <a href="{{ route('public.notices.index') }}" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-500 to-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                    <a href="{{ route('public.notices.index') }}" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400">
                         <span>{{ $locale === 'ne' ? 'सबै सूचना हेर्नुहोस्' : 'View all notices' }}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
                             <path fill-rule="evenodd" d="M13.28 5.97a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 1 1-1.06-1.06l3.97-3.97H4.5a.75.75 0 0 1 0-1.5h12.75l-3.97-3.97a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
@@ -1741,7 +1823,7 @@
 
                 <div class="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     @forelse (($notices ?? collect()) as $n)
-                        <button type="button" class="landing-panel lift-card text-left rounded-[1.75rem] bg-gradient-to-br from-red-50 via-white to-red-100 p-6 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gradient-to-br dark:from-[#191919]/95 dark:via-red-950/25 dark:to-[#191919]"
+                        <button type="button" class="landing-panel lift-card text-left rounded-[1.75rem] bg-white p-6 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-slate-900"
                             @click="notice=@js([
                                 'title' => $n->localized_title,
                                 'date' => $n->formatted_date,
@@ -1774,7 +1856,7 @@
                             </div>
                         </button>
                     @empty
-                        <div class="landing-panel rounded-[1.75rem] border-dashed border-red-200 bg-gradient-to-br from-white to-red-50 p-10 text-center text-sm text-gray-700 dark:border-red-900/40 dark:bg-gradient-to-br dark:from-[#191919] dark:to-red-950/10 dark:text-gray-50 md:col-span-2 lg:col-span-3">
+                        <div class="landing-panel rounded-[1.75rem] border-l-4 border-l-red-300 bg-white p-10 text-center text-sm text-gray-700 dark:border-red-900/40 dark:bg-slate-900 dark:text-gray-50 md:col-span-2 lg:col-span-3">
                             {{ $locale === 'ne' ? 'हाल कुनै सूचना छैन।' : 'No notices published yet.' }}
                         </div>
                     @endforelse
@@ -1782,8 +1864,8 @@
 
                 <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center" role="dialog" aria-modal="true">
                     <div class="absolute inset-0 bg-gray-950/70" aria-hidden="true"></div>
-                    <div class="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-gradient-to-br from-white via-red-50/80 to-red-100/60 shadow-xl ring-1 ring-red-100 dark:bg-gradient-to-br dark:from-[#191919]/95 dark:via-red-950/20 dark:to-[#191919] dark:ring-red-900/30">
-                        <div class="h-1 w-full bg-gradient-to-r from-red-500 to-red-600"></div>
+                    <div class="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-red-100 dark:bg-slate-900 dark:ring-red-900/30">
+                        <div class="h-1 w-full bg-red-600"></div>
                         <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-5 dark:border-gray-800">
                             <div class="min-w-0">
                                 <div class="text-gray-800 dark:text-white" x-text="notice?.date || ''"></div>
@@ -1920,7 +2002,7 @@
                                 </div>
 
                                 <div class="flex flex-wrap items-center gap-3">
-                                    <button type="submit" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rose-600 to-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/15 transition hover:-translate-y-0.5 hover:from-rose-500 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                                    <button type="submit" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-900/15 transition hover:-translate-y-0.5 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-400">
                                         <i class="bi bi-search"></i>
                                         {{ $locale === 'ne' ? 'Exam Result Search' : 'Search Exam Result' }}
                                     </button>
@@ -2282,7 +2364,7 @@
                                         <option :value="t.value" x-text="t.label"></option>
                                     </template>
                                 </select>
-                                <a href="{{ route('public.resources.index') }}" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-500 to-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                                <a href="{{ route('public.resources.index') }}" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
                                     <span>{{ $locale === 'ne' ? 'सबै स्रोत हेर्नुहोस्' : 'View all resources' }}</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
                                         <path fill-rule="evenodd" d="M13.28 5.97a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 1 1-1.06-1.06l3.97-3.97H4.5a.75.75 0 0 1 0-1.5h12.75l-3.97-3.97a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
@@ -2294,20 +2376,20 @@
 
                     <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         <template x-for="d in filtered" :key="d.id">
-                            <div class="landing-panel lift-card rounded-[1.75rem] border-l-4 bg-gradient-to-br from-white via-red-50/80 to-red-100/60 p-6 transition duration-300 dark:bg-gradient-to-br dark:from-[#191919]/90 dark:via-red-950/20 dark:to-[#191919]"
+                            <div class="landing-panel lift-card rounded-[1.75rem] border-l-4 bg-white p-6 transition duration-300 dark:bg-slate-900"
                                  :class="[
-                                     d.type === 'syllabus' ? 'border-l-red-500 dark:border-l-red-400' : 
-                                     d.type === 'notes' ? 'border-l-red-400 dark:border-l-red-300' : 
-                                     d.type === 'guide' ? 'border-l-red-600 dark:border-l-red-500' : 
+                                     d.type === 'syllabus' ? 'border-l-blue-500 dark:border-l-blue-400' : 
+                                     d.type === 'notes' ? 'border-l-orange-400 dark:border-l-orange-300' : 
+                                     d.type === 'guide' ? 'border-l-green-600 dark:border-l-green-500' : 
                                      'border-l-red-300 dark:border-l-red-400'
                                  ]">
                                 <div class="flex h-full flex-col">
                                     <div class="flex flex-wrap items-center gap-2">
                                         <span class="rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide transition duration-200"
                                               :class="[
-                                                  d.type === 'syllabus' ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300' : 
-                                                  d.type === 'notes' ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300' : 
-                                                  d.type === 'guide' ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300' : 
+                                                  d.type === 'syllabus' ? 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-300' : 
+                                                  d.type === 'notes' ? 'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900 dark:bg-orange-950/40 dark:text-orange-300' : 
+                                                  d.type === 'guide' ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-900 dark:bg-green-950/40 dark:text-green-300' : 
                                                   'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300'
                                               ]"
                                               x-text="d.type_label"></span>
@@ -2327,7 +2409,7 @@
                                     <div class="mt-3 text-xs text-gray-800 dark:text-white" x-text="uploadedText(d.uploaded_at)"></div>
                                     <div class="mt-6 flex items-center gap-2">
                                         <template x-if="d.url">
-                                            <a :href="d.url" target="_blank" rel="noopener" class="shine-button flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-red-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:from-red-400 hover:to-red-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-400">
+                                            <a :href="d.url" target="_blank" rel="noopener" class="shine-button flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-400">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5">
                                                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
                                                 </svg>
@@ -2358,7 +2440,7 @@
                             </div>
                         </template>
                         <template x-if="filtered.length === 0">
-                        <div class="landing-panel rounded-[1.75rem] border-l-4 border-l-red-300 bg-gradient-to-br from-red-50 to-white p-10 text-center text-sm text-gray-700 dark:border-red-900/40 dark:from-red-950/20 dark:to-[#191919]/40 dark:text-gray-50 sm:col-span-2 lg:col-span-3">
+                        <div class="landing-panel rounded-[1.75rem] border-l-4 border-l-red-300 bg-white p-10 text-center text-sm text-gray-700 dark:border-red-900/40 dark:bg-slate-900 dark:text-gray-50 sm:col-span-2 lg:col-span-3">
                                 {{ $locale === 'ne' ? 'कुनै सामग्री भेटिएन।' : 'No materials found.' }}
                             </div>
                         </template>
@@ -2381,7 +2463,7 @@
                             {{ $locale === 'ne' ? 'विभागका गतिविधि र सुविधाका झलकहरू।' : 'Highlights from department events and facilities.' }}
                         </p>
                     </div>
-                    <a href="{{ route('gallery.index') }}" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-red-500 to-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                    <a href="{{ route('gallery.index') }}" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-green-900/15 transition hover:-translate-y-0.5 hover:gap-3 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400">
                         <span>{{ $locale === 'ne' ? 'सबै ग्यालरी' : 'View all' }}</span>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
                             <path fill-rule="evenodd" d="M13.28 5.97a.75.75 0 0 1 1.06 0l5.25 5.25a.75.75 0 0 1 0 1.06l-5.25 5.25a.75.75 0 1 1-1.06-1.06l3.97-3.97H4.5a.75.75 0 0 1 0-1.5h12.75l-3.97-3.97a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
@@ -2391,7 +2473,7 @@
 
                 <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                     @forelse (($galleryItems ?? collect()) as $g)
-                        <a href="{{ route('gallery.index', ['category' => $g->category]) }}" class="landing-panel group relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-white via-red-50/60 to-red-100/60 dark:bg-gradient-to-br dark:from-[#191919]/90 dark:via-red-950/20 dark:to-[#191919]">
+                        <a href="{{ route('gallery.index', ['category' => $g->category]) }}" class="landing-panel group relative overflow-hidden rounded-[1.75rem] bg-white dark:bg-slate-900">
                             @if ($g->image_url)
                                 <img src="{{ $g->image_url }}" alt="{{ $g->title }}" class="h-44 w-full object-cover transition duration-300 group-hover:scale-105 sm:h-48">
                             @else
@@ -2410,7 +2492,7 @@
                                         </button>
                                         <button type="button"
                                             onclick="event.preventDefault(); event.stopPropagation(); window.location.href = @js(route('gallery.download', ['id' => $g->id]));"
-                                            class="shine-button inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-red-500 to-red-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                                            class="shine-button inline-flex items-center justify-center rounded-xl bg-orange-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-400">
                                             {{ $locale === 'ne' ? 'डाउनलोड' : 'Download' }}
                                         </button>
                                     </div>
@@ -2502,12 +2584,12 @@
 
                                         @if (!empty($mapOpenUrl))
                                             <a href="{{ $mapOpenUrl }}" target="_blank" rel="noopener"
-                                                class="shine-button inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-red-500 to-red-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                                                class="shine-button inline-flex items-center justify-center rounded-xl bg-green-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400">
                                                 {{ $locale === 'ne' ? 'खोल्नुहोस्' : 'Open' }}
                                             </a>
                                         @endif
                                         <button type="button" data-map-action="directions"
-                                            class="shine-button inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-red-500 to-red-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:from-red-400 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                                            class="shine-button inline-flex items-center justify-center rounded-xl bg-green-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400">
                                             {{ $locale === 'ne' ? 'दिशा' : 'Directions' }}
                                         </button>
                                     </div>
@@ -2522,7 +2604,7 @@
                 </div>
             </section>
 
-            <footer class="border-t border-white/10 bg-gradient-to-b from-gray-950 via-slate-950 to-black py-12 text-white">
+            <footer class="border-t border-white/10 bg-slate-900 py-12 text-white">
                 <div class="landing-shell mx-auto w-full px-4 sm:px-6 lg:px-8">
                     <div class="grid gap-8 md:grid-cols-12">
                         <div class="md:col-span-5">
@@ -2834,7 +2916,7 @@
                     <div class="mt-6 flex justify-end gap-3 border-t border-[var(--landing-border)] pt-4">
                         <button type="button" 
                                 @click="close()"
-                                class="rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/20 hover:from-red-600 hover:to-red-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-red-400 transition-all duration-200">
+                                class="rounded-xl bg-red-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-900/20 hover:bg-red-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-red-400 transition-all duration-200">
                             {{ $locale === 'ne' ? 'सम्झना भयो, बन्द गर्नुहोस्' : 'Got it, Close' }}
                         </button>
                     </div>
