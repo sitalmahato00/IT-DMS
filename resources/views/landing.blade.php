@@ -1021,11 +1021,11 @@
 @endpush
 
 @section('content')
-    <div class="landing-page relative text-gray-900 dark:text-gray-100" style="background: var(--landing-bg);">
+    <div class="landing-page relative text-gray-900 dark:text-white" style="background: var(--landing-bg);">
         <div class="pointer-events-none absolute inset-0 overflow-x-clip">
-            <div class="float-orb left-[-5rem] top-28 h-36 w-36 bg-red-300/60 dark:bg-red-500/20"></div>
-            <div class="float-orb right-[-3rem] top-[34rem] h-40 w-40 bg-red-200/55 [animation-delay:1.2s] dark:bg-red-400/20"></div>
-            <div class="float-orb bottom-40 left-[12%] h-28 w-28 bg-red-400/45 [animation-delay:2.1s] dark:bg-red-500/20"></div>
+            <div class="float-orb left-[-5rem] top-28 h-36 w-36 bg-red-300/60 dark:bg-red-500/30"></div>
+            <div class="float-orb right-[-3rem] top-[34rem] h-40 w-40 bg-red-200/55 [animation-delay:1.2s] dark:bg-red-400/30"></div>
+            <div class="float-orb bottom-40 left-[12%] h-28 w-28 bg-red-400/45 [animation-delay:2.1s] dark:bg-red-500/30"></div>
         </div>
         <a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-gray-900 dark:focus:bg-gray-900 dark:focus:text-gray-100">
             {{ $locale === 'ne' ? 'मुख्य सामग्रीमा जानुहोस्' : 'Skip to content' }}
@@ -1255,15 +1255,15 @@
             <section id="about" class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8">
                 <div class="landing-shell mx-auto w-full landing-stage">
                     <div>
-                        <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
+                        <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/50 dark:text-red-300 dark:ring-red-900/50">
                             <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
                             {{ $locale === 'ne' ? 'परिचय' : 'Introduction' }}
                         </p>
-                        <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+                        <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
                             {{ $locale === 'ne' ? 'विभागको परिचय' : 'About the Department' }}
                         </h2>
-                        <div class="landing-panel mt-5 rounded-[2rem] p-6 dark:bg-slate-950/80">
-                            <div class="whitespace-pre-wrap text-sm leading-7 text-gray-700 dark:text-gray-300">
+                        <div class="landing-panel mt-5 rounded-[2rem] p-6 dark:bg-[#191919]">
+                            <div class="whitespace-pre-wrap text-sm leading-7 text-gray-900 dark:text-white">
                                 {{ $aboutText ?: ($locale === 'ne'
                                     ? 'यो विभागले विद्यार्थी, शिक्षक र अभिभावकका लागि एकीकृत सूचना प्रणालीमार्फत शैक्षिक व्यवस्थापनलाई डिजिटल बनाउँछ।'
                                     : 'This department portal brings academics, resources, and communication together for students, faculty, and parents.') }}
@@ -1280,15 +1280,15 @@
                         </div>
 
                         <div class="mt-6 grid gap-4 sm:grid-cols-2">
-                            <div class="landing-panel lift-card rounded-3xl p-5 dark:bg-slate-950/80">
-                                <div class="text-xs font-semibold text-gray-500 dark:text-gray-300">{{ $locale === 'ne' ? 'स्थापना वर्ष' : 'Established' }}</div>
-                                <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            <div class="landing-panel lift-card rounded-3xl p-5 dark:bg-[#191919]">
+                                <div class="text-xs font-semibold text-gray-600 dark:text-gray-50">{{ $locale === 'ne' ? 'स्थापना वर्ष' : 'Established' }}</div>
+                                <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
                                     {{ $department?->established_year ?: ($locale === 'ne' ? 'उपलब्ध छैन' : 'Not available') }}
                                 </div>
                             </div>
-                            <div class="landing-panel lift-card rounded-3xl p-5 dark:bg-slate-950/80">
-                                <div class="text-xs font-semibold text-gray-500 dark:text-gray-300">{{ $locale === 'ne' ? 'दर्ता नं.' : 'Registration No.' }}</div>
-                                <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            <div class="landing-panel lift-card rounded-3xl p-5 dark:bg-[#191919]">
+                                <div class="text-xs font-semibold text-gray-600 dark:text-gray-50">{{ $locale === 'ne' ? 'दर्ता नं.' : 'Registration No.' }}</div>
+                                <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
                                     {{ $department?->registration_number ?: ($locale === 'ne' ? 'उपलब्ध छैन' : 'Not available') }}
                                 </div>
                             </div>
@@ -1327,14 +1327,14 @@
                         <div class="lg:col-span-7">
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                                 <div>
-                                    <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
+                                    <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/50 dark:text-red-300 dark:ring-red-900/50">
                                         <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
                                         {{ $locale === 'ne' ? 'कार्यक्रम' : 'Programs' }}
                                     </p>
-                                    <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+                                    <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
                                         {{ $programsTitle ?: ($locale === 'ne' ? 'शैक्षिक कार्यक्रम' : 'Academic Programs') }}
                                     </h2>
-                                    <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <p class="mt-2 text-sm text-gray-900 dark:text-white">
                                         {{ $locale === 'ne' ? 'कार्यक्रम र सिकाइ यात्राको छोटो परिचय।' : 'A short overview of our programs and learning path.' }}
                                     </p>
                                 </div>
@@ -1346,7 +1346,7 @@
                                 </a>
                             </div>
 
-                            <div class="landing-panel mt-5 rounded-[2rem] bg-gradient-to-br from-white/90 via-red-50/70 to-white p-6 text-sm leading-7 text-gray-700 dark:from-slate-950/90 dark:via-slate-900 dark:to-slate-950 dark:text-gray-200">
+                            <div class="landing-panel mt-5 rounded-[2rem] bg-gradient-to-br from-white/90 via-red-50/70 to-white p-6 text-sm leading-7 text-gray-700 dark:from-[#191919]/90 dark:via-slate-900 dark:to-[#191919] dark:text-gray-50">
                                 {!! nl2br(e($programsContent ?: ($locale === 'ne'
                                     ? 'हाम्रो विभागले विद्यार्थीहरूको सीप विकास, व्यावहारिक प्रयोगशाला अभ्यास र उद्योगसँग जोडिएको सिकाइलाई प्राथमिकता दिने शैक्षिक कार्यक्रमहरू सञ्चालन गर्दछ।'
                                     : 'Our department runs academic programs focused on practical learning, lab-based skills, and industry-ready outcomes.'))) !!}
@@ -1366,27 +1366,27 @@
                 <div class="landing-shell mx-auto w-full landing-stage">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
+                            <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/50 dark:text-red-300 dark:ring-red-900/50">
                                 <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
                                 {{ $locale === 'ne' ? 'पाठ्यक्रम' : 'Curriculum' }}
                             </p>
-                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
                                 {{ $locale === 'ne' ? 'हाम्रा पाठ्यक्रम' : 'Our Courses' }}
                             </h2>
-                            <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                            <p class="mt-2 text-sm text-gray-900 dark:text-white">
                                 {{ $locale === 'ne' ? 'सेमेस्टर अनुसार विषयहरू हेर्नुहोस्।' : 'Browse semester-wise course highlights.' }}
                             </p>
                         </div>
                     </div>
 
                     <div class="landing-toolbar mt-6 flex-col lg:flex-row lg:items-center lg:justify-between">
-                        <div class="text-sm font-medium text-gray-600 dark:text-gray-300" x-text="resultText"></div>
+                        <div class="text-sm font-medium text-gray-800 dark:text-white" x-text="resultText"></div>
                         <div class="flex flex-wrap items-center gap-2">
                             @foreach ($semesterSummary->take(4) as $sem => $meta)
                                 @continue(empty($sem))
                                 <button type="button"
                                     class="rounded-xl border px-4 py-2 text-sm font-semibold shadow-sm transition duration-200 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                    :class="String(semester) === @js((string) $sem) ? 'border-red-600 bg-red-600 text-white shadow-red-900/10 dark:border-red-400 dark:bg-red-400 dark:text-gray-950' : 'border-white/60 bg-white/80 text-gray-700 hover:-translate-y-0.5 hover:bg-white dark:border-gray-800 dark:bg-slate-950/80 dark:text-gray-200 dark:hover:bg-slate-900'"
+                                    :class="String(semester) === @js((string) $sem) ? 'border-red-600 bg-red-600 text-white shadow-red-900/10 dark:border-red-400 dark:bg-red-400 dark:text-gray-950' : 'border-white/60 bg-white/80 text-gray-700 hover:-translate-y-0.5 hover:bg-white dark:border-gray-800 dark:bg-[#191919] dark:text-gray-50 dark:hover:bg-slate-900'"
                                     @click="semester=@js((string) $sem); query=''; openId=null;">
                                     {{ $locale === 'ne' ? "{$sem} सेमेस्टर" : "Semester {$sem}" }}
                                 </button>
@@ -1396,13 +1396,13 @@
 
                 <div class="mt-8 grid gap-6 md:grid-cols-3">
                     <template x-for="s in visibleSubjects" :key="s.id">
-                        <div class="landing-panel lift-card flex flex-col overflow-hidden rounded-[1.75rem] border-l-4 bg-gradient-to-br from-red-50 via-white to-red-100 duration-300 dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-red-950/25 dark:to-slate-950" 
+                        <div class="landing-panel lift-card flex flex-col overflow-hidden rounded-[1.75rem] border-l-4 bg-gradient-to-br from-red-50 via-white to-red-100 duration-300 dark:bg-gradient-to-br dark:from-[#191919]/95 dark:via-red-950/25 dark:to-[#191919]" 
                              :class="[
                                  s.has_lab ? 'border-l-red-500 dark:border-l-red-400' : 'border-l-red-300 dark:border-l-red-500'
                              ]">
                             <div class="flex items-center justify-between border-b border-red-100 bg-gradient-to-r px-6 py-3 dark:border-red-900/30"
-                                 :class="s.has_lab ? 'from-red-200 to-red-100 dark:from-red-900/40 dark:to-red-950/20' : 'from-red-100 to-red-50 dark:from-red-950/25 dark:to-slate-950/30'">
-                                <div class="text-base font-bold text-gray-900 dark:text-gray-100" x-text="s.title"></div>
+                                 :class="s.has_lab ? 'from-red-200 to-red-100 dark:from-red-900/40 dark:to-red-950/20' : 'from-red-100 to-red-50 dark:from-red-950/25 dark:to-[#191919]/30'">
+                                <div class="text-base font-bold text-gray-900 dark:text-white" x-text="s.title"></div>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" :class="s.has_lab ? 'text-red-600 dark:text-red-400' : 'text-red-400 dark:text-red-300'">
                                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                                 </svg>
@@ -1413,9 +1413,9 @@
                                     <span class="mx-2 inline">•</span>
                                     <span x-text="(s.has_lab || String(s.type || '').toLowerCase().includes('lab')) ? (locale === 'ne' ? 'प्रयोगशाला' : 'Lab') : (locale === 'ne' ? 'सिद्धान्त' : 'Theory')"></span>
                                 </div>
-                                <div class="mt-3 line-clamp-3 text-sm text-gray-700 dark:text-gray-300" x-text="s.description || fallbackDescription"></div>
+                                <div class="mt-3 line-clamp-3 text-sm text-gray-900 dark:text-white" x-text="s.description || fallbackDescription"></div>
 
-                                <div x-show="openId === s.id" x-cloak class="mt-4 rounded-xl border border-red-200 bg-gradient-to-br from-red-100 to-white p-4 text-sm text-gray-700 dark:border-red-900/40 dark:from-red-950/30 dark:to-slate-950/40 dark:text-gray-200">
+                                <div x-show="openId === s.id" x-cloak class="mt-4 rounded-xl border border-red-200 bg-gradient-to-br from-red-100 to-white p-4 text-sm text-gray-700 dark:border-red-900/40 dark:from-red-950/30 dark:to-[#191919]/40 dark:text-gray-50">
                                     <div class="flex flex-wrap gap-2 text-xs font-semibold">
                                         <template x-if="s.code">
                                             <span class="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300" x-text="s.code"></span>
@@ -1440,7 +1440,7 @@
                                    class="inline-flex w-28 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition duration-200"
                                         :class="openId === s.id 
                                             ? 'bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-950/40 dark:text-red-300 dark:hover:bg-red-950/60'
-                                            : 'bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-200 dark:hover:bg-red-950/50'"
+                                            : 'bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-950/50 dark:text-red-200 dark:hover:bg-red-950/50'"
                                         focus:outline-none focus:ring-2 focus:ring-red-500
                                         @click="toggle(s.id)">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
@@ -1453,7 +1453,7 @@
                         </div>
                     </template>
 
-                    <div x-show="visibleSubjects.length === 0" class="landing-panel rounded-[1.75rem] border-l-4 border-l-red-300 bg-gradient-to-br from-red-50 to-white p-10 text-center text-sm text-gray-600 dark:border-red-900/40 dark:from-red-950/20 dark:to-slate-950/40 dark:text-gray-300 md:col-span-3">
+                    <div x-show="visibleSubjects.length === 0" class="landing-panel rounded-[1.75rem] border-l-4 border-l-red-300 bg-gradient-to-br from-red-50 to-white p-10 text-center text-sm text-gray-700 dark:border-red-900/40 dark:from-red-950/20 dark:to-[#191919]/40 dark:text-gray-50 md:col-span-3">
                         {{ $locale === 'ne' ? 'हाल कुनै विषय उपलब्ध छैन।' : 'No courses available yet.' }}
                     </div>
                 </div>
@@ -1471,21 +1471,21 @@
                 {{--
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100 sm:text-3xl">
+                        <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
                             {{ $locale === 'ne' ? 'विषय र पाठ्यक्रम' : 'Subjects & Curriculum' }}
                         </h2>
-                        <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                        <p class="mt-2 text-sm text-gray-900 dark:text-white">
                             {{ $locale === 'ne' ? 'विषय खोज्नुहोस् र विवरण/पूर्व-आवश्यकता हेर्नुहोस्।' : 'Search subjects and view details, prerequisites, and credits.' }}
                         </p>
                     </div>
                     <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <label class="sr-only" for="subjectSearch">{{ $locale === 'ne' ? 'विषय खोज' : 'Search subjects' }}</label>
                         <input id="subjectSearch" type="search" x-model.trim="query" placeholder="{{ $locale === 'ne' ? 'विषय/कोड खोज्नुहोस्…' : 'Search by subject or code…' }}"
-                            class="w-full rounded-xl border-gray-300 bg-white px-4 py-2 text-sm shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 sm:w-72" />
+                            class="w-full rounded-xl border-gray-300 bg-white px-4 py-2 text-sm shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-gray-800 dark:bg-[#191919] dark:text-white sm:w-72" />
 
                         <label class="sr-only" for="semesterFilter">{{ $locale === 'ne' ? 'सेमेस्टर' : 'Semester' }}</label>
                         <select id="semesterFilter" x-model="semester"
-                            class="w-full rounded-xl border-gray-300 bg-white px-4 py-2 text-sm shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 sm:w-44">
+                            class="w-full rounded-xl border-gray-300 bg-white px-4 py-2 text-sm shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-gray-800 dark:bg-[#191919] dark:text-white sm:w-44">
                             <option value="all">{{ $locale === 'ne' ? 'सबै सेमेस्टर' : 'All semesters' }}</option>
                             @foreach ($semesterSummary as $sem => $meta)
                                 @if (!empty($sem))
@@ -1498,13 +1498,13 @@
 
                 <div class="mt-10 grid gap-8 lg:grid-cols-12">
                     <div class="lg:col-span-7">
-                        <div class="rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+                        <div class="rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-[#191919]">
                             <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
                                 <div class="flex items-center justify-between gap-3">
-                                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-white">
                                         {{ $locale === 'ne' ? 'विषय सूची' : 'Subject catalog' }}
                                     </div>
-                                    <div class="text-xs font-medium text-gray-500 dark:text-gray-400" x-text="resultText"></div>
+                                    <div class="text-gray-600 dark:text-white" x-text="resultText"></div>
                                 </div>
                             </div>
 
@@ -1514,7 +1514,7 @@
                                         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                                             <div class="min-w-0">
                                                 <div class="flex flex-wrap items-center gap-2">
-                                                    <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-900 dark:text-gray-200" x-text="s.code || '—'"></span>
+                                                    <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700 dark:bg-gray-900 dark:text-gray-50" x-text="s.code || '—'"></span>
                                                     <span class="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-300" x-text="semesterLabel(s.semester)"></span>
                                                     <template x-if="s.has_lab">
                                                         <span class="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-300">{{ $locale === 'ne' ? 'ल्याब' : 'Lab' }}</span>
@@ -1523,36 +1523,36 @@
                                                         <span class="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-300">{{ $locale === 'ne' ? 'इलेक्टिभ' : 'Elective' }}</span>
                                                     </template>
                                                 </div>
-                                                <div class="mt-2 truncate text-base font-semibold text-gray-900 dark:text-gray-100" x-text="s.title"></div>
-                                                <div class="mt-1 line-clamp-2 text-sm text-gray-700 dark:text-gray-300" x-text="s.description || fallbackDescription"></div>
-                                                <div class="mt-2 text-xs font-medium text-gray-600 dark:text-gray-400" x-text="creditText(s.credits)"></div>
+                                                <div class="mt-2 truncate text-base font-semibold text-gray-900 dark:text-white" x-text="s.title"></div>
+                                                <div class="mt-1 line-clamp-2 text-sm text-gray-900 dark:text-white" x-text="s.description || fallbackDescription"></div>
+                                                <div class="mt-2 text-xs font-medium text-gray-800 dark:text-white" x-text="creditText(s.credits)"></div>
                                             </div>
 
                                             <div class="shrink-0">
-                                                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-900"
+                                                <button type="button" class="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-gray-800 dark:bg-[#191919] dark:text-white dark:hover:bg-gray-900"
                                                     @click="toggle(s.id)">
                                                     <span x-text="openId === s.id ? closeLabel : detailLabel"></span>
                                                 </button>
                                             </div>
                                         </div>
 
-                                        <div x-show="openId === s.id" x-transition class="mt-4 rounded-2xl bg-gray-50 p-4 text-sm text-gray-700 dark:bg-gray-900/40 dark:text-gray-200">
+                                        <div x-show="openId === s.id" x-transition class="mt-4 rounded-2xl bg-gray-50 p-4 text-sm text-gray-700 dark:bg-gray-900/60 dark:text-gray-50">
                                             <div class="grid gap-4 sm:grid-cols-2">
                                                 <div>
-                                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'क्रेडिट' : 'Credits' }}</div>
-                                                    <div class="mt-1 font-semibold text-gray-900 dark:text-gray-100" x-text="s.credits ?? '—'"></div>
+                                                    <div class="text-gray-800 dark:text-white">{{ $locale === 'ne' ? 'क्रेडिट' : 'Credits' }}</div>
+                                                    <div class="mt-1 font-semibold text-gray-900 dark:text-white" x-text="s.credits ?? '—'"></div>
                                                 </div>
                                                 <div>
-                                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'पूर्व-आवश्यकता' : 'Prerequisite' }}</div>
-                                                    <div class="mt-1 font-semibold text-gray-900 dark:text-gray-100" x-text="s.prerequisite || '—'"></div>
+                                                    <div class="text-gray-800 dark:text-white">{{ $locale === 'ne' ? 'पूर्व-आवश्यकता' : 'Prerequisite' }}</div>
+                                                    <div class="mt-1 font-semibold text-gray-900 dark:text-white" x-text="s.prerequisite || '—'"></div>
                                                 </div>
                                             </div>
                                             <template x-if="(s.teachers || []).length">
                                                 <div class="mt-4">
-                                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</div>
+                                                    <div class="text-gray-800 dark:text-white">{{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}</div>
                                                     <div class="mt-2 flex flex-wrap gap-2">
                                                         <template x-for="t in s.teachers" :key="t">
-                                                            <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-200 dark:ring-gray-800" x-text="t"></span>
+                                                            <span class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-gray-200 dark:bg-[#191919] dark:text-gray-50 dark:ring-gray-800" x-text="t"></span>
                                                         </template>
                                                     </div>
                                                 </div>
@@ -1561,7 +1561,7 @@
                                     </div>
                                 </template>
 
-                                <div x-show="filteredSubjects.length === 0" class="px-6 py-10 text-center text-sm text-gray-600 dark:text-gray-300">
+                                <div x-show="filteredSubjects.length === 0" class="px-6 py-10 text-center text-sm text-gray-900 dark:text-white">
                                     {{ $locale === 'ne' ? 'कुनै विषय भेटिएन।' : 'No subjects found.' }}
                                 </div>
                             </div>
@@ -1579,24 +1579,24 @@
                     </div>
 
                     <div class="lg:col-span-5">
-                        <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-950">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-[#191919]">
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
                                 {{ $locale === 'ne' ? 'सेमेस्टर अनुसार सारांश' : 'Semester-wise overview' }}
                             </h3>
                             <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
                                 @foreach ($semesterSummary as $sem => $meta)
                                     @continue(empty($sem))
-                                    <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900/40">
+                                    <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900/60">
                                         <div class="flex items-center justify-between">
-                                            <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                            <div class="text-sm font-semibold text-gray-900 dark:text-white">
                                                 {{ $locale === 'ne' ? "{$sem} सेमेस्टर" : "Semester {$sem}" }}
                                             </div>
-                                            <div class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-gray-200 dark:bg-gray-950 dark:text-gray-200 dark:ring-gray-800">
+                                            <div class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-700 ring-1 ring-gray-200 dark:bg-[#191919] dark:text-gray-50 dark:ring-gray-800">
                                                 {{ $meta['count'] }} {{ $locale === 'ne' ? 'विषय' : 'subjects' }}
                                             </div>
                                         </div>
-                                        <div class="mt-2 text-xs text-gray-600 dark:text-gray-300">
-                                            {{ $locale === 'ne' ? 'कुल क्रेडिट' : 'Total credits' }}: <span class="font-semibold text-gray-900 dark:text-gray-100">{{ $meta['credits'] }}</span>
+                                        <div class="mt-2 text-xs text-gray-800 dark:text-white">
+                                            {{ $locale === 'ne' ? 'कुल क्रेडिट' : 'Total credits' }}: <span class="font-semibold text-gray-900 dark:text-white">{{ $meta['credits'] }}</span>
                                         </div>
                                     </div>
                                 @endforeach
@@ -1611,14 +1611,14 @@
                 <div class="landing-shell mx-auto w-full landing-stage">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
+                            <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/50 dark:text-red-300 dark:ring-red-900/50">
                                 <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
                                 {{ $locale === 'ne' ? 'शिक्षक' : 'Faculty' }}
                             </p>
-                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
                                 {{ $locale === 'ne' ? 'हाम्रा शिक्षक' : 'Meet Our Faculty' }}
                             </h2>
-                            <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                            <p class="mt-2 text-sm text-gray-900 dark:text-white">
                                 {{ $locale === 'ne' ? 'विभागका सक्रिय शिक्षकहरूको झलक।' : 'Meet our active department faculty.' }}
                             </p>
                         </div>
@@ -1627,7 +1627,7 @@
                     @if (($hods ?? collect())->isNotEmpty())
                         <div class="mt-8">
                             <div class="flex items-center justify-between gap-3">
-                                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                <div class="text-sm font-semibold text-gray-900 dark:text-white">
                                     {{ $locale === 'ne' ? 'विभाग प्रमुख (HOD)' : 'HOD' }}
                                 </div>
                                 <a href="#contact" class="inline-flex items-center gap-2 text-xs font-semibold text-red-700 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
@@ -1645,22 +1645,22 @@
                                         $leaderPhoto = $leader->profile_photo_url ?? null;
                                         $leaderMeta = $leaderDept ?: ($leader->email ?: null);
                                     @endphp
-                                    <div class="landing-panel lift-card overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-red-50 via-white to-red-100 dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-red-950/25 dark:to-slate-950">
+                                    <div class="landing-panel lift-card overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-red-50 via-white to-red-100 dark:bg-gradient-to-br dark:from-[#191919]/95 dark:via-red-950/25 dark:to-[#191919]">
                                         <div class="flex h-52 items-center justify-center bg-gradient-to-br from-slate-100 via-rose-100 to-red-200 dark:from-red-900/50 dark:via-red-800/40 dark:to-red-950/40 sm:h-56">
                                             @if (!empty($leaderPhoto))
                                                 <img src="{{ $leaderPhoto }}" alt="{{ $leaderName }}" class="h-full w-full object-cover" />
                                             @else
-                                                <div class="flex h-20 w-24 items-center justify-center rounded-lg bg-white/20 text-white ring-1 ring-white/25 dark:bg-white/10 dark:text-red-100">
+                                                <div class="flex h-20 w-24 items-center justify-center rounded-lg bg-white/20 text-white ring-1 ring-white/25 dark:bg-white/30 dark:text-red-100">
                                                     <span class="text-sm font-bold">{{ $leaderInitial }}</span>
                                                 </div>
                                             @endif
                                         </div>
-                                        <div class="border-t border-red-100 bg-gradient-to-br from-red-100 via-red-50 to-white p-5 dark:border-red-900/30 dark:bg-gradient-to-br dark:from-red-950/35 dark:via-slate-950 dark:to-slate-950">
-                                            <div class="truncate text-sm font-bold text-gray-900 dark:text-gray-100">{{ $leaderName }}</div>
-                                            <div class="mt-1 text-xs font-semibold text-gray-600 dark:text-gray-300">{{ $locale === 'ne' ? 'विभाग प्रमुख' : 'HOD / Admin' }}</div>
-                                            <div class="mt-2 text-xs text-gray-600 dark:text-gray-300">
+                                        <div class="border-t border-red-100 bg-gradient-to-br from-red-100 via-red-50 to-white p-5 dark:border-red-900/30 dark:bg-gradient-to-br dark:from-red-950/35 dark:via-slate-950 dark:to-[#191919]">
+                                            <div class="truncate text-sm font-bold text-gray-900 dark:text-white">{{ $leaderName }}</div>
+                                            <div class="mt-1 text-xs font-semibold text-gray-800 dark:text-white">{{ $locale === 'ne' ? 'विभाग प्रमुख' : 'HOD / Admin' }}</div>
+                                            <div class="mt-2 text-xs text-gray-800 dark:text-white">
                                                 {{ $locale === 'ne' ? 'विवरण' : 'Detail' }}:
-                                                <span class="font-medium text-gray-800 dark:text-gray-200">{{ $leaderMeta ?: ($locale === 'ne' ? 'उपलब्ध छैन' : 'Not specified') }}</span>
+                                                <span class="font-medium text-gray-800 dark:text-gray-50">{{ $leaderMeta ?: ($locale === 'ne' ? 'उपलब्ध छैन' : 'Not specified') }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1678,27 +1678,27 @@
                                 $titleText = $t->qualification ?: ($locale === 'ne' ? 'शिक्षक' : 'Professor');
                                 $expertiseText = $t->bio ?: ($t->department ?: ($t->user?->department ?: null));
                             @endphp
-                            <div class="landing-panel lift-card overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-red-50 via-white to-red-100 dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-red-950/25 dark:to-slate-950">
+                            <div class="landing-panel lift-card overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-red-50 via-white to-red-100 dark:bg-gradient-to-br dark:from-[#191919]/95 dark:via-red-950/25 dark:to-[#191919]">
                                 <div class="flex h-52 items-center justify-center bg-gradient-to-br from-slate-100 via-rose-100 to-red-200 dark:from-red-900/45 dark:via-red-800/35 dark:to-red-950/35 sm:h-56">
                                     @if (!empty($photoUrl))
                                         <img src="{{ $photoUrl }}" alt="{{ $name }}" class="h-full w-full object-cover" />
                                     @else
-                                        <div class="flex h-20 w-24 items-center justify-center rounded-lg bg-white/20 text-white ring-1 ring-white/25 dark:bg-white/10 dark:text-red-100">
+                                        <div class="flex h-20 w-24 items-center justify-center rounded-lg bg-white/20 text-white ring-1 ring-white/25 dark:bg-white/30 dark:text-red-100">
                                             <span class="text-sm font-bold">{{ $initials ?: Str::of($name)->substr(0, 1)->upper() }}</span>
                                         </div>
                                     @endif
                                 </div>
-                                <div class="border-t border-red-100 bg-gradient-to-br from-red-100 via-red-50 to-white p-4 dark:border-red-900/30 dark:bg-gradient-to-br dark:from-red-950/35 dark:via-slate-950 dark:to-slate-950">
-                                    <div class="truncate text-sm font-bold text-gray-900 dark:text-gray-100">{{ $name }}</div>
-                                    <div class="mt-1 text-xs font-semibold text-gray-600 dark:text-gray-300">{{ $titleText }}</div>
-                                    <div class="mt-2 text-xs text-gray-600 dark:text-gray-300">
+                                <div class="border-t border-red-100 bg-gradient-to-br from-red-100 via-red-50 to-white p-4 dark:border-red-900/30 dark:bg-gradient-to-br dark:from-red-950/35 dark:via-slate-950 dark:to-[#191919]">
+                                    <div class="truncate text-sm font-bold text-gray-900 dark:text-white">{{ $name }}</div>
+                                    <div class="mt-1 text-xs font-semibold text-gray-800 dark:text-white">{{ $titleText }}</div>
+                                    <div class="mt-2 text-xs text-gray-800 dark:text-white">
                                         {{ $locale === 'ne' ? 'विशेषज्ञता' : 'Expertise Area' }}:
-                                        <span class="font-medium text-gray-800 dark:text-gray-200">{{ $expertiseText ?: ($locale === 'ne' ? 'उपलब्ध छैन' : 'Not specified') }}</span>
+                                        <span class="font-medium text-gray-800 dark:text-gray-50">{{ $expertiseText ?: ($locale === 'ne' ? 'उपलब्ध छैन' : 'Not specified') }}</span>
                                     </div>
                                 </div>
                             </div>
                         @empty
-                            <div class="landing-panel rounded-[1.75rem] border-dashed border-red-200 bg-gradient-to-br from-white to-red-50 p-10 text-center text-sm text-gray-600 dark:border-red-900/40 dark:bg-gradient-to-br dark:from-slate-950 dark:to-red-950/10 dark:text-gray-300 sm:col-span-2 lg:col-span-4">
+                            <div class="landing-panel rounded-[1.75rem] border-dashed border-red-200 bg-gradient-to-br from-white to-red-50 p-10 text-center text-sm text-gray-700 dark:border-red-900/40 dark:bg-gradient-to-br dark:from-[#191919] dark:to-red-950/10 dark:text-gray-50 sm:col-span-2 lg:col-span-4">
                                 {{ $locale === 'ne' ? 'हाल कुनै शिक्षक उपलब्ध छैन।' : 'No faculty records available yet.' }}
                             </div>
                         @endforelse
@@ -1720,14 +1720,14 @@
                 <div class="landing-shell mx-auto w-full landing-stage">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                        <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
+                        <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/50 dark:text-red-300 dark:ring-red-900/50">
                             <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
                             {{ $locale === 'ne' ? 'सूचना' : 'Updates' }}
                         </p>
-                        <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+                        <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
                             {{ $locale === 'ne' ? 'समाचार तथा कार्यक्रम' : 'News & Events' }}
                         </h2>
-                        <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                        <p class="mt-2 text-sm text-gray-900 dark:text-white">
                             {{ $locale === 'ne' ? 'नयाँ सूचना र घोषणा।' : 'Latest announcements and updates.' }}
                         </p>
                     </div>
@@ -1741,7 +1741,7 @@
 
                 <div class="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     @forelse (($notices ?? collect()) as $n)
-                        <button type="button" class="landing-panel lift-card text-left rounded-[1.75rem] bg-gradient-to-br from-red-50 via-white to-red-100 p-6 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-red-950/25 dark:to-slate-950"
+                        <button type="button" class="landing-panel lift-card text-left rounded-[1.75rem] bg-gradient-to-br from-red-50 via-white to-red-100 p-6 focus:outline-none focus:ring-2 focus:ring-red-500 dark:bg-gradient-to-br dark:from-[#191919]/95 dark:via-red-950/25 dark:to-[#191919]"
                             @click="notice=@js([
                                 'title' => $n->localized_title,
                                 'date' => $n->formatted_date,
@@ -1751,8 +1751,8 @@
                             ]); open=true;">
                             <div class="flex items-start justify-between gap-4 border-b border-red-100 pb-4 dark:border-red-900/25">
                                 <div class="min-w-0">
-                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $n->formatted_date }}</div>
-                                    <div class="mt-2 line-clamp-2 text-base font-bold text-gray-900 dark:text-gray-100">{{ $n->localized_title }}</div>
+                                    <div class="text-gray-800 dark:text-white">{{ $n->formatted_date }}</div>
+                                    <div class="mt-2 line-clamp-2 text-base font-bold text-gray-900 dark:text-white">{{ $n->localized_title }}</div>
                                 </div>
                                 <div class="shrink-0">
                                     <span class="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 dark:bg-red-950/40 dark:text-red-300">
@@ -1760,10 +1760,10 @@
                                     </span>
                                 </div>
                             </div>
-                            <div class="mt-4 text-sm text-gray-700 dark:text-gray-300">
+                            <div class="mt-4 text-sm text-gray-900 dark:text-white">
                                 {{ Str::limit(strip_tags($n->localized_message), 120) }}
                             </div>
-                            <div class="mt-5 flex items-center justify-between text-xs font-semibold text-gray-600 dark:text-gray-400">
+                            <div class="mt-5 flex items-center justify-between text-xs font-semibold text-gray-800 dark:text-white">
                                 <span>{{ $n->localized_audience_label }}</span>
                                 <span class="inline-flex items-center gap-2 rounded-full bg-red-100 px-3 py-1 text-red-700 dark:bg-red-950/40 dark:text-red-300">
                                     <span>{{ $locale === 'ne' ? 'पढ्नुहोस्' : 'Read' }}</span>
@@ -1774,7 +1774,7 @@
                             </div>
                         </button>
                     @empty
-                        <div class="landing-panel rounded-[1.75rem] border-dashed border-red-200 bg-gradient-to-br from-white to-red-50 p-10 text-center text-sm text-gray-600 dark:border-red-900/40 dark:bg-gradient-to-br dark:from-slate-950 dark:to-red-950/10 dark:text-gray-300 md:col-span-2 lg:col-span-3">
+                        <div class="landing-panel rounded-[1.75rem] border-dashed border-red-200 bg-gradient-to-br from-white to-red-50 p-10 text-center text-sm text-gray-700 dark:border-red-900/40 dark:bg-gradient-to-br dark:from-[#191919] dark:to-red-950/10 dark:text-gray-50 md:col-span-2 lg:col-span-3">
                             {{ $locale === 'ne' ? 'हाल कुनै सूचना छैन।' : 'No notices published yet.' }}
                         </div>
                     @endforelse
@@ -1782,25 +1782,25 @@
 
                 <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center" role="dialog" aria-modal="true">
                     <div class="absolute inset-0 bg-gray-950/70" aria-hidden="true"></div>
-                    <div class="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-gradient-to-br from-white via-red-50/80 to-red-100/60 shadow-xl ring-1 ring-red-100 dark:bg-gradient-to-br dark:from-slate-950/95 dark:via-red-950/20 dark:to-slate-950 dark:ring-red-900/30">
+                    <div class="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-gradient-to-br from-white via-red-50/80 to-red-100/60 shadow-xl ring-1 ring-red-100 dark:bg-gradient-to-br dark:from-[#191919]/95 dark:via-red-950/20 dark:to-[#191919] dark:ring-red-900/30">
                         <div class="h-1 w-full bg-gradient-to-r from-red-500 to-red-600"></div>
                         <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-5 dark:border-gray-800">
                             <div class="min-w-0">
-                                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400" x-text="notice?.date || ''"></div>
-                                <div class="mt-1 truncate text-lg font-bold text-gray-900 dark:text-gray-100" x-text="notice?.title || ''"></div>
+                                <div class="text-gray-800 dark:text-white" x-text="notice?.date || ''"></div>
+                                <div class="mt-1 truncate text-lg font-bold text-gray-900 dark:text-white" x-text="notice?.title || ''"></div>
                                 <div class="mt-2 flex flex-wrap gap-2 text-xs font-semibold">
-                                    <span class="rounded-full bg-gray-100 px-3 py-1 text-gray-700 dark:bg-gray-900 dark:text-gray-200" x-text="notice?.audience || ''"></span>
+                                    <span class="rounded-full bg-gray-100 px-3 py-1 text-gray-700 dark:bg-gray-900 dark:text-gray-50" x-text="notice?.audience || ''"></span>
                                     <span class="rounded-full bg-red-50 px-3 py-1 text-red-700 dark:bg-red-950/40 dark:text-red-300" x-text="notice?.priority || ''"></span>
                                 </div>
                             </div>
-                            <button type="button" class="rounded-xl border border-gray-200 bg-white p-2 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800" @click="open=false" aria-label="{{ $locale === 'ne' ? 'बन्द गर्नुहोस्' : 'Close' }}">
+                            <button type="button" class="rounded-xl border border-gray-200 bg-white p-2 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-gray-800 dark:bg-gray-900 dark:text-white dark:hover:bg-gray-800" @click="open=false" aria-label="{{ $locale === 'ne' ? 'बन्द गर्नुहोस्' : 'Close' }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
                                     <path d="M6.22 6.22a.75.75 0 0 1 1.06 0L12 10.94l4.72-4.72a.75.75 0 1 1 1.06 1.06L13.06 12l4.72 4.72a.75.75 0 1 1-1.06 1.06L12 13.06l-4.72 4.72a.75.75 0 0 1-1.06-1.06L10.94 12 6.22 7.28a.75.75 0 0 1 0-1.06Z"/>
                                 </svg>
                             </button>
                         </div>
                         <div class="px-6 py-6">
-                            <div class="prose prose-sm max-w-none text-gray-800 dark:prose-invert dark:text-gray-200" x-html="notice?.full || ''"></div>
+                            <div class="prose prose-sm max-w-none text-gray-800 dark:prose-invert dark:text-gray-50" x-html="notice?.full || ''"></div>
                         </div>
                     </div>
                 </div>
@@ -1808,22 +1808,22 @@
 
             <section id="exam-result" class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8">
                 <div class="landing-shell mx-auto w-full landing-stage">
-                    <div class="grid gap-8 lg:grid-cols-12 lg:items-start">
-                        <div class="lg:col-span-7">
+                    <div class="space-y-8">
+                        <div>
                             <div class="flex flex-wrap items-center gap-3">
-                                <p class="section-chip bg-rose-100 text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:ring-rose-900/50">
+                                <p class="section-chip bg-rose-100 text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:ring-rose-900/50">
                                     <span class="inline-flex h-2.5 w-2.5 rounded-full bg-rose-500"></span>
                                     {{ $locale === 'ne' ? 'परीक्षा परिणाम' : 'Exam Result' }}
                                 </p>
-                                <span class="rounded-full border border-rose-200 bg-white/90 px-3 py-1 text-xs font-semibold text-rose-700 shadow-sm dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
+                                <span class="rounded-full border border-rose-200 bg-white px-3 py-1 text-xs font-semibold text-rose-700 shadow-sm dark:border-rose-900/50 dark:bg-rose-950/50 dark:text-rose-300">
                                     {{ $locale === 'ne' ? 'Published results only' : 'Published results only' }}
                                 </span>
                             </div>
 
-                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
                                 {{ $locale === 'ne' ? 'मार्कसिटको लागि परीक्षा परिणाम खोज्नुहोस्' : 'Search published exam results' }}
                             </h2>
-                            <p class="mt-3 max-w-3xl text-sm leading-7 text-gray-600 dark:text-gray-300">
+                            <p class="mt-3 max-w-3xl text-sm leading-7 text-gray-700 dark:text-gray-50">
                                 {{ $locale === 'ne'
                                     ? 'Academic Year, Semester, Exam Category, Assessment Number, Student ID / Roll No, र DOB प्रयोग गरेर आफ्नो प्रकाशित marksheet हेर्नुहोस्।'
                                     : 'Use Academic Year, Semester, Exam Category, Assessment Number, Student ID / Roll No, and DOB to open the published marksheet for each exam.' }}
@@ -1841,15 +1841,15 @@
                                 </div>
                             @endif
 
-                            <form method="GET" action="{{ route('home') }}" class="mt-6 space-y-5 rounded-[1.75rem] border border-[var(--landing-border)] bg-white/90 p-5 shadow-[0_20px_40px_rgba(15,23,42,0.08)] backdrop-blur dark:bg-slate-950/80" @submit="setTimeout(() => { const elem = document.getElementById('exam-result-panel'); if(elem) elem.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300)">
+                            <form method="GET" action="{{ route('home') }}" class="mt-6 space-y-5 rounded-[1.75rem] border border-[var(--landing-border)] bg-white p-5 shadow-[0_20px_40px_rgba(15,23,42,0.08)] backdrop-blur dark:bg-[#191919]" @submit="setTimeout(() => { const elem = document.getElementById('exam-result-panel'); if(elem) elem.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300)">
                                 <input type="hidden" name="search_exam_result" value="1">
 
                                 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                                     <div>
-                                        <label for="landingExamResultAcademicYear" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <label for="landingExamResultAcademicYear" class="mb-1.5 block text-sm font-medium text-gray-900 dark:text-white">
                                             {{ $locale === 'ne' ? 'Academic Year (BS)' : 'Academic Year (BS)' }}
                                         </label>
-                                        <select id="landingExamResultAcademicYear" name="academic_year" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100">
+                                        <select id="landingExamResultAcademicYear" name="academic_year" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-white">
                                             <option value="">{{ $locale === 'ne' ? 'Academic Year छान्नुहोस्' : 'Select Academic Year' }}</option>
                                             @foreach($examResultMeta['years'] as $year)
                                                 <option value="{{ $year }}" {{ ($examResultFilters['academic_year'] ?? '') === $year ? 'selected' : '' }}>{{ $year }}</option>
@@ -1858,10 +1858,10 @@
                                     </div>
 
                                     <div>
-                                        <label for="landingExamResultSemester" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <label for="landingExamResultSemester" class="mb-1.5 block text-sm font-medium text-gray-900 dark:text-white">
                                             {{ $locale === 'ne' ? 'Semester' : 'Semester' }}
                                         </label>
-                                        <select id="landingExamResultSemester" name="semester" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100">
+                                        <select id="landingExamResultSemester" name="semester" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-white">
                                             <option value="">{{ $locale === 'ne' ? 'Semester छान्नुहोस्' : 'Select Semester' }}</option>
                                             @foreach($examResultMeta['semesters'] as $semester)
                                                 <option value="{{ $semester }}" {{ (string) ($examResultFilters['semester'] ?? '') === (string) $semester ? 'selected' : '' }}>
@@ -1872,10 +1872,10 @@
                                     </div>
 
                                     <div>
-                                        <label for="landingExamResultCategory" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <label for="landingExamResultCategory" class="mb-1.5 block text-sm font-medium text-gray-900 dark:text-white">
                                             {{ $locale === 'ne' ? 'Exam Category' : 'Exam Category' }}
                                         </label>
-                                        <select id="landingExamResultCategory" name="exam_category" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100">
+                                        <select id="landingExamResultCategory" name="exam_category" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-white">
                                             <option value="assessment" {{ ($examResultFilters['exam_category'] ?? 'assessment') === 'assessment' ? 'selected' : '' }}>
                                                 {{ $locale === 'ne' ? 'Assessment' : 'Assessment' }}
                                             </option>
@@ -1886,10 +1886,10 @@
                                     </div>
 
                                     <div id="landingExamResultAssessmentWrap" class="sm:col-span-2 xl:col-span-1 {{ ($examResultFilters['exam_category'] ?? 'assessment') !== 'assessment' ? 'hidden' : '' }}">
-                                        <label for="landingExamResultAssessmentNumber" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <label for="landingExamResultAssessmentNumber" class="mb-1.5 block text-sm font-medium text-gray-900 dark:text-white">
                                             {{ $locale === 'ne' ? 'Assessment Number' : 'Assessment Number' }}
                                         </label>
-                                        <select id="landingExamResultAssessmentNumber" name="assessment_number" data-selected="{{ $examResultFilters['assessment_number'] ?? '' }}" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100">
+                                        <select id="landingExamResultAssessmentNumber" name="assessment_number" data-selected="{{ $examResultFilters['assessment_number'] ?? '' }}" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-white">
                                             <option value="">{{ $locale === 'ne' ? 'All' : 'All' }}</option>
                                             @foreach($examResultAssessmentNumbers as $number)
                                                 <option value="{{ $number }}" {{ (string) ($examResultFilters['assessment_number'] ?? '') === (string) $number ? 'selected' : '' }}>
@@ -1900,19 +1900,19 @@
                                     </div>
 
                                     <div>
-                                        <label for="landingExamResultStudentId" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <label for="landingExamResultStudentId" class="mb-1.5 block text-sm font-medium text-gray-900 dark:text-white">
                                             {{ $locale === 'ne' ? 'Student ID / Roll No' : 'Student ID / Roll No' }}
                                         </label>
-                                        <input id="landingExamResultStudentId" name="student_id" type="text" value="{{ $examResultFilters['student_id'] ?? '' }}" placeholder="002" class="landing-input w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100" required>
+                                        <input id="landingExamResultStudentId" name="student_id" type="text" value="{{ $examResultFilters['student_id'] ?? '' }}" placeholder="002" class="landing-input w-full px-3 py-2.5 text-sm text-gray-900 dark:text-white" required>
                                     </div>
 
                                     <div>
-                                        <label for="landingExamResultDobBs" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <label for="landingExamResultDobBs" class="mb-1.5 block text-sm font-medium text-gray-900 dark:text-white">
                                             {{ $locale === 'ne' ? 'Date of Birth (BS)' : 'Date of Birth (BS)' }}
                                         </label>
                                         <div class="relative">
-                                            <input id="landingExamResultDobBs" name="dob_bs" type="text" placeholder="YYYY-MM-DD or pick date" value="{{ $examResultFilters['dob_bs'] ?? '' }}" class="bs-date landing-input w-full pr-10 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100" autocomplete="off">
-                                            <button type="button" aria-label="Pick BS date" onclick="event?.preventDefault(); event?.stopPropagation(); window.openBsDatePicker?.('landingExamResultDobBs'); return false;" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                            <input id="landingExamResultDobBs" name="dob_bs" type="text" placeholder="YYYY-MM-DD or pick date" value="{{ $examResultFilters['dob_bs'] ?? '' }}" class="bs-date landing-input w-full pr-10 px-3 py-2.5 text-sm text-gray-900 dark:text-white" autocomplete="off">
+                                            <button type="button" aria-label="Pick BS date" onclick="event?.preventDefault(); event?.stopPropagation(); window.openBsDatePicker?.('landingExamResultDobBs'); return false;" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-700 dark:text-gray-50 dark:hover:text-gray-200">
                                                 <i class="bi bi-calendar3"></i>
                                             </button>
                                         </div>
@@ -1924,7 +1924,7 @@
                                         <i class="bi bi-search"></i>
                                         {{ $locale === 'ne' ? 'Exam Result Search' : 'Search Exam Result' }}
                                     </button>
-                                    <a href="{{ route('home') }}#exam-result" class="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-rose-300 hover:text-rose-700 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200 dark:hover:border-rose-800 dark:hover:text-rose-300">
+                                    <a href="{{ route('home') }}#exam-result" class="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-rose-300 hover:text-rose-700 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-50 dark:hover:border-rose-800 dark:hover:text-rose-300">
                                         <i class="bi bi-arrow-counterclockwise"></i>
                                         {{ $locale === 'ne' ? 'Reset' : 'Reset' }}
                                     </a>
@@ -1932,154 +1932,316 @@
                             </form>
                         </div>
 
-                        <div class="lg:col-span-5">
-                            <div id="exam-result-panel" class="landing-panel lift-card rounded-[2rem] p-5 sm:p-6 dark:bg-slate-950/80">
+                        <div>
+                            <div id="exam-result-panel">
                                 @if($examResultSearchPerformed && $examResultPayload)
                                     @php
-                                        $examResultMarks = $examResultPayload['marksheetData']['exam_marks'] ?? collect();
-                                        $examResultResult = strtoupper((string) ($examResultPayload['marksheetData']['result'] ?? 'FAIL'));
-                                        $examResultResultClass = $examResultResult === 'PASS'
-                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
-                                            : 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300';
+                                        $marks = collect($examResultPayload['marksheetData']['exam_marks'] ?? []);
+                                        $departmentEntity = \App\Models\Department::first();
+                                        $departmentName = $departmentEntity?->name ?? config('app.name', 'IT DMS');
+                                        $departmentAddress = trim(collect([
+                                            $departmentEntity?->address ?? null,
+                                            $departmentEntity?->city ?? null,
+                                            $departmentEntity?->district ?? null,
+                                        ])->filter()->implode(', '));
+                                        $departmentLogo = $departmentEntity && method_exists($departmentEntity, 'getLogoUrl')
+                                            ? $departmentEntity->getLogoUrl()
+                                            : asset('images/default-logo.svg');
+                                        $studentName = $examResultStudent?->user?->name ?? 'N/A';
+                                        $studentId = $examResultStudent?->id ?? 'N/A';
+                                        $rollNo = $examResultStudent?->roll_no ?? 'N/A';
+                                        $academicYear = $examResultFilters['academic_year'] ?? 'All';
+                                        $semester = $examResultFilters['semester'] ?? 'All';
+                                        $category = strtolower((string) ($examResultFilters['exam_category'] ?? 'assessment'));
+                                        $examCategoryLabel = strtoupper($category);
+                                        $dob_bs = $examResultFilters['dob_bs'] ?? 'N/A';
+                                        $programName = $examResultStudent?->program ?: ($examResultStudent?->department ?: ($departmentEntity?->short_name ?: ($departmentEntity?->name ?? 'N/A')));
+                                        $examTitle = $examResultPayload['selectedExamName'] ?? 'Marksheet';
+                                        $grandTotal = (float) ($examResultPayload['marksheetData']['total_obtained'] ?? 0);
+                                        $totalFull = (float) ($examResultPayload['marksheetData']['total_full'] ?? 0);
+                                        $percentage = (float) ($examResultPayload['marksheetData']['percentage'] ?? 0);
+                                        $grade = $examResultPayload['marksheetData']['grade'] ?? '-';
+                                        $result = strtoupper((string) ($examResultPayload['marksheetData']['result'] ?? 'FAIL'));
                                     @endphp
-                                    <div class="flex items-start justify-between gap-4">
-                                        <div>
-                                            <p class="text-xs font-bold uppercase tracking-[0.22em] text-rose-500 dark:text-rose-300">
-                                                {{ $locale === 'ne' ? 'Published result found' : 'Published result found' }}
-                                            </p>
-                                            <h3 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                                {{ $examResultStudent?->user?->name ?? 'Student' }}
-                                            </h3>
-                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                {{ $examResultPayload['selectedExamName'] ?? ($locale === 'ne' ? 'Marksheet' : 'Marksheet') }}
-                                            </p>
-                                        </div>
-                                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] {{ $examResultResultClass }}">
-                                            {{ $examResultResult }}
-                                        </span>
-                                    </div>
 
-                                    <div class="mt-5 grid gap-3 sm:grid-cols-2">
-                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Student ID' : 'Student ID' }}</div>
-                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ $examResultStudent?->id ?? 'N/A' }}</div>
-                                        </div>
-                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Roll No' : 'Roll No' }}</div>
-                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ $examResultStudent?->roll_no ?? 'N/A' }}</div>
-                                        </div>
-                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Academic Year (BS)' : 'Academic Year (BS)' }}</div>
-                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ $examResultFilters['academic_year'] ?? 'N/A' }}</div>
-                                        </div>
-                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Semester' : 'Semester' }}</div>
-                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">Semester {{ $examResultFilters['semester'] ?? 'N/A' }}</div>
-                                        </div>
-                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Exam Category' : 'Exam Category' }}</div>
-                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ strtoupper((string) ($examResultFilters['exam_category'] ?? 'assessment')) }}</div>
-                                        </div>
-                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Published Marks' : 'Published Marks' }}</div>
-                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ $examResultMarks->count() }}</div>
-                                        </div>
-                                    </div>
+                                    <style>
+                                        .marksheet-container {
+                                            background: #ffffff;
+                                            border: 1.5px solid #222222;
+                                            padding: 14px;
+                                            max-width: 100%;
+                                            font-family: Arial, sans-serif;
+                                            color: #111111;
+                                        }
+                                        .brand-grid {
+                                            display: grid;
+                                            grid-template-columns: 88px 1fr;
+                                            gap: 14px;
+                                            align-items: start;
+                                            border-bottom: 1px solid #222222;
+                                            padding-bottom: 10px;
+                                            margin-bottom: 14px;
+                                        }
+                                        .logo-box {
+                                            width: 72px;
+                                            height: 72px;
+                                            object-fit: contain;
+                                        }
+                                        .brand-center {
+                                            text-align: center;
+                                        }
+                                        .brand-title {
+                                            font-size: 26px;
+                                            font-weight: 700;
+                                            line-height: 1.2;
+                                        }
+                                        .brand-subtitle {
+                                            font-size: 22px;
+                                            font-weight: 700;
+                                            margin-top: 4px;
+                                            text-transform: uppercase;
+                                        }
+                                        .college-address {
+                                            margin-top: 6px;
+                                            font-size: 12px;
+                                            line-height: 1.4;
+                                        }
+                                        .section-heading {
+                                            margin-top: 14px;
+                                            border: 1px solid #222222;
+                                            background: #ececec;
+                                            text-align: center;
+                                            padding: 7px 10px;
+                                            font-size: 13px;
+                                            font-weight: 700;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.04em;
+                                        }
+                                        .info-table {
+                                            width: 100%;
+                                            border-collapse: collapse;
+                                            margin-top: 0;
+                                            border: 1px solid #222222;
+                                            border-top: 0;
+                                        }
+                                        .info-table td {
+                                            border: 1px solid #222222;
+                                            padding: 10px 8px;
+                                            vertical-align: top;
+                                            width: 25%;
+                                        }
+                                        .info-label {
+                                            font-size: 10px;
+                                            font-weight: 700;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.04em;
+                                            color: #333333;
+                                        }
+                                        .info-value {
+                                            margin-top: 6px;
+                                            font-size: 12px;
+                                            font-weight: 700;
+                                            color: #111111;
+                                        }
+                                        .marks-table {
+                                            width: 100%;
+                                            border-collapse: collapse;
+                                            margin-top: 0;
+                                            border: 1px solid #222222;
+                                            border-top: 0;
+                                        }
+                                        .marks-table th {
+                                            background: #f0f0f0;
+                                            color: #111111;
+                                            text-transform: uppercase;
+                                            font-size: 10px;
+                                            font-weight: 700;
+                                            text-align: center;
+                                            border: 1px solid #222222;
+                                            padding: 6px;
+                                        }
+                                        .marks-table td {
+                                            border: 1px solid #222222;
+                                            padding: 6px;
+                                            font-size: 11px;
+                                            text-align: center;
+                                        }
+                                        .marks-table td:first-child {
+                                            text-align: center;
+                                        }
+                                        .marks-table td:nth-child(2) {
+                                            text-align: left;
+                                            font-weight: 700;
+                                        }
+                                        .marks-table tfoot td {
+                                            background: #f0f0f0;
+                                            font-weight: 700;
+                                        }
+                                        .summary-table {
+                                            width: 100%;
+                                            border-collapse: collapse;
+                                            margin-top: 0;
+                                            border: 1px solid #222222;
+                                            border-top: 0;
+                                        }
+                                        .summary-table td {
+                                            border: 1px solid #222222;
+                                            padding: 10px 8px;
+                                            text-align: center;
+                                        }
+                                        .summary-label {
+                                            font-size: 10px;
+                                            font-weight: 700;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.04em;
+                                        }
+                                        .summary-value {
+                                            margin-top: 6px;
+                                            font-size: 14px;
+                                            font-weight: 700;
+                                        }
+                                    </style>
 
-                                    <!-- Marksheet Table -->
-                                    <div class="mt-6 overflow-x-auto rounded-2xl border border-gray-200 dark:border-slate-700">
-                                        <table class="w-full text-sm">
-                                            <thead class="bg-gradient-to-r from-rose-600 to-red-700 text-white dark:from-rose-900 dark:to-red-950">
+                                    <div class="marksheet-container">
+                                        <div class="brand-grid">
+                                            <div>
+                                                <img src="{{ $departmentLogo }}" alt="Logo" class="logo-box">
+                                            </div>
+                                            <div class="brand-center">
+                                                <div class="brand-title">{{ $departmentName }}</div>
+                                                <div class="brand-subtitle">Academic Transcript</div>
+                                                <div class="college-address" style="margin-top: 4px; text-align: center; font-size: 14px;">{{ $departmentAddress ?: 'Department Address' }}</div>
+                                                <div class="college-address">
+                                                    Academic Year: {{ $academicYear }} | Semester: {{ $semester }} | Program: {{ $programName }} | Category: {{ $examCategoryLabel }} | Exam: {{ $examTitle }}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="section-heading">Student Information</div>
+
+                                        <table class="info-table">
+                                            <tr>
+                                                <td>
+                                                    <div class="info-label">Student Name</div>
+                                                    <div class="info-value">{{ $studentName }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="info-label">Student ID</div>
+                                                    <div class="info-value">{{ $studentId }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="info-label">Roll Number</div>
+                                                    <div class="info-value">{{ $rollNo }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="info-label">Semester</div>
+                                                    <div class="info-value">{{ $semester }}</div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="info-label">Academic Year (BS)</div>
+                                                    <div class="info-value">{{ $academicYear }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="info-label">DOB (BS)</div>
+                                                    <div class="info-value">{{ $dob_bs }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="info-label">Exam Category</div>
+                                                    <div class="info-value">{{ $examCategoryLabel }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="info-label">Public Entries</div>
+                                                    <div class="info-value">{{ $marks->count() }}</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <div class="section-heading">Academic Performance</div>
+
+                                        <table class="marks-table">
+                                            <thead>
                                                 <tr>
-                                                    <th class="px-4 py-3 text-left font-semibold">{{ $locale === 'ne' ? 'विषय' : 'Subject' }}</th>
-                                                    <th class="px-4 py-3 text-center font-semibold">{{ $locale === 'ne' ? 'प्राप्त' : 'Obtained' }}</th>
-                                                    <th class="px-4 py-3 text-center font-semibold">{{ $locale === 'ne' ? 'पूर्ण' : 'Full' }}</th>
-                                                    <th class="px-4 py-3 text-center font-semibold">{{ $locale === 'ne' ? 'प्रतिशत' : 'Percentage' }}</th>
-                                                    <th class="px-4 py-3 text-center font-semibold">{{ $locale === 'ne' ? 'ग्रेड' : 'Grade' }}</th>
+                                                    <th style="width:6%;">S.N.</th>
+                                                    <th style="width:40%;">Subject</th>
+                                                    <th style="width:12%;">Full Marks</th>
+                                                    <th style="width:12%;">Pass Mark</th>
+                                                    <th style="width:12%;">Marks Obtained</th>
+                                                    <th style="width:10%;">Percentage</th>
+                                                    <th style="width:8%;">Grade</th>
+                                                    <th style="width:10%;">Result</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
-                                                @forelse($examResultMarks as $mark)
+                                            <tbody>
+                                                @forelse($marks as $index => $mark)
                                                     @php
-                                                        $percentage = $mark->percentage ?? 0;
-                                                        $gradeClass = $percentage >= 80 ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
-                                                            : ($percentage >= 60 ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300'
-                                                            : ($percentage >= 40 ? 'bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-300'
-                                                            : 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300'));
+                                                        $subjectName = $mark->subject?->subject_name ?? 'N/A';
+                                                        $fullMarks = $mark->full_marks ?? $mark->exam?->full_marks;
+                                                        $passMark = $mark->passing_marks ?? $mark->exam?->passing_marks;
+                                                        $obtainedValue = $mark->marks_obtained;
+                                                        $obtained = is_null($obtainedValue) ? '—' : number_format((float) $obtainedValue, 2);
+                                                        $rowPercentage = is_null($obtainedValue) || is_null($fullMarks) || (float) $fullMarks <= 0
+                                                            ? null
+                                                            : round(((float) $obtainedValue / (float) $fullMarks) * 100, 2);
+                                                        $rowGrade = $mark->grade ?? '—';
+                                                        $rowResult = (($mark->percentage ?? $rowPercentage ?? 0) >= 40) ? 'PASS' : 'FAIL';
                                                     @endphp
-                                                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-900/50">
-                                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
-                                                            {{ $mark->subject?->localized_name ?? 'N/A' }}
-                                                        </td>
-                                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-gray-100">
-                                                            {{ $mark->marks_obtained ?? 0 }}
-                                                        </td>
-                                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-gray-100">
-                                                            {{ $mark->full_marks ?? 0 }}
-                                                        </td>
-                                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-gray-100">
-                                                            {{ number_format((float) ($mark->percentage ?? 0), 2) }}%
-                                                        </td>
-                                                        <td class="px-4 py-3 text-center">
-                                                            <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $gradeClass }}">
-                                                                {{ $mark->grade ?? 'N/A' }}
-                                                            </span>
-                                                        </td>
+                                                    <tr>
+                                                        <td>{{ $index + 1 }}</td>
+                                                        <td>{{ $subjectName }}</td>
+                                                        <td>{{ is_null($fullMarks) ? '—' : number_format((float) $fullMarks, 2) }}</td>
+                                                        <td>{{ is_null($passMark) ? '—' : number_format((float) $passMark, 2) }}</td>
+                                                        <td>{{ $obtained }}</td>
+                                                        <td>{{ is_null($rowPercentage) ? '—' : number_format($rowPercentage, 2) . '%' }}</td>
+                                                        <td>{{ $rowGrade }}</td>
+                                                        <td>{{ $rowResult }}</td>
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                                                            {{ $locale === 'ne' ? 'कोई अंक उपलब्ध नहीं' : 'No marks available' }}
-                                                        </td>
+                                                        <td colspan="8" style="text-align: center; padding: 18px 10px;">No marks found</td>
                                                     </tr>
                                                 @endforelse
                                             </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="4" style="text-align: right;">Grand Total</td>
+                                                    <td>{{ number_format($grandTotal, 2) }}</td>
+                                                    <td>{{ number_format($percentage, 2) }}%</td>
+                                                    <td>{{ $grade }}</td>
+                                                    <td>{{ $result }}</td>
+                                                </tr>
+                                            </tfoot>
                                         </table>
-                                    </div>
 
-                                    <div class="mt-5 flex flex-wrap gap-3 justify-center">
-                                        <button type="button" onclick="document.getElementById('landingExamResultStudentId').scrollIntoView({ behavior: 'smooth', block: 'center' });" class="inline-flex items-center justify-center gap-2 rounded-full border border-blue-300 bg-blue-50 px-5 py-2.5 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300 dark:hover:bg-blue-950/60">
-                                            <i class="bi bi-pencil"></i>
-                                            {{ $locale === 'ne' ? 'फिल्टर सम्पादन गर्नुहोस्' : 'Edit Filters' }}
-                                        </button>
-                                        <a href="{{ $examResultPrintUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/15 transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400">
-                                            <i class="bi bi-printer"></i>
-                                            {{ $locale === 'ne' ? 'Print' : 'Print' }}
-                                        </a>
-                                    </div>
-                                @else
-                                    <div class="rounded-[1.5rem] border border-dashed border-gray-200 bg-white/70 p-6 dark:border-slate-700 dark:bg-slate-950/70">
-                                        <p class="text-xs font-bold uppercase tracking-[0.24em] text-gray-400 dark:text-gray-500">
-                                            {{ $locale === 'ne' ? 'How it works' : 'How it works' }}
-                                        </p>
-                                        <ul class="mt-4 space-y-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
-                                            <li class="flex gap-3">
-                                                <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">1</span>
-                                                <span>{{ $locale === 'ne' ? 'Academic Year, Semester, र Exam Category छान्नुहोस्।' : 'Choose Academic Year, Semester, and Exam Category.' }}</span>
-                                            </li>
-                                            <li class="flex gap-3">
-                                                <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">2</span>
-                                                <span>{{ $locale === 'ne' ? 'Assessment चयन गरेपछि Assessment Number स्वतः देखिन्छ।' : 'When Assessment is selected, Assessment Number appears automatically.' }}</span>
-                                            </li>
-                                            <li class="flex gap-3">
-                                                <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">3</span>
-                                                <span>{{ $locale === 'ne' ? 'Student ID / Roll No र DOB राखेर published result खोल्नुहोस्।' : 'Enter Student ID / Roll No and DOB to open the published result.' }}</span>
-                                            </li>
-                                        </ul>
+                                        <div class="section-heading">Result</div>
 
-                                        <div class="mt-6 grid gap-3 sm:grid-cols-3">
-                                            <div class="rounded-2xl bg-rose-50 p-4 text-center dark:bg-rose-950/25">
-                                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-rose-600 dark:text-rose-300">{{ $locale === 'ne' ? 'Year' : 'Year' }}</div>
-                                                <div class="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">{{ $examResultMeta['years'][0] ?? '—' }}</div>
-                                            </div>
-                                            <div class="rounded-2xl bg-red-50 p-4 text-center dark:bg-red-950/25">
-                                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-red-600 dark:text-red-300">{{ $locale === 'ne' ? 'Semester' : 'Semester' }}</div>
-                                                <div class="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">{{ $examResultMeta['semesters'][0] ?? '—' }}</div>
-                                            </div>
-                                            <div class="rounded-2xl bg-amber-50 p-4 text-center dark:bg-amber-950/25">
-                                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">{{ $locale === 'ne' ? 'Category' : 'Category' }}</div>
-                                                <div class="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">{{ strtoupper((string) ($examResultFilters['exam_category'] ?? 'assessment')) }}</div>
-                                            </div>
+                                        <table class="summary-table">
+                                            <tr>
+                                                <td>
+                                                    <div class="summary-label">Overall Percentage</div>
+                                                    <div class="summary-value">{{ number_format($percentage, 2) }}%</div>
+                                                </td>
+                                                <td>
+                                                    <div class="summary-label">Grade</div>
+                                                    <div class="summary-value">{{ $grade }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="summary-label">Result</div>
+                                                    <div class="summary-value">{{ $result }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="summary-label">Total Obtained</div>
+                                                    <div class="summary-value">{{ number_format($grandTotal, 2) }}</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <div class="mt-5 flex flex-wrap gap-3 justify-center" style="margin-top: 15px;">
+                                            <a href="{{ $examResultPrintUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/15 transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                                                <i class="bi bi-printer"></i>
+                                                {{ $locale === 'ne' ? 'Print' : 'Print' }}
+                                            </a>
                                         </div>
                                     </div>
                                 @endif
@@ -2093,28 +2255,28 @@
                 <div class="landing-shell mx-auto w-full landing-stage">
                     <div class="flex flex-col gap-3">
                         <div>
-                            <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
+                            <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/50 dark:text-red-300 dark:ring-red-900/50">
                                 <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
                                 {{ $locale === 'ne' ? 'स्रोत' : 'Resources' }}
                             </p>
-                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
                                 {{ $locale === 'ne' ? 'दस्तावेज तथा स्रोत' : 'Documents & Resources' }}
                             </h2>
-                            <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                            <p class="mt-2 text-sm text-gray-900 dark:text-white">
                                 {{ $locale === 'ne' ? 'सिलेबस, नोट्स, गाइड र अन्य सामग्री।' : 'Syllabus, notes, guides, and other materials.' }}
                             </p>
                         </div>
 
                         <div class="landing-toolbar lg:items-center lg:justify-between">
-                            <div class="text-sm font-medium text-gray-600 dark:text-gray-300" x-text="resultText"></div>
+                            <div class="text-sm font-medium text-gray-800 dark:text-white" x-text="resultText"></div>
                             <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
                                 <label class="sr-only" for="docSearch">{{ $locale === 'ne' ? 'दस्तावेज खोज' : 'Search documents' }}</label>
                                 <input id="docSearch" type="search" x-model.trim="query" placeholder="{{ $locale === 'ne' ? 'शीर्षक/विषय खोज्नुहोस्…' : 'Search by title or subject…' }}"
-                                    class="landing-input w-full px-4 py-2 text-sm text-gray-900 focus:border-red-500 focus:ring-red-500 dark:text-gray-100 sm:w-72" />
+                                    class="landing-input w-full px-4 py-2 text-sm text-gray-900 focus:border-red-500 focus:ring-red-500 dark:text-white sm:w-72" />
 
                                 <label class="sr-only" for="docType">{{ $locale === 'ne' ? 'प्रकार' : 'Type' }}</label>
                                 <select id="docType" x-model="type"
-                                    class="landing-select w-full px-4 py-2 text-sm text-gray-900 focus:border-red-500 focus:ring-red-500 dark:text-gray-100 sm:w-52">
+                                    class="landing-select w-full px-4 py-2 text-sm text-gray-900 focus:border-red-500 focus:ring-red-500 dark:text-white sm:w-52">
                                     <option value="all">{{ $locale === 'ne' ? 'सबै प्रकार' : 'All types' }}</option>
                                     <template x-for="t in types" :key="t.value">
                                         <option :value="t.value" x-text="t.label"></option>
@@ -2132,7 +2294,7 @@
 
                     <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         <template x-for="d in filtered" :key="d.id">
-                            <div class="landing-panel lift-card rounded-[1.75rem] border-l-4 bg-gradient-to-br from-white via-red-50/80 to-red-100/60 p-6 transition duration-300 dark:bg-gradient-to-br dark:from-slate-950/90 dark:via-red-950/20 dark:to-slate-950"
+                            <div class="landing-panel lift-card rounded-[1.75rem] border-l-4 bg-gradient-to-br from-white via-red-50/80 to-red-100/60 p-6 transition duration-300 dark:bg-gradient-to-br dark:from-[#191919]/90 dark:via-red-950/20 dark:to-[#191919]"
                                  :class="[
                                      d.type === 'syllabus' ? 'border-l-red-500 dark:border-l-red-400' : 
                                      d.type === 'notes' ? 'border-l-red-400 dark:border-l-red-300' : 
@@ -2150,19 +2312,19 @@
                                               ]"
                                               x-text="d.type_label"></span>
                                         <template x-if="d.size">
-                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400" x-text="d.size"></span>
+                                            <span class="text-gray-600 dark:text-white" x-text="d.size"></span>
                                         </template>
                                     </div>
-                                    <div class="mt-4 line-clamp-2 text-base font-bold text-gray-900 dark:text-gray-100" x-text="d.title"></div>
+                                    <div class="mt-4 line-clamp-2 text-base font-bold text-gray-900 dark:text-white" x-text="d.title"></div>
                                     <template x-if="d.subject">
-                                        <div class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                            <span class="font-medium text-gray-900 dark:text-gray-200" x-text="d.subject"></span>
+                                        <div class="mt-2 text-sm text-gray-800 dark:text-white">
+                                            <span class="font-medium text-gray-900 dark:text-gray-50" x-text="d.subject"></span>
                                         </div>
                                     </template>
                                     <template x-if="d.description">
-                                        <div class="mt-3 line-clamp-2 text-sm text-gray-600 dark:text-gray-300" x-text="d.description"></div>
+                                        <div class="mt-3 line-clamp-2 text-sm text-gray-900 dark:text-white" x-text="d.description"></div>
                                     </template>
-                                    <div class="mt-3 text-xs text-gray-500 dark:text-gray-400" x-text="uploadedText(d.uploaded_at)"></div>
+                                    <div class="mt-3 text-xs text-gray-800 dark:text-white" x-text="uploadedText(d.uploaded_at)"></div>
                                     <div class="mt-6 flex items-center gap-2">
                                         <template x-if="d.url">
                                             <a :href="d.url" target="_blank" rel="noopener" class="shine-button flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-red-700 px-3 py-2 text-xs font-semibold text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:from-red-400 hover:to-red-600 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-400">
@@ -2173,13 +2335,13 @@
                                             </a>
                                         </template>
                                         <template x-if="!d.url">
-                                            <span class="flex-1 inline-flex items-center justify-center rounded-lg border border-red-100 bg-red-50/70 px-3 py-2 text-xs font-semibold text-red-300 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-300/70">
+                                            <span class="flex-1 inline-flex items-center justify-center rounded-lg border border-red-100 bg-red-50/70 px-3 py-2 text-xs font-semibold text-red-300 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-300/70">
                                                 {{ $locale === 'ne' ? 'उपलब्ध छैन' : 'N/A' }}
                                             </span>
                                         </template>
 
                                         <template x-if="d.download_url">
-                                            <a :href="d.download_url" class="landing-panel lift-card flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-gray-100">
+                                            <a :href="d.download_url" class="landing-panel lift-card flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-white">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-3.5 w-3.5">
                                                     <path fill-rule="evenodd" d="M12 2a.75.75 0 0 1 .75.75v6.69l1.97-1.97a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L7.97 8.53a.75.75 0 0 1 1.06-1.06l1.97 1.97V2.75A.75.75 0 0 1 12 2zM3 14.25a2.25 2.25 0 0 0 2.25 2.25h13.5A2.25 2.25 0 0 0 21 14.25v-3.5a.75.75 0 0 0-1.5 0v3.5a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75v-3.5a.75.75 0 0 0-1.5 0v3.5z" clip-rule="evenodd" />
                                                 </svg>
@@ -2187,7 +2349,7 @@
                                             </a>
                                         </template>
                                         <template x-if="!d.download_url">
-                                            <span class="flex-1 inline-flex items-center justify-center rounded-lg border border-red-100 bg-red-50/70 px-3 py-2 text-xs font-semibold text-red-300 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-300/70">
+                                            <span class="flex-1 inline-flex items-center justify-center rounded-lg border border-red-100 bg-red-50/70 px-3 py-2 text-xs font-semibold text-red-300 dark:border-red-900/30 dark:bg-red-950/30 dark:text-red-300/70">
                                                 {{ $locale === 'ne' ? 'डाउनलोड छैन' : 'No download' }}
                                             </span>
                                         </template>
@@ -2196,7 +2358,7 @@
                             </div>
                         </template>
                         <template x-if="filtered.length === 0">
-                        <div class="landing-panel rounded-[1.75rem] border-l-4 border-l-red-300 bg-gradient-to-br from-red-50 to-white p-10 text-center text-sm text-gray-600 dark:border-red-900/40 dark:from-red-950/20 dark:to-slate-950/40 dark:text-gray-300 sm:col-span-2 lg:col-span-3">
+                        <div class="landing-panel rounded-[1.75rem] border-l-4 border-l-red-300 bg-gradient-to-br from-red-50 to-white p-10 text-center text-sm text-gray-700 dark:border-red-900/40 dark:from-red-950/20 dark:to-[#191919]/40 dark:text-gray-50 sm:col-span-2 lg:col-span-3">
                                 {{ $locale === 'ne' ? 'कुनै सामग्री भेटिएन।' : 'No materials found.' }}
                             </div>
                         </template>
@@ -2208,14 +2370,14 @@
                 <div class="landing-shell mx-auto w-full landing-stage">
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
+                            <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/50 dark:text-red-300 dark:ring-red-900/50">
                                 <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
                                 {{ $locale === 'ne' ? 'ग्यालरी' : 'Gallery' }}
                             </p>
-                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
                                 {{ $locale === 'ne' ? 'ग्यालरी' : 'Gallery' }}
                             </h2>
-                        <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                        <p class="mt-2 text-sm text-gray-900 dark:text-white">
                             {{ $locale === 'ne' ? 'विभागका गतिविधि र सुविधाका झलकहरू।' : 'Highlights from department events and facilities.' }}
                         </p>
                     </div>
@@ -2229,11 +2391,11 @@
 
                 <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                     @forelse (($galleryItems ?? collect()) as $g)
-                        <a href="{{ route('gallery.index', ['category' => $g->category]) }}" class="landing-panel group relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-white via-red-50/60 to-red-100/60 dark:bg-gradient-to-br dark:from-slate-950/90 dark:via-red-950/20 dark:to-slate-950">
+                        <a href="{{ route('gallery.index', ['category' => $g->category]) }}" class="landing-panel group relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-white via-red-50/60 to-red-100/60 dark:bg-gradient-to-br dark:from-[#191919]/90 dark:via-red-950/20 dark:to-[#191919]">
                             @if ($g->image_url)
                                 <img src="{{ $g->image_url }}" alt="{{ $g->title }}" class="h-44 w-full object-cover transition duration-300 group-hover:scale-105 sm:h-48">
                             @else
-                                <div class="flex h-44 items-center justify-center text-sm text-gray-500 dark:text-gray-400 sm:h-48">
+                                <div class="flex h-44 items-center justify-center text-sm text-gray-900 dark:text-white sm:h-48">
                                     {{ $locale === 'ne' ? 'तस्विर छैन' : 'No image' }}
                                 </div>
                             @endif
@@ -2260,7 +2422,7 @@
                             </div>
                         </a>
                     @empty
-                        <div class="landing-panel rounded-[1.75rem] border-dashed p-10 text-center text-sm text-gray-600 dark:text-gray-300 sm:col-span-3 lg:col-span-4">
+                        <div class="landing-panel rounded-[1.75rem] border-dashed p-10 text-center text-sm text-gray-900 dark:text-white sm:col-span-3 lg:col-span-4">
                             {{ $locale === 'ne' ? 'हाल ग्यालरी सामग्री छैन।' : 'No gallery items available yet.' }}
                         </div>
                     @endforelse
@@ -2271,46 +2433,46 @@
                 <div class="landing-shell mx-auto w-full landing-stage">
                     <div class="grid gap-8 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start">
                         <div>
-                            <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/40 dark:text-red-300 dark:ring-red-900/50">
+                            <p class="section-chip bg-red-100 text-red-700 ring-1 ring-red-200 dark:bg-red-950/50 dark:text-red-300 dark:ring-red-900/50">
                                 <span class="inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
                                 {{ $locale === 'ne' ? 'सम्पर्क' : 'Contact' }}
                             </p>
-                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
                                 {{ $locale === 'ne' ? 'सम्पर्क तथा सहयोग' : 'Contact & Support' }}
                             </h2>
-                            <p class="mt-3 text-sm leading-7 text-gray-700 dark:text-gray-300">
+                            <p class="mt-3 text-sm leading-7 text-gray-900 dark:text-white">
                                 {{ $locale === 'ne'
                                     ? 'कुनै प्रश्न, सुझाव वा सहयोगका लागि हामीलाई सम्पर्क गर्नुहोस्।'
                                     : 'Reach out for questions, suggestions, or support.' }}
                             </p>
 
                             <div class="mt-8 grid gap-4">
-                                <div class="landing-panel lift-card rounded-[1.75rem] p-6 dark:bg-slate-950/80">
-                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'इमेल' : 'Email' }}</div>
-                                    <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                <div class="landing-panel lift-card rounded-[1.75rem] p-6 dark:bg-[#191919]">
+                                    <div class="text-gray-800 dark:text-white">{{ $locale === 'ne' ? 'इमेल' : 'Email' }}</div>
+                                    <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
                                         @if (!empty($department?->email))
                                             <a class="text-red-700 hover:underline dark:text-red-400" href="mailto:{{ $department->email }}">{{ $department->email }}</a>
                                         @else
-                                            <span class="text-gray-500 dark:text-gray-400">support@example.edu</span>
+                                            <span class="text-gray-600 dark:text-gray-50">support@example.edu</span>
                                         @endif
                                     </div>
                                 </div>
-                                <div class="landing-panel lift-card rounded-[1.75rem] p-6 dark:bg-slate-950/80">
-                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'फोन' : 'Phone' }}</div>
-                                    <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                <div class="landing-panel lift-card rounded-[1.75rem] p-6 dark:bg-[#191919]">
+                                    <div class="text-gray-800 dark:text-white">{{ $locale === 'ne' ? 'फोन' : 'Phone' }}</div>
+                                    <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
                                         {{ $department?->phone ?: '+977-000-0000000' }}
                                     </div>
                                 </div>
-                                <div class="landing-panel lift-card rounded-[1.75rem] p-6 dark:bg-slate-950/80">
-                                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'ठेगाना' : 'Address' }}</div>
-                                    <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                <div class="landing-panel lift-card rounded-[1.75rem] p-6 dark:bg-[#191919]">
+                                    <div class="text-gray-800 dark:text-white">{{ $locale === 'ne' ? 'ठेगाना' : 'Address' }}</div>
+                                    <div class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">
                                         {{ $addressText ?: ($locale === 'ne' ? 'विभागीय कार्यालय' : 'Department office') }}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="landing-panel overflow-hidden rounded-[2rem] bg-white/85 dark:bg-slate-950/80">
+                        <div class="landing-panel overflow-hidden rounded-[2rem] bg-white/85 dark:bg-[#191919]">
                             @if (!empty($lat) && !empty($lng))
                                 <div class="relative">
                                     <div id="departmentMap"
@@ -2320,21 +2482,21 @@
                                         data-name="{{ e($departmentName) }}"
                                         data-label="{{ e($mapLabel) }}"></div>
 
-                                    <div class="absolute bottom-3 left-3 z-[500] flex flex-wrap gap-2 rounded-2xl bg-white/80 p-2 shadow-sm backdrop-blur-md dark:bg-gray-950/80">
+                                    <div class="absolute bottom-3 left-3 z-[500] flex flex-wrap gap-2 rounded-2xl bg-white/80 p-2 shadow-sm backdrop-blur-md dark:bg-[#191919]/80">
                                         <button type="button" data-map-action="locate"
-                                            class="landing-panel lift-card inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-gray-100">
+                                            class="landing-panel lift-card inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-white">
                                             {{ $locale === 'ne' ? 'मेरो स्थान' : 'My Location' }}
                                         </button>
                                         <button type="button" data-map-action="layers"
-                                            class="landing-panel lift-card inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-gray-100">
+                                            class="landing-panel lift-card inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-white">
                                             {{ $locale === 'ne' ? 'लेयर' : 'Layers' }}
                                         </button>
                                         <button type="button" data-map-action="reset"
-                                            class="landing-panel lift-card inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-gray-100">
+                                            class="landing-panel lift-card inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-white">
                                             {{ $locale === 'ne' ? 'रीसेट' : 'Reset' }}
                                         </button>
                                         <button type="button" data-map-action="copy"
-                                            class="landing-panel lift-card inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-gray-100">
+                                            class="landing-panel lift-card inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-white">
                                             {{ $locale === 'ne' ? 'कपी' : 'Copy' }}
                                         </button>
 
@@ -2351,7 +2513,7 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="flex h-[22rem] items-center justify-center bg-gray-100 text-sm text-gray-600 dark:bg-gray-900 dark:text-gray-300 sm:h-[26rem] lg:h-[34rem]">
+                                <div class="flex h-[22rem] items-center justify-center bg-gray-100 text-sm text-gray-700 dark:bg-gray-900 dark:text-gray-50 sm:h-[26rem] lg:h-[34rem]">
                                     {{ $locale === 'ne' ? 'नक्सा डेटा उपलब्ध छैन' : 'Map data not available' }}
                                 </div>
                             @endif
@@ -2635,13 +2797,13 @@
 
                                 {{ $locale === 'ne' ? 'स्वागत छ' : 'Welcome' }}
                             </h3>
-                            <p class="mt-1 text-sm text-gray-700 dark:text-gray-300 font-medium">
+                            <p class="mt-1 text-sm text-gray-900 dark:text-white font-medium">
                                 {{ $locale === 'ne' ? 'आईटी विभाग डिजिटल पोर्टलमा' : 'to IT Department Digital Portal' }}
                             </p>
                         </div>
                         <button type="button" 
                                 @click="close()"
-                                class="ml-2 flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-800"
+                                class="ml-2 flex h-8 w-8 items-center justify-center rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-gray-600 dark:hover:text-gray-300 dark:hover:bg-gray-800"
                                 aria-label="{{ $locale === 'ne' ? 'बन्द गर्नुहोस्' : 'Close' }}">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
@@ -2650,7 +2812,7 @@
                     </div>
                     
                     <!-- Body -->
-                    <div class="mt-4 text-sm leading-6 text-gray-800 dark:text-gray-200 max-h-[40vh] overflow-y-auto">
+                    <div class="mt-4 text-sm leading-6 text-gray-800 dark:text-gray-50 max-h-[40vh] overflow-y-auto">
                         <p class="font-medium drop-shadow-sm">{{ $locale === 'ne' ? 'यो एकीकृत प्लेटफर्ममा तपाईंले पाठ्यक्रम, सूचना, स्रोतहरू, शिक्षक विवरण र अन्य सेवाहरू पाउन सक्नुहुन्छ। पहिलो पटकको लागि स्वागत छ!' : 'This unified platform provides access to courses, notices, resources, faculty details, and more department services. Welcome on your first visit!' }}</p>
                         <ul class="mt-4 space-y-2 pl-4">
                             <li class="flex items-start gap-2">

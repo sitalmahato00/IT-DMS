@@ -253,6 +253,14 @@ class LandingController extends Controller
         $searchAttempted = $request->boolean('search_exam_result') || $searchForced;
         $dobBs = trim((string) $request->query('dob_bs', ''));
         
+        // Normalize BS date format: 2058-2-1 -> 2058-02-01
+        if (!empty($dobBs)) {
+            $parts = explode('-', $dobBs);
+            if (count($parts) === 3) {
+                $dobBs = sprintf('%04d-%02d-%02d', (int)$parts[0], (int)$parts[1], (int)$parts[2]);
+            }
+        }
+        
         // Convert BS date to AD for database query
         $dobAd = '';
         if (!empty($dobBs)) {
@@ -276,7 +284,7 @@ class LandingController extends Controller
             'assessment_number' => trim((string) $request->query('assessment_number', '')),
             'student_id' => trim((string) $request->query('student_id', '')),
             'dob' => $dobAd, // AD date for query
-            'dob_bs' => $dobBs, // BS date for display
+            'dob_bs' => $dobBs, // BS date for display (normalized)
         ];
 
         if ($filters['academic_year'] === '' && !empty($examResultMeta['years'][0])) {
