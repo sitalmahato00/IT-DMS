@@ -1,7 +1,11 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "composer install --no-dev --optimize-autoloader && npm ci && npm run build"
+  },
   "deploy": {
-    "startCommand": "php -S 0.0.0.0:${PORT:-8000} -t public/",
+    "startCommand": "php artisan serve --host=0.0.0.0 --port=${PORT:-8000}",
     "restartPolicyMaxRetries": 3,
     "restartPolicyWindowSeconds": 60
   }
