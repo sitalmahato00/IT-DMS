@@ -2038,10 +2038,6 @@
                                     </div>
 
                                     <div class="mt-5 flex flex-wrap gap-3 justify-center">
-                                        <a href="{{ route('student.profile.edit') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-900/15 transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                                            <i class="bi bi-pencil"></i>
-                                            {{ $locale === 'ne' ? 'जानकारी सम्पादन गर्नुहोस्' : 'Edit Information' }}
-                                        </a>
                                         <a href="{{ $examResultPrintUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/15 transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400">
                                             <i class="bi bi-printer"></i>
                                             {{ $locale === 'ne' ? 'Print' : 'Print' }}
