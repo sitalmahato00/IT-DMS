@@ -58,10 +58,18 @@ function initBsDatePicker(root = document) {
         }
         $inputs.each(function() {
             if (!$(this).data('bs-initialized')) {
+                // Remove readonly if set, allow manual editing
+                $(this).removeAttr('readonly');
+                
                 $(this).nepaliDatePicker({
                     dateFormat: '%y-%m-%d',
                     closeOnDateSelect: true
                 });
+                
+                // Ensure input is not readonly after initialization
+                $(this).removeAttr('readonly');
+                $(this).css('cursor', 'text');
+                
                 // Normalize any pre-filled value to Devanagari digits for display.
                 $(this).val(englishDigitsToNepali($(this).val() || ''));
                 $(this).on('change.bsDatepicker', function() {
