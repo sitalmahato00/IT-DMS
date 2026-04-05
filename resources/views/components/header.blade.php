@@ -47,6 +47,7 @@
         ['href' => $onLanding ? $sectionLink('curriculum') : route('subjects.index'), 'label' => $locale === 'ne' ? 'पाठ्यक्रम' : 'Curriculum'],
         ['href' => $onLanding ? $sectionLink('faculty') : route('faculty.index'), 'label' => $locale === 'ne' ? 'शिक्षक' : 'Faculty'],
         ['href' => $onLanding ? $sectionLink('notices') : route('public.notices.index'), 'label' => $locale === 'ne' ? 'सूचना' : 'News & Events'],
+        ['href' => $onLanding ? $sectionLink('exam-result') : $sectionLink('exam-result'), 'label' => $locale === 'ne' ? 'परीक्षा परिणाम' : 'Exam Result'],
         ['href' => $onLanding ? $sectionLink('resources') : route('public.resources.index'), 'label' => $locale === 'ne' ? 'स्रोत' : 'Resources'],
         ['href' => $sectionLink('contact'), 'label' => $locale === 'ne' ? 'सम्पर्क' : 'Contact'],
     ];
