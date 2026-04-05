@@ -10,14 +10,12 @@ use App\Http\Controllers\PublicStudyMaterialController;
 use App\Http\Controllers\PublicGalleryController;
 use App\Http\Controllers\NoticePortalController;
 use App\Http\Controllers\GalleryPortalController;
-use App\Http\Controllers\MigrationController;
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-// TEMPORARY MIGRATION ROUTES - DELETE AFTER MIGRATIONS COMPLETE
-Route::get('/admin/run-migrations', [MigrationController::class, 'runMigrations']);
-Route::get('/admin/migration-status', [MigrationController::class, 'status']);
+
 
 Route::get('/', [\App\Http\Controllers\LandingController::class, 'index'])->name('home');
 Route::get('/exam-result/print', [\App\Http\Controllers\LandingController::class, 'examResultPrint'])->name('public.exam-result.print');
