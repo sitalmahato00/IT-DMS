@@ -24,6 +24,7 @@ class StudentSeeder extends Seeder
                 'batch_year' => '2020',
                 'gender' => 'Male',
                 'blood_group' => 'O+',
+                'date_of_birth' => '2001-05-15',
             ],
         ];
 
@@ -37,6 +38,7 @@ class StudentSeeder extends Seeder
                 'batch_year' => '2020',
                 'gender' => 'Male',
                 'blood_group' => 'A+',
+                'date_of_birth' => '2002-03-20',
             ],
             [
                 'user_email' => 'priya.verma@student.itdms.local',
@@ -46,6 +48,7 @@ class StudentSeeder extends Seeder
                 'batch_year' => '2020',
                 'gender' => 'Female',
                 'blood_group' => 'B+',
+                'date_of_birth' => '2002-07-10',
             ],
             [
                 'user_email' => 'arjun.pant@student.itdms.local',
@@ -55,6 +58,7 @@ class StudentSeeder extends Seeder
                 'batch_year' => '2020',
                 'gender' => 'Male',
                 'blood_group' => 'AB+',
+                'date_of_birth' => '2001-11-25',
             ],
             [
                 'user_email' => 'anjali.singh@student.itdms.local',
@@ -64,6 +68,7 @@ class StudentSeeder extends Seeder
                 'batch_year' => '2020',
                 'gender' => 'Female',
                 'blood_group' => 'O-',
+                'date_of_birth' => '2003-01-30',
             ],
         ];
 
@@ -94,7 +99,7 @@ class StudentSeeder extends Seeder
                         'address' => 'Kathmandu, Nepal',
                         'parent_id' => $parent?->id,
                         'emergency_contact' => $studentUser->phone,
-                        'date_of_birth' => now()->subYears(rand(19, 23)),
+                        'date_of_birth' => $studentData['date_of_birth'] ?? now()->subYears(20),
                     ]
                 );
             }
