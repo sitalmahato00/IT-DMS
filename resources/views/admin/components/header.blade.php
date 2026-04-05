@@ -73,13 +73,13 @@
                     </button>
 
                     <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white dark:bg-[#191919] rounded-xl shadow-xl border border-red-200 dark:border-red-900/50 py-0 z-50 overflow-hidden">
-                        <div class="px-4 py-3 border-b border-red-100 dark:border-red-900/30 bg-red-50 dark:bg-red-950/25 flex items-center justify-between">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                <i class="bi bi-bell text-red-700 dark:text-red-400"></i> {{ __('Notifications') }}
+                        <div class="px-4 py-3 border-b border-gray-700 bg-[#191919] flex items-center justify-between">
+                            <p class="text-sm font-semibold text-white flex items-center gap-2">
+                                <i class="bi bi-bell text-red-400"></i> {{ __('Notifications') }}
                             </p>
-                            <button id="markAllReadBtn" class="text-xs text-[#D5002C] dark:text-red-400 hover:text-[#B00029] dark:hover:text-red-300 font-medium" data-mark-all-read-url="{{ route('admin.notifications.markRead') }}">{{ __('Mark all read') }}</button>
+                            <button id="markAllReadBtn" class="text-xs text-red-400 hover:text-red-300 font-medium" data-mark-all-read-url="{{ route('admin.notifications.markRead') }}">{{ __('Mark all read') }}</button>
                         </div>
-                        <div class="max-h-72 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700/50">
+                        <div class="max-h-72 overflow-y-auto divide-y divide-gray-700/50 bg-[#191919]">
                             @forelse($__notifList as $n)
                                 @php
                                     $data = is_array($n->data) ? $n->data : (array) ($n->data ?? []);
@@ -87,28 +87,28 @@
                                     $message = $data['message'] ?? ($data['body'] ?? '');
                                     $url = $data['url'] ?? null;
                                 @endphp
-                                <div class="px-4 py-3 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-start gap-3 cursor-pointer transition {{ isset($n->read_at) && $n->read_at ? '' : 'bg-red-50/50 dark:bg-red-900/15' }}" onclick="handleNotificationClick('{{ $n->id }}', {{ $url ? "'".$url."'" : 'null' }})">
-                                    <div class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <i class="bi bi-bell text-red-600 dark:text-red-400 text-xs"></i>
+                                <div class="px-4 py-3 hover:bg-gray-800 flex items-start gap-3 cursor-pointer transition bg-[#191919] {{ isset($n->read_at) && $n->read_at ? '' : 'bg-gray-900' }}" onclick="handleNotificationClick('{{ $n->id }}', {{ $url ? "'".$url."'" : 'null' }})">
+                                    <div class="w-8 h-8 rounded-full bg-red-900/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <i class="bi bi-bell text-red-400 text-xs"></i>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $title }}</p>
-                                        <p class="text-xs text-gray-600 dark:text-gray-300 mt-0.5 line-clamp-2">{{ Str::limit($message, 100) }}</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $n->created_at->diffForHumans() }}</p>
+                                        <p class="text-sm font-medium text-white truncate">{{ $title }}</p>
+                                        <p class="text-xs text-gray-300 mt-0.5 line-clamp-2">{{ Str::limit($message, 100) }}</p>
+                                        <p class="text-xs text-gray-400 mt-1">{{ $n->created_at->diffForHumans() }}</p>
                                     </div>
                                     @if(empty($n->read_at))
                                         <div class="w-2 h-2 rounded-full bg-red-600 flex-shrink-0 mt-2"></div>
                                     @endif
                                 </div>
                             @empty
-                                <div class="p-8 text-center">
-                                    <i class="bi bi-bell-slash text-2xl text-gray-400 dark:text-gray-600 block mb-2"></i>
-                                    <p class="text-sm text-gray-600 dark:text-gray-300">{{ __('No notifications') }}</p>
+                                <div class="p-8 text-center bg-[#191919]">
+                                    <i class="bi bi-bell-slash text-2xl text-gray-600 block mb-2"></i>
+                                    <p class="text-sm text-gray-300">{{ __('No notifications') }}</p>
                                 </div>
                             @endforelse
                         </div>
-                        <div class="px-4 py-3 border-t border-red-100 dark:border-red-900/30 bg-red-50 dark:bg-red-950/25 text-center">
-                            <a href="{{ route('admin.notifications') }}" class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium">{{ __('View all notifications') }} →</a>
+                        <div class="px-4 py-3 border-t border-gray-700 bg-[#191919] text-center">
+                            <a href="{{ route('admin.notifications') }}" class="text-sm text-red-400 hover:text-red-300 font-medium">{{ __('View all notifications') }} →</a>
                         </div>
                     </div>
                 </div>
