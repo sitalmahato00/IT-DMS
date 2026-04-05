@@ -7,6 +7,24 @@ use App\Http\Controllers\Admin\StudentController;
 
 // Public API routes (no authentication required)
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/convert-date', function (Request $request) {
+    try {
+        $date = $request->input('date');
+        $direction = $request->input('direction', 'ad-to-bs');
+        
+        if (!$date) {
+            return response()->json(['error' => 'Date is required'], 400);
+        }
+
+        $result = $direction === 'bs-to-ad'
+            ? \App\Helpers\NepaliContentHelper::convertBsToAd($date)
+            : \App\Helpers\NepaliContentHelper::convertAdToBs($date);
+
+        return response()->json(['result' => $result]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Conversion failed: ' . $e->getMessage()], 400);
+    }
+})->middleware('throttle:60,1');
 
 // Protected API routes (authentication required)
 Route::middleware('auth:sanctum')->group(function () {

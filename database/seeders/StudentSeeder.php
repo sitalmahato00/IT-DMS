@@ -80,6 +80,9 @@ class StudentSeeder extends Seeder
             $parent = $parentUser ? StudentParent::where('user_id', $parentUser->id)->first() : null;
 
             if ($studentUser) {
+                $dob = $studentData['date_of_birth'] ?? now()->subYears(20);
+                $dobBs = \App\Helpers\NepaliContentHelper::convertAdToBs($dob);
+                
                 Student::firstOrCreate(
                     ['user_id' => $studentUser->id],
                     [
@@ -99,7 +102,8 @@ class StudentSeeder extends Seeder
                         'address' => 'Kathmandu, Nepal',
                         'parent_id' => $parent?->id,
                         'emergency_contact' => $studentUser->phone,
-                        'date_of_birth' => $studentData['date_of_birth'] ?? now()->subYears(20),
+                        'date_of_birth' => $dob,
+                        'date_of_birth_bs' => $dobBs,
                     ]
                 );
             }

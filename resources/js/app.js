@@ -127,7 +127,14 @@ window.openBsDatePicker = function (inputOrId) {
             return;
         }
 
-        initBsDatePicker(document);
+        // Ensure the input has bs-date class so the plugin initializes it
+        if (!el.classList.contains('bs-date')) {
+            el.classList.add('bs-date');
+        }
+
+        // Initialize the date picker for this specific input
+        initBsDatePicker(el.parentElement || document);
+        
         // Delay open until after the current click event finishes,
         // otherwise "outside click" handlers can instantly close the picker.
         setTimeout(() => {
@@ -304,7 +311,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 document.addEventListener('blur', (e) => {
     const el = e.target;
     if (!(el instanceof HTMLInputElement)) return;
-    if (!el.classList.contains('bs-date')) return;
+    // Handle both bs-date class and DOB input specifically
+    if (!el.classList.contains('bs-date') && el.name !== 'dob_bs') return;
     el.value = englishDigitsToNepali(el.value || '');
 }, true);
 
@@ -312,7 +320,15 @@ document.addEventListener('submit', (e) => {
     const form = e.target;
     if (!(form instanceof HTMLFormElement)) return;
 
+    // Process inputs with bs-date class
     const inputs = Array.from(form.querySelectorAll('input.bs-date'));
+    
+    // Also process the DOB input even if it doesn't have bs-date class
+    const dobInput = form.querySelector('input[name="dob_bs"]');
+    if (dobInput && !inputs.includes(dobInput)) {
+        inputs.push(dobInput);
+    }
+    
     if (inputs.length === 0) return;
 
     const originals = inputs.map((input) => ({ input, value: input.value }));

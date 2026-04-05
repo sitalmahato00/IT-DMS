@@ -1252,242 +1252,6 @@
                 </div>
             </section>
 
-
-    
-
-            <section id="exam-result" class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8">
-                <div class="landing-shell mx-auto w-full landing-stage">
-                    <div class="grid gap-8 lg:grid-cols-12 lg:items-start">
-                        <div class="lg:col-span-7">
-                            <div class="flex flex-wrap items-center gap-3">
-                                <p class="section-chip bg-rose-100 text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:ring-rose-900/50">
-                                    <span class="inline-flex h-2.5 w-2.5 rounded-full bg-rose-500"></span>
-                                    {{ $locale === 'ne' ? 'परीक्षा परिणाम' : 'Exam Result' }}
-                                </p>
-                                <span class="rounded-full border border-rose-200 bg-white/90 px-3 py-1 text-xs font-semibold text-rose-700 shadow-sm dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
-                                    {{ $locale === 'ne' ? 'Published results only' : 'Published results only' }}
-                                </span>
-                            </div>
-
-                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
-                                {{ $locale === 'ne' ? 'मार्कसिटको लागि परीक्षा परिणाम खोज्नुहोस्' : 'Search published exam results' }}
-                            </h2>
-                            <p class="mt-3 max-w-3xl text-sm leading-7 text-gray-600 dark:text-gray-300">
-                                {{ $locale === 'ne'
-                                    ? 'Academic Year, Semester, Exam Category, Assessment Number, Student ID / Roll No, र DOB प्रयोग गरेर आफ्नो प्रकाशित marksheet हेर्नुहोस्।'
-                                    : 'Use Academic Year, Semester, Exam Category, Assessment Number, Student ID / Roll No, and DOB to open the published marksheet for each exam.' }}
-                            </p>
-
-                            @if (session('error'))
-                                <div class="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 shadow-sm dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-200">
-                                    {{ session('error') }}
-                                </div>
-                            @endif
-
-                            @if($examResultSearchPerformed && $examResultError)
-                                <div class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
-                                    {{ $examResultError }}
-                                </div>
-                            @endif
-
-                            <form method="GET" action="{{ route('home') }}" class="mt-6 space-y-5 rounded-[1.75rem] border border-[var(--landing-border)] bg-white/90 p-5 shadow-[0_20px_40px_rgba(15,23,42,0.08)] backdrop-blur dark:bg-slate-950/80" x-data>
-                                <input type="hidden" name="search_exam_result" value="1">
-
-                                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                                    <div>
-                                        <label for="landingExamResultAcademicYear" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {{ $locale === 'ne' ? 'Academic Year (BS)' : 'Academic Year (BS)' }}
-                                        </label>
-                                        <select id="landingExamResultAcademicYear" name="academic_year" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100">
-                                            <option value="">{{ $locale === 'ne' ? 'Academic Year छान्नुहोस्' : 'Select Academic Year' }}</option>
-                                            @foreach($examResultMeta['years'] as $year)
-                                                <option value="{{ $year }}" {{ ($examResultFilters['academic_year'] ?? '') === $year ? 'selected' : '' }}>{{ $year }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label for="landingExamResultSemester" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {{ $locale === 'ne' ? 'Semester' : 'Semester' }}
-                                        </label>
-                                        <select id="landingExamResultSemester" name="semester" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100">
-                                            <option value="">{{ $locale === 'ne' ? 'Semester छान्नुहोस्' : 'Select Semester' }}</option>
-                                            @foreach($examResultMeta['semesters'] as $semester)
-                                                <option value="{{ $semester }}" {{ (string) ($examResultFilters['semester'] ?? '') === (string) $semester ? 'selected' : '' }}>
-                                                    {{ $locale === 'ne' ? 'Semester ' : 'Semester ' }}{{ $semester }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label for="landingExamResultCategory" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {{ $locale === 'ne' ? 'Exam Category' : 'Exam Category' }}
-                                        </label>
-                                        <select id="landingExamResultCategory" name="exam_category" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100">
-                                            <option value="assessment" {{ ($examResultFilters['exam_category'] ?? 'assessment') === 'assessment' ? 'selected' : '' }}>
-                                                {{ $locale === 'ne' ? 'Assessment' : 'Assessment' }}
-                                            </option>
-                                            <option value="ctevt" {{ ($examResultFilters['exam_category'] ?? '') === 'ctevt' ? 'selected' : '' }}>
-                                                {{ $locale === 'ne' ? 'CTEVT' : 'CTEVT' }}
-                                            </option>
-                                        </select>
-                                    </div>
-
-                                    <div id="landingExamResultAssessmentWrap" class="sm:col-span-2 xl:col-span-1 {{ ($examResultFilters['exam_category'] ?? 'assessment') !== 'assessment' ? 'hidden' : '' }}">
-                                        <label for="landingExamResultAssessmentNumber" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {{ $locale === 'ne' ? 'Assessment Number' : 'Assessment Number' }}
-                                        </label>
-                                        <select id="landingExamResultAssessmentNumber" name="assessment_number" data-selected="{{ $examResultFilters['assessment_number'] ?? '' }}" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100">
-                                            <option value="">{{ $locale === 'ne' ? 'All' : 'All' }}</option>
-                                            @foreach($examResultAssessmentNumbers as $number)
-                                                <option value="{{ $number }}" {{ (string) ($examResultFilters['assessment_number'] ?? '') === (string) $number ? 'selected' : '' }}>
-                                                    {{ $locale === 'ne' ? 'Assessment ' : 'Assessment ' }}{{ $number }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label for="landingExamResultStudentId" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {{ $locale === 'ne' ? 'Student ID / Roll No' : 'Student ID / Roll No' }}
-                                        </label>
-                                        <input id="landingExamResultStudentId" name="student_id" type="text" value="{{ $examResultFilters['student_id'] ?? '' }}" placeholder="002" class="landing-input w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100" required>
-                                    </div>
-
-                                    <div>
-                                        <label for="landingExamResultDob" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {{ $locale === 'ne' ? 'DOB' : 'DOB' }}
-                                        </label>
-                                        <input id="landingExamResultDob" name="dob" type="date" value="{{ $examResultFilters['dob'] ?? '' }}" class="landing-input w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100" required>
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-wrap items-center gap-3">
-                                    <button type="submit" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rose-600 to-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/15 transition hover:-translate-y-0.5 hover:from-rose-500 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-rose-400">
-                                        <i class="bi bi-search"></i>
-                                        {{ $locale === 'ne' ? 'Exam Result Search' : 'Search Exam Result' }}
-                                    </button>
-                                    <a href="{{ route('home') }}#exam-result" class="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-rose-300 hover:text-rose-700 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200 dark:hover:border-rose-800 dark:hover:text-rose-300">
-                                        <i class="bi bi-arrow-counterclockwise"></i>
-                                        {{ $locale === 'ne' ? 'Reset' : 'Reset' }}
-                                    </a>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div class="lg:col-span-5">
-                            <div class="landing-panel lift-card rounded-[2rem] p-5 sm:p-6 dark:bg-slate-950/80">
-                                @if($examResultSearchPerformed && $examResultPayload)
-                                    @php
-                                        $examResultMarks = $examResultPayload['marksheetData']['exam_marks'] ?? collect();
-                                        $examResultResult = strtoupper((string) ($examResultPayload['marksheetData']['result'] ?? 'FAIL'));
-                                        $examResultResultClass = $examResultResult === 'PASS'
-                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
-                                            : 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300';
-                                    @endphp
-                                    <div class="flex items-start justify-between gap-4">
-                                        <div>
-                                            <p class="text-xs font-bold uppercase tracking-[0.22em] text-rose-500 dark:text-rose-300">
-                                                {{ $locale === 'ne' ? 'Published result found' : 'Published result found' }}
-                                            </p>
-                                            <h3 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                                {{ $examResultStudent?->user?->name ?? 'Student' }}
-                                            </h3>
-                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                                {{ $examResultPayload['selectedExamName'] ?? ($locale === 'ne' ? 'Marksheet' : 'Marksheet') }}
-                                            </p>
-                                        </div>
-                                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] {{ $examResultResultClass }}">
-                                            {{ $examResultResult }}
-                                        </span>
-                                    </div>
-
-                                    <div class="mt-5 grid gap-3 sm:grid-cols-2">
-                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Student ID' : 'Student ID' }}</div>
-                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ $examResultStudent?->id ?? 'N/A' }}</div>
-                                        </div>
-                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Roll No' : 'Roll No' }}</div>
-                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ $examResultStudent?->roll_no ?? 'N/A' }}</div>
-                                        </div>
-                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Academic Year (BS)' : 'Academic Year (BS)' }}</div>
-                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ $examResultFilters['academic_year'] ?? 'N/A' }}</div>
-                                        </div>
-                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Semester' : 'Semester' }}</div>
-                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">Semester {{ $examResultFilters['semester'] ?? 'N/A' }}</div>
-                                        </div>
-                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Exam Category' : 'Exam Category' }}</div>
-                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ strtoupper((string) ($examResultFilters['exam_category'] ?? 'assessment')) }}</div>
-                                        </div>
-                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Published Marks' : 'Published Marks' }}</div>
-                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ $examResultMarks->count() }}</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-5 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-slate-700 dark:bg-slate-900/70 dark:text-gray-300">
-                                        {{ $locale === 'ne'
-                                            ? 'यो marksheet official admin print layout मा खोलिन्छ। Print/Preview का लागि नयाँ ट्याब प्रयोग गर्नुहोस्।'
-                                            : 'This marksheet opens in the same admin print layout. Use a new tab for preview or printing.' }}
-                                    </div>
-
-                                    <div class="mt-5 flex flex-wrap gap-3">
-                                        <a href="{{ $examResultPrintUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/15 transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400">
-                                            <i class="bi bi-printer"></i>
-                                            {{ $locale === 'ne' ? 'Open Print View' : 'Open Print View' }}
-                                        </a>
-                                        <a href="{{ $examResultPrintUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-rose-300 hover:text-rose-700 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200 dark:hover:border-rose-800 dark:hover:text-rose-300">
-                                            <i class="bi bi-box-arrow-up-right"></i>
-                                            {{ $locale === 'ne' ? 'Preview in New Tab' : 'Preview in New Tab' }}
-                                        </a>
-                                    </div>
-                                @else
-                                    <div class="rounded-[1.5rem] border border-dashed border-gray-200 bg-white/70 p-6 dark:border-slate-700 dark:bg-slate-950/70">
-                                        <p class="text-xs font-bold uppercase tracking-[0.24em] text-gray-400 dark:text-gray-500">
-                                            {{ $locale === 'ne' ? 'How it works' : 'How it works' }}
-                                        </p>
-                                        <ul class="mt-4 space-y-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
-                                            <li class="flex gap-3">
-                                                <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">1</span>
-                                                <span>{{ $locale === 'ne' ? 'Academic Year, Semester, र Exam Category छान्नुहोस्।' : 'Choose Academic Year, Semester, and Exam Category.' }}</span>
-                                            </li>
-                                            <li class="flex gap-3">
-                                                <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">2</span>
-                                                <span>{{ $locale === 'ne' ? 'Assessment चयन गरेपछि Assessment Number स्वतः देखिन्छ।' : 'When Assessment is selected, Assessment Number appears automatically.' }}</span>
-                                            </li>
-                                            <li class="flex gap-3">
-                                                <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">3</span>
-                                                <span>{{ $locale === 'ne' ? 'Student ID / Roll No र DOB राखेर published result खोल्नुहोस्।' : 'Enter Student ID / Roll No and DOB to open the published result.' }}</span>
-                                            </li>
-                                        </ul>
-
-                                        <div class="mt-6 grid gap-3 sm:grid-cols-3">
-                                            <div class="rounded-2xl bg-rose-50 p-4 text-center dark:bg-rose-950/25">
-                                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-rose-600 dark:text-rose-300">{{ $locale === 'ne' ? 'Year' : 'Year' }}</div>
-                                                <div class="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">{{ $examResultMeta['years'][0] ?? '—' }}</div>
-                                            </div>
-                                            <div class="rounded-2xl bg-red-50 p-4 text-center dark:bg-red-950/25">
-                                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-red-600 dark:text-red-300">{{ $locale === 'ne' ? 'Semester' : 'Semester' }}</div>
-                                                <div class="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">{{ $examResultMeta['semesters'][0] ?? '—' }}</div>
-                                            </div>
-                                            <div class="rounded-2xl bg-amber-50 p-4 text-center dark:bg-amber-950/25">
-                                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">{{ $locale === 'ne' ? 'Category' : 'Category' }}</div>
-                                                <div class="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">{{ strtoupper((string) ($examResultFilters['exam_category'] ?? 'assessment')) }}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             <section id="about" class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8">
                 <div class="landing-shell mx-auto w-full landing-stage">
                     <div>
@@ -2037,6 +1801,285 @@
                         </div>
                         <div class="px-6 py-6">
                             <div class="prose prose-sm max-w-none text-gray-800 dark:prose-invert dark:text-gray-200" x-html="notice?.full || ''"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="exam-result" class="landing-section w-full px-4 py-16 sm:px-6 lg:px-8">
+                <div class="landing-shell mx-auto w-full landing-stage">
+                    <div class="grid gap-8 lg:grid-cols-12 lg:items-start">
+                        <div class="lg:col-span-7">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <p class="section-chip bg-rose-100 text-rose-700 ring-1 ring-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:ring-rose-900/50">
+                                    <span class="inline-flex h-2.5 w-2.5 rounded-full bg-rose-500"></span>
+                                    {{ $locale === 'ne' ? 'परीक्षा परिणाम' : 'Exam Result' }}
+                                </p>
+                                <span class="rounded-full border border-rose-200 bg-white/90 px-3 py-1 text-xs font-semibold text-rose-700 shadow-sm dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
+                                    {{ $locale === 'ne' ? 'Published results only' : 'Published results only' }}
+                                </span>
+                            </div>
+
+                            <h2 class="section-title mt-4 text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
+                                {{ $locale === 'ne' ? 'मार्कसिटको लागि परीक्षा परिणाम खोज्नुहोस्' : 'Search published exam results' }}
+                            </h2>
+                            <p class="mt-3 max-w-3xl text-sm leading-7 text-gray-600 dark:text-gray-300">
+                                {{ $locale === 'ne'
+                                    ? 'Academic Year, Semester, Exam Category, Assessment Number, Student ID / Roll No, र DOB प्रयोग गरेर आफ्नो प्रकाशित marksheet हेर्नुहोस्।'
+                                    : 'Use Academic Year, Semester, Exam Category, Assessment Number, Student ID / Roll No, and DOB to open the published marksheet for each exam.' }}
+                            </p>
+
+                            @if (session('error'))
+                                <div class="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 shadow-sm dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-200">
+                                    {{ session('error') }}
+                                </div>
+                            @endif
+
+                            @if($examResultSearchPerformed && $examResultError)
+                                <div class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
+                                    {{ $examResultError }}
+                                </div>
+                            @endif
+
+                            <form method="GET" action="{{ route('home') }}" class="mt-6 space-y-5 rounded-[1.75rem] border border-[var(--landing-border)] bg-white/90 p-5 shadow-[0_20px_40px_rgba(15,23,42,0.08)] backdrop-blur dark:bg-slate-950/80" @submit="setTimeout(() => { const elem = document.getElementById('exam-result'); if(elem) elem.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100)">
+                                <input type="hidden" name="search_exam_result" value="1">
+
+                                <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                                    <div>
+                                        <label for="landingExamResultAcademicYear" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {{ $locale === 'ne' ? 'Academic Year (BS)' : 'Academic Year (BS)' }}
+                                        </label>
+                                        <select id="landingExamResultAcademicYear" name="academic_year" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100">
+                                            <option value="">{{ $locale === 'ne' ? 'Academic Year छान्नुहोस्' : 'Select Academic Year' }}</option>
+                                            @foreach($examResultMeta['years'] as $year)
+                                                <option value="{{ $year }}" {{ ($examResultFilters['academic_year'] ?? '') === $year ? 'selected' : '' }}>{{ $year }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label for="landingExamResultSemester" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {{ $locale === 'ne' ? 'Semester' : 'Semester' }}
+                                        </label>
+                                        <select id="landingExamResultSemester" name="semester" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100">
+                                            <option value="">{{ $locale === 'ne' ? 'Semester छान्नुहोस्' : 'Select Semester' }}</option>
+                                            @foreach($examResultMeta['semesters'] as $semester)
+                                                <option value="{{ $semester }}" {{ (string) ($examResultFilters['semester'] ?? '') === (string) $semester ? 'selected' : '' }}>
+                                                    {{ $locale === 'ne' ? 'Semester ' : 'Semester ' }}{{ $semester }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label for="landingExamResultCategory" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {{ $locale === 'ne' ? 'Exam Category' : 'Exam Category' }}
+                                        </label>
+                                        <select id="landingExamResultCategory" name="exam_category" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100">
+                                            <option value="assessment" {{ ($examResultFilters['exam_category'] ?? 'assessment') === 'assessment' ? 'selected' : '' }}>
+                                                {{ $locale === 'ne' ? 'Assessment' : 'Assessment' }}
+                                            </option>
+                                            <option value="ctevt" {{ ($examResultFilters['exam_category'] ?? '') === 'ctevt' ? 'selected' : '' }}>
+                                                {{ $locale === 'ne' ? 'CTEVT' : 'CTEVT' }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div id="landingExamResultAssessmentWrap" class="sm:col-span-2 xl:col-span-1 {{ ($examResultFilters['exam_category'] ?? 'assessment') !== 'assessment' ? 'hidden' : '' }}">
+                                        <label for="landingExamResultAssessmentNumber" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {{ $locale === 'ne' ? 'Assessment Number' : 'Assessment Number' }}
+                                        </label>
+                                        <select id="landingExamResultAssessmentNumber" name="assessment_number" data-selected="{{ $examResultFilters['assessment_number'] ?? '' }}" class="landing-select w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100">
+                                            <option value="">{{ $locale === 'ne' ? 'All' : 'All' }}</option>
+                                            @foreach($examResultAssessmentNumbers as $number)
+                                                <option value="{{ $number }}" {{ (string) ($examResultFilters['assessment_number'] ?? '') === (string) $number ? 'selected' : '' }}>
+                                                    {{ $locale === 'ne' ? 'Assessment ' : 'Assessment ' }}{{ $number }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label for="landingExamResultStudentId" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {{ $locale === 'ne' ? 'Student ID / Roll No' : 'Student ID / Roll No' }}
+                                        </label>
+                                        <input id="landingExamResultStudentId" name="student_id" type="text" value="{{ $examResultFilters['student_id'] ?? '' }}" placeholder="002" class="landing-input w-full px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100" required>
+                                    </div>
+
+                                    <div>
+                                        <label for="landingExamResultDobBs" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {{ $locale === 'ne' ? 'Date of Birth (BS)' : 'Date of Birth (BS)' }}
+                                        </label>
+                                        <div class="relative">
+                                            <input id="landingExamResultDobBs" name="dob_bs" type="text" placeholder="YYYY-MM-DD or pick date" value="{{ $examResultFilters['dob_bs'] ?? '' }}" class="bs-date landing-input w-full pr-10 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100" autocomplete="off">
+                                            <button type="button" aria-label="Pick BS date" onclick="event?.preventDefault(); event?.stopPropagation(); window.openBsDatePicker?.('landingExamResultDobBs'); return false;" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                                <i class="bi bi-calendar3"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <button type="submit" class="shine-button inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-rose-600 to-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/15 transition hover:-translate-y-0.5 hover:from-rose-500 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                                        <i class="bi bi-search"></i>
+                                        {{ $locale === 'ne' ? 'Exam Result Search' : 'Search Exam Result' }}
+                                    </button>
+                                    <a href="{{ route('home') }}#exam-result" class="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-rose-300 hover:text-rose-700 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-200 dark:hover:border-rose-800 dark:hover:text-rose-300">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                        {{ $locale === 'ne' ? 'Reset' : 'Reset' }}
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="lg:col-span-5">
+                            <div class="landing-panel lift-card rounded-[2rem] p-5 sm:p-6 dark:bg-slate-950/80">
+                                @if($examResultSearchPerformed && $examResultPayload)
+                                    @php
+                                        $examResultMarks = $examResultPayload['marksheetData']['exam_marks'] ?? collect();
+                                        $examResultResult = strtoupper((string) ($examResultPayload['marksheetData']['result'] ?? 'FAIL'));
+                                        $examResultResultClass = $examResultResult === 'PASS'
+                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
+                                            : 'bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300';
+                                    @endphp
+                                    <div class="flex items-start justify-between gap-4">
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-[0.22em] text-rose-500 dark:text-rose-300">
+                                                {{ $locale === 'ne' ? 'Published result found' : 'Published result found' }}
+                                            </p>
+                                            <h3 class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                                {{ $examResultStudent?->user?->name ?? 'Student' }}
+                                            </h3>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                {{ $examResultPayload['selectedExamName'] ?? ($locale === 'ne' ? 'Marksheet' : 'Marksheet') }}
+                                            </p>
+                                        </div>
+                                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] {{ $examResultResultClass }}">
+                                            {{ $examResultResult }}
+                                        </span>
+                                    </div>
+
+                                    <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Student ID' : 'Student ID' }}</div>
+                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ $examResultStudent?->id ?? 'N/A' }}</div>
+                                        </div>
+                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Roll No' : 'Roll No' }}</div>
+                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ $examResultStudent?->roll_no ?? 'N/A' }}</div>
+                                        </div>
+                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Academic Year (BS)' : 'Academic Year (BS)' }}</div>
+                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ $examResultFilters['academic_year'] ?? 'N/A' }}</div>
+                                        </div>
+                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Semester' : 'Semester' }}</div>
+                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">Semester {{ $examResultFilters['semester'] ?? 'N/A' }}</div>
+                                        </div>
+                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Exam Category' : 'Exam Category' }}</div>
+                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ strtoupper((string) ($examResultFilters['exam_category'] ?? 'assessment')) }}</div>
+                                        </div>
+                                        <div class="rounded-2xl border border-gray-200 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+                                            <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">{{ $locale === 'ne' ? 'Published Marks' : 'Published Marks' }}</div>
+                                            <div class="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">{{ $examResultMarks->count() }}</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Marksheet Table -->
+                                    <div class="mt-6 overflow-x-auto rounded-2xl border border-gray-200 dark:border-slate-700">
+                                        <table class="w-full text-sm">
+                                            <thead class="bg-gradient-to-r from-rose-600 to-red-700 text-white dark:from-rose-900 dark:to-red-950">
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left font-semibold">{{ $locale === 'ne' ? 'विषय' : 'Subject' }}</th>
+                                                    <th class="px-4 py-3 text-center font-semibold">{{ $locale === 'ne' ? 'प्राप्त' : 'Obtained' }}</th>
+                                                    <th class="px-4 py-3 text-center font-semibold">{{ $locale === 'ne' ? 'पूर्ण' : 'Full' }}</th>
+                                                    <th class="px-4 py-3 text-center font-semibold">{{ $locale === 'ne' ? 'प्रतिशत' : 'Percentage' }}</th>
+                                                    <th class="px-4 py-3 text-center font-semibold">{{ $locale === 'ne' ? 'ग्रेड' : 'Grade' }}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+                                                @forelse($examResultMarks as $mark)
+                                                    @php
+                                                        $percentage = $mark->percentage ?? 0;
+                                                        $gradeClass = $percentage >= 80 ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300'
+                                                            : ($percentage >= 60 ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300'
+                                                            : ($percentage >= 40 ? 'bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-300'
+                                                            : 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300'));
+                                                    @endphp
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-900/50">
+                                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
+                                                            {{ $mark->subject?->localized_name ?? 'N/A' }}
+                                                        </td>
+                                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-gray-100">
+                                                            {{ $mark->marks_obtained ?? 0 }}
+                                                        </td>
+                                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-gray-100">
+                                                            {{ $mark->full_marks ?? 0 }}
+                                                        </td>
+                                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-gray-100">
+                                                            {{ number_format((float) ($mark->percentage ?? 0), 2) }}%
+                                                        </td>
+                                                        <td class="px-4 py-3 text-center">
+                                                            <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $gradeClass }}">
+                                                                {{ $mark->grade ?? 'N/A' }}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                                            {{ $locale === 'ne' ? 'कोई अंक उपलब्ध नहीं' : 'No marks available' }}
+                                                        </td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="mt-5 flex flex-wrap gap-3 justify-center">
+                                        <a href="{{ $examResultPrintUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/15 transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400">
+                                            <i class="bi bi-printer"></i>
+                                            {{ $locale === 'ne' ? 'Print' : 'Print' }}
+                                        </a>
+                                    </div>
+                                @else
+                                    <div class="rounded-[1.5rem] border border-dashed border-gray-200 bg-white/70 p-6 dark:border-slate-700 dark:bg-slate-950/70">
+                                        <p class="text-xs font-bold uppercase tracking-[0.24em] text-gray-400 dark:text-gray-500">
+                                            {{ $locale === 'ne' ? 'How it works' : 'How it works' }}
+                                        </p>
+                                        <ul class="mt-4 space-y-3 text-sm leading-6 text-gray-600 dark:text-gray-300">
+                                            <li class="flex gap-3">
+                                                <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">1</span>
+                                                <span>{{ $locale === 'ne' ? 'Academic Year, Semester, र Exam Category छान्नुहोस्।' : 'Choose Academic Year, Semester, and Exam Category.' }}</span>
+                                            </li>
+                                            <li class="flex gap-3">
+                                                <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">2</span>
+                                                <span>{{ $locale === 'ne' ? 'Assessment चयन गरेपछि Assessment Number स्वतः देखिन्छ।' : 'When Assessment is selected, Assessment Number appears automatically.' }}</span>
+                                            </li>
+                                            <li class="flex gap-3">
+                                                <span class="mt-1 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300">3</span>
+                                                <span>{{ $locale === 'ne' ? 'Student ID / Roll No र DOB राखेर published result खोल्नुहोस्।' : 'Enter Student ID / Roll No and DOB to open the published result.' }}</span>
+                                            </li>
+                                        </ul>
+
+                                        <div class="mt-6 grid gap-3 sm:grid-cols-3">
+                                            <div class="rounded-2xl bg-rose-50 p-4 text-center dark:bg-rose-950/25">
+                                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-rose-600 dark:text-rose-300">{{ $locale === 'ne' ? 'Year' : 'Year' }}</div>
+                                                <div class="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">{{ $examResultMeta['years'][0] ?? '—' }}</div>
+                                            </div>
+                                            <div class="rounded-2xl bg-red-50 p-4 text-center dark:bg-red-950/25">
+                                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-red-600 dark:text-red-300">{{ $locale === 'ne' ? 'Semester' : 'Semester' }}</div>
+                                                <div class="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">{{ $examResultMeta['semesters'][0] ?? '—' }}</div>
+                                            </div>
+                                            <div class="rounded-2xl bg-amber-50 p-4 text-center dark:bg-amber-950/25">
+                                                <div class="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">{{ $locale === 'ne' ? 'Category' : 'Category' }}</div>
+                                                <div class="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">{{ strtoupper((string) ($examResultFilters['exam_category'] ?? 'assessment')) }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>

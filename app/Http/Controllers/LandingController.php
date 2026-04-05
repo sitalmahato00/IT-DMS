@@ -251,13 +251,32 @@ class LandingController extends Controller
     private function resolveExamResultSearch(Request $request, array $examResultMeta, bool $searchForced = false): array
     {
         $searchAttempted = $request->boolean('search_exam_result') || $searchForced;
+        $dobBs = trim((string) $request->query('dob_bs', ''));
+        
+        // Convert BS date to AD for database query
+        $dobAd = '';
+        if (!empty($dobBs)) {
+            try {
+                $dobAd = \App\Helpers\NepaliContentHelper::convertBsToAd($dobBs);
+                // Normalize date format to YYYY-MM-DD
+                if (!empty($dobAd)) {
+                    $dateObj = \Carbon\Carbon::createFromFormat('Y-m-d', $dobAd);
+                    $dobAd = $dateObj->format('Y-m-d');
+                }
+            } catch (\Exception $e) {
+                // If conversion fails, try to use as-is
+                $dobAd = $dobBs;
+            }
+        }
+
         $filters = [
             'academic_year' => trim((string) $request->query('academic_year', $examResultMeta['years'][0] ?? '')),
             'semester' => trim((string) $request->query('semester', $examResultMeta['semesters'][0] ?? '')),
             'exam_category' => trim((string) $request->query('exam_category', 'assessment')) ?: 'assessment',
             'assessment_number' => trim((string) $request->query('assessment_number', '')),
             'student_id' => trim((string) $request->query('student_id', '')),
-            'dob' => trim((string) $request->query('dob', '')),
+            'dob' => $dobAd, // AD date for query
+            'dob_bs' => $dobBs, // BS date for display
         ];
 
         if ($filters['academic_year'] === '' && !empty($examResultMeta['years'][0])) {
@@ -275,8 +294,8 @@ class LandingController extends Controller
         $error = null;
 
         if ($searchAttempted) {
-            if ($filters['student_id'] === '' || $filters['dob'] === '') {
-                $error = 'Please enter both Student ID / Roll No and DOB.';
+            if ($filters['student_id'] === '' || $dobBs === '') {
+                $error = 'Please enter both Student ID / Roll No and Date of Birth.';
             } else {
                 $student = $this->findPublicExamResultStudent($filters);
 
@@ -335,6 +354,15 @@ class LandingController extends Controller
         $dob = trim((string) ($filters['dob'] ?? ''));
 
         if ($studentId === '' || $dob === '') {
+            return null;
+        }
+
+        // Normalize date format
+        try {
+            $dateObj = \Carbon\Carbon::createFromFormat('Y-m-d', $dob);
+            $dob = $dateObj->format('Y-m-d');
+        } catch (\Exception $e) {
+            // If parsing fails, return null
             return null;
         }
 
