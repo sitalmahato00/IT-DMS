@@ -79,12 +79,22 @@ class AuthenticatedSessionController extends Controller
 
     protected function requiresTwoFactorChallenge(?string $role): bool
     {
-        if (!ErpSetting::isEnabled('security_two_factor_enabled', false)) {
+        \Log::info('DEBUG: Checking 2FA requirement for role: ' . ($role ?? 'null'));
+        
+        $twoFactorEnabled = ErpSetting::isEnabled('security_two_factor_enabled', false);
+        \Log::info('DEBUG: 2FA Enabled setting: ' . ($twoFactorEnabled ? 'true' : 'false'));
+        
+        if (!$twoFactorEnabled) {
+            \Log::info('DEBUG: 2FA is disabled');
             return false;
         }
 
         $roles = ErpSetting::asArray('security_two_factor_roles', ['admin']);
-
-        return $role ? in_array($role, $roles, true) : false;
+        \Log::info('DEBUG: 2FA Roles allowed: ' . json_encode($roles));
+        
+        $requiresOtp = $role ? in_array($role, $roles, true) : false;
+        \Log::info('DEBUG: Role ' . ($role ?? 'null') . ' requires OTP: ' . ($requiresOtp ? 'yes' : 'no'));
+        
+        return $requiresOtp;
     }
 }

@@ -40,7 +40,7 @@ class ErpSettingSeeder extends Seeder
         ];
 
         foreach ($settings as $setting) {
-            ErpSetting::firstOrCreate(
+            ErpSetting::updateOrCreate(
                 ['key' => $setting['key']],
                 $setting
             );
