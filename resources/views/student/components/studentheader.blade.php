@@ -29,6 +29,10 @@
 
 
             <div class="flex items-center gap-2 flex-shrink-0 h-full">
+                <button id="darkModeToggle" class="p-2 border border-gray-200 bg-white text-gray-900 rounded-lg shadow-sm hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white dark:hover:bg-slate-800 transition" title="{{ __('Toggle Dark Mode') }}">
+                    <i class="bi bi-moon-fill text-gray-900 dark:text-yellow-400 text-sm" id="darkModeIcon"></i>
+                </button>
+
                 <div class="relative">
                     <button id="notifToggle" class="relative p-2 rounded-lg border border-gray-200 bg-white text-gray-900 hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white dark:hover:bg-slate-800 transition" aria-expanded="false">
                         <i class="bi bi-bell text-sm"></i>
@@ -119,7 +123,6 @@
 
 <script data-mobile-static-script>
     document.addEventListener('DOMContentLoaded', function () {
-        const localeSelect = document.getElementById('locale-select');
         const notifToggle = document.getElementById('notifToggle');
         const notifDropdown = document.getElementById('notifDropdown');
         const profileToggle = document.getElementById('profileToggle');

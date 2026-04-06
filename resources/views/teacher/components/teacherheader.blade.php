@@ -13,6 +13,11 @@
                 </div>
             </div>
             <div class="flex items-center gap-3 flex-shrink-0 h-full">
+                <!-- Dark Mode Toggle -->
+                <button id="darkModeToggle" class="p-2 border border-gray-200 bg-white text-gray-900 rounded-lg shadow-sm hover:bg-gray-100 transition" title="{{ __('Toggle Dark Mode') }}">
+                    <i class="bi bi-moon-fill text-gray-900 dark:text-yellow-400 text-sm" id="darkModeIcon"></i>
+                </button>
+
                 <!-- Notifications -->
                 @php
                     $__notifList = auth()->user() ? auth()->user()->notifications()->orderBy('created_at', 'desc')->take(6)->get() : collect();

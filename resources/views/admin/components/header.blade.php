@@ -45,6 +45,11 @@
 
             <!-- Right Section: Controls -->
             <div class="flex items-center gap-2 flex-shrink-0">
+                <!-- Dark Mode Toggle -->
+                <button id="darkModeToggle" class="p-2 rounded-lg hover:bg-white/15 transition text-white" title="{{ __('Toggle Dark Mode') }}">
+                    <i class="bi bi-moon-fill text-lg" id="darkModeIcon"></i>
+                </button>
+
                 <!-- Notifications -->
                 @php
                     $__notifList = auth()->user() ? auth()->user()->notifications()->orderBy('created_at', 'desc')->take(6)->get() : collect();
@@ -141,30 +146,6 @@
 
 <script data-mobile-static-script>
     document.addEventListener('DOMContentLoaded', function() {
-        if (localeSelect) {
-            localeSelect.addEventListener('change', function() {
-                const locale = this.value;
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '{{ route("language.switch") }}';
-                const csrfToken = document.querySelector('meta[name="csrf-token"]');
-                if (csrfToken) {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = '_token';
-                    input.value = csrfToken.getAttribute('content');
-                    form.appendChild(input);
-                }
-                const localeInput = document.createElement('input');
-                localeInput.type = 'hidden';
-                localeInput.name = 'locale';
-                localeInput.value = locale;
-                form.appendChild(localeInput);
-                document.body.appendChild(form);
-                form.submit();
-            });
-        }
-
         // Profile dropdown toggle
         const profileToggle = document.getElementById('profileToggle');
         const profileDropdown = document.getElementById('profileDropdown');
@@ -172,7 +153,7 @@
             profileToggle.addEventListener('click', function(e) {
                 e.stopPropagation();
                 profileDropdown.classList.toggle('hidden');
-                notifDropdown?.classList.add('hidden');
+                document.getElementById('notifDropdown')?.classList.add('hidden');
             });
             document.addEventListener('click', function(e) {
                 if (!profileToggle.contains(e.target) && !profileDropdown.contains(e.target)) {
