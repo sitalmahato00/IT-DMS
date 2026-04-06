@@ -177,16 +177,6 @@
                 <span>{{ $locale === 'ne' ? 'छिटो सम्पर्क' : 'Quick Contact' }}</span>
             </a>
 
-            <form method="POST" action="{{ route('language.switch') }}" class="hidden sm:block">
-                @csrf
-                <label class="sr-only" for="headerLocale">{{ $locale === 'ne' ? 'भाषा' : 'Language' }}</label>
-                <select id="headerLocale" name="locale" onchange="this.form.submit()" class="rounded-full border border-transparent bg-transparent px-2 py-2 text-sm font-semibold text-slate-700 focus:border-red-200 focus:outline-none focus:ring-2 focus:ring-red-100 dark:text-slate-200 dark:focus:border-slate-600 dark:focus:ring-slate-800">
-                    @foreach (config('locales.supported') as $code => $label)
-                        <option value="{{ $code }}" @selected($code === $locale)>{{ $label }}</option>
-                    @endforeach
-                </select>
-            </form>
-
             <button
                 id="darkModeToggle"
                 type="button"
@@ -252,16 +242,6 @@
                     </svg>
                     <span>{{ $locale === 'ne' ? 'छिटो सम्पर्क' : 'Quick Contact' }}</span>
                 </a>
-
-                <form method="POST" action="{{ route('language.switch') }}" class="sm:hidden">
-                    @csrf
-                    <label class="sr-only" for="headerLocaleMobile">{{ $locale === 'ne' ? 'भाषा' : 'Language' }}</label>
-                    <select id="headerLocaleMobile" name="locale" onchange="this.form.submit()" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 focus:border-red-200 focus:outline-none focus:ring-2 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:border-slate-600 dark:focus:ring-slate-800">
-                        @foreach (config('locales.supported') as $code => $label)
-                            <option value="{{ $code }}" @selected($code === $locale)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </form>
 
                 @auth
                     <a href="{{ route('dashboard') }}" @click="mobileMenuOpen = false" class="flex items-center justify-center rounded-full bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700">

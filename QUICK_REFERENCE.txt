@@ -1,0 +1,225 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║           IT-DMS (Integrated Teaching-Learning Management System)          ║
+║                    Database Schema Quick Reference                         ║
+║                          Generated: April 2026                             ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+📊 SYSTEM OVERVIEW
+──────────────────────────────────────────────────────────────────────────
+🎯 Purpose: Educational Management System for IT Department
+📚 Platform: Laravel 11 + MySQL
+👥 Users: Admin, Teachers, Students, Parents
+🌐 Languages: English & Nepali
+
+📈 DATABASE STATISTICS
+──────────────────────────────────────────────────────────────────────────
+Total Tables:                28
+User Management Tables:      5
+Academic Management Tables:  9
+Assessment Tables:           4
+Scheduling Tables:           2
+Content & Communication:     5
+System Administration:       2
+
+📋 ENTITIES BY CATEGORY
+──────────────────────────────────────────────────────────────────────────
+
+1. USER MANAGEMENT (5 Tables)
+   ├─ USERS (Core authentication & roles)
+   ├─ TEACHERS (Teacher profiles)
+   ├─ PARENTS (Parent profiles)
+   ├─ STUDENTS (Student profiles)
+   └─ AUDIT_LOGS (System audit trail)
+
+2. ACADEMIC MANAGEMENT (9 Tables)
+   ├─ SUBJECTS (Course information)
+   ├─ SEMESTERS (Semester management)
+   ├─ SUBJECT_TEACHER (Teacher-Subject mapping)
+   ├─ SUBJECT_STUDENTS (Student-Subject enrollment)
+   ├─ EXAMS (Exam definitions)
+   ├─ EXAM_MARKS (Exam results)
+   ├─ MARKS (General marks/grades)
+   ├─ ATTENDANCE (Class attendance)
+   └─ ELECTIVE_ENROLLMENTS (Student elective requests)
+
+3. SCHEDULING (2 Tables)
+   ├─ TIMETABLE_SLOTS (Class scheduling)
+   └─ TIMETABLE_GAP_OVERRIDES (Holiday/gap management)
+
+4. CONTENT & COMMUNICATION (5 Tables)
+   ├─ STUDY_MATERIALS (Course resources)
+   ├─ NOTICES (System announcements)
+   ├─ BILINGUAL_NOTICES (Dual-language notices)
+   ├─ NOTICE_CATEGORIES (Notice categorization)
+   └─ GALLERIES (Image galleries)
+
+5. SYSTEM (2 Tables)
+   ├─ ERP_SETTINGS (System configuration)
+   └─ (Reserved for future use)
+
+🔑 KEY RELATIONSHIPS
+──────────────────────────────────────────────────────────────────────────
+
+User Hierarchy:
+    USERS (root)
+    ├─1:1→ TEACHERS
+    ├─1:1→ PARENTS → 1:Many → STUDENTS
+    └─1:1→ STUDENTS
+
+Academic Flow:
+    SUBJECTS
+    ├─1:Many→ SUBJECT_TEACHER ←1:Many← TEACHERS
+    ├─1:Many→ SUBJECT_STUDENTS ←1:Many← STUDENTS
+    ├─1:Many→ EXAMS → 1:Many → EXAM_MARKS → Many:1 ← STUDENTS
+    ├─1:Many→ ATTENDANCE (Tracks STUDENTS & SUBJECTS)
+    ├─1:Many→ MARKS (Tracks STUDENTS)
+    ├─1:Many→ TIMETABLE_SLOTS (Tracks TEACHERS)
+    ├─1:Many→ STUDY_MATERIALS
+    ├─1:Many→ ELECTIVE_ENROLLMENTS (STUDENTS requests)
+    └─1:Many→ NOTICES
+
+Assessment Pipeline:
+    STUDENTS → SUBJECT_STUDENTS → SUBJECTS → EXAMS → EXAM_MARKS
+    MARKS (Alternative marking system)
+    ATTENDANCE (Tracks class presence)
+
+📊 DATA FLOW EXAMPLE: Student Taking Exam
+──────────────────────────────────────────────────────────────────────────
+1. Student enrolls in Subject (SUBJECT_STUDENTS)
+2. Teacher is assigned to Subject (SUBJECT_TEACHER)
+3. Exam is created for Subject (EXAMS)
+4. Attendance tracked for Student-Subject (ATTENDANCE)
+5. Student's exam marks recorded (EXAM_MARKS)
+6. Final grade calculated (MARKS)
+
+🔐 SECURITY FEATURES
+──────────────────────────────────────────────────────────────────────────
+✓ Soft deletes on sensitive tables (USERS, STUDENTS, EXAMS, etc.)
+✓ Role-based access control (admin, teacher, student, parent)
+✓ Audit logging of all user actions
+✓ Unique constraints on critical fields (email, roll_no, teacher_code)
+✓ Foreign key constraints with cascading rules
+✓ Timestamps for all records (created_at, updated_at)
+
+🌍 BILINGUAL SUPPORT
+──────────────────────────────────────────────────────────────────────────
+Most tables include _ne (Nepali) fields:
+✓ SUBJECTS (subject_name_ne, description_ne)
+✓ SEMESTERS (name_ne)
+✓ STUDENTS (date_of_birth_bs for Nepali calendar)
+✓ NOTICES (title_ne, message_ne)
+✓ STUDY_MATERIALS (title_ne, description_ne)
+✓ DEPARTMENTS (name_nepali, address_nepali)
+✓ Custom Nepali date format fields (date_bs, academic_year_bs)
+
+⚙️ SYSTEM CONFIGURATION
+──────────────────────────────────────────────────────────────────────────
+ERP_SETTINGS table manages:
+- Grading configuration
+- Attendance policies
+- Elective enrollment rules
+- Semester parameters
+- General system settings
+
+📌 CRITICAL INDEXES
+──────────────────────────────────────────────────────────────────────────
+Students Table:
+  • Index on: semester, is_active
+  • Index on: academic_year
+  • Index on: roll_no
+
+Attendance Table:
+  • Index on: date, subject_id
+  • Index on: student_id, date
+  • Index on: student_id, status
+
+Timetable Slots Table:
+  • Index on: semester, section, day_of_week
+  • Index on: teacher_id, day_of_week, start_time, end_time
+
+Exam Marks Table:
+  • Index on: student_id, exam_id
+  • Index on: subject_id, exam_id
+  • Index on: exam_id, marks_obtained
+
+🎓 TYPICAL WORKFLOWS
+──────────────────────────────────────────────────────────────────────────
+
+ADMIN WORKFLOW:
+  1. Create Semesters
+  2. Add Subjects for each Semester
+  3. Assign Teachers to Subjects
+  4. Create Exams
+  5. Configure ERP Settings
+  6. View Audit Logs
+
+TEACHER WORKFLOW:
+  1. View assigned Subjects and Students
+  2. Check Timetable Slots
+  3. Mark Attendance
+  4. Create & Upload Study Materials
+  5. Record Exam Marks
+  6. Calculate Final Marks
+  7. Create Notices for Students
+
+STUDENT WORKFLOW:
+  1. View enrolled Subjects
+  2. Check Timetable
+  3. Request Elective Subjects
+  4. View Attendance & Marks
+  5. Download Study Materials
+  6. Read Notices
+  7. Check Exam Schedule & Results
+
+PARENT WORKFLOW:
+  1. View child's enrolled Subjects
+  2. Check Attendance & Marks
+  3. Read Notices
+  4. View Exam Results
+
+📎 FILE STRUCTURE
+──────────────────────────────────────────────────────────────────────────
+Generated Files:
+  • ER_DIAGRAM_HIERARCHICAL.md → Mermaid diagram code
+  • DATABASE_SCHEMA_COMPLETE.txt → Full reference guide
+  • RELATIONSHIPS_REFERENCE.csv → Relationship mappings
+  • QUICK_REFERENCE.txt → This file
+
+🔍 VIEWING OPTIONS
+──────────────────────────────────────────────────────────────────────────
+Mermaid Diagram:
+  ✓ GitHub (automatic rendering)
+  ✓ Mermaid Live Editor (https://mermaid.live/)
+  ✓ VS Code (with "Markdown Preview Mermaid Support" extension)
+  ✓ Online wikis and documentation platforms
+
+Database Schema:
+  ✓ Open in any text editor
+  ✓ Import to database tools (DBeaver, MySQL Workbench)
+  ✓ Print for reference
+
+Relationships CSV:
+  ✓ Open in Excel/Sheets
+  ✓ Filter and analyze relationships
+  ✓ Create custom reports
+
+💡 NOTES
+──────────────────────────────────────────────────────────────────────────
+• All IDs are big integers (supports large datasets)
+• Timestamps use UTC format
+• Soft deletes preserve data integrity
+• Cascading deletes implemented for data consistency
+• Unique constraints prevent duplicate entries
+• Foreign keys ensure referential integrity
+• All timestamps auto-managed by framework
+
+📞 SUPPORT INFORMATION
+──────────────────────────────────────────────────────────────────────────
+For questions or modifications:
+  • Refer to migrations in: database/migrations/
+  • Check models in: app/Models/
+  • Review relationships in: app/Models/[Model].php
+
+════════════════════════════════════════════════════════════════════════════
+                    End of Quick Reference Guide
+════════════════════════════════════════════════════════════════════════════

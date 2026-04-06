@@ -45,20 +45,6 @@
 
             <!-- Right Section: Controls -->
             <div class="flex items-center gap-2 flex-shrink-0">
-                <!-- Language Selector -->
-                <div class="hidden sm:block">
-                    <select id="locale-select" class="px-3 py-1.5 min-w-[120px] border border-white/30 rounded-lg text-xs text-white bg-white/10 cursor-pointer hover:bg-white/15 focus:ring-2 focus:ring-white focus:ring-offset-0 focus:border-transparent shadow-sm transition duration-150 dark:bg-white/10 dark:border-white/30">
-                        @foreach (config('locales.supported') as $code => $label)
-                            <option value="{{ $code }}" {{ app()->getLocale() === $code ? 'selected' : '' }} class="text-gray-900">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Dark Mode Toggle -->
-                <button id="darkModeToggle" class="p-2 rounded-lg hover:bg-white/15 transition text-white" title="{{ __('Toggle Dark Mode') }}">
-                    <i class="bi bi-moon-fill text-lg" id="darkModeIcon"></i>
-                </button>
-
                 <!-- Notifications -->
                 @php
                     $__notifList = auth()->user() ? auth()->user()->notifications()->orderBy('created_at', 'desc')->take(6)->get() : collect();
@@ -155,12 +141,6 @@
 
 <script data-mobile-static-script>
     document.addEventListener('DOMContentLoaded', function() {
-        const localeSelect = document.getElementById('locale-select');
-        const notifDropdown = document.getElementById('notifDropdown');
-        const sidebar = document.getElementById('sidebar');
-        sidebar?.classList.remove('sidebar-collapsed');
-        localStorage.removeItem('sidebar-collapsed');
-
         if (localeSelect) {
             localeSelect.addEventListener('change', function() {
                 const locale = this.value;

@@ -29,19 +29,6 @@
 
 
             <div class="flex items-center gap-2 flex-shrink-0 h-full">
-                <div class="hidden md:block">
-                    <label for="locale-select" class="sr-only">{{ __('Language') }}</label>
-                    <select id="locale-select" class="px-3 py-1.5 min-w-[120px] border border-gray-200 rounded-full text-sm text-gray-900 bg-white cursor-pointer focus:ring-2 focus:ring-[#FF0037] focus:border-transparent shadow-sm transition dark:bg-slate-900 dark:text-white dark:border-slate-700">
-                        @foreach (config('locales.supported') as $code => $label)
-                            <option value="{{ $code }}" {{ app()->getLocale() === $code ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <button id="darkModeToggle" class="p-2 border border-gray-200 bg-white text-gray-900 rounded-lg shadow-sm hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white dark:hover:bg-slate-800 transition" title="{{ __('Toggle Dark Mode') }}">
-                    <i class="bi bi-moon-fill text-gray-900 dark:text-yellow-400 text-sm" id="darkModeIcon"></i>
-                </button>
-
                 <div class="relative">
                     <button id="notifToggle" class="relative p-2 rounded-lg border border-gray-200 bg-white text-gray-900 hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white dark:hover:bg-slate-800 transition" aria-expanded="false">
                         <i class="bi bi-bell text-sm"></i>
@@ -139,33 +126,6 @@
         const profileDropdown = document.getElementById('profileDropdown');
         const headerSearchForm = document.getElementById('studentHeaderSearchForm');
         const headerSearchInput = document.getElementById('studentHeaderSearchInput');
-
-        if (localeSelect) {
-            localeSelect.addEventListener('change', function () {
-                const form = document.createElement('form');
-                const csrfToken = document.querySelector('meta[name="csrf-token"]');
-
-                form.method = 'POST';
-                form.action = '{{ route('language.switch') }}';
-
-                if (csrfToken) {
-                    const csrfField = document.createElement('input');
-                    csrfField.type = 'hidden';
-                    csrfField.name = '_token';
-                    csrfField.value = csrfToken.getAttribute('content');
-                    form.appendChild(csrfField);
-                }
-
-                const localeField = document.createElement('input');
-                localeField.type = 'hidden';
-                localeField.name = 'locale';
-                localeField.value = this.value;
-                form.appendChild(localeField);
-
-                document.body.appendChild(form);
-                form.submit();
-            });
-        }
 
         if (profileToggle && profileDropdown) {
             profileToggle.addEventListener('click', function (event) {
