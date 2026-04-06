@@ -27,8 +27,9 @@ class ErpSettingSeeder extends Seeder
             ['key' => 'security_password_require_lowercase', 'value' => '1'],
             ['key' => 'security_password_require_number', 'value' => '1'],
             ['key' => 'security_password_require_symbol', 'value' => '1'],
-            ['key' => 'security_two_factor_enabled', 'value' => '0'],
-            ['key' => 'security_two_factor_roles', 'value' => json_encode(['admin'])],
+            // 2FA ENABLED FOR ALL USERS - OTP on login
+            ['key' => 'security_two_factor_enabled', 'value' => '1'],
+            ['key' => 'security_two_factor_roles', 'value' => json_encode(['admin', 'teacher', 'student', 'parent'])],
             ['key' => 'security_two_factor_expiry_minutes', 'value' => '10'],
             ['key' => 'notification_email_enabled', 'value' => '1'],
             ['key' => 'notification_email_exam', 'value' => '1'],

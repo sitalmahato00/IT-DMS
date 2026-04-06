@@ -44,12 +44,6 @@ class GallerySeeder extends Seeder
                 'category' => 'Campus',
                 'order' => 5,
             ],
-            [
-                'title' => 'Workshop and Training',
-                'description' => 'Faculty training and professional development workshops',
-                'category' => 'Training',
-                'order' => 6,
-            ],
         ];
 
         foreach ($galleries as $gallery) {
