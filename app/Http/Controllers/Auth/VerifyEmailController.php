@@ -15,13 +15,27 @@ class VerifyEmailController extends Controller
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->to($request->user()->getDashboardRoute())->with('verified', 1);
+            return redirect()->to($this->getProfileRoute($request->user()))->with('verified', 1);
         }
 
         if ($request->user()->markEmailAsVerified()) {
             event(new Verified($request->user()));
         }
 
-        return redirect()->to($request->user()->getDashboardRoute())->with('verified', 1);
+        return redirect()->to($this->getProfileRoute($request->user()))->with('verified', 1);
+    }
+
+    /**
+     * Get the profile route based on user role
+     */
+    private function getProfileRoute($user): string
+    {
+        return match($user->role) {
+            'admin' => route('admin.settings'),
+            'teacher' => route('teacher.profile.edit'),
+            'student' => route('student.profile.edit'),
+            'parent' => route('parent.profile.edit'),
+            default => route('dashboard'),
+        };
     }
 }
