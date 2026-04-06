@@ -49,7 +49,6 @@ class ExamMarkSeeder extends Seeder
             }
         }
     }
-    }
 
     private function getGrade($percentage)
     {
