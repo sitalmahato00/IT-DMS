@@ -63,9 +63,13 @@ class AuthenticatedSessionController extends Controller
                 return redirect()->route('two-factor.challenge');
             } catch (\Exception $e) {
                 \Log::error('Error during 2FA setup: ' . $e->getMessage());
+                \Log::error('2FA Error Stack: ' . $e->getTraceAsString());
                 // Fallback: skip OTP if there's an error
                 Auth::logout();
-                return back()->withErrors(['email' => 'Authentication error. Please try again.']);
+                
+                // Return detailed error in debug mode
+                $message = config('app.debug') ? 'Authentication error: ' . $e->getMessage() : 'Authentication error. Please try again.';
+                return back()->withErrors(['email' => $message]);
             }
         }
 
