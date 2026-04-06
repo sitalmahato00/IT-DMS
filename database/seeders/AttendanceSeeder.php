@@ -59,27 +59,25 @@ class AttendanceSeeder extends Seeder
                         $status = 'absent';
                     }
 
-                    $attendanceType = $subject->has_lab ? 'class' : 'class';
+                    $attendanceType = $subject->has_lab ? 'lab' : 'class';
 
                     Attendance::firstOrCreate(
                         [
                             'student_id' => $student->id,
                             'subject_id' => $subject->id,
-                            'attendance_date' => $date->format('Y-m-d'),
+                            'date' => $date->format('Y-m-d'),
                             'attendance_type' => $attendanceType,
                         ],
                         [
                             'student_id' => $student->id,
                             'subject_id' => $subject->id,
-                            'semester' => $student->semester,
-                            'academic_year' => '2080-2081',
-                            'academic_year_bs' => '2080-2081',
-                            'attendance_date' => $date->format('Y-m-d'),
-                            'attendance_date_bs' => $date->format('Y-m-d'),
+                            'teacher_id' => $teacherUserId,
+                            'date' => $date->format('Y-m-d'),
+                            'date_bs' => $date->format('Y-m-d'),
                             'attendance_type' => $attendanceType,
                             'status' => $status,
-                            'entered_by' => $teacherUserId,
-                            'recorded_at' => now(),
+                            'academic_year' => '2080-2081',
+                            'academic_year_bs' => '2080-2081',
                             'remarks' => null,
                         ]
                     );
