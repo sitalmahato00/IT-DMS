@@ -490,4 +490,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::delete('/department/hero-images/{index}', [DepartmentController::class, 'deleteHeroImage'])->name('department.hero-image.delete');
 });
 
-require __DIR__ . '/auth.php';
+// Authentication routes - included within web middleware context
+Route::middleware('web')->group(function () {
+    require __DIR__ . '/auth.php';
+});
