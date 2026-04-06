@@ -1,5 +1,8 @@
 import './bootstrap';
 
+// Initialize session keep-alive to prevent 419 PAGE EXPIRED errors
+import './session-keep-alive';
+
 import Alpine from 'alpinejs';
 import collapse from '@alpinejs/collapse';
 import Chart from 'chart.js/auto';
