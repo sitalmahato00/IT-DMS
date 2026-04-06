@@ -14,13 +14,13 @@ class ExamSeeder extends Seeder
      */
     public function run(): void
     {
-        $subjects = Subject::all();
+        $subjects = Subject::all()->take(5); // Max 5 subjects
         $admin = User::where('role', 'admin')->first();
 
+        // Only create 2 exam types per subject (internal and final)
         $examTypes = [
             ['type' => 'internal', 'category' => 'assessment', 'full_marks' => 40, 'assessment_num' => 1],
-            ['type' => 'midterm', 'category' => 'assessment', 'full_marks' => 50, 'assessment_num' => 2],
-            ['type' => 'final', 'category' => 'assessment', 'full_marks' => 100, 'assessment_num' => 3],
+            ['type' => 'final', 'category' => 'assessment', 'full_marks' => 100, 'assessment_num' => 2],
         ];
 
         foreach ($subjects as $subject) {
@@ -51,41 +51,6 @@ class ExamSeeder extends Seeder
                     ]
                 );
             }
-
-            // Create CTEVT exams for each subject
-            Exam::firstOrCreate(
-                [
-                    'subject_id' => $subject->id,
-                    'exam_type' => 'assessment',
-                    'exam_category' => 'ctevt',
-                    'academic_year' => '2080-2081',
-                    'semester' => 5,
-                ],
-                [
-                    'exam_name' => $subject->subject_name . ' - CTEVT Exam',
-                    'subject_id' => $subject->id,
-                    'exam_type' => 'assessment',
-                    'exam_category' => 'ctevt',
-                    'academic_year' => '2080-2081',
-                    'academic_year_bs' => '2080-2081',
-                    'semester' => 5,
-                    'full_marks' => 100,
-                    'passing_marks' => 40,
-                    'theory_internal_max_marks' => 20,
-                    'theory_external_max_marks' => 20,
-                    'practical_internal_max_marks' => 30,
-                    'practical_external_max_marks' => 30,
-                    'theory_internal_pass_marks' => 8,
-                    'theory_external_pass_marks' => 8,
-                    'practical_internal_pass_marks' => 12,
-                    'practical_external_pass_marks' => 12,
-                    'exam_date' => now()->addDays(30),
-                    'exam_date_bs' => now()->addDays(30),
-                    'status' => 'published',
-                    'created_by' => $admin?->id,
-                    'description' => 'CTEVT examination for ' . $subject->subject_name,
-                ]
-            );
         }
     }
 }

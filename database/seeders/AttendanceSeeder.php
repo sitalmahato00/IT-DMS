@@ -16,29 +16,22 @@ class AttendanceSeeder extends Seeder
      */
     public function run(): void
     {
+        // Limit to first 3 students with 20 days of attendance records only
         $students = Student::with([
             'subjects.teacherAssignments.teacher.user',
-        ])->get();
+        ])->take(3)->get();
 
         if ($students->isEmpty()) {
             $this->command?->warn('AttendanceSeeder skipped: no students found.');
             return;
         }
 
-        $fallbackSubjectsBySemester = Subject::query()
-            ->whereIn('subject_type', ['core', 'mandatory'])
-            ->where('status', 'active')
-            ->with(['teacherAssignments.teacher.user'])
-            ->get()
-            ->groupBy(fn ($subject) => (string) ($subject->semester ?? ''));
-
-        $startDate = now()->subDays(60)->startOfDay();
-        $createdCount = 0;
-
+        $startDate = now()->subDays(20)->startOfDay();
+        
         foreach ($students as $student) {
             $subjects = $student->subjects->isNotEmpty()
-                ? $student->subjects
-                : collect($fallbackSubjectsBySemester->get((string) ($student->semester ?? ''), []));
+                ? $student->subjects->take(2)  // Max 2 subjects per student
+                : collect([]);
 
             if ($subjects->isEmpty()) {
                 continue;
@@ -51,11 +44,8 @@ class AttendanceSeeder extends Seeder
 
                 $teacherUserId = $primaryAssignment?->teacher?->user_id;
 
-                if (!$teacherUserId && Schema::hasColumn('subjects', 'teacher_id')) {
-                    $teacherUserId = $subject->teacher_id ?: null;
-                }
-
-                for ($day = 0; $day < 60; $day++) {
+                // Only create 20 attendance records per student-subject
+                for ($day = 0; $day < 20; $day++) {
                     $date = $startDate->copy()->addDays($day);
 
                     if (in_array($date->dayOfWeek, [0, 6], true)) {
@@ -65,19 +55,38 @@ class AttendanceSeeder extends Seeder
                     $rand = random_int(1, 100);
                     if ($rand <= 80) {
                         $status = random_int(1, 10) <= 8 ? 'present' : 'late';
-                    } elseif ($rand <= 95) {
-                        $status = 'absent';
                     } else {
-                        $status = random_int(1, 2) === 1 ? 'leave' : 'excused';
+                        $status = 'absent';
                     }
 
-                    $attendanceType = ($subject->has_lab && random_int(1, 10) <= 3) ? 'lab' : 'class';
+                    $attendanceType = $subject->has_lab ? 'class' : 'class';
 
-                    if ($attendanceType === 'class') {
-                        $times = [
-                            ['08:00', '09:30'],
-                            ['09:45', '11:15'],
-                            ['11:30', '13:00'],
+                    Attendance::firstOrCreate(
+                        [
+                            'student_id' => $student->id,
+                            'subject_id' => $subject->id,
+                            'attendance_date' => $date->format('Y-m-d'),
+                            'attendance_type' => $attendanceType,
+                        ],
+                        [
+                            'student_id' => $student->id,
+                            'subject_id' => $subject->id,
+                            'semester' => $student->semester,
+                            'academic_year' => '2080-2081',
+                            'academic_year_bs' => '2080-2081',
+                            'attendance_date' => $date->format('Y-m-d'),
+                            'attendance_date_bs' => $date->format('Y-m-d'),
+                            'attendance_type' => $attendanceType,
+                            'status' => $status,
+                            'entered_by' => $teacherUserId,
+                            'recorded_at' => now(),
+                            'remarks' => null,
+                        ]
+                    );
+                }
+            }
+        }
+    }
                             ['13:45', '15:15'],
                         ];
                         $timeSlot = $times[array_rand($times)];

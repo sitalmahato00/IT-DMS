@@ -15,10 +15,11 @@ class MarkSeeder extends Seeder
      */
     public function run(): void
     {
-        $students = Student::all();
+        $students = Student::take(5)->get(); // Limit to 5 students
         $subjects = Subject::all();
 
-        $examTypes = ['assignment', 'project', 'quiz', 'presentation'];
+        // Only create 2 exam types per student-subject
+        $examTypes = ['assignment', 'quiz'];
 
         foreach ($students as $student) {
             foreach ($subjects as $subject) {
@@ -29,26 +30,20 @@ class MarkSeeder extends Seeder
                     continue;
                 }
 
-                // Create multiple marks for each exam type
+                // Create marks for each exam type
                 foreach ($examTypes as $idx => $examType) {
-                    // Vary marks based on type and student
                     $baseMarks = match($examType) {
-                        'assignment' => rand(60, 100),  // Assignments tend to have higher marks
-                        'project' => rand(50, 95),       // Projects vary more
-                        'quiz' => rand(40, 90),          // Quizzes can vary
-                        'presentation' => rand(55, 95),  // Presentations vary
+                        'assignment' => rand(60, 100),
+                        'quiz' => rand(40, 90),
                         default => rand(50, 100),
                     };
 
                     $fullMarks = match($examType) {
                         'assignment' => 10,
-                        'project' => 20,
                         'quiz' => 10,
-                        'presentation' => 15,
                         default => 10,
                     };
 
-                    // Scale obtained marks to full marks
                     $marksObtained = round(($baseMarks / 100) * $fullMarks, 2);
 
                     Mark::firstOrCreate(
@@ -67,7 +62,7 @@ class MarkSeeder extends Seeder
                             'marks_obtained' => $marksObtained,
                             'full_marks' => $fullMarks,
                             'date' => now()->subDays(rand(1, 30)),
-                            'remarks' => ucfirst($examType) . ' marks for ' . $subject->subject_name . ' - Excellent work',
+                            'remarks' => ucfirst($examType) . ' marks for ' . $subject->subject_name . ' - Good performance',
                         ]
                     );
                 }
