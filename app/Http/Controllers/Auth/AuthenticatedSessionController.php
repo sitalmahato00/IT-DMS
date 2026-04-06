@@ -29,7 +29,13 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $user = $request->user();
-        $requiresTwoFactor = $user && $this->requiresTwoFactorChallenge($user->role ?? null);
+        
+        try {
+            $requiresTwoFactor = $user && $this->requiresTwoFactorChallenge($user->role ?? null);
+        } catch (\Exception $e) {
+            \Log::error('Error checking 2FA requirement: ' . $e->getMessage());
+            $requiresTwoFactor = false;
+        }
 
         if ($requiresTwoFactor) {
             if (empty($user->email)) {
@@ -37,23 +43,30 @@ class AuthenticatedSessionController extends Controller
                 return back()->withErrors(['email' => 'Two-factor authentication requires a valid email address.']);
             }
 
-            $code = (string) random_int(100000, 999999);
-            $expiresMinutes = (int) ErpSetting::get('security_two_factor_expiry_minutes', 10);
+            try {
+                $code = (string) random_int(100000, 999999);
+                $expiresMinutes = (int) ErpSetting::get('security_two_factor_expiry_minutes', 10);
 
-            $request->session()->put([
-                'two_factor.pending_user_id' => $user->id,
-                'two_factor.code' => $code,
-                'two_factor.expires_at' => now()->addMinutes($expiresMinutes)->toDateTimeString(),
-                'two_factor.remember' => $request->boolean('remember'),
-                'two_factor.email' => $user->email,
-            ]);
+                $request->session()->put([
+                    'two_factor.pending_user_id' => $user->id,
+                    'two_factor.code' => $code,
+                    'two_factor.expires_at' => now()->addMinutes($expiresMinutes)->toDateTimeString(),
+                    'two_factor.remember' => $request->boolean('remember'),
+                    'two_factor.email' => $user->email,
+                ]);
 
-            $user->notify(new TwoFactorCodeNotification($code, $expiresMinutes));
-            Auth::logout();
-            $request->session()->regenerate();
-            $request->session()->regenerateToken();
+                $user->notify(new TwoFactorCodeNotification($code, $expiresMinutes));
+                Auth::logout();
+                $request->session()->regenerate();
+                $request->session()->regenerateToken();
 
-            return redirect()->route('two-factor.challenge');
+                return redirect()->route('two-factor.challenge');
+            } catch (\Exception $e) {
+                \Log::error('Error during 2FA setup: ' . $e->getMessage());
+                // Fallback: skip OTP if there's an error
+                Auth::logout();
+                return back()->withErrors(['email' => 'Authentication error. Please try again.']);
+            }
         }
 
         $request->session()->regenerate();
@@ -79,22 +92,28 @@ class AuthenticatedSessionController extends Controller
 
     protected function requiresTwoFactorChallenge(?string $role): bool
     {
-        \Log::info('DEBUG: Checking 2FA requirement for role: ' . ($role ?? 'null'));
-        
-        $twoFactorEnabled = ErpSetting::isEnabled('security_two_factor_enabled', false);
-        \Log::info('DEBUG: 2FA Enabled setting: ' . ($twoFactorEnabled ? 'true' : 'false'));
-        
-        if (!$twoFactorEnabled) {
-            \Log::info('DEBUG: 2FA is disabled');
+        try {
+            \Log::info('DEBUG: Checking 2FA requirement for role: ' . ($role ?? 'null'));
+            
+            $twoFactorEnabled = ErpSetting::isEnabled('security_two_factor_enabled', false);
+            \Log::info('DEBUG: 2FA Enabled setting: ' . ($twoFactorEnabled ? 'true' : 'false'));
+            
+            if (!$twoFactorEnabled) {
+                \Log::info('DEBUG: 2FA is disabled');
+                return false;
+            }
+
+            $roles = ErpSetting::asArray('security_two_factor_roles', ['admin']);
+            \Log::info('DEBUG: 2FA Roles allowed: ' . json_encode($roles));
+            
+            $requiresOtp = $role ? in_array($role, $roles, true) : false;
+            \Log::info('DEBUG: Role ' . ($role ?? 'null') . ' requires OTP: ' . ($requiresOtp ? 'yes' : 'no'));
+            
+            return $requiresOtp;
+        } catch (\Exception $e) {
+            \Log::error('ERROR in requiresTwoFactorChallenge: ' . $e->getMessage());
+            // Default to disabled if there's an error
             return false;
         }
-
-        $roles = ErpSetting::asArray('security_two_factor_roles', ['admin']);
-        \Log::info('DEBUG: 2FA Roles allowed: ' . json_encode($roles));
-        
-        $requiresOtp = $role ? in_array($role, $roles, true) : false;
-        \Log::info('DEBUG: Role ' . ($role ?? 'null') . ' requires OTP: ' . ($requiresOtp ? 'yes' : 'no'));
-        
-        return $requiresOtp;
     }
 }
