@@ -87,40 +87,4 @@ class AttendanceSeeder extends Seeder
             }
         }
     }
-                            ['13:45', '15:15'],
-                        ];
-                        $timeSlot = $times[array_rand($times)];
-                    } else {
-                        $labStartHour = random_int(8, 14);
-                        $timeSlot = [sprintf('%02d:00', $labStartHour), sprintf('%02d:00', $labStartHour + 2)];
-                    }
-
-                    $record = Attendance::updateOrCreate(
-                        [
-                            'student_id' => $student->id,
-                            'subject_id' => $subject->id,
-                            'date' => $date->toDateString(),
-                            'attendance_type' => $attendanceType,
-                        ],
-                        [
-                            'teacher_id' => $teacherUserId,
-                            'date_bs' => NepaliContentHelper::convertAdToBs($date->toDateString()),
-                            'time_in' => $timeSlot[0],
-                            'time_out' => $timeSlot[1],
-                            'academic_year' => $student->academic_year ?: now()->format('Y'),
-                            'academic_year_bs' => $student->academic_year_bs ?: '2080-2081',
-                            'status' => $status,
-                            'remarks' => ucfirst($status) . ' in ' . ($subject->subject_name ?? 'Subject') . ' (' . strtoupper($attendanceType) . ')',
-                        ]
-                    );
-
-                    if ($record->wasRecentlyCreated) {
-                        $createdCount++;
-                    }
-                }
-            }
-        }
-
-        $this->command?->info("AttendanceSeeder completed. Newly created records: {$createdCount}");
-    }
 }
