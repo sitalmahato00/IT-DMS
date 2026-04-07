@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\MagicLinkController;
 
 Route::middleware('guest')->group(function () {
     if (config('auth.allow_self_registration')) {
@@ -44,6 +45,24 @@ Route::middleware('guest')->group(function () {
         ->name('two-factor.resend');
     Route::get('two-factor-challenge/cancel', [\App\Http\Controllers\Auth\TwoFactorChallengeController::class, 'destroy'])
         ->name('two-factor.cancel');
+
+    // Magic link routes (login via emailed one-time link)
+    Route::get('magic-login/{token}', [MagicLinkController::class, 'consume'])
+        ->name('magic.login');
+
+    Route::get('magic-login/{token}/cancel', [MagicLinkController::class, 'deny'])
+        ->name('magic.cancel');
+
+    Route::get('magic-link-sent', function () {
+        return view('auth.magic_link_sent');
+    })->name('magic.link.sent');
+
+    Route::get('magic-wait', function () {
+        return view('auth.magic_link_wait');
+    })->name('magic.wait');
+
+    Route::get('magic-wait/status', [MagicLinkController::class, 'status'])
+        ->name('magic.wait.status');
 });
 
 Route::middleware('auth')->group(function () {
