@@ -73,9 +73,11 @@ class Department extends Model
     public function getLogoUrlAttribute(): string
     {
         if (!empty($this->logo_path) && Storage::disk('public')->exists($this->logo_path)) {
-            return Storage::url($this->logo_path);
+            $fullPath = storage_path('app/public/' . $this->logo_path);
+            $mtime = filemtime($fullPath) ?: time();
+            return Storage::url($this->logo_path . '?v=' . $mtime);
         }
-        return asset('images/default-logo.svg');
+        return asset('images/default-logo.svg?v=' . time());
     }
 
     public function getProgramsImageUrl(): ?string
@@ -86,7 +88,9 @@ class Department extends Model
     public function getProgramsImageUrlAttribute(): ?string
     {
         if (!empty($this->programs_image_path) && Storage::disk('public')->exists($this->programs_image_path)) {
-            return Storage::url($this->programs_image_path);
+            $fullPath = storage_path('app/public/' . $this->programs_image_path);
+            $mtime = filemtime($fullPath) ?: time();
+            return Storage::url($this->programs_image_path . '?v=' . $mtime);
         }
         return null;
     }

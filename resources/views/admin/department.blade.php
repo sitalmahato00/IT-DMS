@@ -682,23 +682,60 @@
         });
     }
 
-    function handleLogoUpload(event) {
+function handleLogoUpload(event) {
         const file = event.target.files && event.target.files[0];
         if (!file) return;
+
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/svg+xml'];
+        if (!validTypes.includes(file.type)) {
+            showToast('Please select a valid image file (JPEG, PNG, GIF, SVG)', 'error');
+            return;
+        }
 
         if (file.size > 2048 * 1024) {
             showToast('File size must be less than 2MB', 'error');
             return;
         }
 
+        showToast('Previewing image...', 'info');
+
         const reader = new FileReader();
         reader.onload = function(e) {
             const preview = document.getElementById('logoPreview');
             if (preview) {
-                preview.innerHTML = `<img src="${e.target.result}" alt="Logo preview" class="h-full w-full object-contain p-2">`;
+                preview.innerHTML = `
+                    <div class="relative w-full h-full">
+                        <img src="${e.target.result}" alt="Logo preview" class="h-full w-full object-contain p-2">
+                        <button type="button" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-lg transition text-xs" onclick="clearLogoPreview()">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                `;
+                showToast('Image preview loaded successfully', 'success');
             }
         };
+        reader.onerror = function() {
+            showToast('Error reading image file', 'error');
+        };
         reader.readAsDataURL(file);
+        // Reset input to allow same file re-selection
+        event.target.value = '';
+    }
+
+    function clearLogoPreview() {
+        const preview = document.getElementById('logoPreview');
+        const input = document.getElementById('logoInput');
+        if (preview && input) {
+            preview.innerHTML = `
+                <div class="text-center">
+                    <i class="bi bi-cloud-arrow-up text-4xl text-blue-400 group-hover:text-blue-500 transition"></i>
+                    <p class="text-sm text-blue-600 mt-2 font-medium">Click or drag to upload</p>
+                    <p class="text-xs text-blue-500">PNG, JPG, GIF, SVG up to 2MB</p>
+                </div>
+            `;
+            input.value = '';
+        }
     }
 
     async function deleteLogo() {
@@ -710,7 +747,8 @@
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             });
             const data = await response.json();
@@ -719,10 +757,11 @@
                 setTimeout(() => window.location.reload(), 800);
             } else {
                 showToast(data.message || 'Error deleting logo', 'error');
-                showLoader(false);
             }
         } catch (e) {
-            showToast('Error deleting logo', 'error');
+            console.error('Delete logo error:', e);
+            showToast('Network error deleting logo', 'error');
+        } finally {
             showLoader(false);
         }
     }
@@ -927,6 +966,10 @@
 
                 showToast(data.message || '✓ Department details saved successfully', 'success');
                 showLoader(false);
+                // Reload page to refresh preview with saved logo
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             } else {
                 let errorMessage = data.message || 'Error saving department details';
                 if (data.errors) {
