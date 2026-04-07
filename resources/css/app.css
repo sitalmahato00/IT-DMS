@@ -1812,6 +1812,7 @@ main#adminPageContent {
     --mobile-app-nav-height: 4.95rem;
     --mobile-app-safe-top: env(safe-area-inset-top, 0px);
     --mobile-app-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --mobile-app-nav-offset: calc(var(--mobile-app-nav-height) + 1.15rem + var(--mobile-app-safe-bottom));
     --mobile-app-surface: rgba(255, 255, 255, 0.96);
     --mobile-app-surface-dark: rgba(15, 23, 42, 0.96);
     --mobile-app-border: rgba(255, 0, 55, 0.14);
@@ -1929,7 +1930,7 @@ html.dark .mobile-nav-link.is-active {
 
 .mobile-install-sheet {
     right: 0.9rem;
-    bottom: calc(var(--mobile-app-nav-height) + 0.75rem + var(--mobile-app-safe-bottom));
+    bottom: calc(var(--mobile-app-nav-offset) + 0.75rem);
     left: 0.9rem;
     width: min(100% - 1.8rem, 28rem);
     margin: 0 auto;
@@ -2174,6 +2175,21 @@ html.dark .mobile-pull-indicator__label {
         padding: 0.55rem 0;
         border: 0 !important;
         text-align: left !important;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .mobile-table-shell.is-card-mode > table td[data-mobile-cell-kind="selection"] {
+        padding-top: 0.2rem;
+        padding-bottom: 0.2rem;
+    }
+
+    .mobile-table-shell.is-card-mode > table td[data-mobile-cell-kind="selection"]::before {
+        display: none;
+    }
+
+    .mobile-table-shell.is-card-mode > table td[data-mobile-cell-kind="actions"] {
+        padding-top: 0.8rem;
     }
 
     .mobile-table-shell.is-card-mode > table td::before {
@@ -2189,6 +2205,38 @@ html.dark .mobile-pull-indicator__label {
 
     html.dark .mobile-table-shell.is-card-mode > table td::before {
         color: #94a3b8;
+    }
+
+    .mobile-table-shell.is-card-mode > table td[data-mobile-cell-kind="actions"] :is(.flex, .inline-flex, [class*="actions"]) {
+        justify-content: flex-start !important;
+    }
+
+    .mobile-table-shell.is-card-mode > table td > * {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    body[data-mobile-shell] :is(.students-toolbar, .parents-toolbar, .teachers-toolbar, .alumni-toolbar, .alumni-bulk-toolbar, .attendance-table-header, .documents-table-header, .notice-table-header, .courses-table-header) .flex,
+    body[data-mobile-shell] :is(.students-toolbar, .parents-toolbar, .teachers-toolbar, .alumni-toolbar, .alumni-bulk-toolbar, .attendance-table-header, .documents-table-header, .notice-table-header, .courses-table-header) .flex.items-center {
+        flex-wrap: wrap;
+    }
+
+    body[data-mobile-shell] :is(.students-toolbar-select, .students-toolbar button, .students-toolbar a, .teachers-toolbar-btn, .parents-toolbar-btn, .alumni-toolbar-btn, .alumni-bulk-btn, .documents-action-link, .notice-action-link) {
+        max-width: 100%;
+    }
+
+    body[data-mobile-shell] :is(.student-directory-table, .parent-directory-table) td {
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+
+    body[data-mobile-shell] :is(.student-directory-table, .parent-directory-table) td > * {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    body[data-mobile-shell] :is(.student-directory-table .student-actions, .parent-directory-table .parent-actions) {
+        flex-wrap: wrap;
     }
 }
 
@@ -2239,7 +2287,8 @@ html.dark .mobile-pull-indicator__label {
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch;
         touch-action: pan-y;
-        padding-bottom: calc(var(--mobile-app-nav-height) + 1rem + var(--mobile-app-safe-bottom));
+        scroll-padding-bottom: calc(var(--mobile-app-nav-offset) + 1rem);
+        padding-bottom: 1rem;
     }
 
     body[data-mobile-shell].overflow-hidden [data-mobile-main],
@@ -2247,10 +2296,37 @@ html.dark .mobile-pull-indicator__label {
         overflow: hidden !important;
     }
 
+    body[data-mobile-shell] [data-mobile-main]::after {
+        content: "";
+        display: block;
+        height: calc(var(--mobile-app-nav-offset) + 1rem);
+        width: 100%;
+        flex-shrink: 0;
+    }
+
+    body[data-mobile-shell] [data-mobile-main] > :first-child,
+    body[data-mobile-shell] .teacher-page-body > :first-child,
+    body[data-mobile-shell] .student-content-shell > :first-child,
+    body[data-mobile-shell] .parent-content-shell > :first-child,
+    body[data-mobile-shell] #adminPageContent > div {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    body[data-mobile-shell] [data-mobile-main] :is(.grid, .flex) > * {
+        min-width: 0;
+    }
+
+    body[data-mobile-shell] [data-mobile-main] .overflow-x-auto {
+        max-width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+
     body[data-mobile-shell] [data-mobile-sidebar] {
         top: calc(var(--mobile-app-header-height) + var(--mobile-app-safe-top));
-        height: calc(100dvh - var(--mobile-app-header-height) - var(--mobile-app-nav-height) - var(--mobile-app-safe-top) - var(--mobile-app-safe-bottom));
-        max-height: calc(100dvh - var(--mobile-app-header-height) - var(--mobile-app-nav-height) - var(--mobile-app-safe-top) - var(--mobile-app-safe-bottom));
+        height: calc(100dvh - var(--mobile-app-header-height) - var(--mobile-app-safe-top) - var(--mobile-app-nav-offset));
+        max-height: calc(100dvh - var(--mobile-app-header-height) - var(--mobile-app-safe-top) - var(--mobile-app-nav-offset));
         width: min(18rem, 88vw) !important;
         max-width: 88vw !important;
         border-top-right-radius: 1.35rem;
@@ -2349,6 +2425,33 @@ html.dark .mobile-pull-indicator__label {
         padding-right: 0.95rem !important;
     }
 
+    body[data-mobile-shell] :is(#notifDropdown, #profileDropdown) {
+        width: min(22rem, calc(100vw - 1rem)) !important;
+        max-width: calc(100vw - 1rem) !important;
+        right: 0 !important;
+        left: auto !important;
+    }
+
+    body[data-mobile-shell] .fixed.inset-0 :is(.max-w-md, .max-w-lg, .max-w-2xl, .max-w-3xl, .max-w-4xl) {
+        width: calc(100% - 1rem) !important;
+        max-width: calc(100% - 1rem) !important;
+        max-height: calc(100dvh - 1rem - var(--mobile-app-safe-top) - var(--mobile-app-safe-bottom)) !important;
+        margin: 0.5rem auto !important;
+    }
+
+    body[data-mobile-shell] .fixed.inset-0 :is(.max-w-md, .max-w-lg, .max-w-2xl, .max-w-3xl, .max-w-4xl) :is(.flex.justify-between.items-center, .sticky.top-0) {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    body[data-mobile-shell] [data-mobile-main] .grid.grid-cols-3,
+    body[data-mobile-shell] [data-mobile-main] .grid.grid-cols-4,
+    body[data-mobile-shell] [data-mobile-main] .grid.grid-cols-5,
+    body[data-mobile-shell] [data-mobile-main] .grid.grid-cols-6,
+    body[data-mobile-shell] [data-mobile-main] .grid.grid-cols-8 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
     body[data-mobile-shell] .dashboard-chart-container .h-72,
     body[data-mobile-shell] .teacher-dashboard-page .h-72,
     body[data-mobile-shell] .teacher-dashboard-page .h-56,
@@ -2362,6 +2465,17 @@ html.dark .mobile-pull-indicator__label {
     body[data-mobile-shell] .student-dashboard-page .grid.grid-cols-2,
     body[data-mobile-shell] .parent-smooth-page .grid.grid-cols-2 {
         gap: 0.75rem;
+    }
+}
+
+@media (max-width: 420px) {
+    body[data-mobile-shell] [data-mobile-main] .grid.grid-cols-2,
+    body[data-mobile-shell] [data-mobile-main] .grid.grid-cols-3,
+    body[data-mobile-shell] [data-mobile-main] .grid.grid-cols-4,
+    body[data-mobile-shell] [data-mobile-main] .grid.grid-cols-5,
+    body[data-mobile-shell] [data-mobile-main] .grid.grid-cols-6,
+    body[data-mobile-shell] [data-mobile-main] .grid.grid-cols-8 {
+        grid-template-columns: minmax(0, 1fr) !important;
     }
 }
 

@@ -174,17 +174,18 @@
     html.students-ui-enhanced:not(.dark) .student-form-actions { margin-top: 1.5rem; padding-top: 1rem; }
 
     @media (max-width: 768px) {
-        html.students-ui-enhanced:not(.dark) .student-directory-table thead th:nth-child(n+4),
-        html.students-ui-enhanced:not(.dark) .student-directory-table tbody td:nth-child(n+4) { display: none; }
         html.students-ui-enhanced:not(.dark) .student-directory-table th,
         html.students-ui-enhanced:not(.dark) .student-directory-table td { padding: 0.75rem 0.5rem; }
     }
 
     @media (max-width: 640px) {
-        html.students-ui-enhanced:not(.dark) .student-directory-table thead th:nth-child(n+2),
-        html.students-ui-enhanced:not(.dark) .student-directory-table tbody td:nth-child(n+2) { display: none; }
-        html.students-ui-enhanced:not(.dark) .student-directory-table th,
-        html.students-ui-enhanced:not(.dark) .student-directory-table td { padding: 0.5rem 0.25rem; }
+        .student-directory-table { min-width: 48rem; }
+        .student-directory-table th,
+        .student-directory-table td { white-space: nowrap; }
+        .students-toolbar > div,
+        .students-toolbar .flex,
+        .students-toolbar .flex.items-center { flex-wrap: wrap; }
+        .students-toolbar-select { flex: 1 1 11rem; min-width: 0; }
     }
 </style>
 @endsection
@@ -290,8 +291,8 @@
                 <tbody>
                     @forelse($students ?? \App\Models\User::where('role','student')->paginate(15) as $student)
                         <tr class="student-row">
-                            <td class="px-4 py-4"><input type="checkbox" class="student-checkbox rounded text-red-600" data-id="{{ $student->id }}" /></td>
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-4" data-label="Select"><input type="checkbox" class="student-checkbox rounded text-red-600" data-id="{{ $student->id }}" /></td>
+                            <td class="px-4 py-4" data-label="User">
                                 <div class="flex items-center gap-2">
                                     @php
                                         $studentPhotoUrl = $student->student->profile_photo_url ?? null;
@@ -306,22 +307,22 @@
                                     <span class="student-name font-medium">{{ $student->name }}</span>
                                 </div>
                             </td>
-                            <td class="px-4 py-4 text-gray-600"><span class="student-roll-chip">{{ $student->student->roll_no ?? $student->id }}</span></td>
-                            <td class="px-4 py-4 text-gray-600"><span class="student-meta-text">{{ $student->email }}</span></td>
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-4 text-gray-600" data-label="ID"><span class="student-roll-chip">{{ $student->student->roll_no ?? $student->id }}</span></td>
+                            <td class="px-4 py-4 text-gray-600" data-label="Email"><span class="student-meta-text">{{ $student->email }}</span></td>
+                            <td class="px-4 py-4" data-label="Semester">
                                 @if($student->student->is_alumni)
                                     <span class="badge badge-alumni">Graduate</span>
                                 @else
                                     <span class="student-semester-chip">{{ $student->student->semester ?? '--' }}</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-4 text-gray-600"><span class="student-year-chip">{{ $student->student->academic_year ?? '--' }}</span></td>
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-4 text-gray-600" data-label="Year"><span class="student-year-chip">{{ $student->student->academic_year ?? '--' }}</span></td>
+                            <td class="px-4 py-4" data-label="Status">
                                 <span class="badge badge-{{ $student->student->status ?? 'inactive' }}">
                                     {{ ucfirst($student->student->status ?? 'inactive') }}
                                 </span>
                             </td>
-                             <td class="px-4 py-4 text-center">
+                             <td class="px-4 py-4 text-center" data-label="Actions">
                                  <div class="student-actions flex gap-2 justify-center">
                                      <a href="{{ route('admin.students.show', $student->id) }}" class="action-btn action-btn-view" title="View">
                                          <i class="bi bi-eye"></i>

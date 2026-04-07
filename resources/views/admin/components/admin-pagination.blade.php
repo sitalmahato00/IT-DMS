@@ -57,7 +57,7 @@
 
         {{-- Pagination Links --}}
         @if($hasPages || $lastPage > 1)
-        <nav class="flex items-center gap-1">
+        <nav class="flex flex-wrap items-center gap-1 sm:justify-end">
             {{-- Previous Button --}}
             @if($previousPageUrl)
                 <a 

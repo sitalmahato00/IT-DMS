@@ -160,6 +160,15 @@
     html.parents-ui-enhanced:not(.dark) .action-btn-delete { color: #dc2626; }
     html.parents-ui-enhanced:not(.dark) .parent-empty-state { color: #64748b; font-weight: 500; }
 
+@media (max-width: 640px) {
+    .parent-directory-table { min-width: 52rem; }
+    .parent-directory-table th,
+    .parent-directory-table td { white-space: nowrap; }
+    .parents-toolbar > div,
+    .parents-toolbar .flex,
+    .parents-toolbar .flex.items-center { flex-wrap: wrap; }
+}
+
 </style>
 @endsection
 
@@ -291,7 +300,7 @@
                 <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
                     @forelse($parents ?? collect() as $parent)
                     <tr class="parent-row hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
-                        <td class="px-6 py-4">
+                        <td class="px-6 py-4" data-label="Name">
                             <div class="flex items-center gap-3">
                                 @if(!empty(optional($parent->parent)->profile_photo_url))
                                     <img src="{{ optional($parent->parent)->profile_photo_url }}" alt="avatar" class="parent-photo-frame w-10 h-10 rounded-full object-cover">
@@ -303,16 +312,16 @@
                                 <span class="parent-name font-medium text-gray-900 dark:text-white">{{ $parent->name }}</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><span class="parent-id-chip">{{ optional($parent->parent)->parent_code ?? 'P' . str_pad($parent->id, 4, '0', STR_PAD_LEFT) }}</span></td>
-                        <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><span class="parent-email-chip">{{ $parent->email }}</span></td>
-                        <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><span class="parent-phone-chip">{{ optional($parent->parent)->phone ?? '—' }}</span></td>
-                        <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300"><span class="parent-children-chip">{{ $parent->children_count ?? 0 }}</span></td>
-                        <td class="px-6 py-4 text-sm">
+                        <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300" data-label="Parent ID"><span class="parent-id-chip">{{ optional($parent->parent)->parent_code ?? 'P' . str_pad($parent->id, 4, '0', STR_PAD_LEFT) }}</span></td>
+                        <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300" data-label="Email"><span class="parent-email-chip">{{ $parent->email }}</span></td>
+                        <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300" data-label="Phone"><span class="parent-phone-chip">{{ optional($parent->parent)->phone ?? '—' }}</span></td>
+                        <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300" data-label="Children"><span class="parent-children-chip">{{ $parent->children_count ?? 0 }}</span></td>
+                        <td class="px-6 py-4 text-sm" data-label="Role">
                             <span class="parent-role-chip inline-block px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full text-xs font-medium">
                                 {{ ucfirst($parent->role) }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-center text-sm">
+                        <td class="px-6 py-4 text-center text-sm" data-label="Status">
                             @php 
                                 $status = optional($parent->parent)->status ?? 'pending';
                                 $statusColors = [
@@ -326,7 +335,7 @@
                                 {{ ucfirst($status) }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-center text-sm">
+                        <td class="px-6 py-4 text-center text-sm" data-label="Actions">
                             <div class="parent-actions flex gap-2 justify-center">
                                 <a href="{{ route('admin.parents.show', $parent->id) }}" class="action-btn action-btn-view" title="View">
                                     <i class="bi bi-eye"></i>

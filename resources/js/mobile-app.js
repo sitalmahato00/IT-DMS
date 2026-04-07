@@ -703,8 +703,83 @@ function bindSidebarControls(signal) {
     }, { signal });
 }
 
+const CUSTOM_MOBILE_TABLE_SELECTOR = [
+    '.student-directory-table',
+    '.parent-directory-table',
+    '[data-mobile-table-custom]',
+].join(', ');
+
+const COMPLEX_TABLE_CLASS_PATTERN = /\b(?:marks-table|marksheet-table|routine-table|print-table|ctevt-table|report-card|student-table|audit-compare)\b/i;
+const MOBILE_TABLE_CARD_MODE_ENABLED = false;
+let responsiveTableHydrationFrame = 0;
+let mobileNavMetricFrame = 0;
+
+function tableHasCustomMobileLayout(table) {
+    if (!table) {
+        return false;
+    }
+
+    if (table.matches(CUSTOM_MOBILE_TABLE_SELECTOR)) {
+        return true;
+    }
+
+    return table.querySelector('tbody td[data-label]') !== null;
+}
+
+function tableUsesComplexLayout(table) {
+    if (!table) {
+        return false;
+    }
+
+    const className = typeof table.className === 'string' ? table.className : '';
+    if (COMPLEX_TABLE_CLASS_PATTERN.test(className)) {
+        return true;
+    }
+
+    return table.querySelector('thead [rowspan]:not([rowspan="1"]), thead [colspan]:not([colspan="1"]), tbody [rowspan]:not([rowspan="1"]), tbody [colspan]:not([colspan="1"])') !== null;
+}
+
+function getNormalizedHeaderLabel(cell, index) {
+    const rawText = (cell?.textContent || '').replace(/\s+/g, ' ').trim();
+    if (rawText) {
+        return rawText;
+    }
+
+    const metadataLabel = (cell?.getAttribute('aria-label') || cell?.getAttribute('title') || '').trim();
+    if (metadataLabel) {
+        return metadataLabel;
+    }
+
+    if (cell?.querySelector('input[type="checkbox"], input[type="radio"]')) {
+        return 'Select';
+    }
+
+    return `Column ${index + 1}`;
+}
+
+function getCellKind(cell, label) {
+    if (!(cell instanceof HTMLElement)) {
+        return 'default';
+    }
+
+    if (cell.querySelector('input[type="checkbox"], input[type="radio"]')) {
+        return 'selection';
+    }
+
+    const interactiveCount = cell.querySelectorAll('a, button, input[type="button"], input[type="submit"]').length;
+    if (/^actions?$/i.test(label || '') || interactiveCount > 1) {
+        return 'actions';
+    }
+
+    return 'default';
+}
+
 function hydrateResponsiveTables(root = document) {
     root.querySelectorAll('table').forEach((table) => {
+        if (table.closest('[data-mobile-no-card], [data-mobile-table-ignore]') || tableHasCustomMobileLayout(table)) {
+            return;
+        }
+
         if (table.closest('.mobile-table-shell')) {
             updateTableCardMode(table.closest('.mobile-table-shell'));
             return;
@@ -724,19 +799,42 @@ function updateTableCardMode(wrapper) {
         return;
     }
 
-    const headers = Array.from(table.querySelectorAll('thead th')).map((cell) => (cell.textContent || '').trim());
+    const headers = Array.from(table.querySelectorAll('thead th')).map((cell, index) => getNormalizedHeaderLabel(cell, index));
     const firstRow = table.querySelector('tbody tr');
     const cellCount = headers.length || firstRow?.children.length || 0;
-    const enableCardMode = window.innerWidth < MOBILE_CARD_BREAKPOINT && cellCount >= 4;
+    const enableCardMode = MOBILE_TABLE_CARD_MODE_ENABLED && window.innerWidth < MOBILE_CARD_BREAKPOINT && cellCount >= 3 && !tableUsesComplexLayout(table);
 
     wrapper.classList.toggle('is-card-mode', enableCardMode);
 
     table.querySelectorAll('tbody tr').forEach((row) => {
         Array.from(row.children).forEach((cell, index) => {
             if (cell instanceof HTMLElement) {
-                cell.dataset.mobileLabel = headers[index] || `Column ${index + 1}`;
+                const preferredLabel = (cell.dataset.label || '').trim();
+                const resolvedLabel = preferredLabel || headers[index] || `Column ${index + 1}`;
+                const cellKind = getCellKind(cell, resolvedLabel);
+
+                cell.dataset.mobileLabel = resolvedLabel;
+                cell.dataset.mobileCellKind = cellKind;
+
+                if (enableCardMode) {
+                    cell.style.display = 'block';
+                } else {
+                    cell.style.removeProperty('display');
+                }
             }
         });
+    });
+}
+
+function scheduleResponsiveTableHydration(root = document) {
+    if (responsiveTableHydrationFrame) {
+        return;
+    }
+
+    responsiveTableHydrationFrame = window.requestAnimationFrame(() => {
+        responsiveTableHydrationFrame = 0;
+        hydrateResponsiveTables(root);
+        lazyLoadImages(root);
     });
 }
 
@@ -766,6 +864,66 @@ function ensurePullIndicator() {
     }
 
     return indicator;
+}
+
+function bindResponsiveContentObserver() {
+    if (!document.body) {
+        return;
+    }
+
+    const observer = new MutationObserver((mutations) => {
+        const shouldRefresh = mutations.some((mutation) => mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0);
+        if (!shouldRefresh) {
+            return;
+        }
+
+        scheduleResponsiveTableHydration(document);
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+    });
+
+    registerShellCleanup(() => observer.disconnect());
+    registerShellCleanup(() => {
+        if (responsiveTableHydrationFrame) {
+            window.cancelAnimationFrame(responsiveTableHydrationFrame);
+            responsiveTableHydrationFrame = 0;
+        }
+    });
+}
+
+function syncMobileNavMetrics() {
+    const body = document.body;
+    if (!body) {
+        return;
+    }
+
+    const nav = document.querySelector('.mobile-bottom-nav');
+    if (!(nav instanceof HTMLElement) || !(isMobileViewport() || isStandaloneDisplayMode())) {
+        body.style.removeProperty('--mobile-app-nav-offset');
+        return;
+    }
+
+    if (mobileNavMetricFrame) {
+        window.cancelAnimationFrame(mobileNavMetricFrame);
+    }
+
+    mobileNavMetricFrame = window.requestAnimationFrame(() => {
+        mobileNavMetricFrame = 0;
+
+        const computed = window.getComputedStyle(nav);
+        if (computed.display === 'none') {
+            body.style.removeProperty('--mobile-app-nav-offset');
+            return;
+        }
+
+        const height = Math.ceil(nav.getBoundingClientRect().height);
+        if (height > 0) {
+            body.style.setProperty('--mobile-app-nav-offset', `${height}px`);
+        }
+    });
 }
 
 function bindPullToRefresh(signal) {
@@ -1114,6 +1272,8 @@ function initializeShellBindings() {
     bindPullToRefresh(signal);
     bindModalSwipeDismiss(signal);
     bindNotificationBridge();
+    bindResponsiveContentObserver();
+    syncMobileNavMetrics();
     hydrateResponsiveTables(document);
     lazyLoadImages(document);
     window.reinitializeThemeToggle?.(document);
@@ -1163,6 +1323,7 @@ function initializeShellBindings() {
     document.addEventListener('mouseover', prefetchHandler, { signal, passive: true });
 
     window.addEventListener('resize', () => {
+        syncMobileNavMetrics();
         hydrateResponsiveTables(document);
         if (deferredInstallPrompt) {
             showInstallPrompt();
@@ -1175,6 +1336,13 @@ function initializeShellBindings() {
             preserveScroll: true,
         });
     }, { signal });
+
+    registerShellCleanup(() => {
+        if (mobileNavMetricFrame) {
+            window.cancelAnimationFrame(mobileNavMetricFrame);
+            mobileNavMetricFrame = 0;
+        }
+    });
 }
 
 async function syncShellEnhancement(forceReinitialize = false) {

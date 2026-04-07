@@ -116,27 +116,20 @@
     .teachers-page .action-btn-edit { color: #d97706; }
     .teachers-page .action-btn-delete { color: #dc2626; }
 
-    @media (max-width: 768px) {
-        .teachers-page .teacher-directory-table thead th:nth-child(n+4),
-        .teachers-page .teacher-directory-table tbody td:nth-child(n+4) {
-            display: none;
-        }
-
-        .teachers-page .teacher-directory-table th,
-        .teachers-page .teacher-directory-table td {
-            padding: 0.75rem 0.5rem;
-        }
-    }
-
     @media (max-width: 640px) {
-        .teachers-page .teacher-directory-table thead th:nth-child(n+2),
-        .teachers-page .teacher-directory-table tbody td:nth-child(n+2) {
-            display: none;
+        .teachers-page .teacher-directory-table {
+            min-width: 46rem;
         }
 
         .teachers-page .teacher-directory-table th,
         .teachers-page .teacher-directory-table td {
-            padding: 0.5rem 0.25rem;
+            padding: 0.5rem 0.35rem;
+            white-space: nowrap;
+        }
+
+        .teachers-toolbar .flex,
+        .teachers-toolbar .flex.items-center {
+            flex-wrap: wrap;
         }
     }
 
