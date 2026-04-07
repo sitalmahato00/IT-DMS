@@ -207,10 +207,10 @@
                         <div class="settings-card-header border-b border-slate-200 px-5 py-4"><h3 class="flex items-center gap-2 text-sm font-semibold text-slate-900"><i class="bi bi-building text-blue-600"></i>Department</h3></div>
                         <div class="p-6 space-y-6">
                             <div class="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-                                <div class="settings-field">
+                                    <div class="settings-field">
                                     <div class="settings-field-label">Logo</div>
                                     <div class="mt-4 flex items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-4">
-                                        <img src="{{ $department?->logo_url ?? asset('images/default-logo.svg') }}" alt="Department logo" class="max-h-32 w-auto object-contain">
+                                        <img src="{{ $department?->logo_url ?? asset('images/default-logo.svg') }}" alt="College logo" class="max-h-32 w-auto object-contain">
                                     </div>
                                     <div class="mt-4">
                                         <input type="file" name="logo" class="w-full text-sm text-slate-600" accept="image/*" />
@@ -227,8 +227,8 @@
                                         <input id="name_nepali" name="name_nepali" type="text" value="{{ old('name_nepali', $department?->name_nepali) }}" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2">
                                     </div>
                                     <div class="settings-field">
-                                        <label class="settings-field-label" for="short_name">Short Name</label>
-                                        <input id="short_name" name="short_name" type="text" value="{{ old('short_name', $department?->short_name) }}" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" maxlength="10">
+                                        <label class="settings-field-label" for="short_name">Department Name</label>
+                                        <input id="short_name" name="short_name" type="text" value="{{ old('short_name', $department?->short_name) }}" class="mt-2 w-full rounded-xl border border-slate-300 px-3 py-2" maxlength="50">
                                     </div>
                                     <div class="settings-field">
                                         <label class="settings-field-label" for="phone">Phone</label>

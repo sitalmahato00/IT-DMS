@@ -13,14 +13,16 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $defaultPassword = env('SEED_DEFAULT_PASSWORD', 'role123');
+
 
         // Admin User
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'sitalmahato077@gmail.com'],
             [
                 'name' => 'Admin User',
                 'email' => 'sitalmahato077@gmail.com',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make($defaultPassword),
                 'role' => 'admin',
                 'phone' => '9841234567',
                 'department' => 'IT',
@@ -30,12 +32,12 @@ class UserSeeder extends Seeder
         );
 
         // Teacher Users
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'hellogoog94@gmail.com'],
             [
                 'name' => 'Dr. Ramesh Poudel',
                 'email' => 'hellogoog94@gmail.com',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make($defaultPassword),
                 'role' => 'teacher',
                 'phone' => '9847654321',
                 'department' => 'IT',
@@ -58,7 +60,7 @@ class UserSeeder extends Seeder
                 [
                     'name' => $teacher['name'],
                     'email' => $teacher['email'],
-                    'password' => Hash::make('password123'),
+                    'password' => Hash::make($defaultPassword),
                     'role' => 'teacher',
                     'phone' => $teacher['phone'],
                     'department' => 'IT',
@@ -69,12 +71,12 @@ class UserSeeder extends Seeder
         }
 
         // Student Users
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'itstudentsital@gmail.com'],
             [
                 'name' => 'Sital Mahato',
                 'email' => 'itstudentsital@gmail.com',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make($defaultPassword),
                 'role' => 'student',
                 'phone' => '9845556789',
                 'department' => 'IT',
@@ -97,7 +99,7 @@ class UserSeeder extends Seeder
                 [
                     'name' => $student['name'],
                     'email' => $student['email'],
-                    'password' => Hash::make('password123'),
+                    'password' => Hash::make($defaultPassword),
                     'role' => 'student',
                     'phone' => $student['phone'],
                     'department' => 'IT',
@@ -108,12 +110,12 @@ class UserSeeder extends Seeder
         }
 
         // Parent User
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'sitalmahato00@gmail.com'],
             [
                 'name' => 'Parent User',
                 'email' => 'sitalmahato00@gmail.com',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make($defaultPassword),
                 'role' => 'parent',
                 'phone' => '9843334444',
                 'department' => 'IT',
@@ -136,7 +138,7 @@ class UserSeeder extends Seeder
                 [
                     'name' => $parent['name'],
                     'email' => $parent['email'],
-                    'password' => Hash::make('password123'),
+                    'password' => Hash::make($defaultPassword),
                     'role' => 'parent',
                     'phone' => $parent['phone'],
                     'department' => 'IT',

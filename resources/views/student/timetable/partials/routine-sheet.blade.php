@@ -19,7 +19,7 @@
 <section class="routine-paper {{ $paperClass ?? '' }}">
     <header class="routine-paper__header">
         <div class="routine-paper__logo">
-            <img src="{{ $logoUrl }}" alt="{{ $college?->name ?? __('Department Logo') }}">
+            <img src="{{ $logoUrl }}" alt="{{ $college?->name ?? __('College Logo') }}">
         </div>
         <div class="routine-paper__titles">
             <p class="routine-paper__institution">{{ strtoupper($college?->name ?? 'IT-DMS') }}</p>
