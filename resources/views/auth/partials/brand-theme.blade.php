@@ -1097,8 +1097,8 @@
     }
 </style>
 
-<!-- Theme Toggle Button -->
-<button id="authThemeToggle" class="auth-theme-toggle" title="Toggle Dark Mode" aria-label="Toggle Dark Mode">
+<!-- Theme Toggle Button (hidden on small screens) -->
+<button id="authThemeToggle" class="auth-theme-toggle hidden sm:inline-flex" title="Toggle Dark Mode" aria-label="Toggle Dark Mode">
     <svg class="moon-icon" fill="currentColor" viewBox="0 0 20 20">
         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
     </svg>

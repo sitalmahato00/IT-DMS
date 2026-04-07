@@ -14,13 +14,27 @@ class UserSeeder extends Seeder
     public function run(): void
     {
 
+        // Passwords per role; allow overrides via env for deployment
+        $rolePasswords = [
+            'admin' => env('SEED_PASSWORD_ADMIN', 'admin123'),
+            'teacher' => env('SEED_PASSWORD_TEACHER', 'teacher123'),
+            'student' => env('SEED_PASSWORD_STUDENT', 'student123'),
+            'parent' => env('SEED_PASSWORD_PARENT', 'parent123'),
+        ];
+
+        $defaultPassword = env('SEED_DEFAULT_PASSWORD', 'role123');
+
+        $getPassword = function (string $role) use ($rolePasswords, $defaultPassword) {
+            return $rolePasswords[$role] ?? $defaultPassword;
+        };
+
         // Admin User
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'sitalmahato077@gmail.com'],
             [
                 'name' => 'Admin User',
                 'email' => 'sitalmahato077@gmail.com',
-                'password' => Hash::make('password123'),
+            'password' => Hash::make($getPassword('admin')),
                 'role' => 'admin',
                 'phone' => '9841234567',
                 'department' => 'IT',
@@ -30,12 +44,12 @@ class UserSeeder extends Seeder
         );
 
         // Teacher Users
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'hellogoog94@gmail.com'],
             [
                 'name' => 'Dr. Ramesh Poudel',
                 'email' => 'hellogoog94@gmail.com',
-                'password' => Hash::make('password123'),
+            'password' => Hash::make($getPassword('teacher')),
                 'role' => 'teacher',
                 'phone' => '9847654321',
                 'department' => 'IT',
@@ -53,12 +67,12 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($teachers as $teacher) {
-            User::firstOrCreate(
+            User::updateOrCreate(
                 ['email' => $teacher['email']],
                 [
                     'name' => $teacher['name'],
                     'email' => $teacher['email'],
-                    'password' => Hash::make('password123'),
+                    'password' => Hash::make($getPassword('teacher')),
                     'role' => 'teacher',
                     'phone' => $teacher['phone'],
                     'department' => 'IT',
@@ -69,12 +83,12 @@ class UserSeeder extends Seeder
         }
 
         // Student Users
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'itstudentsital@gmail.com'],
             [
                 'name' => 'Sital Mahato',
                 'email' => 'itstudentsital@gmail.com',
-                'password' => Hash::make('password123'),
+            'password' => Hash::make($getPassword('student')),
                 'role' => 'student',
                 'phone' => '9845556789',
                 'department' => 'IT',
@@ -92,12 +106,12 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($students as $student) {
-            User::firstOrCreate(
+            User::updateOrCreate(
                 ['email' => $student['email']],
                 [
                     'name' => $student['name'],
                     'email' => $student['email'],
-                    'password' => Hash::make('password123'),
+                    'password' => Hash::make($getPassword('student')),
                     'role' => 'student',
                     'phone' => $student['phone'],
                     'department' => 'IT',
@@ -108,12 +122,12 @@ class UserSeeder extends Seeder
         }
 
         // Parent User
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'sitalmahato00@gmail.com'],
             [
                 'name' => 'Parent User',
                 'email' => 'sitalmahato00@gmail.com',
-                'password' => Hash::make('password123'),
+            'password' => Hash::make($getPassword('parent')),
                 'role' => 'parent',
                 'phone' => '9843334444',
                 'department' => 'IT',
@@ -131,12 +145,12 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($parents as $parent) {
-            User::firstOrCreate(
+            User::updateOrCreate(
                 ['email' => $parent['email']],
                 [
                     'name' => $parent['name'],
                     'email' => $parent['email'],
-                    'password' => Hash::make('password123'),
+                    'password' => Hash::make($getPassword('parent')),
                     'role' => 'parent',
                     'phone' => $parent['phone'],
                     'department' => 'IT',

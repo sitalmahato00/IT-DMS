@@ -698,10 +698,10 @@
 </head>
 <body class="teacher-panel font-sans antialiased bg-gray-50 dark:bg-gray-900" data-mobile-shell="teacher" data-mobile-role="teacher" data-mobile-route="{{ Route::currentRouteName() ?? '' }}">
     <div id="mobileAppShellRoot" data-mobile-shell-root>
-    <!-- Department Logo Background for All Pages -->
+    <!-- College Logo Background for All Pages -->
     <div class="fixed inset-0 pointer-events-none opacity-10 z-0 flex items-center justify-center">
         @if(isset($departmentLogoUrl))
-            <img src="{{ $departmentLogoUrl }}" alt="{{ __('Department Logo') }}" class="w-[600px] h-[600px] object-contain">
+            <img src="{{ $departmentLogoUrl }}" alt="{{ __('College Logo') }}" class="w-[600px] h-[600px] object-contain">
         @else
             <i class="bi bi-mortarboard text-[30rem] text-gray-300 dark:text-gray-700"></i>
         @endif

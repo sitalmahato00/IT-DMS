@@ -184,12 +184,12 @@
                                 <div class="lg:col-span-1">
                                     <label class="block text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                                         <i class="bi bi-image text-blue-600"></i>
-                                        Department Logo
+                                        College Logo
                                     </label>
                                     <div class="relative">
                                         <div id="logoPreview" class="w-full h-40 border-2 border-dashed border-blue-300 rounded-xl flex items-center justify-center bg-blue-50 overflow-hidden cursor-pointer hover:bg-blue-100 transition group">
                                             @if($department && $department->logo_url)
-                                                <img src="{{ $department->logo_url }}" alt="Department Logo" class="h-full w-full object-contain p-2">
+                                                <img src="{{ $department->logo_url }}" alt="College Logo" class="h-full w-full object-contain p-2">
                                             @else
                                                 <div class="text-center">
                                                     <i class="bi bi-cloud-arrow-up text-4xl text-blue-400 group-hover:text-blue-500 transition"></i>
@@ -211,31 +211,31 @@
                                 <div class="lg:col-span-2 space-y-4">
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                            Department Name <span class="text-red-500">*</span>
+                                            College Name (English) <span class="text-red-500">*</span>
                                         </label>
                                         <input type="text" name="name" value="{{ $department->name ?? '' }}" 
                                             class="field-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                                            placeholder="Enter department name">
-                                        <p class="text-xs text-gray-500 mt-1">English name of your department</p>
+                                            placeholder="Enter college name">
+                                        <p class="text-xs text-gray-500 mt-1">English name of your college</p>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                            विभाग नाम (Nepali) <span class="text-red-500">*</span>
+                                            College Name (Nepali) <span class="text-red-500">*</span>
                                         </label>
                                         <input type="text" name="name_nepali" value="{{ $department->name_nepali ?? '' }}" 
                                             class="field-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                                            placeholder="नेपालीमा विभाग नाम लेख्नुहोस्">
-                                        <p class="text-xs text-gray-500 mt-1">Department name in Nepali</p>
+                                            placeholder="नेपालीमा कलेज नाम लेख्नुहोस्">
+                                        <p class="text-xs text-gray-500 mt-1">College name in Nepali</p>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                            Short Name <span class="text-red-500">*</span>
+                                            Department Name <span class="text-red-500">*</span>
                                         </label>
                                         <input type="text" name="short_name" value="{{ $department->short_name ?? '' }}" 
-                                            maxlength="10"
+                                            maxlength="50"
                                             class="field-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                                            placeholder="e.g., IT, CS, ENG">
-                                        <p class="text-xs text-gray-500 mt-1">Abbreviation or short code</p>
+                                            placeholder="Enter department name">
+                                        <p class="text-xs text-gray-500 mt-1">Full department name</p>
                                     </div>
                                 </div>
                             </div>
@@ -682,27 +682,64 @@
         });
     }
 
-    function handleLogoUpload(event) {
+function handleLogoUpload(event) {
         const file = event.target.files && event.target.files[0];
         if (!file) return;
+
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/svg+xml'];
+        if (!validTypes.includes(file.type)) {
+            showToast('Please select a valid image file (JPEG, PNG, GIF, SVG)', 'error');
+            return;
+        }
 
         if (file.size > 2048 * 1024) {
             showToast('File size must be less than 2MB', 'error');
             return;
         }
 
+        showToast('Previewing image...', 'info');
+
         const reader = new FileReader();
         reader.onload = function(e) {
             const preview = document.getElementById('logoPreview');
             if (preview) {
-                preview.innerHTML = `<img src="${e.target.result}" alt="Logo preview" class="h-full w-full object-contain p-2">`;
+                preview.innerHTML = `
+                    <div class="relative w-full h-full">
+                        <img src="${e.target.result}" alt="Logo preview" class="h-full w-full object-contain p-2">
+                        <button type="button" class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-lg transition text-xs" onclick="clearLogoPreview()">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                `;
+                showToast('Image preview loaded successfully', 'success');
             }
         };
+        reader.onerror = function() {
+            showToast('Error reading image file', 'error');
+        };
         reader.readAsDataURL(file);
+        // Reset input to allow same file re-selection
+        event.target.value = '';
+    }
+
+    function clearLogoPreview() {
+        const preview = document.getElementById('logoPreview');
+        const input = document.getElementById('logoInput');
+        if (preview && input) {
+            preview.innerHTML = `
+                <div class="text-center">
+                    <i class="bi bi-cloud-arrow-up text-4xl text-blue-400 group-hover:text-blue-500 transition"></i>
+                    <p class="text-sm text-blue-600 mt-2 font-medium">Click or drag to upload</p>
+                    <p class="text-xs text-blue-500">PNG, JPG, GIF, SVG up to 2MB</p>
+                </div>
+            `;
+            input.value = '';
+        }
     }
 
     async function deleteLogo() {
-        if (!confirm('Delete department logo?')) return;
+        if (!confirm('Delete college logo?')) return;
         showLoader(true, 'Deleting logo...');
         try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
@@ -710,7 +747,8 @@
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             });
             const data = await response.json();
@@ -719,10 +757,11 @@
                 setTimeout(() => window.location.reload(), 800);
             } else {
                 showToast(data.message || 'Error deleting logo', 'error');
-                showLoader(false);
             }
         } catch (e) {
-            showToast('Error deleting logo', 'error');
+            console.error('Delete logo error:', e);
+            showToast('Network error deleting logo', 'error');
+        } finally {
             showLoader(false);
         }
     }
@@ -900,9 +939,11 @@
             const response = await fetch(form.action, {
                 method: 'POST',
                 body: formData,
+                credentials: 'same-origin',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             });
 
@@ -914,10 +955,21 @@
             }
 
             const data = await response.json();
+            console.debug('Department update response:', data);
 
             if (data.success) {
+                // Update form fields from returned department object so UI reflects changes immediately
+                const dept = data.department || {};
+                if (dept.name !== undefined) form.querySelector('input[name="name"]').value = dept.name;
+                if (dept.name_nepali !== undefined) form.querySelector('input[name="name_nepali"]').value = dept.name_nepali;
+                if (dept.short_name !== undefined) form.querySelector('input[name="short_name"]').value = dept.short_name;
+
                 showToast(data.message || '✓ Department details saved successfully', 'success');
-                setTimeout(() => window.location.reload(), 900);
+                showLoader(false);
+                // Reload page to refresh preview with saved logo
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
             } else {
                 let errorMessage = data.message || 'Error saving department details';
                 if (data.errors) {

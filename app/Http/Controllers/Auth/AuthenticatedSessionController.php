@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Auth\Concerns\ManagesTwoFactorChallengeState;
 use App\Http\Controllers\Controller;
 use App\Models\ErpSetting;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Notifications\TwoFactorCodeNotification;
+use App\Models\MagicLink;
+use App\Notifications\MagicLinkNotification;
+use Illuminate\Support\Str;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,11 +18,18 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
+    use ManagesTwoFactorChallengeState;
     /**
      * Display the login view.
      */
-    public function create(): View
+    public function create(Request $request): View|RedirectResponse
     {
+        $this->restoreTwoFactorChallengeState($request);
+
+        if ($request->session()->has('two_factor.pending_user_id')) {
+            return redirect()->route('two-factor.challenge');
+        }
+
         return view('auth.login');
     }
 
@@ -45,7 +56,6 @@ class AuthenticatedSessionController extends Controller
             }
 
             try {
-                $code = (string) random_int(100000, 999999);
                 $expiresMinutes = (int) ErpSetting::get('security_two_factor_expiry_minutes', 10);
 
                 // Device fingerprint used to remember trusted devices
@@ -58,38 +68,48 @@ class AuthenticatedSessionController extends Controller
                 // If the user already has a trusted device cookie matching this fingerprint, skip 2FA
                 $trustedCookie = $request->cookie('trusted_device');
                 if ($trustedCookie && hash_equals((string) $trustedCookie, (string) $deviceFingerprint)) {
-                    // trusted device - proceed to login without 2FA
                     $request->session()->regenerate();
                     $request->session()->regenerateToken();
-                    return redirect()->to($user?->getDashboardRoute() ?? route('home'));
+
+                    return redirect()
+                        ->to($user?->getDashboardRoute() ?? route('home'))
+                        ->withCookie($this->forgetTwoFactorChallengeStateCookie());
                 }
 
-                $request->session()->put([
-                    'two_factor.pending_user_id' => $user->id,
-                    'two_factor.code' => $code,
-                    'two_factor.expires_at' => now()->addMinutes($expiresMinutes)->toDateTimeString(),
-                    'two_factor.remember' => $request->boolean('remember'),
-                    'two_factor.email' => $user->email,
-                    'two_factor.device_fingerprint' => $deviceFingerprint,
+                // Create a one-time magic link token (store a hash of the token)
+                $plainToken = Str::random(64);
+                $tokenHash = hash('sha256', $plainToken);
+
+                $magic = MagicLink::create([
+                    'user_id' => $user->id,
+                    'token_hash' => $tokenHash,
+                    'expires_at' => now()->addMinutes($expiresMinutes),
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
+                    'session_id' => $request->session()->getId(),
                 ]);
 
-                Log::info('2FA session set', [
+                Log::info('Magic link created', [
+                    'magic_link_id' => $magic->id,
                     'pending_user_id' => $user->id,
                     'email' => $user->email,
                     'fingerprint' => $deviceFingerprint,
                     'session_id' => $request->session()->getId(),
                 ]);
-                $user->notify(new TwoFactorCodeNotification($code, $expiresMinutes));
+
+                // Send email with one-time link
+                $user->notify(new MagicLinkNotification($plainToken, $expiresMinutes));
                 Auth::logout();
 
-                return redirect()->route('two-factor.challenge');
+                // store pending magic link id in session so we can poll for status
+                $request->session()->put('magic_link_pending_id', $magic->id);
+
+                return redirect()->route('magic.wait');
             } catch (\Exception $e) {
-                \Log::error('Error during 2FA setup: ' . $e->getMessage());
-                \Log::error('2FA Error Stack: ' . $e->getTraceAsString());
-                // Fallback: skip OTP if there's an error
+                \Log::error('Error creating magic link: ' . $e->getMessage());
+                \Log::error('Magic link Error Stack: ' . $e->getTraceAsString());
                 Auth::logout();
-                
-                // Return detailed error in debug mode
+
                 $message = config('app.debug') ? 'Authentication error: ' . $e->getMessage() : 'Authentication error. Please try again.';
                 return back()->withErrors(['email' => $message]);
             }
@@ -99,7 +119,9 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         // Redirect to role-based dashboard
-        return redirect()->to($user?->getDashboardRoute() ?? route('home'));
+        return redirect()
+            ->to($user?->getDashboardRoute() ?? route('home'))
+            ->withCookie($this->forgetTwoFactorChallengeStateCookie());
     }
 
     /**
@@ -118,28 +140,7 @@ class AuthenticatedSessionController extends Controller
 
     protected function requiresTwoFactorChallenge(?string $role): bool
     {
-        try {
-            \Log::info('DEBUG: Checking 2FA requirement for role: ' . ($role ?? 'null'));
-            
-            $twoFactorEnabled = ErpSetting::isEnabled('security_two_factor_enabled', false);
-            \Log::info('DEBUG: 2FA Enabled setting: ' . ($twoFactorEnabled ? 'true' : 'false'));
-            
-            if (!$twoFactorEnabled) {
-                \Log::info('DEBUG: 2FA is disabled');
-                return false;
-            }
-
-            $roles = ErpSetting::asArray('security_two_factor_roles', ['admin']);
-            \Log::info('DEBUG: 2FA Roles allowed: ' . json_encode($roles));
-            
-            $requiresOtp = $role ? in_array($role, $roles, true) : false;
-            \Log::info('DEBUG: Role ' . ($role ?? 'null') . ' requires OTP: ' . ($requiresOtp ? 'yes' : 'no'));
-            
-            return $requiresOtp;
-        } catch (\Exception $e) {
-            \Log::error('ERROR in requiresTwoFactorChallenge: ' . $e->getMessage());
-            // Default to disabled if there's an error
-            return false;
-        }
+        // Two-factor / magic-link flow is disabled. Return false to allow direct login.
+        return false;
     }
 }

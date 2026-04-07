@@ -23,8 +23,8 @@
                 'password.confirm',
                 'verification.send',
                 'verification.verify',
-                'two-factor.login',
-                'two-factor.confirm',
+                'two-factor.challenge',
+                'two-factor.verify',
             ]);
         @endphp
         @if($isAuthRoute)
