@@ -71,6 +71,7 @@ class AuthenticatedSessionController extends Controller
                     'two_factor.remember' => $request->boolean('remember'),
                     'two_factor.email' => $user->email,
                     'two_factor.device_fingerprint' => $deviceFingerprint,
+                    'two_factor.last_sent_at' => now()->toDateTimeString(),
                 ]);
 
                 Log::info('2FA session set', [

@@ -85,8 +85,23 @@
 
                     <form method="POST" action="{{ route('two-factor.resend') }}" class="mt-3">
                         @csrf
-                        <button type="submit" class="auth-secondary-action w-full">Resend code</button>
+                        <button
+                            type="submit"
+                            class="auth-secondary-action w-full"
+                            data-otp-resend-button
+                            data-resend-remaining="{{ $resendSecondsRemaining ?? 0 }}"
+                            @disabled(($resendSecondsRemaining ?? 0) > 0)
+                        >
+                            Resend code
+                        </button>
                     </form>
+                    <p class="mt-3 text-sm text-slate-500" data-otp-resend-timer aria-live="polite">
+                        @if (($resendSecondsRemaining ?? 0) > 0)
+                            You can resend a new code in {{ $resendSecondsRemaining }} seconds.
+                        @else
+                            You can request a new code now.
+                        @endif
+                    </p>
 
                     <a href="{{ route('login') }}" class="auth-back-link block mt-4">&#8592; Back to login</a>
                 </div>
@@ -95,3 +110,48 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const resendButton = document.querySelector('[data-otp-resend-button]');
+        const resendTimer = document.querySelector('[data-otp-resend-timer]');
+
+        if (!resendButton || !resendTimer) {
+            return;
+        }
+
+        let remaining = Number(resendButton.dataset.resendRemaining || '0');
+        let intervalId = null;
+
+        const setButtonState = (disabled) => {
+            resendButton.disabled = disabled;
+            resendButton.classList.toggle('opacity-60', disabled);
+            resendButton.classList.toggle('cursor-not-allowed', disabled);
+        };
+
+        const renderTimer = () => {
+            if (remaining > 0) {
+                setButtonState(true);
+                resendTimer.textContent = `You can resend a new code in ${remaining} second${remaining === 1 ? '' : 's'}.`;
+                remaining -= 1;
+                return;
+            }
+
+            setButtonState(false);
+            resendTimer.textContent = 'You can request a new code now.';
+
+            if (intervalId) {
+                window.clearInterval(intervalId);
+                intervalId = null;
+            }
+        };
+
+        renderTimer();
+
+        if (remaining > 0) {
+            intervalId = window.setInterval(renderTimer, 1000);
+        }
+    });
+</script>
+@endpush

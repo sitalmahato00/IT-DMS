@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Log;
 
 class TwoFactorChallengeController extends Controller
 {
+    private const RESEND_COOLDOWN_SECONDS = 30;
+
     public function create(Request $request): View|RedirectResponse
     {
         if (!$request->session()->has('two_factor.pending_user_id')) {
@@ -29,6 +31,7 @@ class TwoFactorChallengeController extends Controller
         return view('auth.two-factor-challenge', [
             'email' => $request->session()->get('two_factor.email'),
             'expiresAt' => $request->session()->get('two_factor.expires_at'),
+            'resendSecondsRemaining' => $this->getResendSecondsRemaining($request),
         ]);
     }
 
@@ -86,6 +89,13 @@ class TwoFactorChallengeController extends Controller
             return redirect()->route('login');
         }
 
+        $secondsRemaining = $this->getResendSecondsRemaining($request);
+        if ($secondsRemaining > 0) {
+            return back()->withErrors([
+                'code' => "Please wait {$secondsRemaining} seconds before requesting another code.",
+            ]);
+        }
+
         $user = \App\Models\User::find($pendingUserId);
         if (!$user || empty($user->email)) {
             return redirect()->route('login')->withErrors(['email' => 'Unable to resend verification code. Please sign in again.']);
@@ -97,6 +107,7 @@ class TwoFactorChallengeController extends Controller
         $request->session()->put([
             'two_factor.code' => $code,
             'two_factor.expires_at' => now()->addMinutes($expiresMinutes)->toDateTimeString(),
+            'two_factor.last_sent_at' => now()->toDateTimeString(),
         ]);
 
         $user->notify(new TwoFactorCodeNotification($code, $expiresMinutes));
@@ -112,6 +123,24 @@ class TwoFactorChallengeController extends Controller
             'two_factor.expires_at',
             'two_factor.remember',
             'two_factor.email',
+            'two_factor.last_sent_at',
         ]);
+    }
+
+    protected function getResendSecondsRemaining(Request $request): int
+    {
+        $lastSentAt = $request->session()->get('two_factor.last_sent_at');
+        if (!$lastSentAt) {
+            return 0;
+        }
+
+        $availableAt = Carbon::parse($lastSentAt)->addSeconds(self::RESEND_COOLDOWN_SECONDS);
+        if ($availableAt->isPast()) {
+            return 0;
+        }
+
+        $millisecondsRemaining = now()->diffInMilliseconds($availableAt, false);
+
+        return max(0, (int) ceil($millisecondsRemaining / 1000));
     }
 }
