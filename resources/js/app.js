@@ -181,8 +181,8 @@ const AUTH_ROUTES = [
     'password.confirm',
     'verification.send',
     'verification.verify',
-    'two-factor.login',
-    'two-factor.confirm',
+    'two-factor.challenge',
+    'two-factor.verify',
 ];
 
 function isAuthPage() {

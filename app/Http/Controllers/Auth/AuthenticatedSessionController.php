@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Auth\Concerns\ManagesTwoFactorChallengeState;
 use App\Http\Controllers\Controller;
 use App\Models\ErpSetting;
 use App\Http\Requests\Auth\LoginRequest;
@@ -14,6 +15,8 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
+    use ManagesTwoFactorChallengeState;
+
     /**
      * Display the login view.
      */
@@ -64,7 +67,7 @@ class AuthenticatedSessionController extends Controller
                     return redirect()->to($user?->getDashboardRoute() ?? route('home'));
                 }
 
-                $request->session()->put([
+                $challengeState = [
                     'two_factor.pending_user_id' => $user->id,
                     'two_factor.code' => $code,
                     'two_factor.expires_at' => now()->addMinutes($expiresMinutes)->toDateTimeString(),
@@ -72,7 +75,7 @@ class AuthenticatedSessionController extends Controller
                     'two_factor.email' => $user->email,
                     'two_factor.device_fingerprint' => $deviceFingerprint,
                     'two_factor.last_sent_at' => now()->toDateTimeString(),
-                ]);
+                ];
 
                 Log::info('2FA session set', [
                     'pending_user_id' => $user->id,
@@ -83,7 +86,9 @@ class AuthenticatedSessionController extends Controller
                 $user->notify(new TwoFactorCodeNotification($code, $expiresMinutes));
                 Auth::logout();
 
-                return redirect()->route('two-factor.challenge');
+                return redirect()
+                    ->route('two-factor.challenge')
+                    ->withCookie($this->persistTwoFactorChallengeState($request, $challengeState));
             } catch (\Exception $e) {
                 \Log::error('Error during 2FA setup: ' . $e->getMessage());
                 \Log::error('2FA Error Stack: ' . $e->getTraceAsString());

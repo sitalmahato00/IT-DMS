@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Auth\Concerns\ManagesTwoFactorChallengeState;
 use App\Http\Controllers\Controller;
 use App\Models\ErpSetting;
 use App\Notifications\TwoFactorCodeNotification;
@@ -14,13 +15,20 @@ use Illuminate\Support\Facades\Log;
 
 class TwoFactorChallengeController extends Controller
 {
+    use ManagesTwoFactorChallengeState;
+
     private const RESEND_COOLDOWN_SECONDS = 30;
 
     public function create(Request $request): View|RedirectResponse
     {
+        $this->restoreTwoFactorChallengeState($request);
+
         if (!$request->session()->has('two_factor.pending_user_id')) {
             Log::warning('Two-factor challenge requested but session missing', ['session_id' => $request->session()->getId()]);
-            return redirect()->route('login');
+
+            return redirect()
+                ->route('login')
+                ->withCookie($this->forgetTwoFactorChallengeStateCookie());
         }
 
         Log::info('Two-factor challenge page shown', [
@@ -37,6 +45,8 @@ class TwoFactorChallengeController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->restoreTwoFactorChallengeState($request);
+
         $request->validate([
             'code' => ['required', 'digits:6'],
         ]);
@@ -47,12 +57,19 @@ class TwoFactorChallengeController extends Controller
         $remember = (bool) $request->session()->get('two_factor.remember', false);
 
         if (!$pendingUserId || !$pendingCode) {
-            return redirect()->route('login')->withErrors(['email' => 'Your login session expired. Please sign in again.']);
+            return redirect()
+                ->route('login')
+                ->withErrors(['email' => 'Your login session expired. Please sign in again.'])
+                ->withCookie($this->forgetTwoFactorChallengeStateCookie());
         }
 
         if ($expiresAt && Carbon::parse($expiresAt)->isPast()) {
             $this->clearChallengeSession($request);
-            return redirect()->route('login')->withErrors(['email' => 'The verification code expired. Please sign in again.']);
+
+            return redirect()
+                ->route('login')
+                ->withErrors(['email' => 'The verification code expired. Please sign in again.'])
+                ->withCookie($this->forgetTwoFactorChallengeStateCookie());
         }
 
         if (!hash_equals((string) $pendingCode, (string) $request->string('code'))) {
@@ -71,6 +88,7 @@ class TwoFactorChallengeController extends Controller
         $this->clearChallengeSession($request);
 
         $redirect = redirect()->to(Auth::user()?->getDashboardRoute() ?? route('home'));
+        $redirect->withCookie($this->forgetTwoFactorChallengeStateCookie());
 
         if ($deviceFingerprint) {
             // set cookie for 1 year (minutes)
@@ -84,9 +102,13 @@ class TwoFactorChallengeController extends Controller
 
     public function resend(Request $request): RedirectResponse
     {
+        $this->restoreTwoFactorChallengeState($request);
+
         $pendingUserId = $request->session()->get('two_factor.pending_user_id');
         if (!$pendingUserId) {
-            return redirect()->route('login');
+            return redirect()
+                ->route('login')
+                ->withCookie($this->forgetTwoFactorChallengeStateCookie());
         }
 
         $secondsRemaining = $this->getResendSecondsRemaining($request);
@@ -109,10 +131,21 @@ class TwoFactorChallengeController extends Controller
             'two_factor.expires_at' => now()->addMinutes($expiresMinutes)->toDateTimeString(),
             'two_factor.last_sent_at' => now()->toDateTimeString(),
         ]);
+        $request->session()->save();
 
         $user->notify(new TwoFactorCodeNotification($code, $expiresMinutes));
 
-        return back()->with('status', 'A new verification code has been sent.');
+        return back()
+            ->with('status', 'A new verification code has been sent.')
+            ->withCookie($this->persistTwoFactorChallengeState($request, [
+                'two_factor.pending_user_id' => $request->session()->get('two_factor.pending_user_id'),
+                'two_factor.code' => $request->session()->get('two_factor.code'),
+                'two_factor.expires_at' => $request->session()->get('two_factor.expires_at'),
+                'two_factor.remember' => $request->session()->get('two_factor.remember', false),
+                'two_factor.email' => $request->session()->get('two_factor.email'),
+                'two_factor.device_fingerprint' => $request->session()->get('two_factor.device_fingerprint'),
+                'two_factor.last_sent_at' => $request->session()->get('two_factor.last_sent_at'),
+            ]));
     }
 
     protected function clearChallengeSession(Request $request): void
@@ -125,6 +158,7 @@ class TwoFactorChallengeController extends Controller
             'two_factor.email',
             'two_factor.last_sent_at',
         ]);
+        $request->session()->save();
     }
 
     protected function getResendSecondsRemaining(Request $request): int

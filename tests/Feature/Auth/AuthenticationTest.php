@@ -73,7 +73,10 @@ class AuthenticationTest extends TestCase
 
             $loginResponse->assertRedirect(route('two-factor.challenge'));
             $loginResponse->assertSessionHas('two_factor.pending_user_id', $user->id);
+            $loginResponse->assertCookie('itdms_two_factor_pending');
             $this->assertGuest();
+
+            $this->flushSession();
 
             $challengeResponse = $this->get('/two-factor-challenge');
             $challengeResponse->assertOk();
