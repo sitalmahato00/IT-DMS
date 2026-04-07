@@ -148,7 +148,7 @@
 
             <span class="min-w-0 leading-tight">
                 <span class="block text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
-                    {{ $locale === 'ne' ? 'आधिकारिक' : 'Official' }}
+                    {{ $departmentName }}
                 </span>
                 <span class="block truncate text-base font-bold text-slate-900 dark:text-white sm:text-lg">
                     {{ $brandTitle }}
