@@ -16,12 +16,17 @@ use Illuminate\View\View;
 class AuthenticatedSessionController extends Controller
 {
     use ManagesTwoFactorChallengeState;
-
     /**
      * Display the login view.
      */
-    public function create(): View
+    public function create(Request $request): View|RedirectResponse
     {
+        $this->restoreTwoFactorChallengeState($request);
+
+        if ($request->session()->has('two_factor.pending_user_id')) {
+            return redirect()->route('two-factor.challenge');
+        }
+
         return view('auth.login');
     }
 
@@ -61,10 +66,12 @@ class AuthenticatedSessionController extends Controller
                 // If the user already has a trusted device cookie matching this fingerprint, skip 2FA
                 $trustedCookie = $request->cookie('trusted_device');
                 if ($trustedCookie && hash_equals((string) $trustedCookie, (string) $deviceFingerprint)) {
-                    // trusted device - proceed to login without 2FA
                     $request->session()->regenerate();
                     $request->session()->regenerateToken();
-                    return redirect()->to($user?->getDashboardRoute() ?? route('home'));
+
+                    return redirect()
+                        ->to($user?->getDashboardRoute() ?? route('home'))
+                        ->withCookie($this->forgetTwoFactorChallengeStateCookie());
                 }
 
                 $challengeState = [
@@ -77,6 +84,11 @@ class AuthenticatedSessionController extends Controller
                     'two_factor.last_sent_at' => now()->toDateTimeString(),
                 ];
 
+                // Persist both session state and a short-lived encrypted cookie so
+                // environments where session storage is flaky can restore the state
+                // on the two-factor challenge page after the redirect.
+                $cookie = $this->persistTwoFactorChallengeState($request, $challengeState);
+
                 Log::info('2FA session set', [
                     'pending_user_id' => $user->id,
                     'email' => $user->email,
@@ -86,9 +98,7 @@ class AuthenticatedSessionController extends Controller
                 $user->notify(new TwoFactorCodeNotification($code, $expiresMinutes));
                 Auth::logout();
 
-                return redirect()
-                    ->route('two-factor.challenge')
-                    ->withCookie($this->persistTwoFactorChallengeState($request, $challengeState));
+                return redirect()->route('two-factor.challenge')->withCookie($cookie);
             } catch (\Exception $e) {
                 \Log::error('Error during 2FA setup: ' . $e->getMessage());
                 \Log::error('2FA Error Stack: ' . $e->getTraceAsString());
@@ -105,7 +115,9 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         // Redirect to role-based dashboard
-        return redirect()->to($user?->getDashboardRoute() ?? route('home'));
+        return redirect()
+            ->to($user?->getDashboardRoute() ?? route('home'))
+            ->withCookie($this->forgetTwoFactorChallengeStateCookie());
     }
 
     /**

@@ -64,7 +64,7 @@ class TwoFactorChallengeController extends Controller
         }
 
         if ($expiresAt && Carbon::parse($expiresAt)->isPast()) {
-            $this->clearChallengeSession($request);
+            $this->clearTwoFactorChallengeState($request);
 
             return redirect()
                 ->route('login')
@@ -85,7 +85,7 @@ class TwoFactorChallengeController extends Controller
         $request->session()->regenerateToken();
 
         // clear challenge session after retrieving fingerprint
-        $this->clearChallengeSession($request);
+        $this->clearTwoFactorChallengeState($request);
 
         $redirect = redirect()->to(Auth::user()?->getDashboardRoute() ?? route('home'));
         $redirect->withCookie($this->forgetTwoFactorChallengeStateCookie());
@@ -120,7 +120,12 @@ class TwoFactorChallengeController extends Controller
 
         $user = \App\Models\User::find($pendingUserId);
         if (!$user || empty($user->email)) {
-            return redirect()->route('login')->withErrors(['email' => 'Unable to resend verification code. Please sign in again.']);
+            $this->clearTwoFactorChallengeState($request);
+
+            return redirect()
+                ->route('login')
+                ->withErrors(['email' => 'Unable to resend verification code. Please sign in again.'])
+                ->withCookie($this->forgetTwoFactorChallengeStateCookie());
         }
 
         $code = (string) random_int(100000, 999999);
@@ -148,17 +153,13 @@ class TwoFactorChallengeController extends Controller
             ]));
     }
 
-    protected function clearChallengeSession(Request $request): void
+    public function destroy(Request $request): RedirectResponse
     {
-        $request->session()->forget([
-            'two_factor.pending_user_id',
-            'two_factor.code',
-            'two_factor.expires_at',
-            'two_factor.remember',
-            'two_factor.email',
-            'two_factor.last_sent_at',
-        ]);
-        $request->session()->save();
+        $this->clearTwoFactorChallengeState($request);
+
+        return redirect()
+            ->route('login')
+            ->withCookie($this->forgetTwoFactorChallengeStateCookie());
     }
 
     protected function getResendSecondsRemaining(Request $request): int

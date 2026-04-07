@@ -103,7 +103,7 @@
                         @endif
                     </p>
 
-                    <a href="{{ route('login') }}" class="auth-back-link block mt-4">&#8592; Back to login</a>
+                    <a href="{{ route('two-factor.cancel') }}" class="auth-back-link block mt-4">&#8592; Back to login</a>
                 </div>
             </div>
         </section>

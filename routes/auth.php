@@ -42,6 +42,8 @@ Route::middleware('guest')->group(function () {
         ->name('two-factor.verify');
     Route::post('two-factor-challenge/resend', [\App\Http\Controllers\Auth\TwoFactorChallengeController::class, 'resend'])
         ->name('two-factor.resend');
+    Route::get('two-factor-challenge/cancel', [\App\Http\Controllers\Auth\TwoFactorChallengeController::class, 'destroy'])
+        ->name('two-factor.cancel');
 });
 
 Route::middleware('auth')->group(function () {

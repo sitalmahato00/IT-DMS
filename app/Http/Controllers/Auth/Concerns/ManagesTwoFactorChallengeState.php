@@ -76,6 +76,12 @@ trait ManagesTwoFactorChallengeState
         $request->session()->save();
     }
 
+    protected function clearTwoFactorChallengeState(Request $request): void
+    {
+        $request->session()->forget($this->twoFactorChallengeKeys());
+        $request->session()->save();
+    }
+
     protected function forgetTwoFactorChallengeStateCookie(): Cookie
     {
         return cookie()->forget(

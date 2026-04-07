@@ -76,7 +76,10 @@ class AuthenticationTest extends TestCase
             $loginResponse->assertCookie('itdms_two_factor_pending');
             $this->assertGuest();
 
+            $pendingChallengeCookie = $loginResponse->getCookie('itdms_two_factor_pending')?->getValue();
+
             $this->flushSession();
+            $this->withCookie('itdms_two_factor_pending', $pendingChallengeCookie);
 
             $challengeResponse = $this->get('/two-factor-challenge');
             $challengeResponse->assertOk();
@@ -92,6 +95,72 @@ class AuthenticationTest extends TestCase
         } finally {
             Carbon::setTestNow();
         }
+    }
+
+    public function test_login_screen_redirects_back_to_two_factor_challenge_when_pending_cookie_exists(): void
+    {
+        Notification::fake();
+
+        $user = $this->makeUser('student');
+
+        ErpSetting::set('security_two_factor_enabled', true, 'security', 'boolean');
+        ErpSetting::set('security_two_factor_roles', ['student'], 'security', 'json');
+        ErpSetting::set('security_two_factor_expiry_minutes', 10, 'security', 'integer');
+
+        $loginResponse = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $loginResponse->assertRedirect(route('two-factor.challenge'));
+        $loginResponse->assertCookie('itdms_two_factor_pending');
+
+        $pendingChallengeCookie = json_encode([
+            'two_factor.pending_user_id' => session('two_factor.pending_user_id'),
+            'two_factor.code' => session('two_factor.code'),
+            'two_factor.expires_at' => session('two_factor.expires_at'),
+            'two_factor.remember' => session('two_factor.remember', false),
+            'two_factor.email' => session('two_factor.email'),
+            'two_factor.device_fingerprint' => session('two_factor.device_fingerprint'),
+            'two_factor.last_sent_at' => session('two_factor.last_sent_at'),
+        ], JSON_UNESCAPED_SLASHES);
+
+        $this->flushSession();
+
+        $response = $this
+            ->withCookie('itdms_two_factor_pending', $pendingChallengeCookie)
+            ->get('/login');
+
+        $response->assertRedirect(route('two-factor.challenge'));
+    }
+
+    public function test_users_can_cancel_pending_two_factor_challenge_and_return_to_login(): void
+    {
+        Notification::fake();
+
+        $user = $this->makeUser('student');
+
+        ErpSetting::set('security_two_factor_enabled', true, 'security', 'boolean');
+        ErpSetting::set('security_two_factor_roles', ['student'], 'security', 'json');
+        ErpSetting::set('security_two_factor_expiry_minutes', 10, 'security', 'integer');
+
+        $loginResponse = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $loginResponse->assertRedirect(route('two-factor.challenge'));
+
+        $this->flushSession();
+
+        $cancelResponse = $this->get('/two-factor-challenge/cancel');
+
+        $cancelResponse->assertRedirect(route('login'));
+
+        $loginResponse = $this->get('/login');
+
+        $loginResponse->assertOk();
+        $loginResponse->assertSee('Welcome Back');
     }
 
     private function makeUser(string $role): User
