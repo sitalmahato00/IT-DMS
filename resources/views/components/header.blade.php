@@ -180,7 +180,7 @@
             <button
                 id="darkModeToggle"
                 type="button"
-                class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white p-2 text-slate-700 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-900 dark:hover:text-white dark:focus:ring-slate-800"
+                class="hidden lg:inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white p-2 text-slate-700 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-900 dark:hover:text-white dark:focus:ring-slate-800"
                 aria-label="{{ $locale === 'ne' ? 'डार्क मोड टगल' : 'Toggle dark mode' }}"
                 aria-pressed="false"
             >

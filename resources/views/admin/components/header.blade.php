@@ -45,8 +45,8 @@
 
             <!-- Right Section: Controls -->
             <div class="flex items-center gap-2 flex-shrink-0">
-                <!-- Dark Mode Toggle -->
-                <button id="darkModeToggle" class="p-2 rounded-lg hover:bg-white/15 transition text-white" title="{{ __('Toggle Dark Mode') }}">
+                <!-- Dark Mode Toggle (hidden on mobile) -->
+                <button id="darkModeToggle" class="hidden lg:inline-flex p-2 rounded-lg hover:bg-white/15 transition text-white" title="{{ __('Toggle Dark Mode') }}">
                     <i class="bi bi-moon-fill text-lg" id="darkModeIcon"></i>
                 </button>
 
