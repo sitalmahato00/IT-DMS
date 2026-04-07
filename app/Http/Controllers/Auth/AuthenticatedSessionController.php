@@ -9,6 +9,7 @@ use App\Notifications\TwoFactorCodeNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -47,18 +48,39 @@ class AuthenticatedSessionController extends Controller
                 $code = (string) random_int(100000, 999999);
                 $expiresMinutes = (int) ErpSetting::get('security_two_factor_expiry_minutes', 10);
 
+                // Device fingerprint used to remember trusted devices
+                $deviceFingerprint = hash_hmac(
+                    'sha256',
+                    $user->id . '|' . $request->ip() . '|' . $request->header('User-Agent'),
+                    config('app.key')
+                );
+
+                // If the user already has a trusted device cookie matching this fingerprint, skip 2FA
+                $trustedCookie = $request->cookie('trusted_device');
+                if ($trustedCookie && hash_equals((string) $trustedCookie, (string) $deviceFingerprint)) {
+                    // trusted device - proceed to login without 2FA
+                    $request->session()->regenerate();
+                    $request->session()->regenerateToken();
+                    return redirect()->to($user?->getDashboardRoute() ?? route('home'));
+                }
+
                 $request->session()->put([
                     'two_factor.pending_user_id' => $user->id,
                     'two_factor.code' => $code,
                     'two_factor.expires_at' => now()->addMinutes($expiresMinutes)->toDateTimeString(),
                     'two_factor.remember' => $request->boolean('remember'),
                     'two_factor.email' => $user->email,
+                    'two_factor.device_fingerprint' => $deviceFingerprint,
                 ]);
 
+                Log::info('2FA session set', [
+                    'pending_user_id' => $user->id,
+                    'email' => $user->email,
+                    'fingerprint' => $deviceFingerprint,
+                    'session_id' => $request->session()->getId(),
+                ]);
                 $user->notify(new TwoFactorCodeNotification($code, $expiresMinutes));
                 Auth::logout();
-                $request->session()->regenerate();
-                $request->session()->regenerateToken();
 
                 return redirect()->route('two-factor.challenge');
             } catch (\Exception $e) {

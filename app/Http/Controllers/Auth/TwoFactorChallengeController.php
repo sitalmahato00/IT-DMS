@@ -10,14 +10,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Log;
 
 class TwoFactorChallengeController extends Controller
 {
     public function create(Request $request): View|RedirectResponse
     {
         if (!$request->session()->has('two_factor.pending_user_id')) {
+            Log::warning('Two-factor challenge requested but session missing', ['session_id' => $request->session()->getId()]);
             return redirect()->route('login');
         }
+
+        Log::info('Two-factor challenge page shown', [
+            'pending_user_id' => $request->session()->get('two_factor.pending_user_id'),
+            'session_id' => $request->session()->getId(),
+        ]);
 
         return view('auth.two-factor-challenge', [
             'email' => $request->session()->get('two_factor.email'),
@@ -50,11 +57,26 @@ class TwoFactorChallengeController extends Controller
         }
 
         Auth::loginUsingId($pendingUserId, $remember);
+
+        // retrieve fingerprint to set trusted device cookie
+        $deviceFingerprint = $request->session()->get('two_factor.device_fingerprint');
+
         $request->session()->regenerate();
         $request->session()->regenerateToken();
+
+        // clear challenge session after retrieving fingerprint
         $this->clearChallengeSession($request);
 
-        return redirect()->to(Auth::user()?->getDashboardRoute() ?? route('home'));
+        $redirect = redirect()->to(Auth::user()?->getDashboardRoute() ?? route('home'));
+
+        if ($deviceFingerprint) {
+            // set cookie for 1 year (minutes)
+            $minutes = 60 * 24 * 365;
+            $cookie = cookie('trusted_device', $deviceFingerprint, $minutes, '/', null, config('app.env') === 'production', true, false, 'Lax');
+            return $redirect->withCookie($cookie);
+        }
+
+        return $redirect;
     }
 
     public function resend(Request $request): RedirectResponse
