@@ -24,6 +24,15 @@ class MagicLink extends Model
         'used_at',
     ];
 
+    /**
+     * Ensure datetime casting for modern Laravel versions.
+     * This guarantees `expires_at` and `used_at` are Carbon instances
+     * even when config caching or older $dates behavior varies on deploy.
+     */
+    protected $casts = [
+        'expires_at' => 'datetime',
+        'used_at' => 'datetime',
+    ];
     public function user()
     {
         return $this->belongsTo(User::class);
