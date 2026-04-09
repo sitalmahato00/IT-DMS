@@ -4,9 +4,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\LandingController;
 
 // Public API routes (no authentication required)
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::get('/landing', [LandingController::class, 'data'])->name('api.landing');
 Route::post('/convert-date', function (Request $request) {
     try {
         $date = $request->input('date');
