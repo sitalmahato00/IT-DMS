@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'IT Department Management System (IT-DMS)') - Teacher</title>
+    <title>@yield('title', 'Manmohan Memorial Polytechnic') - Teacher</title>
     @include('partials.pwa-head', ['themeColor' => '#FF0037'])
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -923,3 +923,4 @@
     @stack('scripts')
 </body>
 </html>
+

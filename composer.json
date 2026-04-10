@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "it-dms/it-dms",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "IT-DMS institutional management system.",
     "keywords": [
         "laravel",
         "framework"

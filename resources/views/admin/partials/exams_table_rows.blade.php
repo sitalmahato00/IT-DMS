@@ -40,3 +40,4 @@
     <td colspan="9" class="px-3 py-3 text-center text-gray-500">No exams found.</td>
 </tr>
 @endforelse
+

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'IT Department Management System (IT-DMS)') - Student</title>
+    <title>@yield('title', 'Manmohan Memorial Polytechnic') - Student</title>
     @include('partials.pwa-head', ['themeColor' => '#FF0037'])
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
@@ -582,3 +582,4 @@
     </script>
 </body>
 </html>
+

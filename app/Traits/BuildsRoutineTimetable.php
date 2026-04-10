@@ -124,3 +124,4 @@ trait BuildsRoutineTimetable
             ->all();
     }
 }
+

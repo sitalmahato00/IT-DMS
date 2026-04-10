@@ -8,7 +8,7 @@
 
     $departmentName = $department
         ? (($locale === 'ne' && !empty($department->name_nepali)) ? $department->name_nepali : $department->name)
-        : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Information Technology Department');
+        : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Manmohan Memorial Polytechnic');
 
     $departmentShort = $department?->short_name ?: ($locale === 'ne' ? 'आईटी' : 'IT');
     $departmentLogo = $departmentLogoUrl ?? ($department?->getLogoUrl() ?? '/images/default-logo.svg');
@@ -256,3 +256,4 @@
         </div>
     </div>
 </header>
+

@@ -38,3 +38,4 @@ class MagicLinkNotification extends Notification
             ]);
     }
 }
+

@@ -179,3 +179,4 @@ class TwoFactorChallengeController extends Controller
         return max(0, (int) ceil($millisecondsRemaining / 1000));
     }
 }
+

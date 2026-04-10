@@ -974,3 +974,4 @@ function resetCoursesFilter() {
 
 <!-- Subject Detail Modal Component -->
 @include('admin.partials.subject-detail-modal')
+

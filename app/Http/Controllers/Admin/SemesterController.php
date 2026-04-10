@@ -191,3 +191,4 @@ class SemesterController extends Controller
         return response()->json(['success' => true, 'message' => 'Semester deleted.']);
     }
 }
+

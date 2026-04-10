@@ -35,9 +35,9 @@
                     <h1 class="text-lg sm:text-xl font-bold text-white truncate">{{ $currentPageName }}</h1>
                     <p class="text-xs sm:text-sm text-white/80 mt-0.5 truncate">
                         @if(isset($department))
-                            {{ $department->name ?? 'Department of Information Technology' }}
+                            {{ $department->name ?? 'Manmohan Memorial Polytechnic' }}
                         @else
-                            Department of Information Technology
+                            Manmohan Memorial Polytechnic
                         @endif
                     </p>
                 </div>
@@ -268,3 +268,4 @@
         });
     }
 </script>
+

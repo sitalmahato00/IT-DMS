@@ -44,3 +44,4 @@ class ParentChildrenController extends Controller
         return view('parent.children.show', compact('child', 'totalAttendance'));
     }
 }
+

@@ -194,3 +194,4 @@ class NoticePortalController extends Controller
         return response()->json($payload);
     }
 }
+

@@ -160,3 +160,4 @@ class TeacherReportsController extends Controller
         ]);
     }
 }
+

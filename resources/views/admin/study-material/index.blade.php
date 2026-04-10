@@ -265,3 +265,4 @@
     window.studyMaterialUpdateBaseUrl = @json(url('/admin/study-material'));
 </script>
 @endsection
+

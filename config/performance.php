@@ -28,3 +28,4 @@ return [
     'department_cache_ttl' => max(0, (int) env('DEPARTMENT_CACHE_TTL', 600)),
 
 ];
+

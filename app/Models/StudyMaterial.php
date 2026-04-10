@@ -298,3 +298,4 @@ class StudyMaterial extends Model
         return $this->teacher_id;
     }
 }
+

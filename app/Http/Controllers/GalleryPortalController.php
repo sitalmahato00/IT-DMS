@@ -78,3 +78,4 @@ class GalleryPortalController extends Controller
         return response()->json($payload);
     }
 }
+

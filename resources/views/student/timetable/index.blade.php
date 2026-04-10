@@ -128,7 +128,7 @@
             $sheetTitle = __('Class Routine');
             $sheetHeading = __('Semester') . ' ' . ($displaySemester ?: ($selectedSemester ?: __('N/A')))
                 . (filled($displaySection ?: $selectedSection) ? ' / ' . __('Section') . ' ' . ($displaySection ?: $selectedSection) : '');
-            $institutionName = $college?->name ?? 'IT-DMS';
+            $institutionName = $college?->name ?? 'Manmohan Memorial Polytechnic';
             $departmentLine = $student->department ?: ($college?->short_name ?? __('Department'));
             $metaItems = [
                 ['label' => __('Prepared On'), 'value' => now()->format('Y-m-d')],
@@ -147,3 +147,4 @@
     @endif
 </div>
 @endsection
+

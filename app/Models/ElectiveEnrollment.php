@@ -80,3 +80,4 @@ class ElectiveEnrollment extends Model
         };
     }
 }
+

@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Marksheet Search - IT DMS')
+@section('title', 'Marksheet Search - Manmohan Memorial Polytechnic')
 
 @section('styles')
 <script>
@@ -362,3 +362,4 @@
 </script>
 @endpush
 @endsection
+

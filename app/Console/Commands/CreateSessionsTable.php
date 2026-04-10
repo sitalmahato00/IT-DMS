@@ -46,3 +46,4 @@ class CreateSessionsTable extends Command
         return Command::SUCCESS;
     }
 }
+

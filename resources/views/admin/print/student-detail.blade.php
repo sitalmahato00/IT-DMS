@@ -83,7 +83,7 @@
                     <div class="logo-placeholder">🎓</div>
                 @endif
             </div>
-            <div class="school-name">{{ !empty($college) ? $college->name : 'IT-DMS COLLEGE' }}</div>
+            <div class="school-name">{{ !empty($college) ? $college->name : 'Manmohan Memorial Polytechnic' }}</div>
             <div class="report-title">Student Profile</div>
         </div>
         
@@ -176,8 +176,9 @@
         
         <!-- Footer -->
         <div class="footer">
-            <p>IT-DMS College ERP | Generated on {{ now()->format('d M Y, h:i A') }}</p>
+            <p>Manmohan Memorial Polytechnic ERP | Generated on {{ now()->format('d M Y, h:i A') }}</p>
         </div>
     </div>
 </body>
 </html>
+

@@ -149,7 +149,8 @@
     </table>
 
     <footer>
-        <p>This is an automated report from IT-DMS. For more information, please contact the administration.</p>
+        <p>This is an automated report from Manmohan Memorial Polytechnic. For more information, please contact the administration.</p>
     </footer>
 </body>
 </html>
+

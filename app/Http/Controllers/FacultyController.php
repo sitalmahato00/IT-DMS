@@ -54,3 +54,4 @@ class FacultyController extends Controller
         return view('faculty.index', compact('department', 'teachers', 'hods'));
     }
 }
+

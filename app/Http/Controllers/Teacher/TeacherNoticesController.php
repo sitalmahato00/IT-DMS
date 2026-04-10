@@ -212,3 +212,4 @@ class TeacherNoticesController extends Controller
             ->with('success', 'Notice posted successfully.');
     }
 }
+

@@ -42,6 +42,15 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
         
+        // Validate selected role matches user's role
+        $selectedRole = $request->input('role');
+        if ($user->role !== $selectedRole) {
+            Auth::logout();
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'role' => 'The selected role does not match your account role. Please select the correct role for your account.',
+            ]);
+        }
+        
         try {
             $requiresTwoFactor = $user && $this->requiresTwoFactorChallenge($user->role ?? null);
         } catch (\Exception $e) {
@@ -144,3 +153,4 @@ class AuthenticatedSessionController extends Controller
         return false;
     }
 }
+

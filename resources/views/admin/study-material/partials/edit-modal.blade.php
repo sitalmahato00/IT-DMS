@@ -162,3 +162,4 @@ document.getElementById('editMaterialModal').addEventListener('click', function(
     if (e.target === this) closeEditMaterialModal();
 });
 </script>
+

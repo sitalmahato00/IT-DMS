@@ -31,3 +31,4 @@ return [
     'compiled' => realpath(storage_path('framework/views')) ?: storage_path('framework/views'),
 
 ];
+

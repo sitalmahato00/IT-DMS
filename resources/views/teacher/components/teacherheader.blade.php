@@ -9,7 +9,7 @@
                 </button>
                 <div class="space-y-0 flex flex-col justify-center h-full">
                     <h2 class="text-lg font-bold text-white truncate leading-tight">{{ trim($__env->yieldContent('title', 'Dashboard')) }}</h2>
-                    <p class="text-xs text-white/70 line-clamp-1 leading-tight">{{ __('Department of Information Technology') }}</p>
+                    <p class="text-xs text-white/70 line-clamp-1 leading-tight">{{ __('Manmohan Memorial Polytechnic') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-3 flex-shrink-0 h-full">
@@ -137,3 +137,4 @@
         }
     });
 </script>
+

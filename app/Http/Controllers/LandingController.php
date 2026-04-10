@@ -10,6 +10,7 @@ use App\Models\Teacher;
 use App\Models\Notice;
 use App\Models\Gallery;
 use App\Models\StudyMaterial;
+use App\Helpers\NepaliContentHelper;
 use App\Models\Student;
 use App\Models\User;
 use App\Support\Media;
@@ -25,6 +26,100 @@ class LandingController extends Controller
         return view('landing', [
             'landingApiUrl' => route('api.landing', ['locale' => app()->getLocale()]),
         ]);
+    }
+
+    public function examResult(Request $request)
+    {
+        $examResultMeta = SafeCache::remember('landing:exam-result-meta:v1', (int) config('performance.public_data_cache_ttl', 300), fn () => $this->buildExamResultMeta());
+        $publishedCount = Exam::published()
+            ->whereIn('exam_category', ['assessment', 'ctevt'])
+            ->count();
+
+        return view('public.exam-result', [
+            'examResultMeta' => $examResultMeta,
+            'publishedCount' => $publishedCount,
+        ]);
+    }
+
+    public function examResultSearch(Request $request)
+    {
+        $validated = $request->validate([
+            'academic_year' => 'required|string',
+            'semester' => 'required|string',
+            'exam_category' => 'required|string|in:assessment,ctevt',
+            'assessment_number' => 'exclude_if:exam_category,ctevt|required_if:exam_category,assessment|string',
+            'student_id' => 'required|string',
+            'dob_bs' => 'required|string',
+        ]);
+
+        $examResultMeta = SafeCache::remember('landing:exam-result-meta:v1', (int) config('performance.public_data_cache_ttl', 300), fn () => $this->buildExamResultMeta());
+        $examResultSearch = $this->resolveExamResultSearch($request, $examResultMeta, true);
+
+        if (!$examResultSearch['searchAttempted'] || $examResultSearch['error']) {
+            return response()->json([
+                'success' => false,
+                'error' => $examResultSearch['error'] ?: 'Unable to locate the requested published result.',
+                'filters' => $examResultSearch['filters'],
+                'assessmentNumbers' => $examResultSearch['assessmentNumbers'],
+            ], 422);
+        }
+
+        $formatted = $this->formatExamResultSearchResponse($examResultSearch, $examResultMeta);
+
+        return response()->json(array_merge(['success' => true], $formatted));
+    }
+
+    private function formatExamResultSearchResponse(array $examResultSearch, array $examResultMeta): array
+    {
+        $student = $examResultSearch['student'];
+        $payload = $examResultSearch['payload'] ?? [];
+        $marksheet = $payload['marksheetData'] ?? [];
+        $selectedExam = $payload['selectedExam'] ?? null;
+
+        $resultRows = collect($marksheet['exam_marks'] ?? [])->map(function ($mark) {
+            $obtained = $mark->marks_obtained ?? ($mark->isAbsent() ? 'AB' : '-');
+            $remarks = '';
+            if ($mark->isAbsent()) {
+                $remarks = 'Absent';
+            } elseif ($obtained !== '-') {
+                $percentage = ($obtained / ($mark->full_marks ?? 1)) * 100;
+                $remarks = $percentage >= 40 ? 'Pass' : 'Fail';
+            }
+
+            return [
+                'subject' => $mark->subject?->localized_name ?? $mark->subject?->name ?? 'Subject',
+                'full_marks' => $mark->full_marks ?? '-',
+                'obtained' => $obtained,
+                'grade' => strtoupper($mark->result ?? (($mark->percentage ?? 0) >= 40 ? 'PASS' : 'FAIL')),
+                'remarks' => $remarks,
+            ];
+        })->all();
+
+        return [
+            'message' => sprintf('Published result found for %s', $student->name ?? ($student->user->name ?? 'Student')),
+            'student' => [
+                'id' => $student->id,
+                'name' => $student->name ?? ($student->user->name ?? ''),
+                'roll_no' => $student->roll_no,
+                'department' => $student->department,
+            ],
+            'exam' => [
+                'name' => $selectedExam?->exam_name ?? 'Published Result',
+                'category' => $selectedExam?->exam_category ?? '',
+            ],
+            'result' => [
+                'status' => strtolower($marksheet['result'] ?? 'fail'),
+                'label' => strtoupper($marksheet['result'] ?? 'N/A'),
+                'grade' => $marksheet['grade'] ?? '',
+                'total_full' => $marksheet['total_full'] ?? 0,
+                'total_obtained' => $marksheet['total_obtained'] ?? 0,
+                'percentage' => $marksheet['percentage'] ?? 0,
+            ],
+            'marks' => $resultRows,
+            'printUrl' => route('public.exam-result.print', $examResultSearch['filters']),
+            'filters' => $examResultSearch['filters'],
+            'assessmentNumbers' => $examResultSearch['assessmentNumbers'],
+        ];
     }
 
     public function data(Request $request)
@@ -64,7 +159,7 @@ class LandingController extends Controller
         }
 
         $department = Department::first() ?: (object) [
-            'name' => config('app.name', 'IT DMS'),
+            'name' => config('app.name', 'Manmohan Memorial Polytechnic'),
             'address' => null,
             'city' => null,
             'district' => null,
@@ -178,15 +273,15 @@ class LandingController extends Controller
         return [
             'generated_at' => now()->toIso8601String(),
             'department' => [
-                'name' => $this->localizedField($department, 'name', 'name_nepali', $locale) ?: config('app.name', 'IT-DMS'),
-                'short_name' => $department?->short_name ?: 'IT-DMS',
+                'name' => $this->localizedField($department, 'name', 'name_nepali', $locale) ?: config('app.name', 'Manmohan Memorial Polytechnic'),
+                'short_name' => $department?->short_name ?: 'MMP',
                 'tagline' => $locale === 'ne'
                     ? 'प्राविधिक शिक्षा, सूचना, र डिजिटल प्रशासनका लागि एकीकृत प्रणाली'
-                    : 'A unified public portal for academics, notices, resources, and campus updates.',
+                    : 'The constituent college of Manmohan Technical University, delivering technical education in Nepal.',
                 'description' => $aboutText,
                 'welcome_title' => $locale === 'ne'
                     ? 'हाम्रो विभागमा स्वागत छ'
-                    : 'Welcome To Our Department',
+                    : 'Welcome To Manmohan Memorial Polytechnic',
                 'logo_url' => $department?->getLogoUrl() ?? asset('images/default-logo.svg'),
                 'hero_image' => $heroImages->first(),
                 'hero_images' => $heroImages->all(),
@@ -478,8 +573,9 @@ class LandingController extends Controller
     private function resolveExamResultSearch(Request $request, array $examResultMeta, bool $searchForced = false): array
     {
         $searchAttempted = $request->boolean('search_exam_result') || $searchForced;
-        $dobBs = trim((string) $request->query('dob_bs', ''));
-        
+        $dobBs = trim((string) $request->input('dob_bs', ''));
+        $dobBs = NepaliContentHelper::toEnglishNumber($dobBs);
+
         // Normalize BS date format: 2058-2-1 -> 2058-02-01
         if (!empty($dobBs)) {
             $parts = explode('-', $dobBs);
@@ -487,7 +583,7 @@ class LandingController extends Controller
                 $dobBs = sprintf('%04d-%02d-%02d', (int)$parts[0], (int)$parts[1], (int)$parts[2]);
             }
         }
-        
+
         // Convert BS date to AD for database query
         $dobAd = '';
         if (!empty($dobBs)) {
@@ -505,11 +601,11 @@ class LandingController extends Controller
         }
 
         $filters = [
-            'academic_year' => trim((string) $request->query('academic_year', $examResultMeta['years'][0] ?? '')),
-            'semester' => trim((string) $request->query('semester', $examResultMeta['semesters'][0] ?? '')),
-            'exam_category' => trim((string) $request->query('exam_category', 'assessment')) ?: 'assessment',
-            'assessment_number' => trim((string) $request->query('assessment_number', '')),
-            'student_id' => trim((string) $request->query('student_id', '')),
+            'academic_year' => trim((string) $request->input('academic_year', $examResultMeta['years'][0] ?? '')),
+            'semester' => trim((string) $request->input('semester', $examResultMeta['semesters'][0] ?? '')),
+            'exam_category' => trim((string) $request->input('exam_category', 'assessment')) ?: 'assessment',
+            'assessment_number' => trim((string) $request->input('assessment_number', '')),
+            'student_id' => trim((string) $request->input('student_id', '')),
             'dob' => $dobAd, // AD date for query
             'dob_bs' => $dobBs, // BS date for display (normalized)
         ];
@@ -585,7 +681,7 @@ class LandingController extends Controller
      */
     private function findPublicExamResultStudent(array $filters): ?Student
     {
-        $studentId = trim((string) ($filters['student_id'] ?? ''));
+        $studentId = NepaliContentHelper::toEnglishNumber(trim((string) ($filters['student_id'] ?? '')));
         $dob = trim((string) ($filters['dob'] ?? ''));
 
         if ($studentId === '' || $dob === '') {
@@ -645,3 +741,4 @@ class LandingController extends Controller
         return [];
     }
 }
+

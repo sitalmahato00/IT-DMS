@@ -377,3 +377,4 @@ class AuditLogController extends Controller
         return $initials !== '' ? strtoupper($initials) : 'A';
     }
 }
+

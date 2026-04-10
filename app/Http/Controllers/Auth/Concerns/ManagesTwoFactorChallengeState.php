@@ -119,3 +119,4 @@ trait ManagesTwoFactorChallengeState
         return max(15, (int) ceil($secondsUntilExpiry / 60));
     }
 }
+

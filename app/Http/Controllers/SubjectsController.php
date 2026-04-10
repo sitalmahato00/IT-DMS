@@ -42,3 +42,4 @@ class SubjectsController extends Controller
         ));
     }
 }
+

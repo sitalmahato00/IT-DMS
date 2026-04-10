@@ -587,3 +587,4 @@ class TeacherDashboardController extends Controller
         return $todayAttendance;
     }
 }
+

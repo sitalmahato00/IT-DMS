@@ -303,3 +303,4 @@ class TimetableSlot extends Model
         return ['A', 'B', 'C', 'D', 'Morning', 'Evening'];
     }
 }
+

@@ -85,7 +85,7 @@
         $paperClass = 'routine-paper--compact';
         $sheetTitle = __('Official Timetable');
         $sheetHeading = __('Semester') . ' ' . $semester . (filled($section) ? ' / ' . __('Section') . ' ' . $section : '');
-        $institutionName = $college?->name ?? 'IT-DMS';
+        $institutionName = $college?->name ?? 'Manmohan Memorial Polytechnic';
         $departmentLine = $college?->short_name ?? __('Department');
         $metaItems = [
             ['label' => __('Prepared On'), 'value' => now()->format('Y-m-d')],
@@ -113,3 +113,4 @@
     </div>
 </body>
 </html>
+

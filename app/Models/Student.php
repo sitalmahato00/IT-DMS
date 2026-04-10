@@ -411,3 +411,4 @@ class Student extends Model
         return $query->get()->sum(fn ($mark) => (float) $mark->effective_full_marks);
     }
 }
+

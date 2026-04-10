@@ -183,7 +183,7 @@
 
     $sheetTitle = __('Class Routine');
     $sheetHeading = __('Semester') . ' ' . $semester . (filled($section) ? ' / ' . __('Section') . ' ' . $section : '');
-    $institutionName = $college?->name ?? 'IT-DMS';
+    $institutionName = $college?->name ?? 'Manmohan Memorial Polytechnic';
     $departmentLine = $college?->short_name ?? __('Department');
     $metaItems = [
         ['label' => __('Prepared On'), 'value' => now()->format('Y-m-d')],
@@ -858,3 +858,4 @@ async function submitSlot() {
 document.getElementById('slotModal').addEventListener('click', e => { if(e.target.id === 'slotModal') closeSlotModal(); });
 </script>
 @endsection
+

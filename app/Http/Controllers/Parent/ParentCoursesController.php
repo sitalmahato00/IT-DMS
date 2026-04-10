@@ -86,3 +86,4 @@ class ParentCoursesController extends Controller
         return view('parent.courses.subject', compact('child', 'subject', 'marks', 'attendance', 'subjectAttendancePercentage'));
     }
 }
+

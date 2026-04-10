@@ -758,3 +758,4 @@ class ParentPortalData
         return ($date ?? $fallback ?? now()->subYears(100))->format('Y-m-d H:i:s');
     }
 }
+

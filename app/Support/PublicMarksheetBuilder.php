@@ -32,10 +32,18 @@ class PublicMarksheetBuilder
         $selectedExam = $examMarks->first()?->exam;
 
         $totalObtained = $examMarks->sum(function (ExamMark $mark) {
-            return $mark->isAbsent() ? 0 : (float) ($mark->marks_obtained ?? 0);
+            if ($mark->isAbsent()) {
+                return 0;
+            }
+
+            return $mark->isCtevt()
+                ? $mark->calculateTotalMarks()
+                : (float) ($mark->marks_obtained ?? 0);
         });
         $totalFull = $examMarks->sum(function (ExamMark $mark) {
-            return (float) ($mark->full_marks ?? 0);
+            return $mark->isCtevt()
+                ? $mark->calculateFullMarks()
+                : (float) ($mark->full_marks ?? 0);
         });
         $percentage = $totalFull > 0 ? round(($totalObtained / $totalFull) * 100, 2) : 0;
         $grade = $this->calculateGrade($percentage);
@@ -91,10 +99,18 @@ class PublicMarksheetBuilder
         $selectedExam = $examMarks->first()?->exam;
 
         $totalObtained = $examMarks->sum(function (ExamMark $mark) {
-            return $mark->isAbsent() ? 0 : (float) ($mark->marks_obtained ?? 0);
+            if ($mark->isAbsent()) {
+                return 0;
+            }
+
+            return $mark->isCtevt()
+                ? $mark->calculateTotalMarks()
+                : (float) ($mark->marks_obtained ?? 0);
         });
         $totalFull = $examMarks->sum(function (ExamMark $mark) {
-            return (float) ($mark->full_marks ?? 0);
+            return $mark->isCtevt()
+                ? $mark->calculateFullMarks()
+                : (float) ($mark->full_marks ?? 0);
         });
         $percentage = $totalFull > 0 ? round(($totalObtained / $totalFull) * 100, 2) : 0;
         $grade = $this->calculateGrade($percentage);
@@ -269,3 +285,4 @@ class PublicMarksheetBuilder
         return 'F';
     }
 }
+

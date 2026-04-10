@@ -34,3 +34,4 @@ class CtaSection extends Component
         return view('components.cta-section');
     }
 }
+

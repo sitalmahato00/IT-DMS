@@ -114,3 +114,4 @@ class ParentMarksController extends Controller
         return view('parent.marks.exam', compact('child', 'exam', 'marks'));
     }
 }
+

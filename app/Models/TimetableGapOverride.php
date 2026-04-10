@@ -19,3 +19,4 @@ class TimetableGapOverride extends Model
         'end_time',
     ];
 }
+

@@ -158,3 +158,4 @@ class PerformanceDiagnostic extends Command
         }
     }
 }
+

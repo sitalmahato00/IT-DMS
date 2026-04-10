@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'IT-DMS') }}</title>
+    <title>{{ config('app.name', 'Manmohan Memorial Polytechnic') }}</title>
     @include('partials.pwa-head', ['themeColor' => '#FF0037'])
 
     <!-- Fonts -->
@@ -67,3 +67,4 @@
     @stack('scripts')
 </body>
 </html>
+

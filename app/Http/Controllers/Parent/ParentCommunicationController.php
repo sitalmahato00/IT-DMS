@@ -46,3 +46,4 @@ class ParentCommunicationController extends Controller
         }
     }
 }
+

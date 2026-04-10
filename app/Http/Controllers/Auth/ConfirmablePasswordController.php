@@ -38,3 +38,4 @@ class ConfirmablePasswordController extends Controller
         return redirect()->intended($request->user()->getDashboardRoute());
     }
 }
+

@@ -795,3 +795,4 @@ class TeacherController extends Controller
         return view('admin.print.teachers-list', compact('teachers', 'college'));
     }
 }
+

@@ -142,3 +142,4 @@ class NepaliSupportServiceProvider extends ServiceProvider
         });
     }
 }
+

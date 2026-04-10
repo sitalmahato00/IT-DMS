@@ -73,3 +73,4 @@ class ExamNotification extends Notification
         ];
     }
 }
+

@@ -856,3 +856,4 @@ class ParentController extends Controller
         return view('admin.print.parents-list', compact('parents', 'college'));
     }
 }
+

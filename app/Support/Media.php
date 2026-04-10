@@ -55,3 +55,4 @@ class Media
         return '/media/' . $encoded;
     }
 }
+

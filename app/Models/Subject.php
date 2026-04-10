@@ -219,3 +219,4 @@ class Subject extends Model
         return $query->where('status', 'active');
     }
 }
+

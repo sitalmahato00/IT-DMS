@@ -406,3 +406,4 @@ class ExamMark extends Model
         return $query->whereNull('marks_obtained');
     }
 }
+

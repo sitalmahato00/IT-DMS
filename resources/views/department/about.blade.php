@@ -5,7 +5,7 @@
     $locale = app()->getLocale();
     $departmentName = $department
         ? (($locale === 'ne' && !empty($department->name_nepali)) ? $department->name_nepali : $department->name)
-        : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Information Technology Department');
+        : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Manmohan Memorial Polytechnic');
     $departmentLogoUrl = $department?->getLogoUrl() ?? '/images/default-logo.svg';
     $aboutText = $department
         ? (($locale === 'ne' && !empty($department->description_nepali)) ? $department->description_nepali : $department->description)
@@ -193,3 +193,4 @@
     <x-footer />
 </body>
 </html>
+

@@ -244,7 +244,7 @@
             </div>
             
             <div class="school-name">
-                {{ $college->name ?? 'IT-DMS COLLEGE' }}
+                {{ $college->name ?? 'Manmohan Memorial Polytechnic' }}
             </div>
             
             <div class="report-title">
@@ -325,3 +325,4 @@
     </div>
 </body>
 </html>
+

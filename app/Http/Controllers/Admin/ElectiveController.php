@@ -222,3 +222,4 @@ class ElectiveController extends Controller
         return response()->json(['success' => true, 'message' => 'Enrollment removed.']);
     }
 }
+

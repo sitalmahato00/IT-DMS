@@ -27,7 +27,7 @@
 
         <div class="sidebar-brand-text mt-3 text-center">
             <h1 class="font-semibold text-xl sm:text-2xl leading-7 text-white block tracking-tight">
-                {{ $department?->short_name ?? ($department?->name ?? __('IT-DMS')) }}
+                {{ $department?->short_name ?? ($department?->name ?? __('Manmohan Memorial Polytechnic')) }}
             </h1>
             <p class="text-sm sm:text-[13px] leading-5 text-red-100">{{ __('Parent Portal') }}</p>
         </div>
@@ -110,3 +110,4 @@
         }
     }
 </style>
+

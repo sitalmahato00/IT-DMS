@@ -643,3 +643,4 @@ document.addEventListener('keydown', function(e) {
 // Ensure listeners are registered immediately (not only on DOMContentLoaded)
 registerEditExamComponentListeners();
 </script>
+

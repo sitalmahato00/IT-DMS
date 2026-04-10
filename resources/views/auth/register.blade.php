@@ -96,7 +96,7 @@
                             </div>
                             <div class="auth-panel-copy">
                                 <h2 class="auth-panel-title">{{ $departmentName }}</h2>
-                                <p class="auth-panel-subtitle">{{ $locale === 'ne' ? 'IT विभाग व्यवस्थापन प्रणाली' : 'IT Department Management System' }}</p>
+                                <p class="auth-panel-subtitle">{{ $locale === 'ne' ? 'IT विभाग व्यवस्थापन प्रणाली' : 'Manmohan Memorial Polytechnic' }}</p>
                                 <p class="auth-panel-meta">{{ $addressInfo }}</p>
                             </div>
                         </div>
@@ -245,3 +245,4 @@
         </div>
     </div>
 @endsection
+

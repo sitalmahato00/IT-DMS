@@ -54,3 +54,4 @@
         <p class="text-gray-600">There are no study materials to display at the moment.</p>
     </div>
 @endif
+

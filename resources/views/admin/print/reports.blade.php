@@ -137,7 +137,7 @@
                     <div class="logo-placeholder" style="font-size: 48px;">🎓</div>
                 @endif
             </div>
-            <div class="school-name">{{ !empty($college) ? $college->name : 'IT-DMS COLLEGE' }}</div>
+            <div class="school-name">{{ !empty($college) ? $college->name : 'Manmohan Memorial Polytechnic' }}</div>
             <div class="report-title">Admin Report - IT Department</div>
             <div class="meta-info">
                 <div class="meta-item">
@@ -598,3 +598,4 @@
     </script>
 </body>
 </html>
+

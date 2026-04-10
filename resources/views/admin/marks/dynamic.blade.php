@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Dynamic Marks - IT DMS')
+@section('title', 'Dynamic Marks - Manmohan Memorial Polytechnic')
 
 @section('styles')
 <script>
@@ -860,3 +860,4 @@
     });
  </script>
 @endsection
+

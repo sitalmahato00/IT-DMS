@@ -15,3 +15,4 @@
     <div class="p-3" id="examsPaginationLinks">
         <x-pagination :paginator="$exams" />
     </div>
+

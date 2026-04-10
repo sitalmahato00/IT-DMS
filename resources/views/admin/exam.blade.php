@@ -1882,3 +1882,4 @@ function updateCreateExamPracticalFieldsVisibility() {
 </script>
 
 @endsection
+

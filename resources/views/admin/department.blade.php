@@ -1028,3 +1028,4 @@ function handleLogoUpload(event) {
     document.head.appendChild(style);
 </script>
 @endsection
+

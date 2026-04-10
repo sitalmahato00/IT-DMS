@@ -8,7 +8,7 @@
                     <div class="auth-card max-w-md mx-auto">
                         <div class="auth-panel-intro">
                             <div class="auth-panel-logo-wrap" aria-hidden="true">
-                                <img src="{{ $departmentLogoUrl ?? asset('build/icons/it-logo.png') }}" alt="IT-DMS" class="auth-panel-logo" />
+                                <img src="{{ $departmentLogoUrl ?? asset('build/icons/it-logo.png') }}" alt="Manmohan Memorial Polytechnic" class="auth-panel-logo" />
                             </div>
                             <div class="auth-panel-copy">
                                 <h2 class="auth-panel-title">Check your email</h2>
@@ -27,3 +27,4 @@
         </div>
     </div>
 @endsection
+

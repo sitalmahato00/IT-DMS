@@ -6,7 +6,7 @@
 
     $departmentName = $department
         ? (($locale === 'ne' && !empty($department->name_nepali)) ? $department->name_nepali : $department->name)
-        : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Information Technology Department');
+        : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Manmohan Memorial Polytechnic');
 
     $departmentLogoUrl = $department?->getLogoUrl() ?? '/images/default-logo.svg';
 @endphp
@@ -146,3 +146,4 @@
         </main>
     </div>
 @endsection
+

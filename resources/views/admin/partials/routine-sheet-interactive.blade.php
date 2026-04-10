@@ -19,7 +19,7 @@
         ->values();
     $sheetTitle = $sheetTitle ?? __('Class Routine');
     $sheetHeading = $sheetHeading ?? __('Routine Schedule');
-    $institutionName = $institutionName ?? strtoupper($college?->name ?? 'IT-DMS');
+    $institutionName = $institutionName ?? strtoupper($college?->name ?? 'Manmohan Memorial Polytechnic');
     $departmentLine = $departmentLine ?? strtoupper($college?->short_name ?? __('Department'));
     $footerLeft = $footerLeft ?? null;
     $footerRight = $footerRight ?? now()->format('Y-m-d H:i');
@@ -282,3 +282,4 @@
         </div>
     </footer>
 </section>
+

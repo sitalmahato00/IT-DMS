@@ -1,7 +1,7 @@
 @php
     $pwaThemeColor = $themeColor ?? '#FF0037';
-    $pwaAppName = config('app.name', 'IT-DMS');
-    $pwaDescription = $description ?? __('IT Department Management System');
+    $pwaAppName = config('app.name', 'Manmohan Memorial Polytechnic');
+    $pwaDescription = $description ?? __('Manmohan Memorial Polytechnic');
 @endphp
 
 <meta name="theme-color" content="{{ $pwaThemeColor }}">
@@ -17,3 +17,4 @@
 <link rel="icon" href="{{ asset('icons/app-icon.svg') }}" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{{ asset('icons/app-icon.svg') }}">
 <link rel="mask-icon" href="{{ asset('icons/maskable-icon.svg') }}" color="{{ $pwaThemeColor }}">
+

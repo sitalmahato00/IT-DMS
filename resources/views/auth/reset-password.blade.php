@@ -43,8 +43,8 @@
                     </p>
                     <p class="auth-hero-text">
                         {{ $locale === 'ne'
-                            ? 'तपाईंको IT-DMS खाता र शैक्षिक अभिलेखहरू सुरक्षित राख्न बलियो पासवर्ड बनाउनुहोस्।'
-                            : 'Create a strong password to protect your IT-DMS account and keep your academic records safe.' }}
+                            ? 'तपाईंको Manmohan Memorial Polytechnic खाता र शैक्षिक अभिलेखहरू सुरक्षित राख्न बलियो पासवर्ड बनाउनुहोस्।'
+                            : 'Create a strong password to protect your Manmohan Memorial Polytechnic account and keep your academic records safe.' }}
                     </p>
 
                     <div class="auth-info-list">
@@ -87,7 +87,7 @@
                             </div>
                             <div class="auth-panel-copy">
                                 <h2 class="auth-panel-title">{{ $departmentName }}</h2>
-                                <p class="auth-panel-subtitle">{{ $locale === 'ne' ? 'IT विभाग व्यवस्थापन प्रणाली' : 'IT Department Management System' }}</p>
+                                <p class="auth-panel-subtitle">{{ $locale === 'ne' ? 'IT विभाग व्यवस्थापन प्रणाली' : 'Manmohan Memorial Polytechnic' }}</p>
                                 <p class="auth-panel-meta">{{ $addressInfo }}</p>
                             </div>
                         </div>
@@ -193,3 +193,4 @@
         </div>
     </div>
 @endsection
+

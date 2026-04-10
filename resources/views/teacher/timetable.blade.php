@@ -128,7 +128,7 @@
     $sheetHeading = $selectedSemester
         ? __('Semester') . ' ' . $selectedSemester . (filled($selectedSection) ? ' / ' . __('Section') . ' ' . $selectedSection : '')
         : __('All Assigned Semesters');
-    $institutionName = $college?->name ?? 'IT-DMS';
+    $institutionName = $college?->name ?? 'Manmohan Memorial Polytechnic';
     $departmentLine = $college?->short_name ?? __('Department');
     $metaItems = [
         ['label' => __('Prepared On'), 'value' => now()->format('Y-m-d')],
@@ -266,3 +266,4 @@
     @endif
 </div>
 @endsection
+

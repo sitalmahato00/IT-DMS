@@ -202,3 +202,4 @@ class SettingController extends Controller
         return back()->with('password_status', 'password-updated');
     }
 }
+

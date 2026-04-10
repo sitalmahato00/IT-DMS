@@ -71,3 +71,4 @@ class AssignmentNotification extends Notification
         return \Carbon\Carbon::parse($date)->format('M d, Y');
     }
 }
+

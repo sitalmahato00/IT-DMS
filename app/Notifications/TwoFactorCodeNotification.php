@@ -22,7 +22,7 @@ class TwoFactorCodeNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Your IT-DMS verification code')
+            ->subject('Your Manmohan Memorial Polytechnic verification code')
             ->greeting('Two-Factor Authentication')
             ->line('Your verification code is: ' . $this->code)
             ->line('This code will expire in ' . $this->expiresMinutes . ' minutes.')
@@ -37,3 +37,4 @@ class TwoFactorCodeNotification extends Notification
         ];
     }
 }
+

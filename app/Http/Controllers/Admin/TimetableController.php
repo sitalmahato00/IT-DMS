@@ -1007,3 +1007,4 @@ class TimetableController extends Controller
             ->all();
     }
 }
+

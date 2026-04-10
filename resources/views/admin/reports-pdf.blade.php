@@ -1,1 +1,2 @@
 @include('admin.print.reports')
+

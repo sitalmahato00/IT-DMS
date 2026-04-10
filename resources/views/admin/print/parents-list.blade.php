@@ -56,7 +56,7 @@
                     <div class="logo-placeholder">🏫</div>
                 @endif
             </div>
-            <div class="school-name">{{ $college->name ?? 'IT-DMS COLLEGE' }}</div>
+            <div class="school-name">{{ $college->name ?? 'Manmohan Memorial Polytechnic' }}</div>
             <div class="report-title">PARENT LIST</div>
             <div class="meta-info">
                 <div class="meta-item"><span class="meta-label">Academic Year:</span><span>{{ date('Y') }}</span></div>
@@ -109,3 +109,4 @@
     </div>
 </body>
 </html>
+

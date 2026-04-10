@@ -436,3 +436,4 @@ document.getElementById('apply_bulk')?.addEventListener('click', function() {
 </script>
 
 @endsection
+

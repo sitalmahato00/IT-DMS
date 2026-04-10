@@ -17,23 +17,33 @@ class ExamSeeder extends Seeder
         $subjects = Subject::all()->take(5); // Max 5 subjects
         $admin = User::where('role', 'admin')->first();
 
-        // Only create 2 exam types per subject (internal and final)
+        // Create assessment and CTEVT exam types per subject.
         $examTypes = [
             ['type' => 'internal', 'category' => 'assessment', 'full_marks' => 40, 'assessment_num' => 1],
             ['type' => 'final', 'category' => 'assessment', 'full_marks' => 100, 'assessment_num' => 2],
+            ['type' => 'practical', 'category' => 'ctevt', 'full_marks' => 100, 'assessment_num' => null, 'components' => [
+                'theory_internal_max_marks' => 30,
+                'theory_external_max_marks' => 30,
+                'practical_internal_max_marks' => 20,
+                'practical_external_max_marks' => 20,
+                'theory_internal_pass_marks' => 12,
+                'theory_external_pass_marks' => 12,
+                'practical_internal_pass_marks' => 8,
+                'practical_external_pass_marks' => 8,
+            ]],
         ];
 
         foreach ($subjects as $subject) {
             foreach ($examTypes as $index => $examType) {
-                Exam::firstOrCreate(
+                Exam::updateOrCreate(
                     [
                         'subject_id' => $subject->id,
                         'exam_type' => $examType['type'],
                         'academic_year' => '2080-2081',
                         'semester' => 5,
                     ],
-                    [
-                        'exam_name' => $subject->subject_name . ' - ' . ucfirst($examType['type']) . ' Exam',
+                    array_merge([
+                        'exam_name' => $subject->subject_name . ' - ' . strtoupper($examType['category']) . ' Exam',
                         'subject_id' => $subject->id,
                         'exam_type' => $examType['type'],
                         'exam_category' => $examType['category'],
@@ -47,8 +57,8 @@ class ExamSeeder extends Seeder
                         'exam_date_bs' => now()->addDays($index * 7),
                         'status' => 'published',
                         'created_by' => $admin?->id,
-                        'description' => 'Official ' . $examType['type'] . ' examination for ' . $subject->subject_name,
-                    ]
+                        'description' => 'Official ' . strtoupper($examType['category']) . ' examination for ' . $subject->subject_name,
+                    ], $examType['components'] ?? [])
                 );
             }
         }

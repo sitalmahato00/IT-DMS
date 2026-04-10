@@ -349,3 +349,4 @@ class Exam extends Model
         return "<span class='text-gray-700'>{$adDate}</span><span class='text-gray-500 mx-1'>/</span><span class='text-gray-700'>{$bsDate}</span>";
     }
 }
+

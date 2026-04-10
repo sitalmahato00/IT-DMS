@@ -237,3 +237,4 @@
     <script src="{{ asset('js/print-as-image.js') }}"></script>
 @endpush
 @endsection
+

@@ -22,7 +22,7 @@
             <img src="{{ $logoUrl }}" alt="{{ $college?->name ?? __('College Logo') }}">
         </div>
         <div class="routine-paper__titles">
-            <p class="routine-paper__institution">{{ strtoupper($college?->name ?? 'IT-DMS') }}</p>
+            <p class="routine-paper__institution">{{ strtoupper($college?->name ?? 'Manmohan Memorial Polytechnic') }}</p>
             <p class="routine-paper__department">{{ strtoupper($departmentLine) }}</p>
             <h2>{{ __('Class Routine') }}</h2>
         </div>
@@ -158,3 +158,4 @@
         </div>
     </footer>
 </section>
+

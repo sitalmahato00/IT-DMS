@@ -1427,3 +1427,4 @@ class AttendanceController extends Controller
         return view('admin.print.attendance-list', compact('attendance', 'college', 'date', 'semester', 'subject', 'semesterLabel', 'dateLabel', 'subjectLabel'));
     }
 }
+

@@ -68,3 +68,4 @@ class AttendanceNotification extends Notification
         ];
     }
 }
+

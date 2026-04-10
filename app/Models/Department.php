@@ -95,3 +95,4 @@ class Department extends Model
         return null;
     }
 }
+

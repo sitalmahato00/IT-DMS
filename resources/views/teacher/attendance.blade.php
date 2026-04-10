@@ -1068,3 +1068,4 @@ async function openEditSubjectAttendance(date, date_bs, subjectId, subjectName) 
     });
 </script>
 @endsection
+

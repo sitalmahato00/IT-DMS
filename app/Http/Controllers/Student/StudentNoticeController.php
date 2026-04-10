@@ -111,3 +111,4 @@ class StudentNoticeController extends Controller
         return view('student.notices.show', compact('notice'));
     }
 }
+

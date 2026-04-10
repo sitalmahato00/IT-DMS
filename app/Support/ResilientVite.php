@@ -63,3 +63,4 @@ class ResilientVite extends BaseVite
         ];
     }
 }
+

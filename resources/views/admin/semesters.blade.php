@@ -613,3 +613,4 @@ document.getElementById('semesterModal').addEventListener('click', function(e) {
 });
 </script>
 @endsection
+

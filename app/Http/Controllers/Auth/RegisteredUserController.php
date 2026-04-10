@@ -55,3 +55,4 @@ class RegisteredUserController extends Controller
         return redirect()->to($user->getDashboardRoute());
     }
 }
+

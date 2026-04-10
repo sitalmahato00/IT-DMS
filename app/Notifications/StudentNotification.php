@@ -76,3 +76,4 @@ class StudentNotification extends Notification
         ];
     }
 }
+

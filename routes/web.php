@@ -31,6 +31,237 @@ Route::get('/gallery/fetch', [GalleryPortalController::class, 'fetch'])->name('g
 
 Route::get('/gallery', [GalleryPortalController::class, 'index'])->name('gallery.index');
 Route::get('/gallery/download/{id}', [PublicGalleryController::class, 'download'])->name('gallery.download');
+Route::get('/exam-result', [\App\Http\Controllers\LandingController::class, 'examResult'])->name('public.exam-result');
+Route::post('/exam-result/search', [\App\Http\Controllers\LandingController::class, 'examResultSearch'])->name('public.exam-result.search');
+
+Route::prefix('public')->name('public.pages.')->group(function () {
+    Route::get('/about', function () {
+        return view('public.pages.show', [
+            'title' => 'About Us',
+            'subtitle' => 'Manmohan Memorial Polytechnic',
+        ]);
+    })->name('about');
+    Route::get('/about/what-is-mmp', function () {
+        return view('public.pages.show', [
+            'title' => 'What is MMP',
+            'subtitle' => 'About Manmohan Memorial Polytechnic',
+        ]);
+    })->name('about.what-is-mmp');
+    Route::get('/about/objectives', function () {
+        return view('public.pages.show', [
+            'title' => 'Objectives',
+            'subtitle' => 'College mission and goals',
+        ]);
+    })->name('about.objectives');
+    Route::get('/about/presidents-principals', function () {
+        return view('public.pages.show', [
+            'title' => 'Presidents and Principals',
+            'subtitle' => 'Leadership of the institute',
+        ]);
+    })->name('about.presidents-principals');
+    Route::get('/about/contact', function () {
+        return view('public.pages.show', [
+            'title' => 'Contact Us',
+            'subtitle' => 'Get in touch with MMP',
+        ]);
+    })->name('about.contact');
+
+    Route::get('/courses', function () {
+        return view('public.pages.show', [
+            'title' => 'Courses',
+            'subtitle' => 'Diploma and short term programs',
+        ]);
+    })->name('courses');
+    Route::get('/courses/information-technology', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Information Technology',
+            'subtitle' => 'IT program overview and curriculum',
+        ]);
+    })->name('courses.it');
+    Route::get('/courses/architecture-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Architecture Engineering',
+            'subtitle' => 'Architecture and design program',
+        ]);
+    })->name('courses.architecture');
+    Route::get('/courses/electrical-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Electrical Engineering',
+            'subtitle' => 'Electrical systems and power studies',
+        ]);
+    })->name('courses.electrical');
+    Route::get('/courses/electronics-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Electronics Engineering',
+            'subtitle' => 'Electronic devices and systems',
+        ]);
+    })->name('courses.electronics');
+    Route::get('/courses/mechanical-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Mechanical Engineering',
+            'subtitle' => 'Mechanical design and manufacturing',
+        ]);
+    })->name('courses.mechanical');
+    Route::get('/courses/civil-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Civil Engineering',
+            'subtitle' => 'Civil construction and infrastructure',
+        ]);
+    })->name('courses.civil');
+    Route::get('/courses/electrical-electronics-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Electrical & Electronics Engineering',
+            'subtitle' => 'Integrated electrical and electronics program',
+        ]);
+    })->name('courses.eee');
+    Route::get('/courses/short-term-trainings', function () {
+        return view('public.pages.show', [
+            'title' => 'Short Term Trainings',
+            'subtitle' => 'Skill-focused short course offerings',
+        ]);
+    })->name('courses.short-term');
+
+    Route::get('/features', function () {
+        return view('public.pages.show', [
+            'title' => 'Features',
+            'subtitle' => 'Facilities and student services',
+        ]);
+    })->name('features');
+    Route::get('/features/classrooms-and-labs', function () {
+        return view('public.pages.show', [
+            'title' => 'Classrooms and Labs',
+            'subtitle' => 'Learning spaces and practical labs',
+        ]);
+    })->name('features.classrooms-labs');
+    Route::get('/features/workshops', function () {
+        return view('public.pages.show', [
+            'title' => 'Workshops',
+            'subtitle' => 'Hands-on workshop facilities',
+        ]);
+    })->name('features.workshops');
+    Route::get('/features/scholarship-schemes', function () {
+        return view('public.pages.show', [
+            'title' => 'Scholarship Schemes',
+            'subtitle' => 'Scholarship and financial support options',
+        ]);
+    })->name('features.scholarships');
+    Route::get('/features/transportation', function () {
+        return view('public.pages.show', [
+            'title' => 'Transportation',
+            'subtitle' => 'Student commute and transport services',
+        ]);
+    })->name('features.transportation');
+    Route::get('/features/internships-placements', function () {
+        return view('public.pages.show', [
+            'title' => 'Internships & Placements',
+            'subtitle' => 'Career support and industry training',
+        ]);
+    })->name('features.internships');
+    Route::get('/features/library-and-hostel', function () {
+        return view('public.pages.show', [
+            'title' => 'Library and Hostel',
+            'subtitle' => 'Campus facilities for study and stay',
+        ]);
+    })->name('features.library-hostel');
+    Route::get('/features/game-courts', function () {
+        return view('public.pages.show', [
+            'title' => 'Game Courts',
+            'subtitle' => 'Sports and recreation facilities',
+        ]);
+    })->name('features.game-courts');
+    Route::get('/features/first-aid-clinic', function () {
+        return view('public.pages.show', [
+            'title' => 'First Aid Clinic',
+            'subtitle' => 'Health and campus medical support',
+        ]);
+    })->name('features.first-aid');
+
+    Route::get('/peoples', function () {
+        return view('public.pages.show', [
+            'title' => 'Peoples',
+            'subtitle' => 'Administrative and academic teams',
+        ]);
+    })->name('peoples');
+    Route::get('/peoples/administrative-staffs', function () {
+        return view('public.pages.show', [
+            'title' => 'Administrative Staffs',
+            'subtitle' => 'Campus administration and operations',
+        ]);
+    })->name('peoples.administrative-staffs');
+    Route::get('/peoples/architecture-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Architecture Engineering',
+            'subtitle' => 'Architecture faculty and staff',
+        ]);
+    })->name('peoples.architecture');
+    Route::get('/peoples/civil-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Civil Engineering',
+            'subtitle' => 'Civil engineering faculty',
+        ]);
+    })->name('peoples.civil');
+    Route::get('/peoples/electrical-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Electrical Engineering',
+            'subtitle' => 'Electrical engineering faculty',
+        ]);
+    })->name('peoples.electrical');
+    Route::get('/peoples/electrical-electronics-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Electrical & Electronics Engineering',
+            'subtitle' => 'EEE faculty and programs',
+        ]);
+    })->name('peoples.eee');
+    Route::get('/peoples/electronics-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Electronics Engineering',
+            'subtitle' => 'Electronics faculty and laboratories',
+        ]);
+    })->name('peoples.electronics');
+    Route::get('/peoples/information-technology', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Information Technology',
+            'subtitle' => 'IT faculty and department details',
+        ]);
+    })->name('peoples.it');
+    Route::get('/peoples/mechanical-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Mechanical Engineering',
+            'subtitle' => 'Mechanical engineering faculty',
+        ]);
+    })->name('peoples.mechanical');
+
+    Route::get('/news-events', function () {
+        return view('public.pages.show', [
+            'title' => 'News & Events',
+            'subtitle' => 'Updates from Manmohan Memorial Polytechnic',
+        ]);
+    })->name('news');
+    Route::get('/gallery', function () {
+        return view('public.pages.show', [
+            'title' => 'Gallery',
+            'subtitle' => 'Campus life and activities',
+        ]);
+    })->name('gallery');
+    Route::get('/resources', function () {
+        return view('public.pages.show', [
+            'title' => 'Resources',
+            'subtitle' => 'Downloads and question bank',
+        ]);
+    })->name('resources');
+    Route::get('/resources/formats', function () {
+        return view('public.pages.show', [
+            'title' => 'Formats',
+            'subtitle' => 'Form templates and downloadables',
+        ]);
+    })->name('resources.formats');
+    Route::get('/resources/question-bank', function () {
+        return view('public.pages.show', [
+            'title' => 'Question Bank',
+            'subtitle' => 'Exam preparation and past papers',
+        ]);
+    })->name('resources.question-bank');
+});
 
 Route::get('/media/{path}', function (string $path) {
     $normalized = str_replace('\\', '/', $path);

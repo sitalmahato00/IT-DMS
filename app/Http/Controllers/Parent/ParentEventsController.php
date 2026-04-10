@@ -40,3 +40,4 @@ class ParentEventsController extends Controller
         return view('parent.events.show', compact('event'));
     }
 }
+

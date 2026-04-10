@@ -230,3 +230,4 @@ class BilingualNotice extends Model
         return $this->belongsTo(NoticeCategory::class);
     }
 }
+

@@ -1,6 +1,6 @@
 @extends('teacher.layouts.teacherlayout')
 
-@section('title', 'Marksheet Search - IT DMS')
+@section('title', 'Marksheet Search - Manmohan Memorial Polytechnic')
 
 @section('styles')
 <style>
@@ -349,3 +349,4 @@
 </script>
 @endpush
 @endsection
+

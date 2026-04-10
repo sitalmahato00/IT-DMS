@@ -53,3 +53,4 @@ class ResultNotification extends Notification
         ];
     }
 }
+

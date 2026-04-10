@@ -319,3 +319,4 @@ foreach ($galleryItems as $item) {
         }
     });
 </script>
+

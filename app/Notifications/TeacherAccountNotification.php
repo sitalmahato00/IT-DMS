@@ -58,3 +58,4 @@ class TeacherAccountNotification extends Notification
         ];
     }
 }
+

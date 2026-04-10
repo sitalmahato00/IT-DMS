@@ -90,3 +90,4 @@ class MagicLinkController extends Controller
         return response()->json(['status' => false]);
     }
 }
+

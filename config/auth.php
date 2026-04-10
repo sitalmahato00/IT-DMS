@@ -131,3 +131,4 @@ return [
     'allow_self_registration' => env('AUTH_ALLOW_SELF_REGISTRATION', false),
 
 ];
+

@@ -573,3 +573,4 @@ document.getElementById('assignModal').addEventListener('click', function(e) {
 });
 </script>
 @endsection
+

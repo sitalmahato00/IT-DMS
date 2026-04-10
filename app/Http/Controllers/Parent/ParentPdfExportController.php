@@ -65,3 +65,4 @@ class ParentPdfExportController extends Controller
         return $pdf->download('marks-' . $child->id . '-' . now()->format('Y-m-d') . '.pdf');
     }
 }
+

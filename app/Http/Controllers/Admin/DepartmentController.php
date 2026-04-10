@@ -175,3 +175,4 @@ class DepartmentController extends Controller
         ]);
     }
 }
+

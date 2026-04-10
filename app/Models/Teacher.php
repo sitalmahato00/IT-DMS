@@ -174,3 +174,4 @@ class Teacher extends Model
             ->all();
     }
 }
+

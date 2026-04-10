@@ -115,3 +115,4 @@ class ParentAttendanceController extends Controller
         return view('parent.attendance.child', compact('child', 'attendance', 'attendancePercentage', 'subjects'));
     }
 }
+

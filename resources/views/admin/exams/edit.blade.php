@@ -29,3 +29,4 @@
 @section('scripts')
     @include('admin.exams.partials.scripts', ['isEdit' => true])
 @endsection
+

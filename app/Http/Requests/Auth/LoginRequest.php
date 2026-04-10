@@ -29,6 +29,7 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'role' => ['required', 'string', 'in:student,teacher,parent,admin'],
         ];
     }
 
@@ -83,3 +84,4 @@ class LoginRequest extends FormRequest
         return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
     }
 }
+

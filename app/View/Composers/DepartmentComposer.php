@@ -12,6 +12,19 @@ class DepartmentComposer
 {
     public function compose(View $view): void
     {
+        if (request()->routeIs('home')) {
+            $fallback = (object) [
+                'name' => config('app.name', 'Manmohan Memorial Polytechnic'),
+                'short_name' => 'MMP',
+            ];
+
+            $view->with('department', $fallback);
+            $view->with('departmentLogoUrl', asset('images/default-logo.svg'));
+            $view->with('college', $fallback);
+            $view->with('collegeLogoUrl', asset('images/default-logo.svg'));
+            return;
+        }
+
         $department = once(function () {
             return SafeCache::remember(
                 'department:shared-current:v1',
@@ -46,3 +59,4 @@ class DepartmentComposer
         $view->with('collegeLogoUrl', $departmentLogoUrl);
     }
 }
+

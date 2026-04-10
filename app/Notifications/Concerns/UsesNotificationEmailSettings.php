@@ -15,3 +15,4 @@ trait UsesNotificationEmailSettings
         return ErpSetting::isEnabled($key, true);
     }
 }
+

@@ -284,7 +284,7 @@
         $category = strtolower((string) ($filters['exam_category'] ?? ($marks->first()?->exam?->exam_category ?? 'assessment')));
         $isCtevt = $category === 'ctevt';
         $departmentEntity = $college ?? $department ?? \App\Models\Department::first();
-        $departmentName = $departmentEntity?->name ?? config('app.name', 'IT DMS');
+        $departmentName = $departmentEntity?->name ?? config('app.name', 'Manmohan Memorial Polytechnic');
         $departmentAddress = trim(collect([
             $departmentEntity?->address ?? null,
             $departmentEntity?->city ?? null,
@@ -370,20 +370,30 @@
                                 <div class="info-value">{{ $semester }}</div>
                             </td>
                         </tr>
-                        <tr>
-                            <td>
+                            <tr>
+                            <td style="width:25%;">
                                 <div class="info-label">Academic Year (BS)</div>
                                 <div class="info-value">{{ $academicYear }}</div>
                             </td>
-                            <td>
+                            <td style="width:25%;">
                                 <div class="info-label">Issue Date</div>
                                 <div class="info-value">{{ $issueDate }}</div>
                             </td>
-                            <td>
+                            <td style="width:25%;">
                                 <div class="info-label">Exam Category</div>
                                 <div class="info-value">{{ $examCategoryLabel }}</div>
                             </td>
-                            <td>
+                            <td style="width:25%;">
+                                <div class="info-label">Assessment Number</div>
+                                <div class="info-value">{{ $assessmentNumber ?: 'N/A' }}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="info-label">Program</div>
+                                <div class="info-value">{{ $programName }}</div>
+                            </td>
+                            <td colspan="2">
                                 <div class="info-label">Public Entries</div>
                                 <div class="info-value">{{ $marks->count() }}</div>
                             </td>
@@ -605,3 +615,4 @@
     </div>
 </body>
 </html>
+

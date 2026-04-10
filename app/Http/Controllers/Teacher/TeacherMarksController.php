@@ -1986,3 +1986,4 @@ class TeacherMarksController extends Controller
         }
     }
 }
+

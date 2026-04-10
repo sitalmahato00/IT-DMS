@@ -26,3 +26,4 @@ class PasswordResetNotification extends ResetPassword
         return new ResetPasswordMail($notifiable, $resetUrl);
     }
 }
+

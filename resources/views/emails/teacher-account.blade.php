@@ -4,7 +4,7 @@
 <!-- Header -->
 <div class="email-header">
     <div class="email-logo">👨‍🏫</div>
-    <h1>Welcome to IT-DMS!</h1>
+    <h1>Welcome to Manmohan Memorial Polytechnic!</h1>
     <p>Department of Computer Science & Engineering</p>
 </div>
 
@@ -14,7 +14,7 @@
     
     <p>Hello <strong>{{ $notifiable->name }}</strong>,</p>
     
-    <p>Your faculty account has been successfully created by the administrator. You now have access to the IT Department Management System with comprehensive tools to manage your classes, student attendance, examinations, and academic records.</p>
+    <p>Your faculty account has been successfully created by the administrator. You now have access to the Manmohan Memorial Polytechnic with comprehensive tools to manage your classes, student attendance, examinations, and academic records.</p>
 
     <!-- Credentials Section -->
     <div class="credentials-box">
@@ -61,10 +61,11 @@
 
 <!-- Footer -->
 <div class="email-footer">
-    <p><strong>IT Department Management System (IT-DMS)</strong></p>
+    <p><strong>Manmohan Memorial Polytechnic</strong></p>
     <p>This is an automated message. Please do not reply to this email.</p>
     <p style="margin-top: 15px; color: #9ca3af;">
         © 2026 IT Department. All rights reserved.
     </p>
 </div>
 @endsection
+

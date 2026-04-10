@@ -315,3 +315,4 @@ function updateStatistics(stats) {
     }
 }
 </script>
+

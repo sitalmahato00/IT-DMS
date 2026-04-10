@@ -14,7 +14,7 @@
     
     <p>Hello <strong>{{ $notifiable->name }}</strong>,</p>
     
-    <p>Thank you for registering with the IT Department Management System. To activate your account and gain full access to all features, please verify your email address by clicking the button below.</p>
+    <p>Thank you for registering with the Manmohan Memorial Polytechnic. To activate your account and gain full access to all features, please verify your email address by clicking the button below.</p>
 
     <!-- CTA Button -->
     <div style="text-align: center; margin: 30px 0;">
@@ -48,15 +48,16 @@
         <strong>Having trouble?</strong> If you're having difficulty verifying your email, please contact the IT Department or your department administrator for assistance.
     </div>
 
-    <p style="margin-top: 30px; color: #6b7280;">Best regards,<br><strong>IT Department</strong><br>Department of Information Technology</p>
+    <p style="margin-top: 30px; color: #6b7280;">Best regards,<br><strong>IT Department</strong><br>Manmohan Memorial Polytechnic</p>
 </div>
 
 <!-- Footer -->
 <div class="email-footer">
-    <p><strong>IT Department Management System (IT-DMS)</strong></p>
+    <p><strong>Manmohan Memorial Polytechnic</strong></p>
     <p>This is an automated message. Please do not reply to this email.</p>
     <p style="margin-top: 15px; color: #9ca3af;">
         © 2026 IT Department. All rights reserved.
     </p>
 </div>
 @endsection
+
