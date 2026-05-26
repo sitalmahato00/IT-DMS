@@ -1,0 +1,36 @@
+{
+  "_auto-sRkgK8jz.js": {
+    "file": "assets/auto-sRkgK8jz.js",
+    "name": "auto"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-NKjCN2pQ.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/admin-dashboard.js": {
+    "file": "assets/admin-dashboard-CboGk8mf.js",
+    "name": "admin-dashboard",
+    "src": "resources/js/admin-dashboard.js",
+    "isEntry": true,
+    "imports": [
+      "_auto-sRkgK8jz.js"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-B3unB6uL.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "_auto-sRkgK8jz.js"
+    ],
+    "css": [
+      "assets/app-DP81AQzm.css"
+    ]
+  }
+}
