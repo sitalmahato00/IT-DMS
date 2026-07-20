@@ -2,6 +2,104 @@
 
 @section('title', 'Gallery Management')
 
+@section('styles')
+<script>
+    document.documentElement.classList.add('gallery-ui-enhanced');
+</script>
+<style>
+    html.gallery-ui-enhanced:not(.dark) .gallery-page {
+        color: #0f172a;
+    }
+
+    html.gallery-ui-enhanced:not(.dark) .gallery-stats > * > div {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        border-color: #d9e4f3;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.96));
+        box-shadow: 0 24px 48px -34px rgba(37, 99, 235, 0.28);
+    }
+
+    html.gallery-ui-enhanced:not(.dark) .gallery-filter-panel > *,
+    html.gallery-ui-enhanced:not(.dark) .gallery-panel {
+        border-radius: 28px;
+        border-color: rgba(215, 227, 243, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(249, 252, 255, 0.97));
+        box-shadow: 0 28px 56px -40px rgba(30, 64, 175, 0.28);
+    }
+
+    html.gallery-ui-enhanced:not(.dark) .gallery-panel-header {
+        background: linear-gradient(180deg, #f6faff, #fbfdff);
+    }
+
+    html.gallery-ui-enhanced:not(.dark) .gallery-tile {
+        border-radius: 26px;
+        border: 1px solid rgba(219, 234, 254, 0.9);
+        box-shadow: 0 24px 48px -34px rgba(37, 99, 235, 0.28);
+    }
+
+    html.gallery-ui-enhanced:not(.dark) .gallery-tile-overlay {
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.04), rgba(15, 23, 42, 0.58));
+    }
+
+    html.gallery-ui-enhanced:not(.dark) .gallery-icon-btn {
+        box-shadow: 0 16px 30px -18px rgba(15, 23, 42, 0.42);
+    }
+
+    html.gallery-ui-enhanced:not(.dark) .gallery-chip,
+    html.gallery-ui-enhanced:not(.dark) .gallery-state-chip {
+        border-radius: 999px;
+        padding: 0.4rem 0.8rem;
+        font-weight: 700;
+        box-shadow: 0 14px 24px -20px rgba(15, 23, 42, 0.26);
+    }
+
+    html.gallery-ui-enhanced:not(.dark) #confirmModal > div,
+    html.gallery-ui-enhanced:not(.dark) #createGalleryModal > div,
+    html.gallery-ui-enhanced:not(.dark) #editGalleryModal > div {
+        border-radius: 30px;
+        border: 1px solid rgba(215, 227, 243, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(247, 251, 255, 0.98));
+        box-shadow: 0 34px 70px -38px rgba(15, 23, 42, 0.42);
+        overflow: hidden;
+    }
+
+    html.gallery-ui-enhanced:not(.dark) #confirmHeader,
+    html.gallery-ui-enhanced:not(.dark) #createGalleryModal .bg-gradient-to-r,
+    html.gallery-ui-enhanced:not(.dark) #editGalleryModal .bg-gradient-to-r {
+        border-bottom: none;
+    }
+
+    html.gallery-ui-enhanced:not(.dark) #createGalleryModal input,
+    html.gallery-ui-enhanced:not(.dark) #createGalleryModal textarea,
+    html.gallery-ui-enhanced:not(.dark) #createGalleryModal select,
+    html.gallery-ui-enhanced:not(.dark) #editGalleryModal input,
+    html.gallery-ui-enhanced:not(.dark) #editGalleryModal textarea,
+    html.gallery-ui-enhanced:not(.dark) #editGalleryModal select {
+        border-radius: 16px;
+        border-color: #d8e4f5;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    html.gallery-ui-enhanced:not(.dark) #createGalleryModal input:focus,
+    html.gallery-ui-enhanced:not(.dark) #createGalleryModal textarea:focus,
+    html.gallery-ui-enhanced:not(.dark) #createGalleryModal select:focus,
+    html.gallery-ui-enhanced:not(.dark) #editGalleryModal input:focus,
+    html.gallery-ui-enhanced:not(.dark) #editGalleryModal textarea:focus,
+    html.gallery-ui-enhanced:not(.dark) #editGalleryModal select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+    }
+
+    html.gallery-ui-enhanced:not(.dark) #confirmCancel,
+    html.gallery-ui-enhanced:not(.dark) #confirmOk,
+    html.gallery-ui-enhanced:not(.dark) #createGalleryModal button,
+    html.gallery-ui-enhanced:not(.dark) #editGalleryModal button {
+        border-radius: 999px;
+    }
+</style>
+@endsection
+
 @section('content')
 {{-- Page Header - Using standardized component --}}
 @include('admin.components.admin-page-header', [
@@ -15,6 +113,8 @@
         'onclick' => 'openCreateGalleryModal()'
     ]
 ])
+
+<div class="gallery-page space-y-6">
 
     <!-- Success/Error Messages -->
     <div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 backdrop-blur-sm hidden flex items-center justify-center">
@@ -68,6 +168,7 @@
     @endif
 
     {{-- Stats Cards - Using standardized component --}}
+<div class="gallery-stats">
 @include('admin.components.admin-stats-cards', [
     'cards' => [
         ['title' => 'Total Photos', 'value' => $stats['total'] ?? 0, 'icon' => 'bi-images', 'color' => 'blue'],
@@ -76,8 +177,10 @@
         ['title' => 'Categories', 'value' => 6, 'icon' => 'bi-folder', 'color' => 'purple'],
     ]
 ])
+</div>
 
     {{-- Filter Card - Using standardized component --}}
+<div class="gallery-filter-panel">
 @include('admin.components.admin-filter-card', [
     'formAction' => route('admin.gallery'),
     'filters' => [
@@ -89,10 +192,11 @@
     'resetRoute' => route('admin.gallery'),
     'hideFilterButton' => true
 ])
+</div>
 
     <!-- Gallery Card -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
+    <div class="gallery-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+        <div class="gallery-panel-header px-5 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
             <div class="flex items-center justify-between">
                 <h3 class="text-sm font-bold text-gray-900 dark:text-white">Photo Gallery</h3>
                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ $galleries->total() }} total photos</span>
@@ -102,7 +206,7 @@
         @if($galleries->count() > 0)
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-4">
             @foreach($galleries as $gallery)
-            <div class="relative group aspect-square bg-gray-100 rounded-lg overflow-hidden">
+            <div class="gallery-tile relative group aspect-square bg-gray-100 rounded-lg overflow-hidden">
                 @if($gallery->image_url)
                     <img src="{{ $gallery->image_url }}" alt="{{ $gallery->title }}" class="w-full h-full object-cover">
                 @else
@@ -112,14 +216,14 @@
                 @endif
 
                 <!-- Overlay -->
-                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                    <button onclick="openEditGalleryModal({{ $gallery->id }})" class="p-2 bg-white rounded-full hover:bg-gray-100 transition" title="Edit">
+                <div class="gallery-tile-overlay absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                    <button onclick="openEditGalleryModal({{ $gallery->id }})" class="gallery-icon-btn p-2 bg-white rounded-full hover:bg-gray-100 transition" title="Edit">
                         <i class="bi bi-pencil text-gray-700 text-sm"></i>
                     </button>
-                    <button onclick="toggleGalleryStatus({{ $gallery->id }}, {{ $gallery->is_active ? 'false' : 'true' }})" class="p-2 {{ $gallery->is_active ? 'bg-green-500' : 'bg-gray-500' }} rounded-full hover:opacity-80 transition" title="{{ $gallery->is_active ? 'Deactivate' : 'Activate' }}">
+                    <button onclick="toggleGalleryStatus({{ $gallery->id }}, {{ $gallery->is_active ? 'false' : 'true' }})" class="gallery-icon-btn p-2 {{ $gallery->is_active ? 'bg-green-500' : 'bg-gray-500' }} rounded-full hover:opacity-80 transition" title="{{ $gallery->is_active ? 'Deactivate' : 'Activate' }}">
                         <i class="bi {{ $gallery->is_active ? 'bi-eye-slash' : 'bi-eye' }} text-white text-sm"></i>
                     </button>
-                    <button onclick="deleteGalleryPhoto({{ $gallery->id }})" class="p-2 bg-blue-500 rounded-full hover:bg-blue-600 transition" title="Delete">
+                    <button onclick="deleteGalleryPhoto({{ $gallery->id }})" class="gallery-icon-btn p-2 bg-blue-500 rounded-full hover:bg-blue-600 transition" title="Delete">
                         <i class="bi bi-trash text-white text-sm"></i>
                     </button>
                 </div>
@@ -127,7 +231,7 @@
                 <!-- Status Badge -->
                 @if(!$gallery->is_active)
                 <div class="absolute top-2 left-2">
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500 text-white">
+                    <span class="gallery-state-chip inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500 text-white">
                         <i class="bi bi-eye-slash text-xs"></i>
                     </span>
                 </div>
@@ -135,7 +239,7 @@
 
                 <!-- Category Badge -->
                 <div class="absolute bottom-2 left-2">
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-white/90 text-gray-700">
+                    <span class="gallery-chip inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-white/90 text-gray-700">
                         {{ ucfirst($gallery->category) }}
                     </span>
                 </div>
@@ -569,4 +673,6 @@
         }
     });
 </script>
+</div>
 @endsection
+

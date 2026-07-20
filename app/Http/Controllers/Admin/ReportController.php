@@ -194,9 +194,18 @@ class ReportController extends Controller
             }
         }
 
-        $totalStudents = $studentQuery->clone()->count();
-        $activeStudents = $studentQuery->clone()->where('students.status', 'active')->where('students.is_alumni', false)->count();
-        $alumni = $studentQuery->clone()->where('students.is_alumni', true)->count();
+        // FIX #11: Combine student count queries into one
+        $studentCounts = $studentQuery->clone()
+            ->selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN students.status = "active" AND students.is_alumni = 0 THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN students.is_alumni = 1 THEN 1 ELSE 0 END) as alumni
+            ')
+            ->first();
+        
+        $totalStudents = $studentCounts->total ?? 0;
+        $activeStudents = $studentCounts->active ?? 0;
+        $alumni = $studentCounts->alumni ?? 0;
 
         // Calculate attendance rate
         $attendanceQuery = DB::table('attendance')
@@ -208,8 +217,16 @@ class ReportController extends Controller
             $attendanceQuery->where('students.semester', $semester);
         }
 
-        $totalAttendance = $attendanceQuery->clone()->count();
-        $presentAttendance = $attendanceQuery->clone()->where('attendance.status', 'present')->count();
+        // FIX #12: Combine attendance count queries into one
+        $attendanceCounts = $attendanceQuery->clone()
+            ->selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN attendance.status = "present" THEN 1 ELSE 0 END) as present
+            ')
+            ->first();
+        
+        $totalAttendance = $attendanceCounts->total ?? 0;
+        $presentAttendance = $attendanceCounts->present ?? 0;
         $attendanceRate = $totalAttendance > 0 ? round(($presentAttendance / $totalAttendance) * 100, 1) : 0;
 
         // Calculate average marks
@@ -1390,3 +1407,4 @@ class ReportController extends Controller
         }
     }
 }
+

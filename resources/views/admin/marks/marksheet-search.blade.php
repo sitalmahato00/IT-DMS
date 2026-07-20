@@ -1,6 +1,54 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Marksheet Search - IT DMS')
+@section('title', 'Marksheet Search - Manmohan Memorial Polytechnic')
+
+@section('styles')
+<script>
+    document.documentElement.classList.add('marksheet-ui-enhanced');
+</script>
+<style>
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-page {
+        color: #0f172a;
+    }
+
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-panel {
+        border-radius: 28px;
+        border-color: rgba(215, 227, 243, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 251, 255, 0.97));
+        box-shadow: 0 28px 56px -40px rgba(37, 99, 235, 0.28);
+    }
+
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-panel-header,
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-table thead {
+        background: linear-gradient(180deg, #f6faff, #fbfdff);
+    }
+
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-info-box {
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(255, 255, 255, 0.98));
+    }
+
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-chip,
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-toolbar-btn {
+        border-radius: 999px;
+        font-weight: 700;
+        box-shadow: 0 16px 28px -20px rgba(15, 23, 42, 0.34);
+    }
+
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-page input,
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-page select {
+        border-radius: 16px;
+        border-color: #d8e4f5;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-page input:focus,
+    html.marksheet-ui-enhanced:not(.dark) .marksheet-page select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+    }
+</style>
+@endsection
 
 @section('content')
 {{-- Page Header --}}
@@ -12,10 +60,10 @@
     ]
 ])
 
-<div class="space-y-6">
+<div class="marksheet-page space-y-6">
     {{-- Search Form --}}
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
-        <div class="p-6 border-b border-gray-200 dark:border-slate-700">
+    <div class="marksheet-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+        <div class="marksheet-panel-header p-6 border-b border-gray-200 dark:border-slate-700">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Search Student Marksheet</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400">Enter student details to search for marksheets</p>
         </div>
@@ -77,40 +125,6 @@
                     >
                 </div>
 
-                {{-- Date of Birth --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Birth (AD)</label>
-                    <input 
-                        type="date" 
-                        id="marksheetDobAd"
-                        name="dob" 
-                        value="{{ $filters['dob'] }}"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-white"
-                    >
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date of Birth (BS)</label>
-                    <div class="relative">
-                        <input 
-                            type="text" 
-                            id="marksheetDobBs"
-                            name="dob_bs" 
-                            value="{{ $filters['dob_bs'] }}"
-                            placeholder="YYYY-MM-DD"
-                            autocomplete="off"
-                            class="bs-date w-full pr-10 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-700 dark:text-white"
-                        >
-                        <button
-                            type="button"
-                            aria-label="Pick BS date"
-                            onclick="event?.preventDefault(); event?.stopPropagation(); window.openBsDatePicker?.('marksheetDobBs'); return false;"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white"
-                        >
-                            <i class="bi bi-calendar3"></i>
-                        </button>
-                    </div>
-                </div>
             </div>
 
             <div class="flex items-center gap-4 pt-4">
@@ -118,13 +132,13 @@
                     type="submit" 
                     name="search_student" 
                     value="1"
-                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                    class="marksheet-toolbar-btn px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
                 >
                     <i class="bi bi-search mr-2"></i>Search Marksheet
                 </button>
                 <a 
                     href="{{ route('admin.marksheet.search') }}" 
-                    class="px-6 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors"
+                    class="marksheet-toolbar-btn px-6 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors"
                 >
                     <i class="bi bi-arrow-counterclockwise mr-2"></i>Reset
                 </a>
@@ -134,8 +148,8 @@
 
     {{-- Search Results --}}
     @if($student)
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
-            <div class="p-6 border-b border-gray-200 dark:border-slate-700 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="marksheet-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+            <div class="marksheet-panel-header p-6 border-b border-gray-200 dark:border-slate-700 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Details</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Search results for the selected student</p>
@@ -144,7 +158,7 @@
                     <a 
                         href="{{ route('admin.marksheet.print', array_merge($filters, ['student_id' => $student->id])) }}" 
                         onclick="adminOpenPrintPreview('{{ route('admin.marksheet.print', array_merge($filters, ['student_id' => $student->id])) }}', { title: 'Print Marksheet' }); return false;"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        class="marksheet-toolbar-btn inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                         <i class="bi bi-printer"></i>
                         Print Marksheet
@@ -152,7 +166,7 @@
                     <a 
                         href="{{ route('admin.marksheet.export', array_merge($filters, ['student_id' => $student->id])) }}" 
                         target="_blank"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                        class="marksheet-toolbar-btn inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                         <i class="bi bi-download"></i>
                         Export CSV
@@ -162,7 +176,7 @@
 
             <div class="p-6">
                 {{-- Student Info --}}
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                <div class="marksheet-info-box grid grid-cols-2 md:grid-cols-3 gap-4 mb-6 p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
                     <div>
                         <span class="text-xs text-gray-500 dark:text-gray-400">Name</span>
                         <p class="font-medium text-gray-800 dark:text-gray-200">{{ $student->user->name ?? 'N/A' }}</p>
@@ -184,12 +198,12 @@
                         <p class="font-medium text-gray-800 dark:text-gray-200">{{ $student->academic_year_bs ?? 'N/A' }}</p>
                     </div>
                     <div>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Date of Birth</span>
-                        <p class="font-medium text-gray-800 dark:text-gray-200">{{ $student->date_of_birth ?? 'N/A' }}</p>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Result</span>
+                        <p class="font-medium text-gray-800 dark:text-gray-200">{{ strtoupper((string) ($marksheetData['result'] ?? 'N/A')) }}</p>
                     </div>
                     <div>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">Date of Birth (BS)</span>
-                        <p class="font-medium text-gray-800 dark:text-gray-200">{{ $student->date_of_birth_bs ?? 'N/A' }}</p>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">Published Exams</span>
+                        <p class="font-medium text-gray-800 dark:text-gray-200">{{ $marksheetData['exam_marks']->count() ?? 0 }}</p>
                     </div>
                 </div>
 
@@ -200,7 +214,7 @@
                             $isCtevt = strtolower($filters['exam_category'] ?? '') === 'ctevt';
                             $grandTotal = 0;
                         @endphp
-                        <table class="w-full text-sm text-left border border-gray-300 dark:border-slate-700 border-collapse">
+                        <table class="marksheet-table w-full text-sm text-left border border-gray-300 dark:border-slate-700 border-collapse">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-slate-700 dark:text-gray-300">
                                 <tr>
                                     <th class="px-4 py-3 text-center border border-gray-300 dark:border-slate-600">S.N.</th>
@@ -314,7 +328,7 @@
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
             <div class="text-center py-8">
                 <i class="bi bi-person-x text-4xl text-gray-400 mb-2"></i>
-                <p class="text-gray-500 dark:text-gray-400">No student found. Please check the student ID or DOB.</p>
+                <p class="text-gray-500 dark:text-gray-400">No student found. Please check the student ID or roll number.</p>
             </div>
         </div>
     @endif
@@ -326,9 +340,6 @@
         const categorySelect = document.getElementById('examCategorySelect');
         const assessmentBlock = document.getElementById('assessmentNumberFilter');
         const assessmentSelect = document.querySelector('select[name="assessment_number"]');
-        const dobAdInput = document.getElementById('marksheetDobAd');
-        const dobBsInput = document.getElementById('marksheetDobBs');
-        let isSyncingDob = false;
 
         function toggleAssessmentFilter() {
             if (!categorySelect || !assessmentBlock) {
@@ -345,152 +356,10 @@
             }
         }
 
-        function normalizeNepaliDigits(value) {
-            if (!value) {
-                return value;
-            }
-
-            const map = {
-                '०': '0',
-                '१': '1',
-                '२': '2',
-                '३': '3',
-                '४': '4',
-                '५': '5',
-                '६': '6',
-                '७': '7',
-                '८': '8',
-                '९': '9',
-            };
-
-            return String(value).replace(/[०-९]/g, digit => map[digit] || digit);
-        }
-
-        async function convertMarksheetAdToBs(adDate) {
-            if (!adDate) {
-                return '';
-            }
-
-            try {
-                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-                const response = await fetch('/admin/convert/ad-to-bs', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': token,
-                    },
-                    body: JSON.stringify({ date: adDate }),
-                });
-
-                if (!response.ok) {
-                    return '';
-                }
-
-                const data = await response.json();
-                return data.bs || '';
-            } catch (error) {
-                return '';
-            }
-        }
-
-        async function convertMarksheetBsToAd(bsDate) {
-            const normalizedBs = normalizeNepaliDigits(bsDate);
-            if (!normalizedBs) {
-                return '';
-            }
-
-            try {
-                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-                const response = await fetch('/admin/convert/bs-to-ad', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': token,
-                    },
-                    body: JSON.stringify({ date: normalizedBs }),
-                });
-
-                if (!response.ok) {
-                    return '';
-                }
-
-                const data = await response.json();
-                return data.ad || '';
-            } catch (error) {
-                return '';
-            }
-        }
-
-        async function syncBsFromAd() {
-            if (!dobAdInput || !dobBsInput || isSyncingDob) {
-                return;
-            }
-
-            if (!dobAdInput.value) {
-                dobBsInput.value = '';
-                return;
-            }
-
-            isSyncingDob = true;
-            dobBsInput.value = await convertMarksheetAdToBs(dobAdInput.value);
-            isSyncingDob = false;
-        }
-
-        async function syncAdFromBs() {
-            if (!dobAdInput || !dobBsInput || isSyncingDob) {
-                return;
-            }
-
-            dobBsInput.value = normalizeNepaliDigits(dobBsInput.value).replace(/[/.]/g, '-');
-
-            if (!dobBsInput.value) {
-                dobAdInput.value = '';
-                return;
-            }
-
-            isSyncingDob = true;
-            const adDate = await convertMarksheetBsToAd(dobBsInput.value);
-            if (adDate) {
-                dobAdInput.value = adDate;
-            }
-            isSyncingDob = false;
-        }
-
         toggleAssessmentFilter();
-        categorySelect.addEventListener('change', toggleAssessmentFilter);
-
-        if (dobAdInput && dobBsInput) {
-            window.initBsDatePicker?.(document);
-
-            dobAdInput.addEventListener('change', syncBsFromAd);
-            dobAdInput.addEventListener('input', syncBsFromAd);
-            dobBsInput.addEventListener('change', syncAdFromBs);
-            dobBsInput.addEventListener('input', syncAdFromBs);
-            dobBsInput.addEventListener('blur', syncAdFromBs);
-
-            if (dobAdInput.value && !dobBsInput.value) {
-                syncBsFromAd();
-            } else if (dobBsInput.value && !dobAdInput.value) {
-                syncAdFromBs();
-            } else if (dobBsInput.value) {
-                dobBsInput.value = normalizeNepaliDigits(dobBsInput.value).replace(/[/.]/g, '-');
-            }
-
-            let previousBsDob = dobBsInput.value || '';
-            setInterval(() => {
-                const currentBsDob = dobBsInput.value || '';
-                if (currentBsDob === previousBsDob) {
-                    return;
-                }
-
-                previousBsDob = currentBsDob;
-
-                if (!isSyncingDob) {
-                    syncAdFromBs();
-                }
-            }, 200);
-        }
+        categorySelect?.addEventListener('change', toggleAssessmentFilter);
     });
 </script>
 @endpush
 @endsection
+

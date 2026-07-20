@@ -56,30 +56,6 @@ class NoticeSeeder extends Seeder
                 'is_important' => true,
                 'published_at' => now()->addDays(3),
             ],
-            [
-                'title' => 'Teacher Training Workshop',
-                'message' => 'A workshop on modern teaching methodologies will be conducted for all faculty members. Attendance is mandatory.',
-                'audience' => 'teacher',
-                'status' => 'published',
-                'is_important' => true,
-                'published_at' => now()->addDays(4),
-            ],
-            [
-                'title' => 'System Maintenance',
-                'message' => 'The system will be under maintenance on Friday from 2 PM to 6 PM. Users will not be able to access the system during this time.',
-                'audience' => 'all',
-                'status' => 'published',
-                'is_important' => true,
-                'published_at' => now()->addDays(5),
-            ],
-            [
-                'title' => 'Parent-Teacher Meeting',
-                'message' => 'Parent-teacher meetings will be conducted on the last Saturday of this month. Parents can schedule their appointments online.',
-                'audience' => 'parent',
-                'status' => 'published',
-                'is_important' => false,
-                'published_at' => now()->addDays(6),
-            ],
         ];
 
         foreach ($notices as $notice) {

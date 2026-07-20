@@ -36,10 +36,10 @@
     $buttonClass = $colorClasses[$buttonColor] ?? $colorClasses['red'];
 @endphp
 
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+<div class="teacher-page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
     {{-- Left: Page Title & Breadcrumb --}}
     <div class="min-w-0">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+        <h1 class="teacher-page-header-title text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
             {{ $title }}
         </h1>
         @if(!empty($breadcrumbs))
@@ -71,7 +71,7 @@
 
         {{-- Import Button --}}
         @if($importRoute)
-            <a href="{{ $importRoute }}" class="inline-flex items-center gap-2 px-4 py-2 border border-blue-300 dark:border-blue-600 bg-white dark:bg-blue-900/30 hover:bg-blue-50 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-medium transition-colors shadow-sm">
+            <a href="{{ $importRoute }}" class="teacher-page-secondary-btn inline-flex items-center gap-2 px-4 py-2 border border-blue-300 dark:border-blue-600 bg-white dark:bg-blue-900/30 hover:bg-blue-50 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-medium transition-colors shadow-sm">
                 <i class="bi bi-upload"></i>
                 <span class="hidden sm:inline">{{ __('Import') }}</span>
             </a>
@@ -79,7 +79,7 @@
 
         {{-- Export Button --}}
         @if($exportRoute)
-            <a href="{{ $exportRoute }}" class="inline-flex items-center gap-2 px-4 py-2 border border-red-300 dark:border-red-600 bg-white dark:bg-red-900/30 hover:bg-red-50 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg text-sm font-medium transition-colors shadow-sm">
+            <a href="{{ $exportRoute }}" class="teacher-page-secondary-btn inline-flex items-center gap-2 px-4 py-2 border border-red-300 dark:border-red-600 bg-white dark:bg-red-900/30 hover:bg-red-50 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 rounded-lg text-sm font-medium transition-colors shadow-sm">
                 <i class="bi bi-download"></i>
                 <span class="hidden sm:inline">{{ __('Export') }}</span>
             </a>
@@ -94,7 +94,7 @@
                 @elseif(isset($addButton['route']))
                     onclick="window.location.href='{{ $addButton['route'] }}'"
                 @endif
-                class="inline-flex items-center gap-2 px-4 py-2 {{ $buttonClass }} text-white rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors shadow-sm"
+                class="teacher-page-primary-btn inline-flex items-center gap-2 px-4 py-2 {{ $buttonClass }} text-white rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors shadow-sm"
             >
                 <i class="bi bi-plus-lg"></i>
                 <span>{{ $addButton['label'] }}</span>
@@ -102,3 +102,4 @@
         @endif
     </div>
 </div>
+

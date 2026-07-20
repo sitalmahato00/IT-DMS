@@ -34,6 +34,12 @@ class ErpSetting extends Model
      */
     public static function set(string $key, mixed $value, string $group = 'general', string $type = 'string'): void
     {
+        if ($type === 'json' && is_array($value)) {
+            $value = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } elseif ($type === 'boolean') {
+            $value = $value ? '1' : '0';
+        }
+
         static::updateOrCreate(
             ['key' => $key],
             ['value' => $value, 'group' => $group, 'type' => $type]
@@ -66,6 +72,23 @@ class ErpSetting extends Model
     }
 
     /**
+     * Convenience boolean getter.
+     */
+    public static function isEnabled(string $key, bool $default = false): bool
+    {
+        return (bool) static::get($key, $default);
+    }
+
+    /**
+     * Convenience array getter.
+     */
+    public static function asArray(string $key, array $default = []): array
+    {
+        $value = static::get($key, $default);
+        return is_array($value) ? $value : $default;
+    }
+
+    /**
      * Default settings with descriptions
      */
     public static function defaults(): array
@@ -91,6 +114,23 @@ class ErpSetting extends Model
             ['key' => 'max_electives_per_student', 'value' => '2', 'group' => 'elective', 'type' => 'integer', 'label' => 'Max Electives per Student'],
             ['key' => 'elective_approval_required', 'value' => '1', 'group' => 'elective', 'type' => 'boolean', 'label' => 'Require Admin Approval for Electives'],
             ['key' => 'elective_enrollment_open', 'value' => '0', 'group' => 'elective', 'type' => 'boolean', 'label' => 'Global Elective Enrollment Open'],
+            // Security
+            ['key' => 'security_password_min_length', 'value' => '10', 'group' => 'security', 'type' => 'integer', 'label' => 'Minimum Password Length'],
+            ['key' => 'security_password_require_uppercase', 'value' => '1', 'group' => 'security', 'type' => 'boolean', 'label' => 'Require Uppercase Letter'],
+            ['key' => 'security_password_require_lowercase', 'value' => '1', 'group' => 'security', 'type' => 'boolean', 'label' => 'Require Lowercase Letter'],
+            ['key' => 'security_password_require_number', 'value' => '1', 'group' => 'security', 'type' => 'boolean', 'label' => 'Require Number'],
+            ['key' => 'security_password_require_symbol', 'value' => '1', 'group' => 'security', 'type' => 'boolean', 'label' => 'Require Symbol'],
+            ['key' => 'security_two_factor_enabled', 'value' => '0', 'group' => 'security', 'type' => 'boolean', 'label' => 'Enable Two-Factor Authentication'],
+            ['key' => 'security_two_factor_roles', 'value' => json_encode(['admin'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'group' => 'security', 'type' => 'json', 'label' => '2FA Roles'],
+            ['key' => 'security_two_factor_expiry_minutes', 'value' => '10', 'group' => 'security', 'type' => 'integer', 'label' => '2FA Code Expiry (minutes)'],
+            // Notifications
+            ['key' => 'notification_email_enabled', 'value' => '1', 'group' => 'notification', 'type' => 'boolean', 'label' => 'Enable Notification Emails'],
+            ['key' => 'notification_email_exam', 'value' => '1', 'group' => 'notification', 'type' => 'boolean', 'label' => 'Email for Exams'],
+            ['key' => 'notification_email_attendance', 'value' => '1', 'group' => 'notification', 'type' => 'boolean', 'label' => 'Email for Attendance'],
+            ['key' => 'notification_email_student', 'value' => '1', 'group' => 'notification', 'type' => 'boolean', 'label' => 'Email for Student Updates'],
+            ['key' => 'notification_email_assignment', 'value' => '1', 'group' => 'notification', 'type' => 'boolean', 'label' => 'Email for Notices/Assignments'],
+            ['key' => 'notification_email_result', 'value' => '1', 'group' => 'notification', 'type' => 'boolean', 'label' => 'Email for Results'],
         ];
     }
 }
+

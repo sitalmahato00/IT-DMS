@@ -127,7 +127,7 @@
                             </div>
                             <div class="auth-panel-copy">
                                 <h2 class="auth-panel-title">{{ $departmentName }}</h2>
-                                <p class="auth-panel-subtitle">{{ $locale === 'ne' ? 'IT विभाग व्यवस्थापन प्रणाली' : 'IT Department Management System' }}</p>
+                                <p class="auth-panel-subtitle">{{ $locale === 'ne' ? 'IT विभाग व्यवस्थापन प्रणाली' : 'Manmohan Memorial Polytechnic' }}</p>
                                 <p class="auth-panel-meta">{{ $addressInfo }}</p>
                             </div>
                         </div>
@@ -200,6 +200,28 @@
                                 </div>
                             </div>
 
+                            <div class="auth-field">
+                                <label for="role" class="auth-label">{{ $locale === 'ne' ? 'भूमिका' : 'Role' }}</label>
+                                <div class="auth-input-wrap">
+                                    <span class="auth-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16.5 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                            <circle cx="8.5" cy="7" r="4" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 8a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
+                                        </svg>
+                                    </span>
+                                    <select id="role" class="auth-input" name="role" required>
+                                        <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>{{ $locale === 'ne' ? 'विद्यार्थी' : 'Student' }}</option>
+                                        <option value="teacher" {{ old('role') == 'teacher' ? 'selected' : '' }}>{{ $locale === 'ne' ? 'शिक्षक' : 'Teacher' }}</option>
+                                        <option value="parent" {{ old('role') == 'parent' ? 'selected' : '' }}>{{ $locale === 'ne' ? 'अभिभावक' : 'Parent' }}</option>
+                                        <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>{{ $locale === 'ne' ? 'प्रशासक' : 'Admin' }}</option>
+                                    </select>
+                                </div>
+                                @error('role')
+                                    <p class="auth-error">{{ $message }}</p>
+                                @enderror
+                            </div>
+
                             <div class="auth-row">
                                 <label for="remember" class="auth-remember">
                                     <input
@@ -247,3 +269,4 @@
         </div>
     </div>
 @endsection
+

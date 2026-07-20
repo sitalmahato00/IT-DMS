@@ -3,18 +3,18 @@
 @section('title', __('Upload Study Material'))
 
 @section('content')
-<div class="space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Upload Study Material') }}</h1>
+<div class="teacher-smooth-page teacher-materials-page space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif">
+    <div class="teacher-page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="min-w-0">
+            <h1 class="teacher-page-header-title text-2xl font-bold text-gray-900 dark:text-white">{{ __('Upload Study Material') }}</h1>
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('Upload files for your assigned subjects only.') }}</p>
         </div>
-        <a href="{{ route('teacher.study-materials') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium">
+        <a href="{{ route('teacher.study-materials') }}" class="teacher-page-secondary-btn inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium">
             <i class="bi bi-arrow-left"></i> {{ __('Back to Materials') }}
         </a>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div class="teacher-smooth-form-panel bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
         @if($errors->any())
             <div class="mb-4 p-4 rounded-lg border border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300 text-sm">
                 <ul class="list-disc pl-5 space-y-1">
@@ -77,10 +77,10 @@
             </div>
 
             <div class="flex items-center gap-2 pt-2">
-                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition font-medium">
+                <button type="submit" class="teacher-page-primary-btn inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition font-medium">
                     <i class="bi bi-upload"></i> {{ __('Upload Material') }}
                 </button>
-                <a href="{{ route('teacher.study-materials') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium">
+                <a href="{{ route('teacher.study-materials') }}" class="teacher-page-secondary-btn inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium">
                     {{ __('Cancel') }}
                 </a>
             </div>
@@ -88,3 +88,4 @@
     </div>
 </div>
 @endsection
+

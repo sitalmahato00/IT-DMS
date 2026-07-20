@@ -1,7 +1,7 @@
 @props([
-    'description' => 'IT Department Management System (IT-DMS) is a comprehensive academic management solution designed to streamline administrative tasks, improve communication, and enhance the learning experience.',
+    'description' => 'Manmohan Memorial Polytechnic is a comprehensive academic management solution designed to streamline administrative tasks, improve communication, and enhance the learning experience.',
     'primaryBtnText' => 'Get Started',
-    'primaryBtnUrl' => '/register',
+    'primaryBtnUrl' => '/login',
     'secondaryBtnText' => 'Learn More',
     'secondaryBtnUrl' => '#about',
     'imageSrc' => '/images/hero-image.jpg',
@@ -36,7 +36,7 @@
                         {{ __('Modern Academic Solutions') }}
                     </div>
                     <h1 class="heading-lg leading-tight text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
-                        {{ __('Welcome to the') }} <span class="text-gradient">{{ __('IT Department Management System') }}</span> ({{ __('IT-DMS') }})
+                        {{ __('Welcome to the') }} <span class="text-gradient">{{ __('Manmohan Memorial Polytechnic') }}</span> ({{ __('Manmohan Memorial Polytechnic') }})
                     </h1>
                     <p class="text-lg text-gray-700 mb-6 max-w-xl">
                         {{ __('A unified digital platform for managing academics, administration, communication, and resources in the IT Department.') }}
@@ -102,3 +102,4 @@
         :counts="$counts" 
     />
 </div>
+

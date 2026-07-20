@@ -1,12 +1,12 @@
 {{-- Edit Material Modal --}}
 <div id="editMaterialModal" class="fixed inset-0 z-50 hidden">
     <div class="fixed inset-0 bg-black bg-opacity-50" onclick="closeEditMaterialModal()"></div>
-    <div class="relative mt-10 flex max-h-[calc(100vh-4rem)] w-[90%] max-w-md flex-col overflow-hidden rounded-lg bg-white shadow-xl mx-auto" style="max-width: 500px;">
-        <div class="flex items-center justify-between p-4 border-b">
-            <h3 class="text-lg font-semibold text-gray-900">Edit Study Material</h3>
-            <button onclick="closeEditMaterialModal()" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+    <div class="document-modal-panel relative mt-10 flex max-h-[calc(100vh-4rem)] w-[90%] max-w-md flex-col overflow-hidden rounded-lg bg-white shadow-xl mx-auto" style="max-width: 500px;">
+        <div class="document-modal-header flex items-center justify-between p-4 border-b">
+            <h3 class="text-lg font-semibold text-white">Edit Study Material</h3>
+            <button onclick="closeEditMaterialModal()" class="text-white/80 hover:text-white text-2xl">×</button>
         </div>
-        <form id="editMaterialForm" method="POST" enctype="multipart/form-data" class="overflow-y-auto p-4">
+        <form id="editMaterialForm" method="POST" enctype="multipart/form-data" class="document-form overflow-y-auto p-4">
             @csrf
             @method('PUT')
             
@@ -53,7 +53,7 @@
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Select Course</option>
                     @forelse($courses as $course)
-                        <option value="{{ $course->subject_name }}">{{ $course->subject_name }} ({{ $course->subject_code }})</option>
+                        <option value="{{ $course->id }}">{{ $course->subject_name }} ({{ $course->subject_code }})</option>
                     @empty
                         <option value="">No courses available</option>
                     @endforelse
@@ -67,8 +67,7 @@
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="all">Everyone (All)</option>
                     <option value="students">Students Only</option>
-                    <option value="teachers">Teachers Only</option>
-                    <option value="admins">Admins Only</option>
+                    <option value="faculty">Faculty Only</option>
                 </select>
                 @error('visibility')<p class="text-blue-600 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
@@ -99,11 +98,11 @@
             
             <div class="flex justify-end gap-3">
                 <button type="button" onclick="closeEditMaterialModal()"
-                    class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
+                    class="document-secondary-btn px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
                     Cancel
                 </button>
                 <button type="submit"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+                    class="document-primary-btn px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
                     <i class="bi bi-check-lg mr-1"></i>Update
                 </button>
             </div>
@@ -126,7 +125,7 @@ function openEditMaterialModal(materialId) {
     document.getElementById('editTitle').value = material.title || '';
     document.getElementById('editSemester').value = material.semester || '';
     document.getElementById('editDocumentType').value = material.document_type || '';
-    document.getElementById('editCourse').value = material.course || '';
+    document.getElementById('editCourse').value = material.course_id || '';
     document.getElementById('editVisibility').value = material.visibility || 'all';
     document.getElementById('editDescription').value = material.description || '';
     
@@ -163,3 +162,4 @@ document.getElementById('editMaterialModal').addEventListener('click', function(
     if (e.target === this) closeEditMaterialModal();
 });
 </script>
+

@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Student;
 use App\Notifications\PasswordResetNotification;
+use App\Support\Media;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
@@ -23,8 +25,8 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'username',
         'password',
-        'role',
         'phone',
         'department',
         'bio',
@@ -35,7 +37,7 @@ class User extends Authenticatable
      * Model attribute defaults.
      */
     protected $attributes = [
-        'role' => 'admin',
+        'role' => 'student',
     ];
 
     /**
@@ -82,28 +84,39 @@ class User extends Authenticatable
     /**
      * Get the profile photo URL.
      */
-    public function getProfilePhotoUrlAttribute(): string
+    public function getProfilePhotoUrlAttribute(): ?string
     {
         // First check if profile photo is stored directly on user
         if (!empty($this->profile_photo_path)) {
-            return asset('storage/' . $this->profile_photo_path);
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($this->profile_photo_path)) {
+                return \Illuminate\Support\Facades\Storage::url($this->profile_photo_path);
+            }
+            return null;
         }
         
         // Check related models for profile photo (using optional to avoid errors if not loaded)
         if ($this->role === 'student' && optional($this->student)->profile_photo_path) {
-            return asset('storage/' . $this->student->profile_photo_path);
+            $path = $this->student->profile_photo_path;
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+                return \Illuminate\Support\Facades\Storage::url($path);
+            }
         }
         
         if ($this->role === 'teacher' && optional($this->teacher)->profile_photo_path) {
-            return asset('storage/' . $this->teacher->profile_photo_path);
+            $path = $this->teacher->profile_photo_path;
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+                return \Illuminate\Support\Facades\Storage::url($path);
+            }
         }
         
         if ($this->role === 'parent' && optional($this->parent)->profile_photo_path) {
-            return asset('storage/' . $this->parent->profile_photo_path);
+            $path = $this->parent->profile_photo_path;
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+                return \Illuminate\Support\Facades\Storage::url($path);
+            }
         }
         
-        // Fallback to ui-avatars
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&size=150&background=random';
+        return asset('images/default-logo.svg');
     }
 
     /**
@@ -128,3 +141,4 @@ class User extends Authenticatable
         };
     }
 }
+

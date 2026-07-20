@@ -18,6 +18,10 @@ class RoleMiddleware
     {
         // Check if user is authenticated
         if (!Auth::check()) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+
             return redirect()->route('login');
         }
 
@@ -25,6 +29,10 @@ class RoleMiddleware
 
         // Check if user has the correct role
         if ($user->role !== $role) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
+
             // User doesn't have the required role, redirect to their appropriate dashboard
             return redirect()->to($user->getDashboardRoute())
                 ->with('error', 'You do not have permission to access that page.');

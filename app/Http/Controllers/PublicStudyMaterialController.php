@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\StudyMaterial;
+use App\Support\SafeCache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,31 +14,41 @@ class PublicStudyMaterialController extends Controller
         $locale = app()->getLocale();
         $type = (string) $request->get('type', 'all');
         $query = trim((string) $request->get('q', ''));
+        $page = max(1, (int) $request->get('page', 1));
+        $ttl = (int) config('performance.public_data_cache_ttl', 300);
+        $typeKey = $type !== '' ? $type : 'all';
+        $queryKey = $query !== '' ? md5($query) : 'all';
 
-        $materialsQuery = StudyMaterial::published()
-            ->with('subject')
-            ->whereIn('visibility', ['all', 'students'])
-            ->latest();
+        $materials = SafeCache::remember("resources:index:{$typeKey}:{$queryKey}:page:{$page}:v1", $ttl, function () use ($type, $query, $page) {
+            $materialsQuery = StudyMaterial::published()
+                ->with('subject')
+                ->whereIn('visibility', ['all', 'students'])
+                ->latest();
 
-        if ($type !== '' && $type !== 'all') {
-            $materialsQuery->where('document_type', $type);
-        }
+            if ($type !== '' && $type !== 'all') {
+                $materialsQuery->where('document_type', $type);
+            }
 
-        if ($query !== '') {
-            $materialsQuery->where(function ($builder) use ($query) {
-                $builder->where('title', 'like', '%' . $query . '%')
-                    ->orWhere('title_ne', 'like', '%' . $query . '%')
-                    ->orWhere('description', 'like', '%' . $query . '%')
-                    ->orWhere('description_ne', 'like', '%' . $query . '%')
-                    ->orWhereHas('subject', function ($subjectQuery) use ($query) {
-                        $subjectQuery->where('subject_name', 'like', '%' . $query . '%')
-                            ->orWhere('subject_name_nepali', 'like', '%' . $query . '%')
-                            ->orWhere('subject_code', 'like', '%' . $query . '%');
-                    });
-            });
-        }
+            if ($query !== '') {
+                $materialsQuery->where(function ($builder) use ($query) {
+                    $builder->where('title', 'like', '%' . $query . '%')
+                        ->orWhere('title_ne', 'like', '%' . $query . '%')
+                        ->orWhere('description', 'like', '%' . $query . '%')
+                        ->orWhere('description_ne', 'like', '%' . $query . '%')
+                        ->orWhereHas('subject', function ($subjectQuery) use ($query) {
+                            $subjectQuery->where('subject_name', 'like', '%' . $query . '%')
+                                ->orWhere('subject_name_nepali', 'like', '%' . $query . '%')
+                                ->orWhere('subject_code', 'like', '%' . $query . '%');
+                        });
+                });
+            }
 
-        $materials = $materialsQuery->paginate(9)->withQueryString();
+            return $materialsQuery->paginate(9, ['*'], 'page', $page);
+        });
+        $materials->appends([
+            'type' => $type,
+            'q' => $query,
+        ]);
 
         $typeOptions = [
             'all' => $locale === 'ne' ? 'सबै' : 'All',
@@ -69,3 +80,4 @@ class PublicStudyMaterialController extends Controller
         );
     }
 }
+

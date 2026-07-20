@@ -35,3 +35,4 @@ class Header extends Component
         return view('components.header');
     }
 }
+

@@ -2,28 +2,163 @@
 
 @section('title', __('Semester Management'))
 
-@push('styles')
+@section('styles')
+<script>document.documentElement.classList.add('semesters-ui-enhanced');</script>
 <style>
-    .action-btn {
-        @apply inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200;
+    html.semesters-ui-enhanced:not(.dark) .semesters-page {
+        position: relative;
     }
-    
-    .action-btn-view {
-        @apply text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30;
+
+    html.semesters-ui-enhanced:not(.dark) .semesters-stats > .grid {
+        margin-bottom: 0;
     }
-    
-    .action-btn-edit {
-        @apply text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/30;
+
+    html.semesters-ui-enhanced:not(.dark) .semesters-stats > .grid > div {
+        position: relative;
+        overflow: hidden;
+        border-width: 2px;
+        border-radius: 1rem;
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
-    
-    .action-btn-delete {
-        @apply text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30;
+
+    html.semesters-ui-enhanced:not(.dark) .semesters-stats > .grid > div:hover,
+    html.semesters-ui-enhanced:not(.dark) .semester-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 40px -28px rgba(15, 23, 42, 0.28);
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semesters-stats > .grid > div:nth-child(1) { border-color: #93c5fd; background: linear-gradient(135deg, #eff6ff 0%, #ffffff 56%, #eff6ff 100%); }
+    html.semesters-ui-enhanced:not(.dark) .semesters-stats > .grid > div:nth-child(2) { border-color: #86efac; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 56%, #f0fdf4 100%); }
+    html.semesters-ui-enhanced:not(.dark) .semesters-stats > .grid > div:nth-child(3) { border-color: #fcd34d; background: linear-gradient(135deg, #fffbeb 0%, #ffffff 56%, #fffbeb 100%); }
+    html.semesters-ui-enhanced:not(.dark) .semesters-stats > .grid > div:nth-child(4) { border-color: #cbd5e1; background: linear-gradient(135deg, #f8fafc 0%, #ffffff 56%, #f8fafc 100%); }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-empty-panel,
+    html.semesters-ui-enhanced:not(.dark) .semester-card,
+    html.semesters-ui-enhanced:not(.dark) .semester-modal-panel,
+    html.semesters-ui-enhanced:not(.dark) .semester-delete-panel {
+        overflow: hidden;
+        border: 2px solid #e2e8f0;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 18px 35px -30px rgba(15, 23, 42, 0.22);
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-number-badge {
+        border: 1px solid #bfdbfe;
+        background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-card-title { color: #0f172a; font-weight: 700; }
+    html.semesters-ui-enhanced:not(.dark) .semester-muted { color: #64748b; }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-status-chip,
+    html.semesters-ui-enhanced:not(.dark) .semester-toggle-btn,
+    html.semesters-ui-enhanced:not(.dark) .semester-active-btn,
+    html.semesters-ui-enhanced:not(.dark) .semester-icon-btn {
+        box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.45);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-toggle-btn:hover,
+    html.semesters-ui-enhanced:not(.dark) .semester-active-btn:hover,
+    html.semesters-ui-enhanced:not(.dark) .semester-icon-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 34px -24px rgba(15, 23, 42, 0.5);
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-card-stats {
+        border-top: 1px solid #e2e8f0;
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-card-stats .stat-divider {
+        border-color: #e2e8f0;
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-card-stats p:first-child {
+        color: #0f172a;
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-modal-header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        border-bottom: none;
+        background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-modal-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.8rem;
+        background: rgba(255, 255, 255, 0.14);
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-form label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-form input:not([type='checkbox']):not([type='radio']),
+    html.semesters-ui-enhanced:not(.dark) .semester-form select,
+    html.semesters-ui-enhanced:not(.dark) .semester-form textarea {
+        min-height: 2.9rem;
+        border: 2px solid #cbd5e1;
+        border-radius: 0.85rem;
+        background: #ffffff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-form input:not([type='checkbox']):not([type='radio']):focus,
+    html.semesters-ui-enhanced:not(.dark) .semester-form select:focus,
+    html.semesters-ui-enhanced:not(.dark) .semester-form textarea:focus {
+        outline: none;
+        border-color: #f43f5e;
+        box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1);
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-form-footer {
+        border-top: 1px solid #e2e8f0;
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-secondary-btn,
+    html.semesters-ui-enhanced:not(.dark) .semester-primary-btn,
+    html.semesters-ui-enhanced:not(.dark) .semester-danger-btn {
+        box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.45);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-secondary-btn:hover,
+    html.semesters-ui-enhanced:not(.dark) .semester-primary-btn:hover,
+    html.semesters-ui-enhanced:not(.dark) .semester-danger-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 34px -24px rgba(15, 23, 42, 0.5);
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-secondary-btn {
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #334155;
+    }
+
+    html.semesters-ui-enhanced:not(.dark) .semester-danger-btn {
+        border: 1px solid #fecaca;
+        background: #fff1f2;
+        color: #be123c;
     }
 </style>
-@endpush
+@endsection
 
 @section('content')
-<div class="space-y-6">
+<div class="semesters-page space-y-6">
 
     {{-- Page Header --}}
     @include('admin.components.admin-page-header', [
@@ -40,18 +175,20 @@
     ])
 
     <!-- Stats Cards -->
-    @include('admin.components.admin-stats-cards', [
-        'cards' => [
-            ['title' => 'Total', 'value' => $stats['total'] ?? 0, 'icon' => 'bi-archive', 'color' => 'blue'],
-            ['title' => 'Open', 'value' => $stats['open'] ?? 0, 'icon' => 'bi-door-open', 'color' => 'green'],
-            ['title' => 'Active', 'value' => $stats['active'] ?? 0, 'icon' => 'bi-play-circle', 'color' => 'yellow'],
-            ['title' => 'Upcoming', 'value' => $stats['upcoming'] ?? 0, 'icon' => 'bi-clock', 'color' => 'gray']
-        ]
-    ])
+    <div class="semesters-stats">
+        @include('admin.components.admin-stats-cards', [
+            'cards' => [
+                ['title' => 'Total', 'value' => $stats['total'] ?? 0, 'icon' => 'bi-archive', 'color' => 'blue'],
+                ['title' => 'Open', 'value' => $stats['open'] ?? 0, 'icon' => 'bi-door-open', 'color' => 'green'],
+                ['title' => 'Active', 'value' => $stats['active'] ?? 0, 'icon' => 'bi-play-circle', 'color' => 'yellow'],
+                ['title' => 'Upcoming', 'value' => $stats['upcoming'] ?? 0, 'icon' => 'bi-clock', 'color' => 'gray']
+            ]
+        ])
+    </div>
 
     <!-- Semesters Grid -->
     @if($enrichedSemesters->isEmpty())
-        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-16 text-center">
+        <div class="semester-empty-panel bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-16 text-center">
             <i class="bi bi-calendar3 text-5xl text-gray-300 dark:text-gray-600 block mb-4"></i>
             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">{{ __('No Semesters Yet') }}</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('Start by creating your first semester for the IT department.') }}</p>
@@ -62,17 +199,17 @@
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             @foreach($enrichedSemesters as $semester)
-                <div class="rounded-xl border-2 bg-white p-5 transition hover:shadow-md {{ $semester->is_active ? 'border-green-400 bg-green-50/30' : 'border-gray-200' }}">
+                <div class="semester-card rounded-xl border-2 bg-white p-5 transition hover:shadow-md {{ $semester->is_active ? 'border-green-400 bg-green-50/30' : 'border-gray-200' }}">
                     <!-- Card Header -->
                     <div class="flex items-start justify-between mb-3">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                            <div class="semester-number-badge w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-lg flex-shrink-0">
                                 {{ $semester->number }}
                             </div>
                             <div>
-                                <h3 class="font-semibold text-gray-900 text-sm">{{ $semester->name }}</h3>
+                                <h3 class="semester-card-title font-semibold text-gray-900 text-sm">{{ $semester->name }}</h3>
                                 @if($semester->academic_year)
-                                    <p class="text-xs text-gray-400">{{ $semester->academic_year }}</p>
+                                    <p class="semester-muted text-xs text-gray-400">{{ $semester->academic_year }}</p>
                                 @endif
                             </div>
                         </div>
@@ -100,7 +237,7 @@
                                 'upcoming' => 'bi-hourglass-split',
                             ];
                         @endphp
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium {{ $statusClasses[$semester->status] ?? 'bg-gray-100 text-gray-600' }}">
+                        <span class="semester-status-chip inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium {{ $statusClasses[$semester->status] ?? 'bg-gray-100 text-gray-600' }}">
                             <i class="bi {{ $statusIcons[$semester->status] ?? 'bi-question' }}"></i>
                             {{ ucfirst($semester->status) }}
                         </span>
@@ -108,7 +245,7 @@
 
                     <!-- Date Range -->
                     @if($semester->start_date || $semester->end_date)
-                        <div class="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                        <div class="semester-muted flex items-center gap-2 text-xs text-gray-500 mb-3">
                             <i class="bi bi-calendar-range text-gray-400"></i>
                             <span>
                                 {{ $semester->start_date ? \Carbon\Carbon::parse($semester->start_date)->format('M d, Y') : '—' }}
@@ -119,12 +256,12 @@
                     @endif
 
                     <!-- Stats Row -->
-                    <div class="grid grid-cols-3 gap-2 py-3 border-t border-gray-100 mb-3">
+                    <div class="semester-card-stats grid grid-cols-3 gap-2 py-3 border-t border-gray-100 mb-3">
                         <div class="text-center">
                             <p class="text-lg font-bold text-gray-900">{{ $semester->student_count }}</p>
                             <p class="text-[11px] text-gray-400">{{ __('Students') }}</p>
                         </div>
-                        <div class="text-center border-x border-gray-100">
+                        <div class="stat-divider text-center border-x border-gray-100">
                             <p class="text-lg font-bold text-gray-900">{{ $semester->subject_count }}</p>
                             <p class="text-[11px] text-gray-400">{{ __('Subjects') }}</p>
                         </div>
@@ -138,7 +275,7 @@
                     <div class="flex items-center gap-2">
                         <!-- Open/Close Toggle -->
                         <button onclick="toggleSemesterStatus({{ $semester->id }}, '{{ $semester->status }}')"
-                            class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg transition {{ $semester->status === 'open' ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-green-100 text-green-700 hover:bg-green-200' }}">
+                            class="semester-toggle-btn flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg transition {{ $semester->status === 'open' ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-green-100 text-green-700 hover:bg-green-200' }}">
                             <i class="bi {{ $semester->status === 'open' ? 'bi-lock' : 'bi-unlock' }}"></i>
                             {{ $semester->status === 'open' ? __('Close') : __('Open') }}
                         </button>
@@ -146,14 +283,14 @@
                         @if($semester->is_active)
                             <!-- Deactivate -->
                             <button onclick="setActiveSemester({{ $semester->id }})"
-                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition">
+                                class="semester-active-btn flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition">
                                 <i class="bi bi-x-circle"></i>
                                 {{ __('Deactivate') }}
                             </button>
                         @else
                             <!-- Activate -->
                             <button onclick="setActiveSemester({{ $semester->id }})"
-                                class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg transition">
+                                class="semester-active-btn flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg transition">
                                 <i class="bi bi-check-circle"></i>
                                 {{ __('Activate') }}
                             </button>
@@ -161,13 +298,13 @@
 
                         <!-- Edit -->
                         <button onclick="editSemester({{ $semester->id }})"
-                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/30">
+                            class="semester-icon-btn inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/30">
                             <i class="bi bi-pencil text-sm"></i>
                         </button>
 
                         <!-- Delete -->
                         <button onclick="deleteSemester({{ $semester->id }}, '{{ $semester->name }}')"
-                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30">
+                            class="semester-icon-btn inline-flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200 text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30">
                             <i class="bi bi-trash text-sm"></i>
                         </button>
                     </div>
@@ -179,14 +316,14 @@
 
 <!-- Create/Edit Modal -->
 <div id="semesterModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
-        <div class="px-6 py-4 border-b bg-gray-50 flex items-center justify-between">
-            <h3 id="modalTitle" class="text-base font-semibold text-gray-900">{{ __('Add Semester') }}</h3>
-            <button onclick="closeModal()" class="p-1.5 hover:bg-gray-200 rounded-lg transition">
-                <i class="bi bi-x text-lg text-gray-500"></i>
+    <div class="semester-modal-panel bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+        <div class="semester-modal-header px-6 py-4 border-b bg-gray-50 flex items-center justify-between">
+            <h3 id="modalTitle" class="text-base font-semibold text-white">{{ __('Add Semester') }}</h3>
+            <button onclick="closeModal()" class="semester-modal-close p-1.5 hover:bg-gray-200 rounded-lg transition">
+                <i class="bi bi-x text-lg text-white"></i>
             </button>
         </div>
-        <form id="semesterForm" class="p-6 space-y-4" onsubmit="submitSemesterForm(event)">
+        <form id="semesterForm" class="semester-form p-6 space-y-4" onsubmit="submitSemesterForm(event)">
             @csrf
             <input type="hidden" id="semesterId" name="semester_id" value="">
             <input type="hidden" id="formMethod" name="_method" value="POST">
@@ -264,11 +401,11 @@
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
             </div>
         </form>
-        <div class="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
-            <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-700 transition">
+        <div class="semester-form-footer px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
+            <button onclick="closeModal()" class="semester-secondary-btn px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-100 text-gray-700 transition">
                 {{ __('Cancel') }}
             </button>
-            <button onclick="submitSemesterForm(event)" id="saveBtn" class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition">
+            <button onclick="submitSemesterForm(event)" id="saveBtn" class="semester-primary-btn px-5 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition">
                 <i class="bi bi-check2 mr-1"></i> {{ __('Save Semester') }}
             </button>
         </div>
@@ -277,7 +414,7 @@
 
 <!-- Confirm Delete Modal -->
 <div id="deleteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 text-center">
+    <div class="semester-delete-panel bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 text-center">
         <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
             <i class="bi bi-trash text-2xl text-red-600"></i>
         </div>
@@ -285,11 +422,11 @@
         <p class="text-sm text-gray-500 mb-6" id="deleteConfirmMsg">{{ __('This action cannot be undone.') }}</p>
         <div class="flex justify-center gap-3">
             <button onclick="document.getElementById('deleteModal').classList.add('hidden')"
-                class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 text-sm font-medium hover:bg-gray-50 transition">
+                class="semester-secondary-btn px-5 py-2 border border-gray-300 rounded-lg text-gray-700 text-sm font-medium hover:bg-gray-50 transition">
                 {{ __('Cancel') }}
             </button>
             <button id="confirmDeleteBtn"
-                class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition">
+                class="semester-danger-btn px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition">
                 {{ __('Delete') }}
             </button>
         </div>
@@ -476,3 +613,4 @@ document.getElementById('semesterModal').addEventListener('click', function(e) {
 });
 </script>
 @endsection
+

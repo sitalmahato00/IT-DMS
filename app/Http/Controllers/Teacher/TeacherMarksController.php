@@ -37,6 +37,53 @@ class TeacherMarksController extends Controller
             ->toArray();
     }
 
+    private function normalizeSemesterValue(?string $semester): string
+    {
+        $normalized = strtolower(trim((string) $semester));
+
+        $numberToKey = [
+            '1' => 'first',
+            '2' => 'second',
+            '3' => 'third',
+            '4' => 'fourth',
+            '5' => 'fifth',
+            '6' => 'sixth',
+            '7' => 'seventh',
+            '8' => 'eighth',
+            'first semester' => 'first',
+            'second semester' => 'second',
+            'third semester' => 'third',
+            'fourth semester' => 'fourth',
+            'fifth semester' => 'fifth',
+            'sixth semester' => 'sixth',
+            'seventh semester' => 'seventh',
+            'eighth semester' => 'eighth',
+        ];
+
+        return $numberToKey[$normalized] ?? $normalized;
+    }
+
+    private function getSemesterFilterCandidates(string $semester): array
+    {
+        $normalized = $this->normalizeSemesterValue($semester);
+        $keyToNumber = [
+            'first' => '1',
+            'second' => '2',
+            'third' => '3',
+            'fourth' => '4',
+            'fifth' => '5',
+            'sixth' => '6',
+            'seventh' => '7',
+            'eighth' => '8',
+        ];
+
+        return array_values(array_unique(array_filter([
+            strtolower(trim($semester)),
+            $normalized,
+            $normalized ? ($keyToNumber[$normalized] ?? null) : null,
+        ])));
+    }
+
     /**
      * Display marks for teacher's subjects - using new simplified view
      */
@@ -53,6 +100,7 @@ class TeacherMarksController extends Controller
                     'semesters' => collect([]),
                     'academicYears' => collect([]),
                     'assessments' => [],
+                    'availableAssessments' => collect([]),
                     'selectedCategory' => 'assessment',
                     'currentFilters' => [],
                 ]);
@@ -67,6 +115,7 @@ class TeacherMarksController extends Controller
                     'semesters' => collect([]),
                     'academicYears' => collect([]),
                     'assessments' => [],
+                    'availableAssessments' => collect([]),
                     'selectedCategory' => 'assessment',
                     'currentFilters' => [],
                 ]);
@@ -74,6 +123,9 @@ class TeacherMarksController extends Controller
             
             // Get filter parameters
             $category = $request->get('category', 'assessment');
+            if (!in_array($category, ['assessment', 'ctevt'], true)) {
+                $category = 'assessment';
+            }
             $semester = $request->get('semester', '');
             $subjectId = $request->get('subject_id', '');
             $academicYear = $request->get('academic_year', '');
@@ -89,22 +141,27 @@ class TeacherMarksController extends Controller
                 ->values();
             
             // Get unique academic years from exam marks for teacher's subjects
-            $academicYears = ExamMark::whereHas('exam', function ($q) use ($subjectIds) {
-                $q->whereIn('subject_id', $subjectIds);
-            })
+            $academicYears = Exam::whereIn('subject_id', $subjectIds)
                 ->distinct()
                 ->orderBy('academic_year', 'desc')
                 ->pluck('academic_year')
                 ->filter()
                 ->values();
+
+            $semesterCandidates = $semester !== ''
+                ? $this->getSemesterFilterCandidates((string) $semester)
+                : [];
             
-            // Get unique assessments (Assessment category only)
-            $assessments = Exam::whereIn('subject_id', $subjectIds)
+            $allAssessmentOptions = Exam::whereIn('subject_id', $subjectIds)
                 ->where('exam_category', 'assessment')
-                ->distinct()
                 ->orderBy('exam_date', 'asc')
-                ->pluck('exam_name', 'id')
-                ->toArray();
+                ->get([
+                    'id',
+                    'exam_name',
+                    'subject_id',
+                    'semester',
+                    'academic_year',
+                ]);
             
             // Get subjects for teacher (format for display)
             $subjects = SubjectTeacher::where('teacher_id', $teacher->id)
@@ -118,6 +175,44 @@ class TeacherMarksController extends Controller
                         'semester' => $st->subject->semester,
                     ];
                 })
+                ->values();
+
+            $filteredAssessmentOptions = $allAssessmentOptions
+                ->when($semester !== '', function ($collection) use ($semester, $semesterCandidates) {
+                    return $collection->filter(function ($exam) use ($semester, $semesterCandidates) {
+                        $examSemester = strtolower(trim((string) ($exam->semester ?? '')));
+
+                        if ($semester === 'all') {
+                            return $examSemester === 'all';
+                        }
+
+                        return in_array($examSemester, $semesterCandidates, true)
+                            || $examSemester === 'all'
+                            || $examSemester === '';
+                    });
+                })
+                ->when($subjectId !== '', fn ($collection) => $collection->filter(fn ($exam) => (string) $exam->subject_id === (string) $subjectId))
+                ->when($academicYear !== '', fn ($collection) => $collection->filter(fn ($exam) => (string) ($exam->academic_year ?? '') === (string) $academicYear))
+                ->values();
+
+            if ($category !== 'assessment') {
+                $assessmentId = '';
+            } elseif ($assessmentId !== '' && !$filteredAssessmentOptions->contains(fn ($exam) => (string) $exam->id === (string) $assessmentId)) {
+                $assessmentId = '';
+            }
+
+            $assessments = $filteredAssessmentOptions
+                ->pluck('exam_name', 'id')
+                ->toArray();
+
+            $availableAssessments = $allAssessmentOptions
+                ->map(fn ($exam) => [
+                    'id' => $exam->id,
+                    'name' => $exam->exam_name,
+                    'subject_id' => $exam->subject_id,
+                    'semester' => $exam->semester,
+                    'academic_year' => $exam->academic_year,
+                ])
                 ->values();
             
             // Get students with marks if subject is selected
@@ -286,6 +381,7 @@ class TeacherMarksController extends Controller
                 'semesters' => $semesters,
                 'academicYears' => $academicYears,
                 'assessments' => $assessments,
+                'availableAssessments' => $availableAssessments,
                 'selectedCategory' => $category,
                 'currentFilters' => [
                     'category' => $category,
@@ -304,6 +400,7 @@ class TeacherMarksController extends Controller
                 'semesters' => collect([]),
                 'academicYears' => collect([]),
                 'assessments' => [],
+                'availableAssessments' => collect([]),
                 'selectedCategory' => 'assessment',
                 'currentFilters' => [],
             ]);
@@ -1524,8 +1621,6 @@ class TeacherMarksController extends Controller
                 'exam_category' => $request->get('exam_category', 'assessment'),
                 'assessment_number' => $selectedAssessmentNumber,
                 'student_id' => $request->get('student_id', ''),
-                'dob' => $request->get('dob', ''),
-                'dob_bs' => $request->get('dob_bs', ''),
                 'result' => $request->get('result', ''),
             ];
             
@@ -1534,10 +1629,39 @@ class TeacherMarksController extends Controller
             
             // If search parameters are present, search for student
             if ($request->has('search_student')) {
-                $student = $this->findStudentByIdOrDob($request);
+                $student = $this->findStudentByIdOrRollNo($request);
                 
                 if ($student) {
                     $marksheetData = $this->getMarksheetDataForTeacher($student, $request, $subjectIds);
+
+                    // Retry with the student's own semester/year when the current filters
+                    // hide an otherwise valid marksheet.
+                    if (($marksheetData['exam_marks'] ?? collect())->isEmpty()) {
+                        $studentSemester = trim((string) ($student->semester ?? ''));
+                        $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                        if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                            $fallbackRequest = Request::create($request->url(), 'GET', array_merge(
+                                $request->query(),
+                                [
+                                    'semester' => $studentSemester !== '' ? $studentSemester : $request->get('semester', ''),
+                                    'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $request->get('academic_year', ''),
+                                ]
+                            ));
+
+                            $fallbackData = $this->getMarksheetDataForTeacher($student, $fallbackRequest, $subjectIds);
+
+                            if (($fallbackData['exam_marks'] ?? collect())->isNotEmpty()) {
+                                $request->merge([
+                                    'semester' => $fallbackRequest->get('semester', ''),
+                                    'academic_year' => $fallbackRequest->get('academic_year', ''),
+                                ]);
+                                $marksheetData = $fallbackData;
+                                $filters['semester'] = $request->get('semester', '');
+                                $filters['academic_year'] = $request->get('academic_year', '');
+                            }
+                        }
+                    }
                 }
             }
             
@@ -1559,107 +1683,27 @@ class TeacherMarksController extends Controller
     }
 
     /**
-     * Find student by ID or DOB.
+     * Find student by ID or roll number.
      */
-    private function findStudentByIdOrDob(Request $request)
+    private function findStudentByIdOrRollNo(Request $request)
     {
-        $studentId = $request->get('student_id', '');
-        $dob = $request->get('dob', '');
-        $dobBs = $this->normalizeBsDateOfBirth($request->get('dob_bs', ''));
+        $studentId = trim($request->get('student_id', ''));
         
         $query = \App\Models\Student::with('user');
         
         if (!empty($studentId)) {
             $query->where(function($q) use ($studentId) {
                 $q->where('id', $studentId)
-                  ->orWhere('roll_no', 'like', "%{$studentId}%");
-            });
-        }
-        
-        $normalizedDob = !empty($dob) ? $this->normalizeDateOfBirth($dob) : null;
-        $convertedDobBs = !empty($dobBs) ? NepaliContentHelper::convertBsToAd($dobBs) : null;
-
-        if ($normalizedDob || !empty($dob) || !empty($dobBs) || $convertedDobBs) {
-            $query->where(function ($q) use ($normalizedDob, $dob, $dobBs, $convertedDobBs) {
-                if ($normalizedDob) {
-                    $q->whereDate('date_of_birth', $normalizedDob);
-                } elseif (!empty($dob)) {
-                    $q->where('date_of_birth', $dob);
-                }
-
-                if (!empty($dobBs)) {
-                    $q->orWhere('date_of_birth_bs', $dobBs);
-                }
-
-                if ($convertedDobBs) {
-                    $q->orWhereDate('date_of_birth', $convertedDobBs);
-                }
+                  ->orWhere('roll_no', 'like', "%{$studentId}%")
+                  ->orWhereHas('user', function ($userQuery) use ($studentId) {
+                      $userQuery->where('id', $studentId);
+                  });
             });
         }
         
         $student = $query->first();
 
-        // If no student found and DOB is in YYYY-MM-DD, try swapping day/month (some browsers/locales may flip them)
-        if (!$student && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $dob, $m)) {
-            $year = $m[1];
-            $month = $m[2];
-            $day = $m[3];
-
-            if (checkdate((int)$day, (int)$month, (int)$year)) {
-                $swappedDob = sprintf('%s-%s-%s', $year, $day, $month);
-                $student = \App\Models\Student::with('user')
-                    ->where(function($q) use ($studentId) {
-                        $q->where('id', $studentId)
-                          ->orWhere('roll_no', 'like', "%{$studentId}%");
-                    })
-                    ->whereDate('date_of_birth', $swappedDob)
-                    ->first();
-            }
-        }
-
         return $student;
-    }
-
-    private function normalizeBsDateOfBirth(?string $dobBs): string
-    {
-        if (empty($dobBs)) {
-            return '';
-        }
-
-        $normalized = NepaliContentHelper::toEnglishNumber(trim($dobBs));
-        $normalized = str_replace(['/', '.'], '-', $normalized);
-
-        return preg_replace('/\s+/', '', $normalized) ?? '';
-    }
-
-    /**
-     * Normalize a date of birth input into YYYY-MM-DD.
-     * Accepts common formats like DD/MM/YYYY, DD-MM-YYYY, YYYY/MM/DD, YYYY-MM-DD.
-     */
-    private function normalizeDateOfBirth(string $dob): ?string
-    {
-        $formats = [
-            'Y-m-d',
-            'Y/m/d',
-            'd/m/Y',
-            'd-m-Y',
-            'd.m.Y',
-            'm/d/Y',
-            'm-d-Y',
-        ];
-
-        foreach ($formats as $format) {
-            try {
-                $parsed = \Carbon\Carbon::createFromFormat($format, trim($dob));
-                if ($parsed) {
-                    return $parsed->format('Y-m-d');
-                }
-            } catch (\Exception $e) {
-                // ignore parse errors, try next format
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -1773,14 +1817,13 @@ class TeacherMarksController extends Controller
     {
         try {
             $studentId = $request->get('student_id', '');
-            $dob = $request->get('dob', '');
-            
-            if (empty($studentId) && empty($dob)) {
+
+            if (empty($studentId)) {
                 return redirect()->route('teacher.marksheet.search')
-                    ->with('error', 'Please provide student ID or Date of Birth');
+                    ->with('error', 'Please provide student ID or roll number');
             }
             
-            $student = $this->findStudentByIdOrDob($request);
+            $student = $this->findStudentByIdOrRollNo($request);
             
             if (!$student) {
                 return redirect()->route('teacher.marksheet.search')
@@ -1789,6 +1832,30 @@ class TeacherMarksController extends Controller
             
             $subjectIds = $this->getTeacherSubjectIds();
             $marksheetData = $this->getMarksheetDataForTeacher($student, $request, $subjectIds);
+
+            if (($marksheetData['exam_marks'] ?? collect())->isEmpty()) {
+                $studentSemester = trim((string) ($student->semester ?? ''));
+                $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                    $fallbackRequest = Request::create($request->url(), 'GET', array_merge(
+                        $request->query(),
+                        [
+                            'semester' => $studentSemester !== '' ? $studentSemester : $request->get('semester', ''),
+                            'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $request->get('academic_year', ''),
+                        ]
+                    ));
+
+                    $fallbackData = $this->getMarksheetDataForTeacher($student, $fallbackRequest, $subjectIds);
+                    if (($fallbackData['exam_marks'] ?? collect())->isNotEmpty()) {
+                        $request->merge([
+                            'semester' => $fallbackRequest->get('semester', ''),
+                            'academic_year' => $fallbackRequest->get('academic_year', ''),
+                        ]);
+                        $marksheetData = $fallbackData;
+                    }
+                }
+            }
             
             return view('teacher.marks.marksheet-print', [
                 'student' => $student,
@@ -1809,14 +1876,13 @@ class TeacherMarksController extends Controller
     {
         try {
             $studentId = $request->get('student_id', '');
-            $dob = $request->get('dob', '');
-            
-            if (empty($studentId) && empty($dob)) {
+
+            if (empty($studentId)) {
                 return redirect()->route('teacher.marksheet.search')
-                    ->with('error', 'Please provide student ID or Date of Birth');
+                    ->with('error', 'Please provide student ID or roll number');
             }
             
-            $student = $this->findStudentByIdOrDob($request);
+            $student = $this->findStudentByIdOrRollNo($request);
             
             if (!$student) {
                 return redirect()->route('teacher.marksheet.search')
@@ -1825,6 +1891,30 @@ class TeacherMarksController extends Controller
             
             $subjectIds = $this->getTeacherSubjectIds();
             $marksheetData = $this->getMarksheetDataForTeacher($student, $request, $subjectIds);
+
+            if (($marksheetData['exam_marks'] ?? collect())->isEmpty()) {
+                $studentSemester = trim((string) ($student->semester ?? ''));
+                $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                    $fallbackRequest = Request::create($request->url(), 'GET', array_merge(
+                        $request->query(),
+                        [
+                            'semester' => $studentSemester !== '' ? $studentSemester : $request->get('semester', ''),
+                            'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $request->get('academic_year', ''),
+                        ]
+                    ));
+
+                    $fallbackData = $this->getMarksheetDataForTeacher($student, $fallbackRequest, $subjectIds);
+                    if (($fallbackData['exam_marks'] ?? collect())->isNotEmpty()) {
+                        $request->merge([
+                            'semester' => $fallbackRequest->get('semester', ''),
+                            'academic_year' => $fallbackRequest->get('academic_year', ''),
+                        ]);
+                        $marksheetData = $fallbackData;
+                    }
+                }
+            }
             
             $fileName = sprintf('marksheet_%s_%s.csv', $student->id, now()->format('Ymd_His'));
 
@@ -1896,3 +1986,4 @@ class TeacherMarksController extends Controller
         }
     }
 }
+

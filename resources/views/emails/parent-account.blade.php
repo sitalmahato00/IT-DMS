@@ -4,7 +4,7 @@
 <!-- Header -->
 <div class="email-header">
     <div class="email-logo">👨‍👩‍👧</div>
-    <h1>Welcome to IT-DMS!</h1>
+    <h1>Welcome to Manmohan Memorial Polytechnic!</h1>
     <p>Department of Computer Science & Engineering</p>
 </div>
 
@@ -14,7 +14,30 @@
     
     <p>Hello <strong>{{ $notifiable->name }}</strong>,</p>
     
-    <p>Your parent/guardian account has been successfully created by the administrator. You now have access to the IT Department Management System where you can monitor your child's academic progress, attendance, examination results, and important notifications from the department.</p>
+    <p>Your parent/guardian account has been successfully created by the administrator. You now have access to the Manmohan Memorial Polytechnic where you can monitor your child's academic progress, attendance, examination results, and important notifications from the department.</p>
+
+    @php
+        $linkedStudentName = $context['student_name'] ?? null;
+        $linkedStudentRollNo = $context['student_roll_no'] ?? null;
+        $relationship = $context['relationship'] ?? null;
+    @endphp
+
+    @if($linkedStudentName || $linkedStudentRollNo || $relationship)
+    <div class="info-box" style="margin-top: 18px;">
+        <strong>Linked Student Information</strong>
+        <div style="margin-top: 10px; line-height: 1.7;">
+            @if($linkedStudentName)
+                <div><strong>Student:</strong> {{ $linkedStudentName }}</div>
+            @endif
+            @if($linkedStudentRollNo)
+                <div><strong>Student ID:</strong> {{ $linkedStudentRollNo }}</div>
+            @endif
+            @if($relationship)
+                <div><strong>Relationship:</strong> {{ $relationship }}</div>
+            @endif
+        </div>
+    </div>
+    @endif
 
     <!-- Credentials Section -->
     <div class="credentials-box">
@@ -61,7 +84,7 @@
 
 <!-- Footer -->
 <div class="email-footer">
-    <p><strong>IT Department Management System (IT-DMS)</strong></p>
+    <p><strong>Manmohan Memorial Polytechnic</strong></p>
     <p>This is an automated message. Please do not reply to this email.</p>
     <p style="margin-top: 15px; color: #9ca3af;">
         © 2026 IT Department. All rights reserved.

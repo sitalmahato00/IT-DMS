@@ -2,10 +2,11 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
+        @include('partials.pwa-head', ['themeColor' => '#FF0037'])
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -29,8 +30,13 @@
 
             <!-- Page Content -->
             <main>
-                {{ $slot }}
+                @isset($slot)
+                    {{ $slot }}
+                @else
+                    @yield('content')
+                @endisset
             </main>
         </div>
     </body>
 </html>
+

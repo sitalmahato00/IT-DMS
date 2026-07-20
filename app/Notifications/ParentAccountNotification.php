@@ -12,13 +12,15 @@ class ParentAccountNotification extends Notification
     use Queueable;
 
     protected $password;
+    protected array $context;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(string $password)
+    public function __construct(string $password, array $context = [])
     {
         $this->password = $password;
+        $this->context = $context;
     }
 
     /**
@@ -40,6 +42,7 @@ class ParentAccountNotification extends Notification
             ->view('emails.parent-account', [
                 'notifiable' => $notifiable,
                 'password' => $this->password,
+                'context' => $this->context,
             ])
             ->subject("Your Parent/Guardian Account Credentials - IT Department");
     }
@@ -58,3 +61,4 @@ class ParentAccountNotification extends Notification
         ];
     }
 }
+

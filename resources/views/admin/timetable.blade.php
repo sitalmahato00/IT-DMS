@@ -67,6 +67,101 @@
             border-color: #cbd5e1;
             background: linear-gradient(135deg, #ffffff, #f8fafc);
         }
+
+        html.dark .routine-slot--interactive:hover,
+        html.dark .routine-slot--interactive:focus-visible {
+            box-shadow: 0 16px 34px -26px rgba(2, 6, 23, 0.88);
+            border-color: #64748b;
+        }
+
+        html.dark .routine-slot--locked {
+            background-image: linear-gradient(135deg, rgba(30, 41, 59, 0.64), rgba(15, 23, 42, 0.94));
+        }
+
+        html.dark .routine-slot__actions button {
+            border-color: #475569;
+            background: rgba(15, 23, 42, 0.94);
+            color: #dbe4f0;
+        }
+
+        html.dark .routine-slot__actions button:hover {
+            background: rgba(30, 41, 59, 0.98);
+            color: #fda4af;
+            border-color: rgba(251, 113, 133, 0.52);
+        }
+
+        html.dark .routine-break-slot {
+            border-color: #475569;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.94));
+        }
+
+        html.dark .routine-empty-slot {
+            border-color: #475569;
+            background: linear-gradient(135deg, rgba(8, 15, 29, 0.98), rgba(15, 23, 42, 0.94));
+        }
+
+        html.dark #slotModal > div {
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        html.dark #slotModal .bg-gray-50 {
+            background: #111c2f !important;
+        }
+
+        html.dark #slotModal .border-b,
+        html.dark #slotModal .border-t,
+        html.dark #slotModal .border {
+            border-color: #334155 !important;
+        }
+
+        html.dark #slotModal .text-gray-900 {
+            color: #f8fafc !important;
+        }
+
+        html.dark #slotModal .text-gray-700,
+        html.dark #slotModal .text-gray-600,
+        html.dark #slotModal .text-gray-500 {
+            color: #cbd5e1 !important;
+        }
+
+        html.dark #slotModal input,
+        html.dark #slotModal select {
+            border-color: #475569 !important;
+            background: #111c2f !important;
+            color: #f8fafc !important;
+        }
+
+        html.dark #slotModal input::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        html.dark #slotModal #conflictWarning {
+            border-color: rgba(251, 113, 133, 0.36) !important;
+            background: rgba(127, 29, 29, 0.3) !important;
+        }
+
+        html.dark #slotModal #conflictMessage {
+            color: #fecaca !important;
+        }
+
+        @media (max-width: 900px) {
+            .routine-slot--interactive {
+                padding-top: 2.3rem;
+            }
+
+            .routine-slot__actions {
+                top: 0.35rem;
+                right: 0.35rem;
+                gap: 0.25rem;
+            }
+
+            .routine-slot__actions button {
+                width: 1.45rem;
+                height: 1.45rem;
+            }
+        }
     </style>
 @endsection
 
@@ -88,7 +183,7 @@
 
     $sheetTitle = __('Class Routine');
     $sheetHeading = __('Semester') . ' ' . $semester . (filled($section) ? ' / ' . __('Section') . ' ' . $section : '');
-    $institutionName = $college?->name ?? 'IT-DMS';
+    $institutionName = $college?->name ?? 'Manmohan Memorial Polytechnic';
     $departmentLine = $college?->short_name ?? __('Department');
     $metaItems = [
         ['label' => __('Prepared On'), 'value' => now()->format('Y-m-d')],
@@ -102,24 +197,40 @@
     ];
     $footerLeft = $slots->count() . ' ' . __('slots');
     $timetableByDay = $slotsByDay;
+    $showSlotSection = blank($section);
     $subjectAssignmentMap = $subjects->mapWithKeys(function ($subject) {
-        $primaryAssignment = $subject->teacherAssignments
+        $teacherOptions = $subject->teacherAssignments
             ->sortBy(fn ($assignment) => $assignment->role === 'primary' ? 0 : 1)
-            ->first();
+            ->map(function ($assignment) {
+                return [
+                    'id' => $assignment->teacher_id,
+                    'name' => $assignment->teacher?->user?->name ?? __('Unknown'),
+                    'role' => $assignment->role,
+                ];
+            })
+            ->filter(fn ($assignment) => !empty($assignment['id']))
+            ->unique('id')
+            ->values();
+
+        $primaryAssignment = $teacherOptions->first();
 
         return [
             $subject->id => [
-                'teacher_id' => $primaryAssignment?->teacher_id,
-                'teacher_name' => $primaryAssignment?->teacher?->user?->name,
+                'teacher_id' => $primaryAssignment['id'] ?? null,
+                'teacher_name' => $primaryAssignment['name'] ?? null,
+                'teacher_options' => $teacherOptions->all(),
                 'lab_technician_id' => $subject->lab_technician_id,
                 'lab_technician_name' => $subject->labTechnician?->user?->name,
                 'has_lab' => (bool) $subject->has_lab,
             ],
         ];
     })->all();
+    $teacherDirectory = $teachers->mapWithKeys(function ($teacher) {
+        return [$teacher->id => ($teacher->user->name ?? '—')];
+    })->all();
 @endphp
 
-<div class="routine-page space-y-6">
+<div class="routine-page admin-timetable-page space-y-6">
     <section class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div class="max-w-3xl space-y-3">
@@ -382,6 +493,7 @@ const SEMESTER = '{{ $semester }}';
 const CURRENT_SECTION = @json($section ?: '');
 const BREAK_OVERRIDE_STORE_URL = @json(route('admin.timetable.break-overrides.store'));
 const SUBJECT_ASSIGNMENTS = @json($subjectAssignmentMap);
+const TEACHER_DIRECTORY = @json($teacherDirectory);
 const SLOT_FIELD_IDS = [
     'slotDay',
     'slotType',
@@ -403,17 +515,50 @@ function toggleLabGroup() {
     handleSubjectSelection(false);
 }
 
-function handleSubjectSelection(syncTeacher = true) {
-    const subjectId = document.getElementById('slotSubject').value;
+function rebuildTeacherOptions(subjectMeta, preferredTeacherId = '', syncTeacher = true) {
     const teacherField = document.getElementById('slotTeacher');
+
+    if (!teacherField) {
+        return;
+    }
+
+    const allowedTeachers = Array.isArray(subjectMeta?.teacher_options) ? subjectMeta.teacher_options : [];
+    const currentTeacherId = String(preferredTeacherId || '');
+    const optionLabel = allowedTeachers.length ? '-- Select assigned teacher --' : '-- No assigned teacher --';
+
+    teacherField.innerHTML = `<option value="">${optionLabel}</option>`;
+
+    allowedTeachers.forEach((teacher) => {
+        const option = document.createElement('option');
+        option.value = String(teacher.id);
+        option.textContent = teacher.role ? `${teacher.name} (${teacher.role})` : teacher.name;
+        teacherField.appendChild(option);
+    });
+
+    if (currentTeacherId && !allowedTeachers.some((teacher) => String(teacher.id) === currentTeacherId) && TEACHER_DIRECTORY[currentTeacherId]) {
+        const option = document.createElement('option');
+        option.value = currentTeacherId;
+        option.textContent = `${TEACHER_DIRECTORY[currentTeacherId]} (not assigned)`;
+        teacherField.appendChild(option);
+    }
+
+    if (syncTeacher) {
+        teacherField.value = subjectMeta?.teacher_id ? String(subjectMeta.teacher_id) : '';
+    } else {
+        teacherField.value = currentTeacherId;
+    }
+
+    teacherField.disabled = false;
+}
+
+function handleSubjectSelection(syncTeacher = true, preferredTeacherId = '') {
+    const subjectId = document.getElementById('slotSubject').value;
     const slotType = document.getElementById('slotType').value;
     const labTechField = document.getElementById('slotAssignedLabTech');
     const labTechIdField = document.getElementById('slotAssignedLabTechId');
     const subjectMeta = subjectId ? SUBJECT_ASSIGNMENTS[String(subjectId)] : null;
 
-    if (syncTeacher) {
-        teacherField.value = subjectMeta?.teacher_id ? String(subjectMeta.teacher_id) : '';
-    }
+    rebuildTeacherOptions(subjectMeta, preferredTeacherId, syncTeacher);
 
     if (labTechField) {
         if (slotType === 'practical' && subjectMeta?.lab_technician_id) {
@@ -455,7 +600,6 @@ function populateSlotForm(slot) {
     document.getElementById('slotDay').value = slot.day_of_week || 'monday';
     document.getElementById('slotType').value = slot.slot_type || 'theory';
     document.getElementById('slotSubject').value = slot.subject_id || '';
-    document.getElementById('slotTeacher').value = slot.teacher_id || '';
     document.getElementById('slotStartTime').value = slot.start_time?.substring(0, 5) || '';
     document.getElementById('slotEndTime').value = slot.end_time?.substring(0, 5) || '';
     document.getElementById('slotRoom').value = slot.room || '';
@@ -465,7 +609,7 @@ function populateSlotForm(slot) {
     document.getElementById('slotLocked').checked = Boolean(slot.is_locked);
     document.getElementById('conflictWarning').classList.add('hidden');
     toggleLabGroup();
-    handleSubjectSelection(false);
+    handleSubjectSelection(false, slot.teacher_id || '');
 }
 
 async function fetchSlot(id) {
@@ -714,3 +858,4 @@ async function submitSlot() {
 document.getElementById('slotModal').addEventListener('click', e => { if(e.target.id === 'slotModal') closeSlotModal(); });
 </script>
 @endsection
+

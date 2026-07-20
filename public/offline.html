@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#FF0037">
+    <title>Offline | IT-DMS</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --brand: #ff0037;
+            --brand-dark: #d90033;
+            --surface: #fff5f7;
+            --card: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --border: rgba(255, 0, 55, 0.16);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100dvh;
+            display: grid;
+            place-items: center;
+            padding: calc(2rem + env(safe-area-inset-top)) 1.25rem calc(2rem + env(safe-area-inset-bottom));
+            font-family: Figtree, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(255, 0, 55, 0.14), transparent 34%),
+                linear-gradient(180deg, #fffafb 0%, var(--surface) 100%);
+            color: var(--text);
+        }
+
+        .offline-card {
+            width: min(100%, 28rem);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2rem 1.5rem;
+            box-shadow: 0 24px 48px -32px rgba(15, 23, 42, 0.24);
+            text-align: center;
+        }
+
+        .offline-mark {
+            width: 4.5rem;
+            height: 4.5rem;
+            margin: 0 auto 1rem;
+            display: grid;
+            place-items: center;
+            border-radius: 1.5rem;
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+            color: #fff;
+            font-size: 1.85rem;
+            font-weight: 700;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            line-height: 1.2;
+        }
+
+        p {
+            margin: 0.875rem 0 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .offline-actions {
+            display: grid;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .offline-actions a,
+        .offline-actions button {
+            width: 100%;
+            border: 0;
+            border-radius: 999px;
+            padding: 0.9rem 1rem;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .offline-actions button {
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+            color: #fff;
+        }
+
+        .offline-actions a {
+            background: rgba(255, 0, 55, 0.08);
+            color: var(--brand-dark);
+        }
+    </style>
+</head>
+<body>
+    <main class="offline-card">
+        <div class="offline-mark">IT</div>
+        <h1>You’re offline</h1>
+        <p>IT-DMS can still open pages you visited recently, but this screen appears when the requested page is not cached yet.</p>
+        <div class="offline-actions">
+            <button type="button" onclick="window.location.reload()">Try again</button>
+            <a href="/">Go to home</a>
+        </div>
+    </main>
+</body>
+</html>

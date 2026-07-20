@@ -3,10 +3,13 @@
 namespace App\Notifications;
 
 use App\Models\Student;
+use App\Notifications\Concerns\UsesNotificationEmailSettings;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class StudentNotification extends Notification
 {
+    use UsesNotificationEmailSettings;
 
     protected $student;
     protected $action;
@@ -21,7 +24,20 @@ class StudentNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->notificationEmailEnabled('notification_email_student')
+            ? ['database', 'mail']
+            : ['database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $data = $this->toArray($notifiable);
+
+        return (new MailMessage)
+            ->subject('Student Update - ' . ($this->student->user?->name ?? 'Student'))
+            ->greeting('Student ' . ucfirst(str_replace('_', ' ', $this->action)))
+            ->line($data['message'])
+            ->action('Open Student Record', route('admin.students.show', $this->student->id));
     }
 
     public function toArray(object $notifiable): array
@@ -60,3 +76,4 @@ class StudentNotification extends Notification
         ];
     }
 }
+

@@ -13,7 +13,7 @@
         $college = (object)[
             'id' => 1,
             'name' => 'Institute of Technology & Management',
-            'logo_path' => asset('images/default-logo.svg'),
+            'logo_path' => '/images/default-logo.svg',
             'address' => 'Kathmandu, Nepal',
         ];
 
@@ -237,3 +237,4 @@
     <script src="{{ asset('js/print-as-image.js') }}"></script>
 @endpush
 @endsection
+

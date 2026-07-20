@@ -3,73 +3,115 @@
 namespace App\Http\Controllers\Parent;
 
 use App\Http\Controllers\Controller;
+use App\Support\ParentPortalData;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ParentExportController extends Controller
 {
+    public function __construct(
+        private readonly ParentPortalData $portalData
+    ) {
+    }
+
     /**
-     * Export parent data to CSV
-     * Exports children/students information
+     * Export a parent summary report to CSV.
      */
     public function export(Request $request)
     {
-        $user = Auth::user();
-        
-        // Get parent's children (students associated with this parent)
-        $parentModel = DB::table('parents')
-            ->where('user_id', $user->id)
-            ->first();
-        
-        $data = [];
-        
-        // Header row
-        $data[] = ['Student Name', 'Email', 'Phone', 'Semester', 'Academic Year', 'Department', 'Roll No', 'Gender', 'Status'];
-        
-        if ($parentModel) {
-            // Get associated students
-            $children = DB::table('users')
-                ->join('students', 'users.id', '=', 'students.user_id')
-                ->where('students.parent_id', $parentModel->id)
-                ->select('users.*', 'students.*')
-                ->get();
-            
-            foreach ($children as $child) {
-                $data[] = [
-                    $child->name ?? '',
-                    $child->email ?? '',
-                    $child->phone ?? '',
-                    $child->semester ?? '',
-                    $child->academic_year ?? '',
-                    $child->department ?? '',
-                    $child->roll_no ?? '',
-                    $child->gender ?? '',
-                    $child->status ?? '',
-                ];
+        $portal = $this->portalData->build($request->user());
+        $filename = 'parent_portal_export_' . now()->format('Ymd_His') . '.csv';
+
+        return response()->streamDownload(function () use ($portal) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, ['Parent Portal Summary']);
+            fputcsv($handle, ['Parent Name', $portal['parentUser']->name ?? '']);
+            fputcsv($handle, ['Parent Email', $portal['parentUser']->email ?? '']);
+            fputcsv($handle, ['Phone', $portal['parentUser']->phone ?? optional($portal['parentProfile'])->phone ?? '']);
+            fputcsv($handle, ['Children Count', $portal['childrenCount']]);
+            fputcsv($handle, ['Overall Attendance', $portal['overallAttendance'] . '%']);
+            fputcsv($handle, ['Overall Score', $portal['overallScore'] !== null ? $portal['overallScore'] . '%' : 'Pending']);
+            fputcsv($handle, ['Unread Notifications', $portal['unreadNotificationCount']]);
+            fputcsv($handle, []);
+
+            fputcsv($handle, ['Children Overview']);
+            fputcsv($handle, [
+                'Student Name',
+                'Roll No',
+                'Semester',
+                'Academic Year',
+                'Attendance %',
+                'Overall Score %',
+                'CGPA',
+                'Passed Subjects',
+                'Failed Subjects',
+                'Pending Subjects',
+            ]);
+
+            foreach ($portal['children'] as $child) {
+                fputcsv($handle, [
+                    $child['name'],
+                    $child['roll_no'],
+                    $child['semester'],
+                    $child['academic_year'],
+                    $child['attendance_percentage'],
+                    $child['overall_percentage'] ?? 'Pending',
+                    $child['cgpa'] ?? 'Pending',
+                    $child['passed_subjects'],
+                    $child['failed_subjects'],
+                    $child['pending_subjects'],
+                ]);
             }
-        }
-        
-        // If no children found
-        if (count($data) === 1) {
-            $data[] = ['No children associated with this parent account'];
-        }
-        
-        // Generate CSV
-        $filename = 'parent_export_' . date('Y-m-d_His') . '.csv';
-        
-        $handle = fopen('php://output', 'w');
-        foreach ($data as $row) {
-            fputcsv($handle, $row);
-        }
-        fclose($handle);
-        
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-        
-        return response()->make('', 200, $headers);
+
+            fputcsv($handle, []);
+            fputcsv($handle, ['Subject Performance']);
+            fputcsv($handle, [
+                'Student Name',
+                'Subject',
+                'Code',
+                'Teacher',
+                'Attendance %',
+                'Obtained Marks',
+                'Full Marks',
+                'Percentage',
+                'Status',
+                'Next Exam',
+            ]);
+
+            foreach ($portal['children'] as $child) {
+                foreach ($child['subjects'] as $subject) {
+                    fputcsv($handle, [
+                        $child['name'],
+                        $subject['name'],
+                        $subject['code'],
+                        $subject['teacher_name'],
+                        $subject['attendance_percentage'],
+                        $subject['obtained_marks'] ?? 'Pending',
+                        $subject['full_marks'] ?? 'Pending',
+                        $subject['percentage'] ?? 'Pending',
+                        $subject['status_label'],
+                        $subject['next_exam']['date_label'] ?? 'Not scheduled',
+                    ]);
+                }
+            }
+
+            fputcsv($handle, []);
+            fputcsv($handle, ['Recent Notices']);
+            fputcsv($handle, ['Title', 'Audience', 'Priority', 'Date']);
+
+            foreach ($portal['recentNotices'] as $notice) {
+                fputcsv($handle, [
+                    $notice->localized_title,
+                    $notice->localized_audience_label,
+                    $notice->localized_priority_label,
+                    $notice->formatted_date,
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 }
 

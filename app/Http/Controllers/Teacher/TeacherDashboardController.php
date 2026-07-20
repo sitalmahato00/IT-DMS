@@ -9,6 +9,7 @@ use App\Models\SubjectTeacher;
 use App\Models\Notice;
 use App\Models\Attendance;
 use App\Models\Exam;
+use App\Helpers\NepaliContentHelper;
 use App\Support\TeacherSubjectRoster;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -533,20 +534,25 @@ class TeacherDashboardController extends Controller
             return collect([]);
         }
 
-        $today = Carbon::now()->toDateString();
+        // Define today variables FIRST to avoid scope issues
+        $today = Carbon::now('Asia/Kathmandu')->toDateString();
+        $todayBs = NepaliContentHelper::convertAdToBs($today);
         
         $subjectsMap = Subject::whereIn('id', $subjectIds)->get()->keyBy('id');
         
         $todayAttendance = Attendance::whereIn('subject_id', $subjectIds)
             ->where('attendance_type', 'class')
-            ->whereDate('date', $today)
+            ->where(function ($query) use ($today, $todayBs) {
+                $query->whereDate('date', $today)
+                    ->orWhere('date_bs', $todayBs);
+            })
             ->whereHas('student', function ($query) {
                 $query->where('status', 'active')
                       ->where('is_alumni', 0);
             })
             ->get()
             ->groupBy('subject_id')
-            ->map(function ($records, $subjectId) use ($subjectsMap) {
+            ->map(function ($records, $subjectId) use ($subjectsMap, $today, $todayBs) {
                 $subject = $subjectsMap->get($subjectId);
                 
                 $totalStudents = DB::table('subject_students as ss')
@@ -556,8 +562,12 @@ class TeacherDashboardController extends Controller
                     ->where('s.is_alumni', 0)
                     ->count();
                 
-                $presentCount = $records->filter(function($r) { return strtolower($r->status) === 'present'; })->count();
-                $absentCount = $records->filter(function($r) { return strtolower($r->status) === 'absent'; })->count();
+                $presentCount = $records->filter(function($r) { 
+                    return strtolower($r->status ?? '') === 'present'; 
+                })->count();
+                $absentCount = $records->filter(function($r) { 
+                    return strtolower($r->status ?? '') === 'absent'; 
+                })->count();
                 
                 return [
                     'subject_id' => $subjectId,
@@ -567,6 +577,9 @@ class TeacherDashboardController extends Controller
                     'present_count' => $presentCount,
                     'absent_count' => $absentCount,
                     'attendance_rate' => $totalStudents > 0 ? round(($presentCount / $totalStudents) * 100, 1) : 0,
+                    'date' => $today,
+                    'date_bs' => $todayBs,
+                    'date_label' => Carbon::parse($today)->format('M d, Y'),
                 ];
             })
             ->values();
@@ -574,3 +587,4 @@ class TeacherDashboardController extends Controller
         return $todayAttendance;
     }
 }
+

@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ __('Admin Timetable') }} - {{ __('Semester') }} {{ $semester }}</title>
     @include('shared.timetable.partials.routine-styles')
+    <script>
+        try {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        } catch (error) {}
+    </script>
     <style>
         body {
             margin: 0;
@@ -23,6 +30,7 @@
             display: flex;
             justify-content: flex-end;
             gap: 12px;
+            flex-wrap: wrap;
             margin-bottom: 16px;
         }
 
@@ -37,6 +45,18 @@
             font-weight: 600;
             text-decoration: none;
             cursor: pointer;
+        }
+
+        html.dark body {
+            background: #020817;
+            color: #e2e8f0;
+        }
+
+        html.dark .routine-print-actions button,
+        html.dark .routine-print-actions a {
+            border-color: #334155;
+            background: #0f172a;
+            color: #e2e8f0;
         }
 
         @media print {
@@ -65,7 +85,7 @@
         $paperClass = 'routine-paper--compact';
         $sheetTitle = __('Official Timetable');
         $sheetHeading = __('Semester') . ' ' . $semester . (filled($section) ? ' / ' . __('Section') . ' ' . $section : '');
-        $institutionName = $college?->name ?? 'IT-DMS';
+        $institutionName = $college?->name ?? 'Manmohan Memorial Polytechnic';
         $departmentLine = $college?->short_name ?? __('Department');
         $metaItems = [
             ['label' => __('Prepared On'), 'value' => now()->format('Y-m-d')],
@@ -78,6 +98,7 @@
             ['label' => __('Slots'), 'value' => collect($slots ?? [])->count()],
         ];
         $footerLeft = collect($slots ?? [])->count() . ' ' . __('slots');
+        $showSlotSection = blank($section);
     @endphp
 
     <div class="routine-print-shell">
@@ -92,3 +113,4 @@
     </div>
 </body>
 </html>
+

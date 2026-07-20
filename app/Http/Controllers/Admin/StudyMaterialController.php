@@ -62,8 +62,8 @@ class StudyMaterialController extends Controller
             'title' => 'required|string|max:200',
             'description' => 'nullable|string',
             'semester' => 'required|string',
-            'course' => 'required|string',
-            'visibility' => 'required|in:all,students,teachers,admins',
+            'course' => 'required|integer|exists:subjects,id',
+            'visibility' => 'required|in:all,students,faculty',
             'document_type' => 'required|in:lecture_notes,assignment,lab_report,assessment,study_guide,syllabus,project_material',
             'file' => 'required|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip,rar',
         ]);
@@ -71,18 +71,14 @@ class StudyMaterialController extends Controller
         try {
             DB::beginTransaction();
 
-            // Look up subject_id from subject_name (course)
-            $subject = Subject::where('subject_name', $validated['course'])->first();
-            $subjectId = $subject ? $subject->id : 1;
-
             $material = new StudyMaterial();
             $material->title = $validated['title'];
             $material->description = $validated['description'] ?? null;
             $material->semester = $validated['semester'];
-            $material->subject_id = $subjectId;
+            $material->subject_id = (int) $validated['course'];
             $material->visibility = $validated['visibility'];
             $material->document_type = $validated['document_type'];
-            $material->teacher_id = Auth::id() ?? 1;
+            $material->teacher_id = Auth::id();
             $material->is_published = true;
             $material->uploaded_at = now();
             
@@ -129,7 +125,7 @@ class StudyMaterialController extends Controller
                     'description' => $material->description,
                     'semester' => $material->semester,
                     'document_type' => $material->document_type,
-                    'course' => $material->subject->subject_name ?? '',
+                    'course_id' => $material->subject_id,
                     'visibility' => $material->visibility,
                     'file_name' => $material->file_name,
                     'file_icon' => $material->file_icon,
@@ -139,9 +135,10 @@ class StudyMaterialController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            report($e);
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to upload study material. Please try again. Error: ' . $e->getMessage(),
+                'message' => 'Failed to upload study material. Please try again.',
             ], 422);
         }
     }
@@ -176,8 +173,8 @@ class StudyMaterialController extends Controller
             'title' => 'required|string|max:200',
             'description' => 'nullable|string',
             'semester' => 'required|string',
-            'course' => 'required|string',
-            'visibility' => 'required|in:all,students,teachers,admins',
+            'course' => 'required|integer|exists:subjects,id',
+            'visibility' => 'required|in:all,students,faculty',
             'document_type' => 'required|in:lecture_notes,assignment,lab_report,assessment,study_guide,syllabus,project_material',
             'file' => 'required|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip,rar',
         ]);
@@ -185,18 +182,14 @@ class StudyMaterialController extends Controller
         try {
             DB::beginTransaction();
 
-            // Look up subject_id from subject_name (course)
-            $subject = Subject::where('subject_name', $validated['course'])->first();
-            $subjectId = $subject ? $subject->id : 1;
-
             $material = new StudyMaterial();
             $material->title = $validated['title'];
             $material->description = $validated['description'] ?? null;
             $material->semester = $validated['semester'];
-            $material->subject_id = $subjectId;
+            $material->subject_id = (int) $validated['course'];
             $material->visibility = $validated['visibility'];
             $material->document_type = $validated['document_type'];
-            $material->teacher_id = Auth::id() ?? 1;
+            $material->teacher_id = Auth::id();
             $material->is_published = true;
             $material->uploaded_at = now();
             
@@ -226,8 +219,9 @@ class StudyMaterialController extends Controller
                 ->with('success', 'Study material uploaded successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+            report($e);
             return redirect()->back()
-                ->with('error', 'Failed to upload study material. Please try again. Error: ' . $e->getMessage())
+                ->with('error', 'Failed to upload study material. Please try again.')
                 ->withInput();
         }
     }
@@ -243,8 +237,8 @@ class StudyMaterialController extends Controller
             'title' => 'required|string|max:200',
             'description' => 'nullable|string',
             'semester' => 'required|string',
-            'course' => 'required|string',
-            'visibility' => 'required|in:all,students,teachers,admins',
+            'course' => 'required|integer|exists:subjects,id',
+            'visibility' => 'required|in:all,students,faculty',
             'document_type' => 'required|in:lecture_notes,assignment,lab_report,assessment,study_guide,syllabus,project_material',
             'file' => 'nullable|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,zip,rar',
         ]);
@@ -252,14 +246,10 @@ class StudyMaterialController extends Controller
         try {
             DB::beginTransaction();
 
-            // Look up subject_id from subject_name (course)
-            $subject = Subject::where('subject_name', $validated['course'])->first();
-            $subjectId = $subject ? $subject->id : 1;
-
             $material->title = $validated['title'];
             $material->description = $validated['description'] ?? null;
             $material->semester = $validated['semester'];
-            $material->subject_id = $subjectId;
+            $material->subject_id = (int) $validated['course'];
             $material->visibility = $validated['visibility'];
             $material->document_type = $validated['document_type'];
             
@@ -287,8 +277,9 @@ class StudyMaterialController extends Controller
                 ->with('success', 'Study material updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+            report($e);
             return redirect()->back()
-                ->with('error', 'Failed to update study material. Please try again. Error: ' . $e->getMessage())
+                ->with('error', 'Failed to update study material. Please try again.')
                 ->withInput();
         }
     }
@@ -338,3 +329,4 @@ class StudyMaterialController extends Controller
         }
     }
 }
+

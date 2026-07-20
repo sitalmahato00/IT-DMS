@@ -49,19 +49,21 @@
             this.activeGroup = this.activeGroup === group ? null : group;
         }
     }"
-    class="hidden lg:flex lg:w-60 bg-white text-slate-900 flex-col fixed lg:static w-64 left-0 z-30 overflow-y-auto transition-all duration-300 shadow-xl border-r border-red-500/40">
+    data-mobile-sidebar
+    class="hidden lg:flex lg:w-60 bg-white text-slate-900 flex-col fixed lg:static w-64 max-w-[85vw] left-0 z-[50] overflow-y-auto overflow-x-hidden shadow-xl border-r border-red-500/40 top-0 h-screen lg:h-auto"
+    style="top: 0; height: 100vh; width: 256px;">
     <div
         class="hidden lg:flex flex-col items-center justify-center px-4 py-2 min-h-[88px] bg-[#FF0037] text-white border-b border-red-500">
-        @if($department && $department->logo_path)
-            <img src="{{ $departmentLogoUrl }}" alt="{{ $department->name ?? 'Department Logo' }}"
+        @if($department && $department->logo_url)
+            <img src="{{ $departmentLogoUrl }}" alt="{{ $department->name ?? 'College Logo' }}"
                 class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg">
         @else
-            <img src="{{ asset('images/default-logo.svg') }}" alt="Default Logo"
+            <img src="/images/default-logo.svg" alt="Default Logo"
                 class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg">
         @endif
         <div class="sidebar-brand-text mt-3 text-center">
             <h1 class="font-semibold text-xl sm:text-2xl leading-7 text-white block tracking-tight">
-                {{ $department?->short_name ?? ($department?->name ?? __('IT-DMS')) }}
+                {{ $department?->short_name ?? ($department?->name ?? __('Manmohan Memorial Polytechnic')) }}
             </h1>
             <p class="text-sm sm:text-[13px] leading-5 text-white/80">{{ __('IT Admin Portal') }}</p>
         </div>
@@ -308,62 +310,11 @@
 </aside>
 
 <style>
-    #sidebar.sidebar-collapsed {
-        width: 5rem !important;
-        min-width: 5rem !important;
-    }
-
-    #sidebar.sidebar-collapsed .sidebar-label,
-    #sidebar.sidebar-collapsed .sidebar-brand-text,
-    #sidebar.sidebar-collapsed .sidebar-section-label span {
-        display: none !important;
-    }
-
-    #sidebar.sidebar-collapsed .nav-link {
-        position: relative;
-        padding: 0.35rem 0;
-        border-radius: 999px;
-        gap: 0 !important;
-        width: 100%;
-        justify-content: center;
-    }
-
-    #sidebar.sidebar-collapsed .nav-link i {
-        display: flex !important;
-        margin: 0 auto;
-        color: #FF0037 !important;
-        font-size: 1.4rem;
-        width: 2.25rem;
-        height: 2.25rem;
-        align-items: center;
-        justify-content: center;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-
-    #sidebar.sidebar-collapsed .collapsible-section,
-    #sidebar.sidebar-collapsed .collapsible-section.section-collapsed {
-        max-height: none;
-        opacity: 1;
-        padding-top: 0;
-    }
-
-    #sidebar.sidebar-collapsed .bi {
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-
-    #sidebar.sidebar-collapsed .nav-link.bg-red-600,
-    #sidebar.sidebar-collapsed .nav-link.text-white {
-        background-color: transparent !important;
-        color: #FF0037 !important;
-    }
-
     @media (max-width: 1023px) {
         #sidebar {
-            top: 40px;
-            height: calc(100vh - 40px);
-            max-height: calc(100vh - 40px);
+            width: min(16rem, 85vw) !important;
+            max-width: 85vw !important;
+            z-index: 60 !important;
         }
     }
 
@@ -373,6 +324,8 @@
             height: 100vh;
             max-height: 100vh;
             top: auto;
+            transform: none !important;
         }
     }
 </style>
+

@@ -57,7 +57,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>{{ $college->name ?? 'IT DMS' }}</h1>
+        <h1>{{ $college->name ?? 'Manmohan Memorial Polytechnic' }}</h1>
         <p>Marks Report - {{ ucfirst($category) }}</p>
         <p>Generated on: {{ date('Y-m-d H:i:s') }}</p>
     </div>
@@ -155,3 +155,4 @@
     </div>
 </body>
 </html>
+

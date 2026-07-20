@@ -10,12 +10,15 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\MagicLinkController;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-        ->name('register');
+    if (config('auth.allow_self_registration')) {
+        Route::get('register', [RegisteredUserController::class, 'create'])
+            ->name('register');
 
-    Route::post('register', [RegisteredUserController::class, 'store']);
+        Route::post('register', [RegisteredUserController::class, 'store']);
+    }
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
@@ -33,6 +36,33 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+
+    Route::get('two-factor-challenge', [\App\Http\Controllers\Auth\TwoFactorChallengeController::class, 'create'])
+        ->name('two-factor.challenge');
+    Route::post('two-factor-challenge', [\App\Http\Controllers\Auth\TwoFactorChallengeController::class, 'store'])
+        ->name('two-factor.verify');
+    Route::post('two-factor-challenge/resend', [\App\Http\Controllers\Auth\TwoFactorChallengeController::class, 'resend'])
+        ->name('two-factor.resend');
+    Route::get('two-factor-challenge/cancel', [\App\Http\Controllers\Auth\TwoFactorChallengeController::class, 'destroy'])
+        ->name('two-factor.cancel');
+
+    // Magic link routes (login via emailed one-time link)
+    Route::get('magic-login/{token}', [MagicLinkController::class, 'consume'])
+        ->name('magic.login');
+
+    Route::get('magic-login/{token}/cancel', [MagicLinkController::class, 'deny'])
+        ->name('magic.cancel');
+
+    Route::get('magic-link-sent', function () {
+        return view('auth.magic_link_sent');
+    })->name('magic.link.sent');
+
+    Route::get('magic-wait', function () {
+        return view('auth.magic_link_wait');
+    })->name('magic.wait');
+
+    Route::get('magic-wait/status', [MagicLinkController::class, 'status'])
+        ->name('magic.wait.status');
 });
 
 Route::middleware('auth')->group(function () {

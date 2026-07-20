@@ -32,7 +32,7 @@ return [
     |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    'lifetime' => (int) env('SESSION_LIFETIME', 1440),
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
@@ -114,7 +114,10 @@ return [
     |
     */
 
-    'lottery' => [2, 100],
+    'lottery' => array_map(
+        static fn (string $value): int => (int) trim($value),
+        explode(',', env('SESSION_LOTTERY', '2,100'))
+    ),
 
     /*
     |--------------------------------------------------------------------------
@@ -215,3 +218,4 @@ return [
     'partitioned' => env('SESSION_PARTITIONED_COOKIE', false),
 
 ];
+

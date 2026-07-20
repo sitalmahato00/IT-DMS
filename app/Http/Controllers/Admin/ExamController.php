@@ -186,6 +186,14 @@ class ExamController extends Controller
     }
 
     /**
+     * Show the exam creation page.
+     */
+    public function create()
+    {
+        return view('admin.exams.create', $this->getExamFormContext());
+    }
+
+    /**
      * Get subjects by semester for exam views/modals.
      * Returns both a flat list and a "grouped" map (by category) for optgroups.
      */
@@ -445,6 +453,7 @@ class ExamController extends Controller
                 'status' => 'sometimes|required|in:draft,published,archived,faculty',
                 'description' => 'sometimes|nullable|string',
                 'description_ne' => 'sometimes|nullable|string',
+                'instructions' => 'sometimes|nullable|string',
             ]);
 
             if ($validator->fails()) {
@@ -593,10 +602,19 @@ class ExamController extends Controller
         try {
 $exam->load(['subject', 'marks.student']);
             
-            // Get statistics
-            $totalStudents = $exam->marks()->count();
-            $averageMarks = $exam->marks()->avg('marks_obtained');
-            $passCount = $exam->marks()->where('percentage', '>=', 35)->count();
+            // Get statistics (FIX #4: Single query instead of 3 separate queries)
+            $stats = DB::table('exam_marks')
+                ->where('exam_id', $exam->id)
+                ->selectRaw('
+                    COUNT(*) as total_students,
+                    AVG(marks_obtained) as average_marks,
+                    SUM(CASE WHEN percentage >= 35 THEN 1 ELSE 0 END) as pass_count
+                ')
+                ->first();
+            
+            $totalStudents = $stats->total_students ?? 0;
+            $averageMarks = $stats->average_marks ?? 0;
+            $passCount = $stats->pass_count ?? 0;
             $passRate = $totalStudents > 0 ? round(($passCount / $totalStudents) * 100, 2) : 0;
 
             // Provide subjects list for upload modal (optional subject override)
@@ -609,6 +627,26 @@ $exam->load(['subject', 'marks.student']);
             Log::error('Error showing exam: ' . $e->getMessage());
             return redirect()->back()
                 ->with('error', 'Failed to load exam details: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show the exam edit page.
+     */
+    public function edit(Exam $exam)
+    {
+        try {
+            $exam->load(['subject']);
+
+            return view('admin.exams.edit', array_merge(
+                $this->getExamFormContext($exam),
+                ['exam' => $exam]
+            ));
+        } catch (\Exception $e) {
+            Log::error('Error loading exam edit page: ' . $e->getMessage());
+
+            return redirect()->route('admin.exam')
+                ->with('error', 'Failed to load exam edit page: ' . $e->getMessage());
         }
     }
 
@@ -901,10 +939,19 @@ $exam->load(['subject', 'marks.student']);
             // Reload exam with marks
 $exam->load(['subject', 'marks.student.user']);
 
-            // Get updated statistics
-            $totalStudents = $exam->marks()->count();
-            $averageMarks = $exam->marks()->avg('marks_obtained');
-            $passCount = $exam->marks()->where('percentage', '>=', 35)->count();
+            // Get updated statistics (FIX #5: Single query instead of 3 separate)
+            $stats = DB::table('exam_marks')
+                ->where('exam_id', $exam->id)
+                ->selectRaw('
+                    COUNT(*) as total_students,
+                    AVG(marks_obtained) as average_marks,
+                    SUM(CASE WHEN percentage >= 35 THEN 1 ELSE 0 END) as pass_count
+                ')
+                ->first();
+            
+            $totalStudents = $stats->total_students ?? 0;
+            $averageMarks = $stats->average_marks ?? 0;
+            $passCount = $stats->pass_count ?? 0;
             $passRate = $totalStudents > 0 ? round(($passCount / $totalStudents) * 100, 2) : 0;
 
             // Get updated marks rows HTML
@@ -985,29 +1032,39 @@ $exam->load(['subject', 'marks.student.user']);
             }
             $existingMarks = $existingMarksQuery->pluck('marks_obtained', 'student_id')->toArray();
 
-            // Get attendance percentage for each student (for the exam's subject)
+            // Get attendance percentage for each student (for the exam's subject) - FIX #6: Pre-calculate for all students
             $studentAttendance = [];
             if ($exam->subject_id) {
+                // Fetch all attendance data in ONE query instead of 2*N queries
+                $studentIds = $students->pluck('id')->toArray();
+                $attendanceStats = DB::table('attendance')
+                    ->whereIn('student_id', $studentIds)
+                    ->where('attendance_type', 'class')
+                    ->where('subject_id', $exam->subject_id)
+                    ->selectRaw('
+                        student_id,
+                        COUNT(*) as total_attendance,
+                        SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_attendance
+                    ')
+                    ->groupBy('student_id')
+                    ->pluck(null, 'student_id')
+                    ->map(function($item) {
+                        return [
+                            'total' => $item->total_attendance,
+                            'present' => $item->present_attendance,
+                            'percentage' => $item->total_attendance > 0 
+                                ? round(($item->present_attendance / $item->total_attendance) * 100, 1) 
+                                : 0,
+                        ];
+                    })
+                    ->toArray();
+                
+                // Fill in zeros for students with no attendance records
                 foreach ($students as $student) {
-                    $totalAttendance = Attendance::where('student_id', $student->id)
-                        ->where('attendance_type', 'class')
-                        ->where('subject_id', $exam->subject_id)
-                        ->count();
-                    
-                    $presentAttendance = Attendance::where('student_id', $student->id)
-                        ->where('attendance_type', 'class')
-                        ->where('subject_id', $exam->subject_id)
-                        ->where('status', 'present')
-                        ->count();
-                    
-                    $attendancePercentage = $totalAttendance > 0 
-                        ? round(($presentAttendance / $totalAttendance) * 100, 1) 
-                        : 0;
-                    
-                    $studentAttendance[$student->id] = [
-                        'total' => $totalAttendance,
-                        'present' => $presentAttendance,
-                        'percentage' => $attendancePercentage,
+                    $studentAttendance[$student->id] = $attendanceStats[$student->id] ?? [
+                        'total' => 0,
+                        'present' => 0,
+                        'percentage' => 0,
                     ];
                 }
             }
@@ -1170,37 +1227,38 @@ $exam->load(['subject', 'marks.student.user']);
                 ];
             })->toArray();
 
-            // Get attendance percentage for each student (subject-specific if subject_id is provided)
+            // Get attendance percentage for each student (subject-specific if subject_id is provided) - FIX #7: Pre-calculate all at once
             $studentAttendance = [];
             $subjectId = $request->subject_id && $request->subject_id !== '' ? (int)$request->subject_id : null;
             
+            // Fetch all attendance data in ONE query instead of 2*N queries
+            $studentIds = $students->pluck('id')->toArray();
+            $attendanceQuery = DB::table('attendance')
+                ->whereIn('student_id', $studentIds)
+                ->where('attendance_type', 'class');
+            
+            if ($subjectId) {
+                $attendanceQuery->where('subject_id', $subjectId);
+            }
+            
+            $attendanceStats = $attendanceQuery
+                ->selectRaw('
+                    student_id,
+                    COUNT(*) as total_attendance,
+                    SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_attendance
+                ')
+                ->groupBy('student_id')
+                ->pluck(null, 'student_id')
+                ->map(function($item) {
+                    return $item->total_attendance > 0 
+                        ? round(($item->present_attendance / $item->total_attendance) * 100, 1) 
+                        : 0;
+                })
+                ->toArray();
+            
+            // Fill in zeros for students with no attendance records
             foreach ($students as $student) {
-                $attendanceQuery = Attendance::where('student_id', $student->id)
-                    ->where('attendance_type', 'class');
-                
-                // If a specific subject is selected, filter attendance by that subject
-                if ($subjectId) {
-                    $attendanceQuery->where('subject_id', $subjectId);
-                }
-                
-                $totalAttendance = $attendanceQuery->count();
-                
-                $presentAttendance = Attendance::where('student_id', $student->id)
-                    ->where('attendance_type', 'class')
-                    ->where('status', 'present');
-                
-                // If a specific subject is selected, filter by that subject
-                if ($subjectId) {
-                    $presentAttendance->where('subject_id', $subjectId);
-                }
-                
-                $presentAttendance = $presentAttendance->count();
-                
-                $attendancePercentage = $totalAttendance > 0 
-                    ? round(($presentAttendance / $totalAttendance) * 100, 1) 
-                    : 0;
-                
-                $studentAttendance[$student->id] = $attendancePercentage;
+                $studentAttendance[$student->id] = $attendanceStats[$student->id] ?? 0;
             }
 
             // Get the subject name if subject_id is provided
@@ -1303,6 +1361,7 @@ $exam->load(['subject', 'marks.student.user']);
                     'exam_date_bs' => $exam->exam_date_bs,
                     'status' => $exam->status,
                     'description' => $exam->description,
+                    'instructions' => $exam->instructions,
                     'theory_internal_max_marks' => $exam->theory_internal_max_marks,
                     'theory_external_max_marks' => $exam->theory_external_max_marks,
                     'practical_internal_max_marks' => $exam->practical_internal_max_marks,
@@ -1320,6 +1379,20 @@ $exam->load(['subject', 'marks.student.user']);
                 'message' => 'Failed to load exam data',
             ], 500);
         }
+    }
+
+    /**
+     * Shared data for exam create/edit pages.
+     */
+    private function getExamFormContext(?Exam $exam = null): array
+    {
+        return [
+            'academicYears' => $this->getAcademicYears(),
+            'semesters' => $this->getSemesters(),
+            'activeSemesters' => $this->getActiveSemesters(),
+            'subjects' => Subject::active()->orderBy('semester')->orderBy('subject_name')->get(),
+            'exam' => $exam,
+        ];
     }
 
     /**
@@ -1721,12 +1794,25 @@ $exam->load(['subject', 'marks.student.user']);
      */
     public function getStatistics(): array
     {
-        return [
-            'total_exams' => Exam::count(),
-            'published_exams' => Exam::where('status', 'published')->count(),
-            'draft_exams' => Exam::where('status', 'draft')->count(),
-            'total_marks_entries' => ExamMark::count(),
-        ];
+        // FIX #14 + #15: Aggregate stats + cache for 10 minutes
+        return \Illuminate\Support\Facades\Cache::remember('exam_statistics', 600, function() {
+            $stats = DB::table('exams')
+                ->selectRaw('
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = "published" THEN 1 ELSE 0 END) as published,
+                    SUM(CASE WHEN status = "draft" THEN 1 ELSE 0 END) as draft
+                ')
+                ->first();
+            
+            $marksCount = ExamMark::count();
+            
+            return [
+                'total_exams' => $stats->total ?? 0,
+                'published_exams' => $stats->published ?? 0,
+                'draft_exams' => $stats->draft ?? 0,
+                'total_marks_entries' => $marksCount,
+            ];
+        });
     }
 
     /**
@@ -2683,9 +2769,8 @@ $exam->load(['subject', 'marks.student.user']);
                 'semester' => $request->get('semester', ''),
                 'exam_category' => $request->get('exam_category', 'assessment'),
                 'assessment_number' => $request->get('assessment_number', ''),
+                'exam_id' => $request->get('exam_id', ''),
                 'student_id' => $request->get('student_id', ''),
-                'dob' => $request->get('dob', ''),
-                'dob_bs' => $request->get('dob_bs', ''),
                 'result' => $request->get('result', ''),
             ];
             
@@ -2694,10 +2779,40 @@ $exam->load(['subject', 'marks.student.user']);
             
             // If search parameters are present, search for student
             if ($request->has('search_student')) {
-                $student = $this->findStudentByIdOrDob($request);
+                $student = $this->findStudentByIdOrRollNo($request);
                 
                 if ($student) {
                     $marksheetData = $this->getMarksheetData($student, $request);
+
+                    // If the selected semester/year no longer matches the student's marks,
+                    // retry with the student's own academic context so the marksheet does not
+                    // disappear behind a stale filter.
+                    if (($marksheetData['exam_marks'] ?? collect())->isEmpty()) {
+                        $studentSemester = trim((string) ($student->semester ?? ''));
+                        $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                        if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                            $fallbackRequest = Request::create($request->url(), 'GET', array_merge(
+                                $request->query(),
+                                [
+                                    'semester' => $studentSemester !== '' ? $studentSemester : $request->get('semester', ''),
+                                    'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $request->get('academic_year', ''),
+                                ]
+                            ));
+
+                            $fallbackData = $this->getMarksheetData($student, $fallbackRequest);
+
+                            if (($fallbackData['exam_marks'] ?? collect())->isNotEmpty()) {
+                                $request->merge([
+                                    'semester' => $fallbackRequest->get('semester', ''),
+                                    'academic_year' => $fallbackRequest->get('academic_year', ''),
+                                ]);
+                                $marksheetData = $fallbackData;
+                                $filters['semester'] = $request->get('semester', '');
+                                $filters['academic_year'] = $request->get('academic_year', '');
+                            }
+                        }
+                    }
                 }
             }
             
@@ -2719,109 +2834,29 @@ $exam->load(['subject', 'marks.student.user']);
     }
 
     /**
-     * Find student by ID or DOB.
+     * Find student by ID or roll number.
      */
-    private function findStudentByIdOrDob(Request $request)
+    private function findStudentByIdOrRollNo(Request $request)
     {
         // Trim inputs to avoid mismatches from extra spaces (e.g., from copy/paste)
         $studentId = trim($request->get('student_id', ''));
-        $dob = trim($request->get('dob', ''));
-        $dobBs = $this->normalizeBsDateOfBirth($request->get('dob_bs', ''));
         
         $query = Student::with('user');
         
         if (!empty($studentId)) {
-            // Search by student ID (primary key) or roll_no
+            // Search by student profile id, linked user id, or roll_no.
             $query->where(function($q) use ($studentId) {
                 $q->where('id', $studentId)
-                  ->orWhere('roll_no', 'like', "%{$studentId}%");
-            });
-        }
-        
-        $normalizedDob = !empty($dob) ? $this->normalizeDateOfBirth($dob) : null;
-        $convertedDobBs = !empty($dobBs) ? NepaliContentHelper::convertBsToAd($dobBs) : null;
-
-        if ($normalizedDob || !empty($dob) || !empty($dobBs) || $convertedDobBs) {
-            $query->where(function ($q) use ($normalizedDob, $dob, $dobBs, $convertedDobBs) {
-                if ($normalizedDob) {
-                    $q->whereDate('date_of_birth', $normalizedDob);
-                } elseif (!empty($dob)) {
-                    $q->where('date_of_birth', $dob);
-                }
-
-                if (!empty($dobBs)) {
-                    $q->orWhere('date_of_birth_bs', $dobBs);
-                }
-
-                if ($convertedDobBs) {
-                    $q->orWhereDate('date_of_birth', $convertedDobBs);
-                }
+                  ->orWhere('roll_no', 'like', "%{$studentId}%")
+                  ->orWhereHas('user', function ($userQuery) use ($studentId) {
+                      $userQuery->where('id', $studentId);
+                  });
             });
         }
         
         $student = $query->first();
 
-        // If no student found and DOB is in YYYY-MM-DD, try swapping day/month (some browsers/locales may flip them)
-        if (!$student && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $dob, $m)) {
-            $year = $m[1];
-            $month = $m[2];
-            $day = $m[3];
-
-            if (checkdate((int)$day, (int)$month, (int)$year)) {
-                $swappedDob = sprintf('%s-%s-%s', $year, $day, $month);
-                $student = Student::with('user')
-                    ->where(function($q) use ($studentId) {
-                        $q->where('id', $studentId)
-                          ->orWhere('roll_no', 'like', "%{$studentId}%");
-                    })
-                    ->whereDate('date_of_birth', $swappedDob)
-                    ->first();
-            }
-        }
-
         return $student;
-    }
-
-    private function normalizeBsDateOfBirth(?string $dobBs): string
-    {
-        if (empty($dobBs)) {
-            return '';
-        }
-
-        $normalized = NepaliContentHelper::toEnglishNumber(trim($dobBs));
-        $normalized = str_replace(['/', '.'], '-', $normalized);
-
-        return preg_replace('/\s+/', '', $normalized) ?? '';
-    }
-
-    /**
-     * Normalize a date of birth input into YYYY-MM-DD.
-     * Accepts common formats like DD/MM/YYYY, DD-MM-YYYY, YYYY/MM/DD, YYYY-MM-DD.
-     */
-    private function normalizeDateOfBirth(string $dob): ?string
-    {
-        $formats = [
-            'Y-m-d',
-            'Y/m/d',
-            'd/m/Y',
-            'd-m-Y',
-            'd.m.Y',
-            'm/d/Y',
-            'm-d-Y',
-        ];
-
-        foreach ($formats as $format) {
-            try {
-                $parsed = \Carbon\Carbon::createFromFormat($format, trim($dob));
-                if ($parsed) {
-                    return $parsed->format('Y-m-d');
-                }
-            } catch (\Exception $e) {
-                // ignore parse errors, try next format
-            }
-        }
-
-        return null;
     }
 
     /**
@@ -2832,6 +2867,7 @@ $exam->load(['subject', 'marks.student.user']);
         $academicYear = $request->get('academic_year', '');
         $semester = $request->get('semester', '');
         $examCategory = $request->get('exam_category', 'assessment');
+        $examId = $request->get('exam_id', '');
         
         $examMarksQuery = ExamMark::where('student_id', $student->id)
             ->with(['exam', 'subject']);
@@ -2855,6 +2891,11 @@ $exam->load(['subject', 'marks.student.user']);
             $examMarksQuery->whereHas('exam', function($q) use ($examCategory) {
                 $q->where('exam_category', $examCategory);
             });
+        }
+
+        // Filter by specific exam when a detail link points to one exam block.
+        if (!empty($examId)) {
+            $examMarksQuery->where('exam_id', $examId);
         }
 
         // Filter by assessment number (only for assessment category)
@@ -2934,21 +2975,50 @@ $exam->load(['subject', 'marks.student.user']);
     {
         try {
             $studentId = $request->get('student_id', '');
-            $dob = $request->get('dob', '');
-            
-            if (empty($studentId) && empty($dob)) {
-                return redirect()->route('admin.marksheet.search')
-                    ->with('error', 'Please provide student ID or Date of Birth');
+
+            if (empty($studentId)) {
+                return response()->view('admin.marks.marksheet-error', [
+                    'title' => 'Student Not Found',
+                    'message' => 'Please provide student ID or roll number to generate the marksheet.',
+                    'searchUrl' => route('admin.marksheet.search'),
+                ], 404);
             }
             
-            $student = $this->findStudentByIdOrDob($request);
+            $student = $this->findStudentByIdOrRollNo($request);
             
             if (!$student) {
-                return redirect()->route('admin.marksheet.search')
-                    ->with('error', 'Student not found');
+                return response()->view('admin.marks.marksheet-error', [
+                    'title' => 'Student Not Found',
+                    'message' => 'The requested student could not be found for this marksheet.',
+                    'searchUrl' => route('admin.marksheet.search'),
+                ], 404);
             }
             
             $marksheetData = $this->getMarksheetData($student, $request);
+
+            if (($marksheetData['exam_marks'] ?? collect())->isEmpty()) {
+                $studentSemester = trim((string) ($student->semester ?? ''));
+                $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                    $fallbackRequest = Request::create($request->url(), 'GET', array_merge(
+                        $request->query(),
+                        [
+                            'semester' => $studentSemester !== '' ? $studentSemester : $request->get('semester', ''),
+                            'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $request->get('academic_year', ''),
+                        ]
+                    ));
+
+                    $fallbackData = $this->getMarksheetData($student, $fallbackRequest);
+                    if (($fallbackData['exam_marks'] ?? collect())->isNotEmpty()) {
+                        $request->merge([
+                            'semester' => $fallbackRequest->get('semester', ''),
+                            'academic_year' => $fallbackRequest->get('academic_year', ''),
+                        ]);
+                        $marksheetData = $fallbackData;
+                    }
+                }
+            }
             
             return view('admin.marks.marksheet-print', [
                 'student' => $student,
@@ -2969,21 +3039,50 @@ $exam->load(['subject', 'marks.student.user']);
     {
         try {
             $studentId = $request->get('student_id', '');
-            $dob = $request->get('dob', '');
 
-            if (empty($studentId) && empty($dob)) {
-                return redirect()->route('admin.marksheet.search')
-                    ->with('error', 'Please provide student ID or Date of Birth');
+            if (empty($studentId)) {
+                return response()->view('admin.marks.marksheet-error', [
+                    'title' => 'Student Not Found',
+                    'message' => 'Please provide student ID or roll number to export the marksheet.',
+                    'searchUrl' => route('admin.marksheet.search'),
+                ], 404);
             }
 
-            $student = $this->findStudentByIdOrDob($request);
+            $student = $this->findStudentByIdOrRollNo($request);
 
             if (!$student) {
-                return redirect()->route('admin.marksheet.search')
-                    ->with('error', 'Student not found');
+                return response()->view('admin.marks.marksheet-error', [
+                    'title' => 'Student Not Found',
+                    'message' => 'The requested student could not be found for this marksheet export.',
+                    'searchUrl' => route('admin.marksheet.search'),
+                ], 404);
             }
 
             $marksheetData = $this->getMarksheetData($student, $request);
+
+            if (($marksheetData['exam_marks'] ?? collect())->isEmpty()) {
+                $studentSemester = trim((string) ($student->semester ?? ''));
+                $studentAcademicYear = trim((string) ($student->academic_year_bs ?? $student->academic_year ?? ''));
+
+                if ($studentSemester !== '' || $studentAcademicYear !== '') {
+                    $fallbackRequest = Request::create($request->url(), 'GET', array_merge(
+                        $request->query(),
+                        [
+                            'semester' => $studentSemester !== '' ? $studentSemester : $request->get('semester', ''),
+                            'academic_year' => $studentAcademicYear !== '' ? $studentAcademicYear : $request->get('academic_year', ''),
+                        ]
+                    ));
+
+                    $fallbackData = $this->getMarksheetData($student, $fallbackRequest);
+                    if (($fallbackData['exam_marks'] ?? collect())->isNotEmpty()) {
+                        $request->merge([
+                            'semester' => $fallbackRequest->get('semester', ''),
+                            'academic_year' => $fallbackRequest->get('academic_year', ''),
+                        ]);
+                        $marksheetData = $fallbackData;
+                    }
+                }
+            }
 
             $fileName = sprintf('marksheet_%s_%s.csv', $student->id, now()->format('Ymd_His'));
 
@@ -3055,3 +3154,4 @@ $exam->load(['subject', 'marks.student.user']);
         }
     }
 }
+

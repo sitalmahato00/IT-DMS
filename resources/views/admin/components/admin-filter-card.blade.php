@@ -27,7 +27,7 @@
     $hideFilterButton = $hideFilterButton ?? false;
 @endphp
 
-<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-5 mb-6">
+<div class="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-5">
     <form action="{{ $formAction }}" method="GET" id="filterForm" class="space-y-4">
         {{-- Filter Fields Grid --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -122,13 +122,13 @@
         </div>
 
         {{-- Action Buttons --}}
-        <div class="flex items-center justify-between gap-3 pt-2 border-t border-gray-100 dark:border-slate-700">
-            <div class="flex gap-3">
+        <div class="flex flex-col gap-3 border-t border-gray-100 pt-2 dark:border-slate-700 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-col gap-3 sm:flex-row">
                 {{-- Apply Filter Button (Primary Red) --}}
                 @if(!$hideFilterButton)
                 <button 
                     type="submit"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
+                    class="inline-flex w-full items-center justify-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 sm:w-auto"
                 >
                     <i class="bi bi-funnel"></i>
                     <span>Apply Filter</span>
@@ -139,7 +139,7 @@
                 @if($showReset)
                 <a 
                     href="{{ $resetRoute }}"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium transition shadow-sm"
+                    class="inline-flex w-full items-center justify-center gap-2 px-5 py-2.5 border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium transition shadow-sm sm:w-auto"
                 >
                     <i class="bi bi-arrow-counterclockwise"></i>
                     <span>Reset Filter</span>
@@ -154,3 +154,4 @@
         </div>
     </form>
 </div>
+

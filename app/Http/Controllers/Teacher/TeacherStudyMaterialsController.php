@@ -289,3 +289,4 @@ class TeacherStudyMaterialsController extends Controller
         return round($bytes / (1024 ** $power), 2) . ' ' . $units[$power];
     }
 }
+

@@ -11,10 +11,61 @@ use App\Notifications\ParentAccountNotification;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ParentController extends Controller
 {
+    private function parentFieldOptions(): array
+    {
+        return [
+            'relationships' => ['Father', 'Mother', 'Guardian', 'Other'],
+            'contactMethods' => ['call' => 'Call', 'email' => 'Email', 'sms' => 'SMS'],
+            'notificationPreferences' => ['email' => 'Email', 'sms' => 'SMS'],
+            'accessLevels' => ['view_only' => 'View Only', 'full_access' => 'Full Access'],
+            'preferredLanguages' => ['English', 'Nepali', 'Hindi'],
+            'profileVisibilities' => ['public' => 'Public', 'private' => 'Private'],
+            'bloodGroups' => ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+            'statuses' => ['active' => 'Active', 'inactive' => 'Inactive', 'suspended' => 'Suspended'],
+        ];
+    }
+
+    private function availableStudentsFor(User $user)
+    {
+        $query = User::where('role', 'student')->with('student')->orderBy('name');
+
+        if ($user->role === 'teacher' && $user->semester) {
+            $query->whereHas('student', function ($q) use ($user) {
+                $q->where('semester', $user->semester);
+            });
+        } elseif ($user->role === 'parent') {
+            $query->where('parent_id', $user->id);
+        }
+
+        return $query->get();
+    }
+
+    private function syncChildren(User $parentUser, array $childrenIds = [], ?int $primaryChildUserId = null): void
+    {
+        Student::where('parent_id', $parentUser->id)->update(['parent_id' => null]);
+
+        $childrenIds = array_values(array_unique(array_filter(array_map('intval', $childrenIds))));
+
+        if (!empty($childrenIds)) {
+            Student::whereIn('user_id', $childrenIds)->update(['parent_id' => $parentUser->id]);
+        }
+
+        $primaryChildUserId = $primaryChildUserId && in_array($primaryChildUserId, $childrenIds, true)
+            ? $primaryChildUserId
+            : (!empty($childrenIds) ? $childrenIds[0] : null);
+
+        if ($parentUser->parent) {
+            $parentUser->parent->primary_child_user_id = $primaryChildUserId;
+            $parentUser->parent->save();
+        }
+    }
+
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -66,10 +117,19 @@ class ParentController extends Controller
 
         $parents = $builder->paginate($perPage)->withQueryString();
 
+        // FIX #1: Eager load all students for all parents in ONE query (not N queries)
+        $parentIds = $parents->getCollection()->pluck('id')->toArray();
+        $allStudents = Student::whereIn('parent_id', $parentIds)->with('user')->get()->groupBy('parent_id');
+
         // Attach children count so view can display it
-        $parents->getCollection()->transform(function($p){
-            $childrenStudents = Student::where('parent_id', $p->id)->with('user')->get();
+        $parents->getCollection()->transform(function($p) use ($allStudents){
+            $childrenStudents = $allStudents->get($p->id, collect());
+            $primaryChild = null;
+            if (!empty($p->parent?->primary_child_user_id)) {
+                $primaryChild = $childrenStudents->firstWhere('user_id', $p->parent->primary_child_user_id);
+            }
             $p->children_count = $childrenStudents->count();
+            $p->primary_child_name = $primaryChild?->user?->name;
             $p->children = $childrenStudents->map(function($student) {
                 return $student->user;
             })->filter();
@@ -79,80 +139,316 @@ class ParentController extends Controller
         return view('admin.parents', compact('parents'));
     }
 
+    public function create()
+    {
+        $user = auth()->user();
+        $availableStudents = $this->availableStudentsFor($user)->map(function ($student) {
+            return [
+                'id' => $student->id,
+                'name' => $student->name,
+                'email' => $student->email,
+                'roll_no' => $student->student?->roll_no,
+                'semester' => $student->student?->semester,
+                'program' => $student->student?->program,
+            ];
+        });
+
+        return view('admin.parents.create', [
+            'availableStudents' => $availableStudents,
+            'fieldOptions' => $this->parentFieldOptions(),
+        ]);
+    }
+
+    public function show($id)
+    {
+        $user = auth()->user();
+        $parent = User::where('role', 'parent')->with('parent')->findOrFail($id);
+
+        if ($user->role === 'parent' && $user->id !== $parent->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $assignedChildren = Student::where('parent_id', $parent->id)->with('user')->get();
+        $parentProfile = $parent->parent;
+
+        return view('admin.parents.show', [
+            'parent' => $parent,
+            'parentProfile' => $parentProfile,
+            'assignedChildren' => $assignedChildren,
+            'primaryChildUserId' => $parentProfile?->primary_child_user_id,
+            'fieldOptions' => $this->parentFieldOptions(),
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $user = auth()->user();
+        $parent = User::where('role', 'parent')->with('parent')->findOrFail($id);
+
+        if ($user->role === 'parent' && $user->id !== $parent->id) {
+            abort(403, 'Unauthorized');
+        }
+
+        $assignedChildren = Student::where('parent_id', $parent->id)->with('user')->get();
+        $selectedChildren = $assignedChildren->pluck('user_id')->filter()->values();
+        $availableStudents = $this->availableStudentsFor($user)->map(function ($student) {
+            return [
+                'id' => $student->id,
+                'name' => $student->name,
+                'email' => $student->email,
+                'roll_no' => $student->student?->roll_no,
+                'semester' => $student->student?->semester,
+                'program' => $student->student?->program,
+            ];
+        });
+
+        return view('admin.parents.edit', [
+            'parent' => $parent,
+            'parentProfile' => $parent->parent,
+            'assignedChildren' => $assignedChildren,
+            'selectedChildren' => $selectedChildren,
+            'primaryChildUserId' => $parent->parent?->primary_child_user_id,
+            'availableStudents' => $availableStudents,
+            'fieldOptions' => $this->parentFieldOptions(),
+        ]);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
+            'username' => ['nullable', 'string', 'max:255', Rule::unique('users', 'username')],
             'name' => 'required|string|max:255',
-            'email' => ['required','email', Rule::unique('users','email')],
-            'phone' => 'nullable|digits:10',
-            'relationship' => 'nullable|string|max:100',
-            'bio' => 'nullable|string',
-            'status' => 'nullable|string',
-            'profile_photo' => 'nullable|image|max:4096',
-            'children' => 'nullable|array',
-            'children.*' => 'integer|exists:users,id',
-            'gender' => 'nullable|string|max:20',
+            'email' => ['required', 'email', Rule::unique('users', 'email')],
+            'phone' => ['required', 'string', 'max:20'],
+            'secondary_phone' => ['nullable', 'string', 'max:20'],
+            'alternate_email' => ['nullable', 'email', 'max:191'],
+            'whatsapp_number' => ['nullable', 'string', 'max:20'],
+            'parent_code' => ['nullable', 'string', 'max:20', Rule::unique('parents', 'parent_code')],
+            'national_id_number' => ['nullable', 'string', 'max:100'],
+            'date_of_birth' => ['nullable', 'date'],
+            'relationship' => ['nullable', 'string', 'max:60'],
+            'occupation' => ['nullable', 'string', 'max:100'],
+            'address' => ['nullable', 'string'],
+            'city' => ['nullable', 'string', 'max:120'],
+            'state_province' => ['nullable', 'string', 'max:120'],
+            'postal_code' => ['nullable', 'string', 'max:20'],
+            'country' => ['nullable', 'string', 'max:120'],
+            'employer_name' => ['nullable', 'string', 'max:150'],
+            'work_address' => ['nullable', 'string'],
+            'work_phone_number' => ['nullable', 'string', 'max:20'],
+            'income_range' => ['nullable', 'string', 'max:60'],
+            'blood_group' => ['nullable', 'string', 'max:10'],
+            'medical_conditions' => ['nullable', 'string'],
+            'emergency_notes' => ['nullable', 'string'],
+            'bio' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string'],
+            'status' => ['nullable', Rule::in(['active', 'inactive', 'suspended'])],
+            'profile_visibility' => ['nullable', Rule::in(['public', 'private'])],
+            'preferred_language' => ['nullable', 'string', 'max:20'],
+            'access_level' => ['nullable', Rule::in(['view_only', 'full_access'])],
+            'preferred_contact_method' => ['nullable', Rule::in(['call', 'email', 'sms'])],
+            'notification_preferences' => ['nullable', 'array'],
+            'notification_preferences.*' => ['nullable', Rule::in(['email', 'sms'])],
+            'portal_access' => ['nullable', 'boolean'],
+            'emergency_contact_priority' => ['nullable', 'boolean'],
+            'primary_child_user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'profile_photo' => ['nullable', 'image', 'max:4096'],
+            'id_proof_upload' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:4096'],
+            'address_proof_upload' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:4096'],
+            'children' => ['nullable', 'array'],
+            'children.*' => ['integer', 'exists:users,id'],
+            'gender' => ['nullable', 'string', 'max:20'],
         ]);
 
-        // Generate a temporary password
-        $password = Str::random(10);
-
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($password),
-            'role' => 'parent',
-        ]);
-
-        // Create parent record with profile fields
-        $parent = $user->parent()->create([
-            'parent_code' => 'P' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
-            'occupation' => $data['occupation'] ?? null,
-            'gender' => $data['gender'] ?? null,
-            'phone' => $data['phone'] ?? null,
-            'address' => $data['address'] ?? null,
-            'department' => null,
-            'bio' => $data['bio'] ?? null,
-            'status' => $data['status'] ?? 'active',
-        ]);
-
-        if ($request->hasFile('profile_photo')) {
-            $path = $request->file('profile_photo')->store('profiles', 'public');
-            $parent->profile_photo_path = $path;
-            $parent->save();
+        $childrenIds = array_values(array_unique(array_filter(array_map('intval', $data['children'] ?? []))));
+        $primaryChildUserId = !empty($data['primary_child_user_id']) ? (int) $data['primary_child_user_id'] : null;
+        if ($primaryChildUserId && !in_array($primaryChildUserId, $childrenIds, true)) {
+            $primaryChildUserId = !empty($childrenIds) ? $childrenIds[0] : null;
         }
 
-        // Assign children
-        if (!empty($data['children'])) {
-            $childrenIds = array_filter($data['children'], fn($id) => !empty($id));
-            if (!empty($childrenIds)) {
-                Student::whereIn('user_id', $childrenIds)->update(['parent_id' => $user->id]);
-            }
-        }
+        DB::beginTransaction();
 
-        $credentialsEmailSent = true;
         try {
-            $user->notify(new ParentAccountNotification($password));
-        } catch (\Exception $e) {
-            $credentialsEmailSent = false;
-            \Illuminate\Support\Facades\Log::error('Failed to send parent notification: ' . $e->getMessage());
+            $password = Str::random(10);
+
+            $user = new User([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'username' => $data['username'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'password' => Hash::make($password),
+            ]);
+            $user->role = 'parent';
+            $user->save();
+
+            $parent = $user->parent()->create([
+                'parent_code' => $data['parent_code'] ?? ('P' . str_pad($user->id, 4, '0', STR_PAD_LEFT)),
+                'occupation' => $data['occupation'] ?? null,
+                'national_id_number' => $data['national_id_number'] ?? null,
+                'date_of_birth' => $data['date_of_birth'] ?? null,
+                'relationship' => $data['relationship'] ?? null,
+                'gender' => $data['gender'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'secondary_phone' => $data['secondary_phone'] ?? null,
+                'alternate_email' => $data['alternate_email'] ?? null,
+                'whatsapp_number' => $data['whatsapp_number'] ?? null,
+                'preferred_contact_method' => $data['preferred_contact_method'] ?? null,
+                'address' => $data['address'] ?? null,
+                'city' => $data['city'] ?? null,
+                'state_province' => $data['state_province'] ?? null,
+                'postal_code' => $data['postal_code'] ?? null,
+                'country' => $data['country'] ?? null,
+                'employer_name' => $data['employer_name'] ?? null,
+                'work_address' => $data['work_address'] ?? null,
+                'work_phone_number' => $data['work_phone_number'] ?? null,
+                'income_range' => $data['income_range'] ?? null,
+                'blood_group' => $data['blood_group'] ?? null,
+                'medical_conditions' => $data['medical_conditions'] ?? null,
+                'emergency_notes' => $data['emergency_notes'] ?? null,
+                'department' => null,
+                'bio' => $data['bio'] ?? null,
+                'status' => $data['status'] ?? 'active',
+                'notification_preferences' => !empty($data['notification_preferences']) ? implode(',', $data['notification_preferences']) : null,
+                'access_level' => $data['access_level'] ?? 'view_only',
+                'portal_access' => $request->boolean('portal_access', true),
+                'notes' => $data['notes'] ?? null,
+                'preferred_language' => $data['preferred_language'] ?? null,
+                'profile_visibility' => $data['profile_visibility'] ?? 'public',
+                'emergency_contact_priority' => $request->boolean('emergency_contact_priority', false),
+                'primary_child_user_id' => $primaryChildUserId,
+            ]);
+
+            if ($request->hasFile('profile_photo')) {
+                $path = $request->file('profile_photo')->store('parents', 'public');
+                $parent->profile_photo_path = $path;
+            }
+
+            if ($request->hasFile('id_proof_upload')) {
+                $parent->id_proof_path = $request->file('id_proof_upload')->store('parents/documents', 'public');
+            }
+
+            if ($request->hasFile('address_proof_upload')) {
+                $parent->address_proof_path = $request->file('address_proof_upload')->store('parents/documents', 'public');
+            }
+
+            $parent->save();
+            $this->syncChildren($user, $childrenIds, $primaryChildUserId);
+
+            DB::commit();
+
+            $credentialsEmailSent = true;
+            try {
+                $user->notify(new ParentAccountNotification($password));
+            } catch (\Exception $e) {
+                $credentialsEmailSent = false;
+                Log::error('Failed to send parent notification: ' . $e->getMessage());
+            }
+
+            $message = $credentialsEmailSent
+                ? 'Parent created successfully. Login credentials have been sent to the parent\'s email.'
+                : 'Parent created successfully, but the credentials email could not be sent. Check mail settings and logs.';
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'email_sent' => $credentialsEmailSent,
+                    'parent' => $user,
+                ]);
+            }
+
+            return redirect()->route('admin.parents.show', $user->id)->with($credentialsEmailSent ? 'success' : 'warning', $message);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Parent create failed: ' . $e->getMessage());
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create parent: ' . $e->getMessage(),
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Failed to create parent: ' . $e->getMessage())
+                ->withInput();
         }
+    }
 
-        $message = $credentialsEmailSent
-            ? 'Parent created successfully. Login credentials have been sent to the parent\'s email.'
-            : 'Parent created successfully, but the credentials email could not be sent. Check mail settings and logs.';
+    public function lookupByEmail(Request $request)
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
 
-        // Check if this is an AJAX request
-        if ($request->expectsJson() || $request->ajax()) {
+        $parent = User::where('role', 'parent')
+            ->with('parent')
+            ->where('email', $data['email'])
+            ->first();
+
+        if (!$parent) {
             return response()->json([
-                'success' => true,
-                'message' => $message,
-                'email_sent' => $credentialsEmailSent,
-                'parent' => $user
+                'found' => false,
             ]);
         }
 
-        return redirect()->route('admin.parents')->with($credentialsEmailSent ? 'success' : 'warning', $message);
+        $children = Student::where('parent_id', $parent->id)
+            ->with('user')
+            ->get()
+            ->map(fn ($student) => [
+                'id' => $student->user?->id,
+                'name' => $student->user?->name,
+                'email' => $student->user?->email,
+                'roll_no' => $student->roll_no,
+                'semester' => $student->semester,
+                'program' => $student->program,
+                'section' => $student->section,
+                'academic_year' => $student->academic_year_bs ?: $student->academic_year,
+            ])
+            ->values();
+
+        return response()->json([
+            'found' => true,
+            'parent' => [
+                'id' => $parent->id,
+                'name' => $parent->name,
+                'email' => $parent->email,
+                'phone' => $parent->parent->phone ?? $parent->phone,
+                'occupation' => $parent->parent->occupation ?? null,
+                'address' => $parent->parent->address ?? null,
+                'bio' => $parent->parent->bio ?? null,
+                'status' => $parent->parent->status ?? 'active',
+                'gender' => $parent->parent->gender ?? null,
+                'parent_code' => $parent->parent->parent_code ?? null,
+                'national_id_number' => $parent->parent->national_id_number ?? null,
+                'date_of_birth' => optional($parent->parent->date_of_birth)->format('Y-m-d'),
+                'relationship' => $parent->parent->relationship ?? null,
+                'secondary_phone' => $parent->parent->secondary_phone ?? null,
+                'alternate_email' => $parent->parent->alternate_email ?? null,
+                'whatsapp_number' => $parent->parent->whatsapp_number ?? null,
+                'preferred_contact_method' => $parent->parent->preferred_contact_method ?? null,
+                'city' => $parent->parent->city ?? null,
+                'state_province' => $parent->parent->state_province ?? null,
+                'postal_code' => $parent->parent->postal_code ?? null,
+                'country' => $parent->parent->country ?? null,
+                'employer_name' => $parent->parent->employer_name ?? null,
+                'work_address' => $parent->parent->work_address ?? null,
+                'work_phone_number' => $parent->parent->work_phone_number ?? null,
+                'income_range' => $parent->parent->income_range ?? null,
+                'blood_group' => $parent->parent->blood_group ?? null,
+                'medical_conditions' => $parent->parent->medical_conditions ?? null,
+                'emergency_notes' => $parent->parent->emergency_notes ?? null,
+                'profile_visibility' => $parent->parent->profile_visibility ?? 'public',
+                'preferred_language' => $parent->parent->preferred_language ?? null,
+                'access_level' => $parent->parent->access_level ?? 'view_only',
+                'portal_access' => (bool) ($parent->parent->portal_access ?? true),
+                'notification_preferences' => array_values(array_filter(array_map('trim', explode(',', (string) ($parent->parent->notification_preferences ?? ''))))),
+                'emergency_contact_priority' => (bool) ($parent->parent->emergency_contact_priority ?? false),
+                'primary_child_user_id' => $parent->parent->primary_child_user_id ?? null,
+                'children_count' => $children->count(),
+                'children' => $children,
+            ],
+        ]);
     }
 
     public function getStudents()
@@ -173,7 +469,7 @@ class ParentController extends Controller
         }
         // Admin sees all students
         
-        $students = $query->select('id', 'name', 'email')
+        $students = $query->with('student')
             ->orderBy('name')
             ->get()
             ->map(function($s) {
@@ -181,131 +477,150 @@ class ParentController extends Controller
                     'id' => $s->id,
                     'name' => $s->name,
                     'email' => $s->email,
+                    'roll_no' => $s->student?->roll_no,
+                    'semester' => $s->student?->semester,
+                    'program' => $s->student?->program,
+                    'section' => $s->student?->section,
+                    'academic_year' => $s->student?->academic_year_bs ?: $s->student?->academic_year,
                 ];
             });
         
         return response()->json($students);
     }
 
-    public function edit($id)
-    {
-        $user = auth()->user();
-        $parent = User::where('role', 'parent')->with('parent')->findOrFail($id);
-        
-        // Check authorization
-        if ($user->role === 'parent' && $user->id !== $parent->id) {
-            abort(403, 'Unauthorized');
-        }
-        
-        $assignedChildren = Student::where('parent_id', $id)->with('user')->get()->map(function($student) {
-            return [
-                'id' => $student->user->id,
-                'name' => $student->user->name,
-                'email' => $student->user->email,
-            ];
-        })->toArray();
-        
-        // Get available students based on role
-        $availableStudentsQuery = User::where('role', 'student');
-        if ($user->role === 'teacher' && $user->semester) {
-            $availableStudentsQuery->whereHas('student', function($q) use ($user) {
-                $q->where('semester', $user->semester);
-            });
-        }
-        $availableStudents = $availableStudentsQuery->orderBy('name')->get();
-
-        $parentProfile = $parent->parent;
-        return response()->json([
-            'id' => $parent->id,
-            'name' => $parent->name,
-            'email' => $parent->email,
-            'phone' => $parentProfile->phone ?? null,
-            'occupation' => $parentProfile->occupation ?? null,
-            'address' => $parentProfile->address ?? null,
-            'bio' => $parentProfile->bio ?? null,
-            'status' => $parentProfile->status ?? 'active',
-            'profile_photo_path' => $parentProfile->profile_photo_path ?? null,
-            'gender' => $parentProfile->gender ?? null,
-            'parent_code' => $parentProfile->parent_code ?? null,
-            'assigned_children' => $assignedChildren,
-            'availableStudents' => $availableStudents,
-        ]);
-    }
-
     public function update(Request $request, $id)
     {
-        $parent = User::where('role', 'parent')->findOrFail($id);
+        $user = User::where('role', 'parent')->with('parent')->findOrFail($id);
+
+        if (auth()->user()->role === 'parent' && auth()->id() !== $user->id) {
+            abort(403, 'Unauthorized');
+        }
 
         $data = $request->validate([
+            'username' => ['nullable', 'string', 'max:255', Rule::unique('users', 'username')->ignore($user->id)],
             'name' => 'required|string|max:255',
-            'email' => ['required','email', Rule::unique('users','email')->ignore($id)],
-            'phone' => 'nullable|digits:10',
-            'occupation' => 'nullable|string|max:100',
-            'address' => 'nullable|string',
-            'bio' => 'nullable|string',
-            'status' => 'nullable|string',
-            'profile_photo' => 'nullable|image|max:4096',
-            'children' => 'nullable|array',
-            'children.*' => 'integer|exists:users,id',
-            'gender' => 'nullable|string|max:20',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => ['required', 'string', 'max:20'],
+            'secondary_phone' => ['nullable', 'string', 'max:20'],
+            'alternate_email' => ['nullable', 'email', 'max:191'],
+            'whatsapp_number' => ['nullable', 'string', 'max:20'],
+            'parent_code' => ['nullable', 'string', 'max:20', Rule::unique('parents', 'parent_code')->ignore($user->parent?->id)],
+            'national_id_number' => ['nullable', 'string', 'max:100'],
+            'date_of_birth' => ['nullable', 'date'],
+            'relationship' => ['nullable', 'string', 'max:60'],
+            'occupation' => ['nullable', 'string', 'max:100'],
+            'gender' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string'],
+            'city' => ['nullable', 'string', 'max:120'],
+            'state_province' => ['nullable', 'string', 'max:120'],
+            'postal_code' => ['nullable', 'string', 'max:20'],
+            'country' => ['nullable', 'string', 'max:120'],
+            'employer_name' => ['nullable', 'string', 'max:150'],
+            'work_address' => ['nullable', 'string'],
+            'work_phone_number' => ['nullable', 'string', 'max:20'],
+            'income_range' => ['nullable', 'string', 'max:60'],
+            'blood_group' => ['nullable', 'string', 'max:10'],
+            'medical_conditions' => ['nullable', 'string'],
+            'emergency_notes' => ['nullable', 'string'],
+            'bio' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string'],
+            'status' => ['nullable', Rule::in(['active', 'inactive', 'suspended'])],
+            'profile_visibility' => ['nullable', Rule::in(['public', 'private'])],
+            'preferred_language' => ['nullable', 'string', 'max:20'],
+            'access_level' => ['nullable', Rule::in(['view_only', 'full_access'])],
+            'preferred_contact_method' => ['nullable', Rule::in(['call', 'email', 'sms'])],
+            'notification_preferences' => ['nullable', 'array'],
+            'notification_preferences.*' => ['nullable', Rule::in(['email', 'sms'])],
+            'portal_access' => ['nullable', 'boolean'],
+            'emergency_contact_priority' => ['nullable', 'boolean'],
+            'primary_child_user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'profile_photo' => ['nullable', 'image', 'max:4096'],
+            'id_proof_upload' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:4096'],
+            'address_proof_upload' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:4096'],
+            'children' => ['nullable', 'array'],
+            'children.*' => ['integer', 'exists:users,id'],
         ]);
 
-        $parent->update([
-            'name' => $data['name'],
-            'email' => $data['email'],
-        ]);
-
-        // Update parent record with profile fields
-        if ($parent->parent) {
-            $parent->parent->update([
-                'gender' => $data['gender'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'occupation' => $data['occupation'] ?? null,
-                'address' => $data['address'] ?? null,
-                'bio' => $data['bio'] ?? null,
-                'status' => $data['status'] ?? 'active',
-            ]);
-        } else {
-            // Create parent record if it doesn't exist
-            $parent->parent()->create([
-                'parent_code' => 'P' . str_pad($parent->id, 4, '0', STR_PAD_LEFT),
-                'occupation' => $data['occupation'] ?? null,
-                'gender' => $data['gender'] ?? null,
-                'phone' => $data['phone'] ?? null,
-                'address' => $data['address'] ?? null,
-                'bio' => $data['bio'] ?? null,
-                'status' => $data['status'] ?? 'active',
-            ]);
+        $childrenIds = array_values(array_unique(array_filter(array_map('intval', $data['children'] ?? []))));
+        $primaryChildUserId = !empty($data['primary_child_user_id']) ? (int) $data['primary_child_user_id'] : null;
+        if ($primaryChildUserId && !in_array($primaryChildUserId, $childrenIds, true)) {
+            $primaryChildUserId = !empty($childrenIds) ? $childrenIds[0] : null;
         }
 
-        if ($request->hasFile('profile_photo')) {
-            $path = $request->file('profile_photo')->store('profiles', 'public');
-            $parent->parent->profile_photo_path = $path;
-            $parent->parent->save();
-        }
+        DB::beginTransaction();
 
-        // Update children assignments
-        // First, remove this parent from all students
-        Student::where('parent_id', $parent->id)->update(['parent_id' => null]);
+        try {
+            $user->update([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'username' => $data['username'] ?? null,
+                'phone' => $data['phone'] ?? null,
+            ]);
 
-        // Then assign selected children
-        if (!empty($data['children'])) {
-            $childrenIds = array_filter($data['children'], fn($id) => !empty($id));
-            if (!empty($childrenIds)) {
-                Student::whereIn('user_id', $childrenIds)->update(['parent_id' => $parent->id]);
+            $parent = $user->parent ?: $user->parent()->make();
+            $parent->fill([
+                'parent_code' => $data['parent_code'] ?? ($parent->parent_code ?? ('P' . str_pad($user->id, 4, '0', STR_PAD_LEFT))),
+                'occupation' => $data['occupation'] ?? null,
+                'national_id_number' => $data['national_id_number'] ?? null,
+                'date_of_birth' => $data['date_of_birth'] ?? null,
+                'relationship' => $data['relationship'] ?? null,
+                'gender' => $data['gender'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'secondary_phone' => $data['secondary_phone'] ?? null,
+                'alternate_email' => $data['alternate_email'] ?? null,
+                'whatsapp_number' => $data['whatsapp_number'] ?? null,
+                'preferred_contact_method' => $data['preferred_contact_method'] ?? null,
+                'address' => $data['address'] ?? null,
+                'city' => $data['city'] ?? null,
+                'state_province' => $data['state_province'] ?? null,
+                'postal_code' => $data['postal_code'] ?? null,
+                'country' => $data['country'] ?? null,
+                'employer_name' => $data['employer_name'] ?? null,
+                'work_address' => $data['work_address'] ?? null,
+                'work_phone_number' => $data['work_phone_number'] ?? null,
+                'income_range' => $data['income_range'] ?? null,
+                'blood_group' => $data['blood_group'] ?? null,
+                'medical_conditions' => $data['medical_conditions'] ?? null,
+                'emergency_notes' => $data['emergency_notes'] ?? null,
+                'department' => null,
+                'bio' => $data['bio'] ?? null,
+                'status' => $data['status'] ?? 'active',
+                'notification_preferences' => !empty($data['notification_preferences']) ? implode(',', $data['notification_preferences']) : null,
+                'access_level' => $data['access_level'] ?? 'view_only',
+                'portal_access' => $request->boolean('portal_access', true),
+                'notes' => $data['notes'] ?? null,
+                'preferred_language' => $data['preferred_language'] ?? null,
+                'profile_visibility' => $data['profile_visibility'] ?? 'public',
+                'emergency_contact_priority' => $request->boolean('emergency_contact_priority', false),
+                'primary_child_user_id' => $primaryChildUserId,
+            ]);
+
+            if ($request->hasFile('profile_photo')) {
+                $parent->profile_photo_path = $request->file('profile_photo')->store('parents', 'public');
             }
-        }
 
-        // Check if this is an AJAX request
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Parent updated successfully',
-                'parent' => $parent
-            ]);
-        }
+            if ($request->hasFile('id_proof_upload')) {
+                $parent->id_proof_path = $request->file('id_proof_upload')->store('parents/documents', 'public');
+            }
 
-        return redirect()->route('admin.parents')->with('success', 'Parent updated successfully');
+            if ($request->hasFile('address_proof_upload')) {
+                $parent->address_proof_path = $request->file('address_proof_upload')->store('parents/documents', 'public');
+            }
+
+            $parent->save();
+            $this->syncChildren($user, $childrenIds, $primaryChildUserId);
+
+            DB::commit();
+
+            return redirect()->route('admin.parents.show', $user->id)->with('success', 'Parent updated successfully');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Parent update failed: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Failed to update parent: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     public function destroy($id)
@@ -371,6 +686,13 @@ class ParentController extends Controller
 
             $rows = $builder->orderBy('created_at', 'desc')->get();
 
+            // FIX #2: Pre-calculate children counts for all parents (not N queries)
+            $childrenCounts = Student::whereIn('parent_id', $rows->pluck('id'))
+                ->groupBy('parent_id')
+                ->selectRaw('parent_id, COUNT(*) as count')
+                ->pluck('count', 'parent_id')
+                ->toArray();
+
             // Prepare filter information
             $filterInfo = [];
             if ($request->input('q')) {
@@ -418,7 +740,7 @@ class ParentController extends Controller
                 
                 // Write data rows
                 foreach ($rows as $r) {
-                    $childCount = Student::where('parent_id', $r->id)->count();
+                    $childCount = $childrenCounts[$r->id] ?? 0;
                     $line = [
                         $r->id,
                         $r->name,
@@ -443,14 +765,8 @@ class ParentController extends Controller
 
     public function print($id)
     {
-        $parent = User::where('role','parent')->with('parent')->findOrFail($id);
-        $children = User::where('role','student')
-            ->whereHas('student', function($q) use ($id) {
-                $q->where('parent_id', $id);
-            })
-            ->with('student')
-            ->get();
-        // Convert image to base64 for PDF
+        $parent = User::where('role', 'parent')->with('parent')->findOrFail($id);
+        $children = Student::where('parent_id', $parent->id)->with('user')->get();
         $parent->photo_base64 = $this->getImageBase64($parent);
         return view('admin.partials.parent-print', compact('parent', 'children'));
     }
@@ -458,14 +774,8 @@ class ParentController extends Controller
     public function download($id)
     {
         try {
-            $parent = User::where('role','parent')->with('parent')->findOrFail($id);
-            $children = User::where('role','student')
-                ->whereHas('student', function($q) use ($id) {
-                    $q->where('parent_id', $id);
-                })
-                ->with('student')
-                ->get();
-            // Convert image to base64 for PDF
+            $parent = User::where('role', 'parent')->with('parent')->findOrFail($id);
+            $children = Student::where('parent_id', $parent->id)->with('user')->get();
             $parent->photo_base64 = $this->getImageBase64($parent);
             $pdf = Pdf::loadView('admin.partials.parent-print', compact('parent', 'children'));
             return $pdf->download('parent_' . $parent->id . '_' . Str::slug($parent->name) . '.pdf');
@@ -546,3 +856,4 @@ class ParentController extends Controller
         return view('admin.print.parents-list', compact('parents', 'college'));
     }
 }
+

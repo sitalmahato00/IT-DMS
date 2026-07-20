@@ -12,3 +12,4 @@ return [
     // missing.
     'fallback_to_other' => false,
 ];
+

@@ -35,3 +35,4 @@ class ClearAttendance extends Command
         }
     }
 }
+

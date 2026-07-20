@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Semester;
 use App\Models\Student;
 use App\Models\Subject;
@@ -20,23 +21,40 @@ class SemesterController extends Controller
     {
         $semesters = Semester::orderBy('number')->get();
 
+        // FIX #3: Pre-calculate all counts in ONE query (not N queries)
+        $counts = DB::table('semesters')
+            ->leftJoin('students', function($j) {
+                $j->on(DB::raw('CAST(students.semester AS CHAR)'), '=', 'semesters.number')
+                  ->where('students.status', 'active')
+                  ->where('students.is_alumni', false);
+            })
+            ->leftJoin('subjects as subjects_all', function($j) {
+                $j->on(DB::raw('CAST(subjects_all.semester AS CHAR)'), '=', 'semesters.number')
+                  ->where('subjects_all.status', 'active');
+            })
+            ->leftJoin('subjects as elective_subjects', function($j) {
+                $j->on(DB::raw('CAST(elective_subjects.semester AS CHAR)'), '=', 'semesters.number')
+                  ->where('elective_subjects.subject_type', 'elective')
+                  ->where('elective_subjects.status', 'active');
+            })
+            ->select(
+                'semesters.id',
+                'semesters.number',
+                DB::raw('COUNT(DISTINCT students.id) as student_count'),
+                DB::raw('COUNT(DISTINCT subjects_all.id) as subject_count'),
+                DB::raw('COUNT(DISTINCT elective_subjects.id) as elective_count')
+            )
+            ->groupBy('semesters.id', 'semesters.number')
+            ->get()
+            ->keyBy('id');
+
         // Build enriched data as a collection of stdClass objects (avoids model readonly)
-        $enrichedSemesters = $semesters->map(function ($semester) {
+        $enrichedSemesters = $semesters->map(function ($semester) use ($counts) {
             $obj = $semester->toArray();
-            $obj['student_count'] = Student::where('semester', (string) $semester->number)
-                ->where('status', 'active')
-                ->where('is_alumni', false)
-                ->count();
-            $obj['subject_count'] = Subject::where('semester', (string) $semester->number)
-                ->where('status', 'active')
-                ->count();
-            $obj['elective_count'] = Subject::where('semester', (string) $semester->number)
-                ->where(function($q) {
-                    $q->where('subject_type', 'elective')
-                      ->orWhere('subject_type', 'optional');
-                })
-                ->where('status', 'active')
-                ->count();
+            $semesterCounts = $counts->get($semester->id);
+            $obj['student_count'] = $semesterCounts->student_count ?? 0;
+            $obj['subject_count'] = $semesterCounts->subject_count ?? 0;
+            $obj['elective_count'] = $semesterCounts->elective_count ?? 0;
             return (object) $obj;
         });
 
@@ -173,3 +191,4 @@ class SemesterController extends Controller
         return response()->json(['success' => true, 'message' => 'Semester deleted.']);
     }
 }
+

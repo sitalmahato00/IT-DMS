@@ -18,7 +18,8 @@ class StudyMaterialSeeder extends Seeder
         $subjects = Subject::all();
         $teachers = Teacher::all();
 
-        $documentTypes = ['lecture_notes', 'assignment', 'lab_report', 'assessment', 'study_guide', 'syllabus'];
+        // Only create 3 core document types per subject to limit records
+        $documentTypes = ['lecture_notes', 'assignment', 'study_guide'];
 
         foreach ($subjects as $subject) {
             $teacher = $teachers->random();

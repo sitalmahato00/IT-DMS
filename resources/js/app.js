@@ -1,15 +1,27 @@
-console.log('app.js loaded');
 import './bootstrap';
 
+// Initialize session keep-alive to prevent 419 PAGE EXPIRED errors
+import './session-keep-alive';
+
 import Alpine from 'alpinejs';
+import collapse from '@alpinejs/collapse';
 import Chart from 'chart.js/auto';
 import $ from 'jquery';
+
+if (document.body?.hasAttribute('data-mobile-shell')) {
+    import('./mobile-app').catch((error) => {
+        console.warn('Mobile app runtime failed to load:', error);
+    });
+}
 
 // Make jQuery available globally (nepali-date-picker expects global jQuery)
 globalThis.$ = globalThis.jQuery = $;
 
 window.Alpine = Alpine;
 window.Chart = Chart;
+
+// Register Alpine plugins
+Alpine.plugin(collapse);
 
 Alpine.start();
 
@@ -49,10 +61,18 @@ function initBsDatePicker(root = document) {
         }
         $inputs.each(function() {
             if (!$(this).data('bs-initialized')) {
+                // Remove readonly if set, allow manual editing
+                $(this).removeAttr('readonly');
+                
                 $(this).nepaliDatePicker({
                     dateFormat: '%y-%m-%d',
                     closeOnDateSelect: true
                 });
+                
+                // Ensure input is not readonly after initialization
+                $(this).removeAttr('readonly');
+                $(this).css('cursor', 'text');
+                
                 // Normalize any pre-filled value to Devanagari digits for display.
                 $(this).val(englishDigitsToNepali($(this).val() || ''));
                 $(this).on('change.bsDatepicker', function() {
@@ -118,7 +138,14 @@ window.openBsDatePicker = function (inputOrId) {
             return;
         }
 
-        initBsDatePicker(document);
+        // Ensure the input has bs-date class so the plugin initializes it
+        if (!el.classList.contains('bs-date')) {
+            el.classList.add('bs-date');
+        }
+
+        // Initialize the date picker for this specific input
+        initBsDatePicker(el.parentElement || document);
+        
         // Delay open until after the current click event finishes,
         // otherwise "outside click" handlers can instantly close the picker.
         setTimeout(() => {
@@ -144,84 +171,133 @@ window.openBsDatePicker = function (inputOrId) {
     });
 };
 
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('DOMContentLoaded fired, initializing dark mode toggle');
-    const ok = await ensureBsDatePickerLoaded();
-    if (ok) initBsDatePicker();
+let themeMediaListenerRegistered = false;
 
-    // Dark Mode Toggle Functionality
-    const darkModeButtons = Array.from(document.querySelectorAll('#darkModeToggle'));
+const AUTH_ROUTES = [
+    'login',
+    'register',
+    'password.request',
+    'password.reset',
+    'password.confirm',
+    'verification.send',
+    'verification.verify',
+    'two-factor.challenge',
+    'two-factor.verify',
+];
+
+function isAuthPage() {
+    const routeName = document.body.getAttribute('data-mobile-route');
+    return AUTH_ROUTES.includes(routeName);
+}
+
+function getThemePreference() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+        return savedTheme;
+    }
+
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+    }
+
+    return 'light';
+}
+
+function getDarkModeButtons(root = document) {
+    return Array.from(root.querySelectorAll('#darkModeToggle'));
+}
+
+function updateThemeIcons(theme) {
+    const isDark = theme === 'dark';
     const darkModeIcon = document.getElementById('darkModeIcon');
     const moonIconSvg = document.getElementById('moonIcon');
     const sunIconSvg = document.getElementById('sunIcon');
+
+    if (darkModeIcon) {
+        darkModeIcon.classList.toggle('bi-moon-fill', !isDark);
+        darkModeIcon.classList.toggle('bi-sun-fill', isDark);
+    }
+
+    if (moonIconSvg && sunIconSvg) {
+        moonIconSvg.classList.toggle('hidden', isDark);
+        sunIconSvg.classList.toggle('hidden', !isDark);
+    }
+
+    getDarkModeButtons().forEach((button) => {
+        button.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+        button.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+    });
+}
+
+function applyTheme(theme) {
     const html = document.documentElement;
 
-    function getThemePreference() {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark' || savedTheme === 'light') {
-            return savedTheme;
-        }
-
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark';
-        }
-
-        return 'light';
+    // Force light mode on auth pages
+    if (isAuthPage()) {
+        theme = 'light';
+        localStorage.setItem('theme', 'light');
     }
 
-    function updateThemeIcons(theme) {
-        const isDark = theme === 'dark';
-
-        if (darkModeIcon) {
-            darkModeIcon.classList.toggle('bi-moon-fill', !isDark);
-            darkModeIcon.classList.toggle('bi-sun-fill', isDark);
-        }
-
-        if (moonIconSvg && sunIconSvg) {
-            moonIconSvg.classList.toggle('hidden', isDark);
-            sunIconSvg.classList.toggle('hidden', !isDark);
-        }
-
-        darkModeButtons.forEach((button) => {
-            button.setAttribute('aria-pressed', isDark ? 'true' : 'false');
-            button.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
-        });
+    if (theme === 'dark') {
+        html.classList.add('dark');
+    } else {
+        html.classList.remove('dark');
     }
 
-    function applyTheme(theme) {
-        if (theme === 'dark') {
-            html.classList.add('dark');
-        } else {
-            html.classList.remove('dark');
+    localStorage.setItem('theme', theme);
+    updateThemeIcons(theme);
+}
+
+function toggleTheme() {
+    // Don't allow toggling theme on auth pages
+    if (isAuthPage()) {
+        return;
+    }
+
+    const html = document.documentElement;
+    const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+}
+
+function initThemeControls(root = document) {
+    applyTheme(getThemePreference());
+
+    getDarkModeButtons(root).forEach((button) => {
+        if (button.dataset.themeToggleBound === 'true') {
+            return;
         }
 
-        localStorage.setItem('theme', theme);
-        updateThemeIcons(theme);
-    }
-
-    function toggleTheme() {
-        const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        applyTheme(newTheme);
-    }
-
-    // Initialize theme
-    const initialTheme = getThemePreference();
-    applyTheme(initialTheme);
-
-    // Add toggle event listeners
-    darkModeButtons.forEach((button) => {
+        button.dataset.themeToggleBound = 'true';
         button.addEventListener('click', toggleTheme);
     });
 
-    // Listen for system preference changes only when user hasn't set explicit theme
-    if (window.matchMedia) {
+    if (!themeMediaListenerRegistered && window.matchMedia) {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
             if (!localStorage.getItem('theme')) {
                 applyTheme(e.matches ? 'dark' : 'light');
             }
         });
+
+        themeMediaListenerRegistered = true;
     }
+}
+
+window.reinitializeThemeToggle = initThemeControls;
+window.ensureBsDatePickerLoaded = ensureBsDatePickerLoaded;
+window.reinitializeBaseUi = async function (root = document) {
+    initThemeControls(root);
+
+    const ok = await ensureBsDatePickerLoaded();
+    if (ok) {
+        initBsDatePicker(root);
+    }
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const ok = await ensureBsDatePickerLoaded();
+    if (ok) initBsDatePicker();
+    initThemeControls(document);
 
     // Watch for dynamically added inputs (modals, AJAX content)
     const obs = new MutationObserver((mutations) => {
@@ -240,28 +316,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     obs.observe(document.body, { childList: true, subtree: true });
 
-    // Locale selector: attach JS handler to navigate to locale route (uses data-base-url)
-    try {
-        const localeSelect = document.getElementById('locale-select');
-        if (localeSelect) {
-            const base = localeSelect.getAttribute('data-base-url') || '/locale';
-            localeSelect.addEventListener('change', function () {
-                if (!this.value) return;
-                const url = base.replace(/\/$/, '') + '/' + encodeURIComponent(this.value);
-                console.log('[Locale] navigating to', url);
-                window.location.href = url;
-            });
-        }
-    } catch (e) {
-        console.warn('Locale select init failed', e);
-    }
 });
 
 // Keep BS inputs displayed using Devanagari digits, but submit English digits to the server.
 document.addEventListener('blur', (e) => {
     const el = e.target;
     if (!(el instanceof HTMLInputElement)) return;
-    if (!el.classList.contains('bs-date')) return;
+    // Handle both bs-date class and DOB input specifically
+    if (!el.classList.contains('bs-date') && el.name !== 'dob_bs') return;
     el.value = englishDigitsToNepali(el.value || '');
 }, true);
 
@@ -269,7 +331,15 @@ document.addEventListener('submit', (e) => {
     const form = e.target;
     if (!(form instanceof HTMLFormElement)) return;
 
+    // Process inputs with bs-date class
     const inputs = Array.from(form.querySelectorAll('input.bs-date'));
+    
+    // Also process the DOB input even if it doesn't have bs-date class
+    const dobInput = form.querySelector('input[name="dob_bs"]');
+    if (dobInput && !inputs.includes(dobInput)) {
+        inputs.push(dobInput);
+    }
+    
     if (inputs.length === 0) return;
 
     const originals = inputs.map((input) => ({ input, value: input.value }));

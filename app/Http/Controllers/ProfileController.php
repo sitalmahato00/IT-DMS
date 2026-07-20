@@ -60,7 +60,7 @@ class ProfileController extends Controller
         }
 
         // Update basic user fields
-        $user->fill(array_intersect_key($validated, array_flip(['name','email'])));
+        $user->fill(array_intersect_key($validated, array_flip(['name','username','email'])));
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
@@ -144,3 +144,4 @@ class ProfileController extends Controller
         return Redirect::to('/');
     }
 }
+

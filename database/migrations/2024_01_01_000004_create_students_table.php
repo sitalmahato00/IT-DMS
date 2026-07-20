@@ -17,19 +17,24 @@ return new class extends Migration
             $table->string('roll_no', 50);
             $table->string('registration_number', 50)->nullable();
             $table->string('semester', 20)->default('1');
-$table->foreignId('parent_id')->nullable()->index(); // parents FK constraint added later
+            $table->string('section', 50)->nullable();
+            $table->foreignId('parent_id')->nullable()->index(); // parents FK constraint added later
             $table->date('date_of_birth')->nullable();
             $table->string('date_of_birth_bs', 20)->nullable();
-$table->string('academic_year', 10)->nullable();
+            $table->string('academic_year', 10)->nullable();
             $table->string('academic_year_bs', 10)->nullable();
+            $table->date('enrollment_date')->nullable();
+            $table->string('expected_graduation_year', 10)->nullable();
             $table->string('batch_year', 10)->nullable();
             $table->boolean('is_active')->default(true);
 
             // Profile fields
             $table->string('phone', 20)->nullable();
+            $table->string('secondary_phone', 20)->nullable();
             $table->text('address')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();
             $table->string('department', 100)->nullable();
+            $table->string('program', 150)->nullable();
             $table->text('bio')->nullable();
             $table->enum('status', ['active', 'inactive', 'suspended'])->default('active');
             $table->boolean('is_alumni')->default(false);
@@ -37,7 +42,20 @@ $table->string('academic_year', 10)->nullable();
             $table->string('gender', 20)->nullable();
             $table->string('blood_group', 10)->nullable();
             $table->string('emergency_contact', 20)->nullable();
-            
+            $table->string('emergency_contact_name', 150)->nullable();
+            $table->string('emergency_relationship', 100)->nullable();
+            $table->string('national_id_number', 100)->nullable();
+            $table->string('city', 100)->nullable();
+            $table->string('state_province', 100)->nullable();
+            $table->string('postal_code', 30)->nullable();
+            $table->string('country', 100)->nullable();
+            $table->text('medical_conditions')->nullable();
+            $table->text('allergies')->nullable();
+            $table->string('disability_status', 120)->nullable();
+            $table->text('notes')->nullable();
+            $table->string('id_document_path', 2048)->nullable();
+            $table->json('certificate_paths')->nullable();
+
             $table->timestamps();
             $table->softDeletes();
 
@@ -57,4 +75,3 @@ $table->string('academic_year', 10)->nullable();
         Schema::dropIfExists('students');
     }
 };
-

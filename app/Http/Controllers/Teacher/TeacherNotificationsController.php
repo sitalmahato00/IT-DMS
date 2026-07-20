@@ -104,3 +104,4 @@ class TeacherNotificationsController extends Controller
         ]);
     }
 }
+

@@ -32,8 +32,8 @@
     };
 @endphp
 
-<div class="space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif">
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF0037] via-[#D90033] to-[#B2002F] p-6 md:p-8 text-white shadow-xl border border-[#D90033]">
+<div class="student-smooth-page space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif">
+    <div class="student-smooth-hero relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF0037] via-[#D90033] to-[#B2002F] p-6 md:p-8 text-white shadow-xl border border-[#D90033]">
         <div class="absolute -right-10 -top-12 h-40 w-40 rounded-full bg-white/15 blur-2xl"></div>
         <div class="absolute -left-8 -bottom-14 h-48 w-48 rounded-full bg-black/10 blur-3xl"></div>
 
@@ -66,7 +66,7 @@
     </div>
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="rounded-xl border border-red-200 bg-white p-5 dark:border-red-900 dark:bg-gray-800">
+        <div class="student-smooth-card rounded-xl border border-red-200 bg-white p-5 dark:border-red-900 dark:bg-gray-800">
             <p class="text-xs font-semibold uppercase tracking-wide text-red-700 dark:text-red-300">{{ __('Assessment Score') }}</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ is_null($assessmentPercentage) ? '—' : $assessmentPercentage . '%' }}</p>
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -74,7 +74,7 @@
             </p>
         </div>
 
-        <div class="rounded-xl border border-blue-200 bg-white p-5 dark:border-blue-900 dark:bg-gray-800">
+        <div class="student-smooth-card rounded-xl border border-blue-200 bg-white p-5 dark:border-blue-900 dark:bg-gray-800">
             <p class="text-xs font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">{{ __('CTEVT Score') }}</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ is_null($ctevtPercentage) ? '—' : $ctevtPercentage . '%' }}</p>
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -82,13 +82,13 @@
             </p>
         </div>
 
-        <div class="rounded-xl border border-emerald-200 bg-white p-5 dark:border-emerald-900 dark:bg-gray-800">
+        <div class="student-smooth-card rounded-xl border border-emerald-200 bg-white p-5 dark:border-emerald-900 dark:bg-gray-800">
             <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{{ __('Teachers') }}</p>
             <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ $teachers->count() }}</p>
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Assigned to this subject') }}</p>
         </div>
 
-        <div class="rounded-xl border border-amber-200 bg-white p-5 dark:border-amber-900 dark:bg-gray-800">
+        <div class="student-smooth-card rounded-xl border border-amber-200 bg-white p-5 dark:border-amber-900 dark:bg-gray-800">
             <p class="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">{{ __('Latest Exam') }}</p>
             <p class="mt-2 text-lg font-bold text-gray-900 dark:text-white">{{ $latestExam->exam_name ?? __('Not available') }}</p>
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -99,7 +99,7 @@
 
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
         <div class="xl:col-span-4 space-y-6">
-            <div class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+            <div class="student-smooth-panel rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Subject Information') }}</h2>
 
                 <div class="mt-4 space-y-4 text-sm">
@@ -122,21 +122,21 @@
                 </div>
             </div>
 
-            <div class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+            <div class="student-smooth-panel rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
                 <div class="flex items-center justify-between gap-3">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Teachers') }}</h2>
                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ $teachers->count() }} {{ __('assigned') }}</span>
                 </div>
 
                 @if($teachers->isEmpty())
-                    <div class="mt-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center dark:border-gray-700 dark:bg-gray-900/40">
+                    <div class="student-smooth-empty mt-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center dark:border-gray-700 dark:bg-gray-900/40">
                         <i class="bi bi-person-x text-3xl text-gray-300 dark:text-gray-600"></i>
                         <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">{{ __('No teacher assignment found for this subject.') }}</p>
                     </div>
                 @else
                     <div class="mt-4 space-y-3">
                         @foreach($teachers as $teacher)
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
+                            <div class="student-smooth-list-card rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
                                         <p class="font-semibold text-gray-900 dark:text-white">{{ $teacher['name'] }}</p>
@@ -155,7 +155,7 @@
 
         <div class="xl:col-span-8 space-y-6">
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <div class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+                <div class="student-smooth-panel rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Assessment Summary') }}</h2>
                         <span class="inline-flex items-center rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wide {{ $statusBadge($assessmentMarks->is_pass ?? null) }}">
@@ -165,32 +165,32 @@
 
                     @if(($assessmentMarks->full ?? 0) > 0)
                         <div class="mt-5 grid grid-cols-2 gap-4">
-                            <div class="rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
+                            <div class="student-smooth-mini-card rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
                                 <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Obtained') }}</p>
                                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $assessmentMarks->obtained }}</p>
                             </div>
-                            <div class="rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
+                            <div class="student-smooth-mini-card rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
                                 <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Full Marks') }}</p>
                                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $assessmentMarks->full }}</p>
                             </div>
-                            <div class="rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
+                            <div class="student-smooth-mini-card rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
                                 <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Passing Marks') }}</p>
                                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $assessmentMarks->pass }}</p>
                             </div>
-                            <div class="rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
+                            <div class="student-smooth-mini-card rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
                                 <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Percentage') }}</p>
                                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $assessmentPercentage }}%</p>
                             </div>
                         </div>
                     @else
-                        <div class="mt-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-900/40">
+                        <div class="student-smooth-empty mt-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-900/40">
                             <i class="bi bi-clipboard-x text-3xl text-gray-300 dark:text-gray-600"></i>
                             <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">{{ __('Assessment marks have not been published yet.') }}</p>
                         </div>
                     @endif
                 </div>
 
-                <div class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+                <div class="student-smooth-panel rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('CTEVT Summary') }}</h2>
                         <span class="inline-flex items-center rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wide {{ $statusBadge($ctevtMarks->is_pass ?? null) }}">
@@ -200,25 +200,25 @@
 
                     @if($ctevtMarks && ($ctevtMarks->full ?? 0) > 0)
                         <div class="mt-5 grid grid-cols-2 gap-4">
-                            <div class="rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
+                            <div class="student-smooth-mini-card rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
                                 <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Obtained') }}</p>
                                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $ctevtMarks->obtained }}</p>
                             </div>
-                            <div class="rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
+                            <div class="student-smooth-mini-card rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
                                 <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Full Marks') }}</p>
                                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $ctevtMarks->full }}</p>
                             </div>
-                            <div class="rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
+                            <div class="student-smooth-mini-card rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
                                 <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Passing Marks') }}</p>
                                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $ctevtMarks->pass }}</p>
                             </div>
-                            <div class="rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
+                            <div class="student-smooth-mini-card rounded-xl bg-gray-50 p-4 dark:bg-gray-900/40">
                                 <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Percentage') }}</p>
                                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ $ctevtPercentage }}%</p>
                             </div>
                         </div>
                     @else
-                        <div class="mt-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-900/40">
+                        <div class="student-smooth-empty mt-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-900/40">
                             <i class="bi bi-clipboard-minus text-3xl text-gray-300 dark:text-gray-600"></i>
                             <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">{{ __('CTEVT marks have not been published yet.') }}</p>
                         </div>
@@ -227,7 +227,7 @@
             </div>
 
             @if(!empty($componentMarks))
-                <div class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+                <div class="student-smooth-panel rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
                     <div class="flex items-center justify-between gap-3">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Component Breakdown') }}</h2>
                         <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('CTEVT components') }}</span>
@@ -235,7 +235,7 @@
 
                     <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
                         @foreach($componentMarks as $component => $marks)
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
+                            <div class="student-smooth-list-card rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
                                 <div class="flex items-center justify-between gap-3">
                                     <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ $component }}</h3>
                                     <span class="inline-flex items-center rounded-full px-2 py-1 text-[11px] font-semibold uppercase tracking-wide {{ $statusBadge($marks->is_pass ?? null) }}">
@@ -263,7 +263,7 @@
                 </div>
             @endif
 
-            <div class="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+            <div class="student-smooth-table-card rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
                 <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-5 py-4 dark:border-gray-700">
                     <div>
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Exam History') }}</h2>
@@ -331,3 +331,4 @@
     </div>
 </div>
 @endsection
+

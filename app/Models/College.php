@@ -6,3 +6,4 @@ class College extends Department
 {
     // Backwards-compatible alias for older code paths.
 }
+

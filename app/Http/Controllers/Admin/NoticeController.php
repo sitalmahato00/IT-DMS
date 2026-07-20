@@ -51,12 +51,21 @@ class NoticeController extends Controller
                         ->orderBy('published_at', 'desc')
                         ->paginate(10);
 
-        // Get statistics
+        // Get statistics (FIX #8: Single query for all counts instead of 4 separate queries)
+        $stats = DB::table('notices')
+            ->selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN status = "published" THEN 1 ELSE 0 END) as published,
+                SUM(CASE WHEN status = "draft" THEN 1 ELSE 0 END) as draft,
+                SUM(CASE WHEN status = "scheduled" THEN 1 ELSE 0 END) as scheduled
+            ')
+            ->first();
+        
         $stats = [
-            'total' => Notice::count(),
-            'published' => Notice::published()->count(),
-            'draft' => Notice::draft()->count(),
-            'scheduled' => Notice::scheduled()->count(),
+            'total' => $stats->total ?? 0,
+            'published' => $stats->published ?? 0,
+            'draft' => $stats->draft ?? 0,
+            'scheduled' => $stats->scheduled ?? 0,
         ];
 
         return view('admin.notice-board', compact('notices', 'stats'));
@@ -324,4 +333,5 @@ $validated = $request->validate([
         return response()->json($subjects);
     }
 }
+
 

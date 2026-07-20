@@ -370,3 +370,4 @@ class Notice extends Model
     }
 }
 
+

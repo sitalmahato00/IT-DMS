@@ -1,12 +1,13 @@
 @extends('parent.layouts.parentlayout')
 
-@section('title', 'Edit Profile')
+@section('title', __('Profile Settings'))
+@section('subtitle', __('Update your name, contact details, and password'))
 
 @section('content')
-<div class="space-y-6">
+<div class="parent-smooth-page space-y-6">
     <!-- Profile Info Card -->
-    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div class="px-6 py-4 border-b border-gray-200">
+    <div class="parent-smooth-form-panel bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div class="parent-smooth-panel-header px-6 py-4 border-b border-gray-200">
             <h3 class="text-gray-900 font-semibold text-base flex items-center gap-2">
                 <i class="bi bi-person-badge text-gray-500"></i>
                 Profile Information
@@ -19,21 +20,21 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Profile Photo -->
-                    <div class="flex flex-col items-center">
+                    <div class="parent-smooth-photo-frame flex flex-col items-center">
                         <label class="block text-sm font-medium text-gray-900 mb-3">Profile Photo</label>
                         @php
-                            $photoPath = $user->profile_photo_path;
-                            $hasFile = !empty($photoPath) && \Illuminate\Support\Facades\Storage::disk('public')->exists($photoPath);
+                            $photoPath = $user->profile_photo_url;
+                            $hasFile = !empty($photoPath);
                         @endphp
                         @if($hasFile)
-                            <img id="profilePhotoPreview" src="{{ asset('storage/' . $photoPath) }}" alt="Profile photo" class="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow-sm" />
+                            <img id="profilePhotoPreview" src="{{ $photoPath }}" alt="Profile photo" class="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow-sm" />
                         @else
-                            <div id="profilePhotoPreview" class="w-32 h-32 rounded-full bg-gradient-to-br from-purple-600 to-purple-700 flex items-center justify-center text-white text-5xl font-bold border-4 border-gray-100 shadow-sm">
+                            <div id="profilePhotoPreview" class="w-32 h-32 rounded-full bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white text-5xl font-bold border-4 border-gray-100 shadow-sm">
                                 {{ substr($user->name ?? 'A', 0, 1) }}
                             </div>
                         @endif
                         <div class="mt-3 flex flex-col items-center w-full">
-                            <label for="photo" class="inline-flex items-center px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg text-sm font-medium cursor-pointer transition">
+                            <label for="photo" class="parent-smooth-upload-trigger inline-flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium cursor-pointer transition">
                                 <i class="bi bi-cloud-upload mr-2"></i>
                                 <span id="photoButtonText">Choose Photo</span>
                             </label>
@@ -51,14 +52,14 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                                <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
                                 @error('name')
                                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
                                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                                <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}" required autocomplete="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                                <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}" required autocomplete="username" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
                                 @error('email')
                                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
@@ -68,21 +69,21 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                <input type="tel" id="phone" name="phone" value="{{ old('phone', $user->phone ?? '') }}" autocomplete="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                                <input type="tel" id="phone" name="phone" value="{{ old('phone', $user->phone ?? '') }}" autocomplete="tel" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
                                 @error('phone')
                                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                                <div class="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm text-gray-600">
+                                <div class="parent-smooth-static-field w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg text-sm text-gray-600">
                                     Parent
                                 </div>
                             </div>
                         </div>
 
                         <div class="flex items-center gap-3 pt-2">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition">
                                 <i class="bi bi-check-lg mr-1"></i>
                                 Save Changes
                             </button>
@@ -100,8 +101,8 @@
     </div>
 
     <!-- Password Update Card -->
-    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div class="px-4 py-3 border-b border-gray-200">
+    <div class="parent-smooth-form-panel bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div class="parent-smooth-panel-header px-4 py-3 border-b border-gray-200">
             <h3 class="text-gray-900 font-semibold text-sm flex items-center gap-2">
                 <i class="bi bi-key text-gray-500"></i>
                 Update Password
@@ -115,7 +116,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="update_password_current_password" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                        <input type="password" id="update_password_current_password" name="current_password" autocomplete="current-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                        <input type="password" id="update_password_current_password" name="current_password" autocomplete="current-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
                         @error('current_password', 'updatePassword')
                             <p class="text-xs text-red-600 mt-1">{{ $errors->updatePassword->first('current_password') }}</p>
                         @enderror
@@ -123,14 +124,14 @@
                     <div></div>
                     <div>
                         <label for="update_password_password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                        <input type="password" id="update_password_password" name="password" autocomplete="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                        <input type="password" id="update_password_password" name="password" autocomplete="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
                         @error('password', 'updatePassword')
                             <p class="text-xs text-red-600 mt-1">{{ $errors->updatePassword->first('password') }}</p>
                         @enderror
                     </div>
                     <div>
                         <label for="update_password_password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                        <input type="password" id="update_password_password_confirmation" name="password_confirmation" autocomplete="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                        <input type="password" id="update_password_password_confirmation" name="password_confirmation" autocomplete="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent" />
                         @error('password_confirmation', 'updatePassword')
                             <p class="text-xs text-red-600 mt-1">{{ $errors->updatePassword->first('password_confirmation') }}</p>
                         @enderror
@@ -138,7 +139,7 @@
                 </div>
 
                 <div class="flex items-center gap-3 pt-2">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition">
                         <i class="bi bi-shield-check mr-1"></i>
                         Update Password
                     </button>

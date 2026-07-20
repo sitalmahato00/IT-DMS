@@ -10,11 +10,15 @@ use App\Http\Controllers\PublicStudyMaterialController;
 use App\Http\Controllers\PublicGalleryController;
 use App\Http\Controllers\NoticePortalController;
 use App\Http\Controllers\GalleryPortalController;
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+
+
 Route::get('/', [\App\Http\Controllers\LandingController::class, 'index'])->name('home');
+Route::get('/exam-result/print', [\App\Http\Controllers\LandingController::class, 'examResultPrint'])->name('public.exam-result.print');
 Route::get('/department/about/{id?}', [\App\Http\Controllers\LandingController::class, 'about'])->name('department.about');
 Route::get('/subjects', [\App\Http\Controllers\SubjectsController::class, 'index'])->name('subjects.index');
 Route::get('/faculty', [FacultyController::class, 'index'])->name('faculty.index');
@@ -27,6 +31,258 @@ Route::get('/gallery/fetch', [GalleryPortalController::class, 'fetch'])->name('g
 
 Route::get('/gallery', [GalleryPortalController::class, 'index'])->name('gallery.index');
 Route::get('/gallery/download/{id}', [PublicGalleryController::class, 'download'])->name('gallery.download');
+Route::get('/exam-result', [\App\Http\Controllers\LandingController::class, 'examResult'])->name('public.exam-result');
+Route::post('/exam-result/search', [\App\Http\Controllers\LandingController::class, 'examResultSearch'])->name('public.exam-result.search');
+
+Route::prefix('public')->name('public.pages.')->group(function () {
+    Route::get('/about', function () {
+        return view('public.pages.show', [
+            'title' => 'About Us',
+            'subtitle' => 'Manmohan Memorial Polytechnic',
+        ]);
+    })->name('about');
+    Route::get('/about/what-is-mmp', function () {
+        return view('public.pages.show', [
+            'title' => 'What is MMP',
+            'subtitle' => 'About Manmohan Memorial Polytechnic',
+        ]);
+    })->name('about.what-is-mmp');
+    Route::get('/about/objectives', function () {
+        return view('public.pages.show', [
+            'title' => 'Objectives',
+            'subtitle' => 'College mission and goals',
+        ]);
+    })->name('about.objectives');
+    Route::get('/about/presidents-principals', function () {
+        return view('public.pages.show', [
+            'title' => 'Presidents and Principals',
+            'subtitle' => 'Leadership of the institute',
+        ]);
+    })->name('about.presidents-principals');
+    Route::get('/about/contact', function () {
+        return view('public.pages.show', [
+            'title' => 'Contact Us',
+            'subtitle' => 'Get in touch with MMP',
+        ]);
+    })->name('about.contact');
+
+    Route::get('/courses', function () {
+        return view('public.pages.show', [
+            'title' => 'Courses',
+            'subtitle' => 'Diploma and short term programs',
+        ]);
+    })->name('courses');
+    Route::get('/courses/information-technology', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Information Technology',
+            'subtitle' => 'IT program overview and curriculum',
+        ]);
+    })->name('courses.it');
+    Route::get('/courses/architecture-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Architecture Engineering',
+            'subtitle' => 'Architecture and design program',
+        ]);
+    })->name('courses.architecture');
+    Route::get('/courses/electrical-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Electrical Engineering',
+            'subtitle' => 'Electrical systems and power studies',
+        ]);
+    })->name('courses.electrical');
+    Route::get('/courses/electronics-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Electronics Engineering',
+            'subtitle' => 'Electronic devices and systems',
+        ]);
+    })->name('courses.electronics');
+    Route::get('/courses/mechanical-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Mechanical Engineering',
+            'subtitle' => 'Mechanical design and manufacturing',
+        ]);
+    })->name('courses.mechanical');
+    Route::get('/courses/civil-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Civil Engineering',
+            'subtitle' => 'Civil construction and infrastructure',
+        ]);
+    })->name('courses.civil');
+    Route::get('/courses/electrical-electronics-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Diploma in Electrical & Electronics Engineering',
+            'subtitle' => 'Integrated electrical and electronics program',
+        ]);
+    })->name('courses.eee');
+    Route::get('/courses/short-term-trainings', function () {
+        return view('public.pages.show', [
+            'title' => 'Short Term Trainings',
+            'subtitle' => 'Skill-focused short course offerings',
+        ]);
+    })->name('courses.short-term');
+
+    Route::get('/features', function () {
+        return view('public.pages.show', [
+            'title' => 'Features',
+            'subtitle' => 'Facilities and student services',
+        ]);
+    })->name('features');
+    Route::get('/features/classrooms-and-labs', function () {
+        return view('public.pages.show', [
+            'title' => 'Classrooms and Labs',
+            'subtitle' => 'Learning spaces and practical labs',
+        ]);
+    })->name('features.classrooms-labs');
+    Route::get('/features/workshops', function () {
+        return view('public.pages.show', [
+            'title' => 'Workshops',
+            'subtitle' => 'Hands-on workshop facilities',
+        ]);
+    })->name('features.workshops');
+    Route::get('/features/scholarship-schemes', function () {
+        return view('public.pages.show', [
+            'title' => 'Scholarship Schemes',
+            'subtitle' => 'Scholarship and financial support options',
+        ]);
+    })->name('features.scholarships');
+    Route::get('/features/transportation', function () {
+        return view('public.pages.show', [
+            'title' => 'Transportation',
+            'subtitle' => 'Student commute and transport services',
+        ]);
+    })->name('features.transportation');
+    Route::get('/features/internships-placements', function () {
+        return view('public.pages.show', [
+            'title' => 'Internships & Placements',
+            'subtitle' => 'Career support and industry training',
+        ]);
+    })->name('features.internships');
+    Route::get('/features/library-and-hostel', function () {
+        return view('public.pages.show', [
+            'title' => 'Library and Hostel',
+            'subtitle' => 'Campus facilities for study and stay',
+        ]);
+    })->name('features.library-hostel');
+    Route::get('/features/game-courts', function () {
+        return view('public.pages.show', [
+            'title' => 'Game Courts',
+            'subtitle' => 'Sports and recreation facilities',
+        ]);
+    })->name('features.game-courts');
+    Route::get('/features/first-aid-clinic', function () {
+        return view('public.pages.show', [
+            'title' => 'First Aid Clinic',
+            'subtitle' => 'Health and campus medical support',
+        ]);
+    })->name('features.first-aid');
+
+    Route::get('/peoples', function () {
+        return view('public.pages.show', [
+            'title' => 'Peoples',
+            'subtitle' => 'Administrative and academic teams',
+        ]);
+    })->name('peoples');
+    Route::get('/peoples/administrative-staffs', function () {
+        return view('public.pages.show', [
+            'title' => 'Administrative Staffs',
+            'subtitle' => 'Campus administration and operations',
+        ]);
+    })->name('peoples.administrative-staffs');
+    Route::get('/peoples/architecture-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Architecture Engineering',
+            'subtitle' => 'Architecture faculty and staff',
+        ]);
+    })->name('peoples.architecture');
+    Route::get('/peoples/civil-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Civil Engineering',
+            'subtitle' => 'Civil engineering faculty',
+        ]);
+    })->name('peoples.civil');
+    Route::get('/peoples/electrical-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Electrical Engineering',
+            'subtitle' => 'Electrical engineering faculty',
+        ]);
+    })->name('peoples.electrical');
+    Route::get('/peoples/electrical-electronics-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Electrical & Electronics Engineering',
+            'subtitle' => 'EEE faculty and programs',
+        ]);
+    })->name('peoples.eee');
+    Route::get('/peoples/electronics-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Electronics Engineering',
+            'subtitle' => 'Electronics faculty and laboratories',
+        ]);
+    })->name('peoples.electronics');
+    Route::get('/peoples/information-technology', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Information Technology',
+            'subtitle' => 'IT faculty and department details',
+        ]);
+    })->name('peoples.it');
+    Route::get('/peoples/mechanical-engineering', function () {
+        return view('public.pages.show', [
+            'title' => 'Department of Mechanical Engineering',
+            'subtitle' => 'Mechanical engineering faculty',
+        ]);
+    })->name('peoples.mechanical');
+
+    Route::get('/news-events', function () {
+        return view('public.pages.show', [
+            'title' => 'News & Events',
+            'subtitle' => 'Updates from Manmohan Memorial Polytechnic',
+        ]);
+    })->name('news');
+    Route::get('/gallery', function () {
+        return view('public.pages.show', [
+            'title' => 'Gallery',
+            'subtitle' => 'Campus life and activities',
+        ]);
+    })->name('gallery');
+    Route::get('/resources', function () {
+        return view('public.pages.show', [
+            'title' => 'Resources',
+            'subtitle' => 'Downloads and question bank',
+        ]);
+    })->name('resources');
+    Route::get('/resources/formats', function () {
+        return view('public.pages.show', [
+            'title' => 'Formats',
+            'subtitle' => 'Form templates and downloadables',
+        ]);
+    })->name('resources.formats');
+    Route::get('/resources/question-bank', function () {
+        return view('public.pages.show', [
+            'title' => 'Question Bank',
+            'subtitle' => 'Exam preparation and past papers',
+        ]);
+    })->name('resources.question-bank');
+});
+
+Route::get('/media/{path}', function (string $path) {
+    $normalized = str_replace('\\', '/', $path);
+    $normalized = ltrim(str_replace('storage/', '', $normalized), '/');
+
+    $disk = \Illuminate\Support\Facades\Storage::disk('public');
+
+    if ($normalized === '') {
+        abort(404);
+    }
+
+    if ($disk->exists($normalized)) {
+        return response()->file($disk->path($normalized));
+    }
+
+    if (file_exists(public_path($normalized))) {
+        return response()->file(public_path($normalized));
+    }
+
+    abort(404);
+})->where('path', '.*')->name('media.show');
 
 // Language switcher: sets the locale in the session and redirects back
 Route::post('locale', function (Illuminate\Http\Request $request) {
@@ -59,16 +315,18 @@ Route::middleware(['auth', 'verified', 'role:student'])->prefix('student')->name
     // Marks/Results
     Route::get('/marks', [\App\Http\Controllers\Student\StudentMarkController::class, 'index'])->name('marks');
     Route::get('/marks/{subjectId}', [\App\Http\Controllers\Student\StudentMarkController::class, 'show'])->name('marks.show');
+    Route::get('/marksheet', [\App\Http\Controllers\Student\StudentMarkController::class, 'marksheet'])->name('marksheet');
+    Route::get('/exams', [\App\Http\Controllers\Student\StudentMarkController::class, 'exams'])->name('exams');
 
     // Timetable
     Route::get('/timetable/print', [\App\Http\Controllers\Student\StudentTimetableController::class, 'print'])->name('timetable.print');
     Route::get('/timetable', [\App\Http\Controllers\Student\StudentTimetableController::class, 'index'])->name('timetable');
 
-    // NOTE: disabled routes pointing to missing controllers; recreate classes before enabling.
-    // Route::get('/study-materials', [\App\Http\Controllers\Student\StudentStudyMaterialController::class, 'index'])->name('study-materials');
-    // Route::get('/study-materials/download/{id}', [\App\Http\Controllers\Student\StudentStudyMaterialController::class, 'download'])->name('study-materials.download');
-    // Route::get('/notices', [\App\Http\Controllers\Student\StudentNoticeController::class, 'index'])->name('notices');
-    // Route::get('/notices/{id}', [\App\Http\Controllers\Student\StudentNoticeController::class, 'show'])->name('notices.show');
+    // Resources & Announcements
+    Route::get('/study-materials', [\App\Http\Controllers\Student\StudentStudyMaterialController::class, 'index'])->name('study-materials');
+    Route::get('/study-materials/download/{id}', [\App\Http\Controllers\Student\StudentStudyMaterialController::class, 'download'])->name('study-materials.download');
+    Route::get('/notices', [\App\Http\Controllers\Student\StudentNoticeController::class, 'index'])->name('notices');
+    Route::get('/notices/{id}', [\App\Http\Controllers\Student\StudentNoticeController::class, 'show'])->name('notices.show');
     // Route::get('/assignments', [\App\Http\Controllers\Student\StudentAssignmentController::class, 'index'])->name('assignments');
     // Route::get('/assignments/{id}', [\App\Http\Controllers\Student\StudentAssignmentController::class, 'show'])->name('assignments.show');
     // Route::get('/teachers', [\App\Http\Controllers\Student\StudentTeacherController::class, 'index'])->name('teachers');
@@ -147,6 +405,17 @@ Route::middleware(['auth', 'verified', 'role:teacher'])->prefix('teacher')->name
 
 // Parent Profile Routes
 Route::middleware(['auth', 'verified', 'role:parent'])->prefix('parent')->name('parent.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Parent\ParentPortalController::class, 'dashboard'])->name('dashboard');
+    Route::get('/children', [\App\Http\Controllers\Parent\ParentPortalController::class, 'children'])->name('children');
+    Route::get('/attendance', [\App\Http\Controllers\Parent\ParentPortalController::class, 'attendance'])->name('attendance');
+    Route::get('/results', [\App\Http\Controllers\Parent\ParentPortalController::class, 'results'])->name('results');
+    Route::get('/courses', [\App\Http\Controllers\Parent\ParentPortalController::class, 'courses'])->name('courses');
+    Route::get('/notices', [\App\Http\Controllers\Parent\ParentPortalController::class, 'notices'])->name('notices');
+    Route::get('/communication', [\App\Http\Controllers\Parent\ParentPortalController::class, 'communication'])->name('communication');
+    Route::get('/events', [\App\Http\Controllers\Parent\ParentPortalController::class, 'events'])->name('events');
+    Route::get('/report/print', [\App\Http\Controllers\Parent\ParentPortalController::class, 'print'])->name('print');
+    Route::get('/exams', [\App\Http\Controllers\Parent\ParentPortalController::class, 'exams'])->name('exams');
+    Route::get('/exams/print', [\App\Http\Controllers\Parent\ParentPortalController::class, 'examsPrint'])->name('exams.print');
     Route::get('/profile', [\App\Http\Controllers\Parent\ParentProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [\App\Http\Controllers\Parent\ParentProfileController::class, 'update'])->name('profile.update');
     Route::get('/export', [\App\Http\Controllers\Parent\ParentExportController::class, 'export'])->name('export');
@@ -156,11 +425,6 @@ Route::middleware(['auth', 'verified', 'role:parent'])->prefix('parent')->name('
 Route::get('/student', [\App\Http\Controllers\Student\StudentDashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:student'])
     ->name('student.dashboard');
-
-// Parent-facing dashboard
-Route::get('/parent', function () {
-    return view('parent.parentdashboard');
-})->middleware(['auth', 'verified', 'role:parent'])->name('parent.dashboard');
 
 // Teacher-facing dashboard
 Route::get('/teacher', [\App\Http\Controllers\Teacher\TeacherDashboardController::class, 'index'])
@@ -194,7 +458,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->post('students/{id}/move-
 Route::middleware(['auth', 'verified', 'role:admin'])->get('teachers/print-list', [\App\Http\Controllers\Admin\TeacherController::class, 'printList'])->name('teachers.print-list');
 Route::middleware(['auth', 'verified', 'role:admin'])->get('parents/print-list', [\App\Http\Controllers\Admin\ParentController::class, 'printList'])->name('parents.print-list');
 Route::middleware(['auth', 'verified', 'role:admin'])->get('courses/print-list', [\App\Http\Controllers\Admin\CourseController::class, 'printList'])->name('courses.print-list');
-Route::get('alumni-students/print-list', [StudentController::class, 'printAlumniList'])->name('alumni-students.print-list');
+Route::middleware(['auth', 'verified', 'role:admin'])->get('alumni-students/print-list', [StudentController::class, 'printAlumniList'])->name('alumni-students.print-list');
 
 // Admin Routes
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -249,8 +513,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::post('alumni-students/bulk', [StudentController::class, 'bulk'])->name('alumni-students.bulk');
     Route::get('alumni-students/export', [StudentController::class, 'export'])->name('alumni-students.export');
 
-    // Students resource (index, show, store, edit, destroy)
-    Route::resource('students', StudentController::class)->except(['create'])->names([
+    // Students resource
+    Route::resource('students', StudentController::class)->names([
         'index' => 'students'
     ]);
 
@@ -267,8 +531,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('students/{id}/exam-report', [StudentController::class, 'examReport'])->name('students.exam-report');
 
     Route::get('/teachers', [\App\Http\Controllers\Admin\TeacherController::class, 'index'])->name('teachers');
+    Route::get('/teachers/create', [\App\Http\Controllers\Admin\TeacherController::class, 'create'])->name('teachers.create');
     Route::get('/teachers/export', [\App\Http\Controllers\Admin\TeacherController::class, 'export'])->name('teachers.export');
     Route::post('/teachers', [\App\Http\Controllers\Admin\TeacherController::class, 'store'])->name('teachers.store');
+    Route::get('/teachers/{id}', [\App\Http\Controllers\Admin\TeacherController::class, 'show'])->name('teachers.show');
     Route::get('/teachers/{id}/edit', [\App\Http\Controllers\Admin\TeacherController::class, 'edit'])->name('teachers.edit');
     Route::put('/teachers/{id}', [\App\Http\Controllers\Admin\TeacherController::class, 'update'])->name('teachers.update');
     Route::delete('/teachers/{id}', [\App\Http\Controllers\Admin\TeacherController::class, 'destroy'])->name('teachers.destroy');
@@ -287,8 +553,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     });
 
     Route::get('/parents', [\App\Http\Controllers\Admin\ParentController::class, 'index'])->name('parents');
+    Route::get('/parents/create', [\App\Http\Controllers\Admin\ParentController::class, 'create'])->name('parents.create');
+    Route::get('/parents/{id}', [\App\Http\Controllers\Admin\ParentController::class, 'show'])->name('parents.show');
     Route::get('/parents/export', [\App\Http\Controllers\Admin\ParentController::class, 'export'])->name('parents.export');
     Route::get('/parents/students', [\App\Http\Controllers\Admin\ParentController::class, 'getStudents'])->name('parents.students');
+    Route::get('/parents/lookup', [\App\Http\Controllers\Admin\ParentController::class, 'lookupByEmail'])->name('parents.lookup');
     Route::post('/parents', [\App\Http\Controllers\Admin\ParentController::class, 'store'])->name('parents.store');
     Route::get('/parents/{id}/edit', [\App\Http\Controllers\Admin\ParentController::class, 'edit'])->name('parents.edit');
     Route::put('/parents/{id}', [\App\Http\Controllers\Admin\ParentController::class, 'update'])->name('parents.update');
@@ -318,6 +587,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/attendance/export', [\App\Http\Controllers\Admin\AttendanceController::class, 'export'])->name('attendance.export');
 
     Route::get('/exam', [App\Http\Controllers\Admin\ExamController::class, 'index'])->name('exam');
+    Route::get('/exam/create', [App\Http\Controllers\Admin\ExamController::class, 'create'])->name('exam.create');
     Route::post('/exam', [App\Http\Controllers\Admin\ExamController::class, 'store'])->name('exam.store');
     Route::get('/exam/data', [App\Http\Controllers\Admin\ExamController::class, 'index'])->name('exam.data');
     
@@ -327,6 +597,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/exam/subjects/by-semester', [App\Http\Controllers\Admin\ExamController::class, 'getSubjectsBySemester'])->name('exam.subjects');
     Route::get('/exam/all-subjects', [App\Http\Controllers\Admin\ExamController::class, 'getAllSubjects'])->name('exam.all-subjects');
     Route::get('/exam/{exam}/edit-data', [App\Http\Controllers\Admin\ExamController::class, 'getEditExamData'])->name('exam.edit-data');
+    Route::get('/exam/{exam}/edit', [App\Http\Controllers\Admin\ExamController::class, 'edit'])->name('exam.edit');
     
     // Generic routes come last
     Route::put('/exam/{exam}', [App\Http\Controllers\Admin\ExamController::class, 'update'])->name('exam.update');
@@ -363,6 +634,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     })->name('convert.bs-to-ad');
 
     Route::get('/courses', [App\Http\Controllers\Admin\CourseController::class, 'index'])->name('courses');
+    Route::get('/courses/create', [App\Http\Controllers\Admin\CourseController::class, 'create'])->name('courses.create');
     Route::post('/courses', [App\Http\Controllers\Admin\CourseController::class, 'store'])->name('courses.store');
     Route::get('/courses/{course}', [App\Http\Controllers\Admin\CourseController::class, 'show'])->name('courses.show');
     Route::get('/courses/{course}/view', [App\Http\Controllers\Admin\CourseController::class, 'showView'])->name('courses.view');
@@ -438,6 +710,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // Settings management
     Route::get('/settings', [SettingController::class, 'index'])->name('settings');
+    Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::patch('/settings/profile', [SettingController::class, 'updateProfile'])->name('settings.profile.update');
+    Route::post('/settings/password', [SettingController::class, 'updatePassword'])->name('settings.password');
 
     // Department details (renamed from "college" settings)
     Route::get('/department', [DepartmentController::class, 'edit'])->name('department.edit');
@@ -446,4 +721,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::delete('/department/hero-images/{index}', [DepartmentController::class, 'deleteHeroImage'])->name('department.hero-image.delete');
 });
 
-require __DIR__ . '/auth.php';
+// Authentication routes - included within web middleware context
+Route::middleware('web')->group(function () {
+    require __DIR__ . '/auth.php';
+});

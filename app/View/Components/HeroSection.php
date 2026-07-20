@@ -35,3 +35,4 @@ class HeroSection extends Component
         return view('components.hero-section');
     }
 }
+

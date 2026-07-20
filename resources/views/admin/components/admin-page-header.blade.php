@@ -36,14 +36,14 @@
     $buttonClass = $colorClasses[$buttonColor] ?? $colorClasses['red'];
 @endphp
 
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+<div class="mb-4 flex w-full min-w-0 flex-col gap-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
     {{-- Left: Page Title & Breadcrumb --}}
     <div class="min-w-0">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
             {{ $title }}
         </h1>
         @if(!empty($breadcrumbs))
-        <nav class="flex items-center gap-2 text-sm mt-1">
+        <nav class="flex flex-wrap items-center gap-2 text-sm mt-1">
             @foreach($breadcrumbs as $index => $crumb)
                 @if($index > 0)
                     <i class="bi bi-chevron-right text-gray-400 text-xs"></i>
@@ -63,7 +63,7 @@
     </div>
 
     {{-- Right: Action Buttons --}}
-    <div class="flex items-center gap-3 flex-shrink-0">
+    <div class="flex w-full min-w-0 flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
         {{-- Custom Right Content (if provided) --}}
         @if($rightContent)
             {!! $rightContent !!}
@@ -71,7 +71,7 @@
 
         {{-- Import Button (Optional) --}}
         @if($importRoute)
-        <a href="{{ $importRoute }}" class="inline-flex items-center gap-2 px-4 py-2 border border-blue-300 dark:border-blue-600 bg-white dark:bg-blue-900/30 hover:bg-blue-50 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-medium transition shadow-sm">
+        <a href="{{ $importRoute }}" class="inline-flex w-full items-center justify-center gap-2 px-4 py-2 border border-blue-300 dark:border-blue-600 bg-white dark:bg-blue-900/30 hover:bg-blue-50 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-medium transition shadow-sm sm:w-auto">
             <i class="bi bi-upload"></i>
             <span class="hidden sm:inline">Import</span>
         </a>
@@ -79,7 +79,7 @@
 
         {{-- Export Button (Optional) --}}
         @if($exportRoute)
-        <a href="{{ $exportRoute }}" class="inline-flex items-center gap-2 px-4 py-2 border border-green-300 dark:border-green-600 bg-white dark:bg-green-900/30 hover:bg-green-50 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 rounded-lg text-sm font-medium transition shadow-sm">
+        <a href="{{ $exportRoute }}" class="inline-flex w-full items-center justify-center gap-2 px-4 py-2 border border-green-300 dark:border-green-600 bg-white dark:bg-green-900/30 hover:bg-green-50 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 rounded-lg text-sm font-medium transition shadow-sm sm:w-auto">
             <i class="bi bi-download"></i>
             <span class="hidden sm:inline">Export</span>
         </a>
@@ -93,10 +93,11 @@
             @elseif(!empty($addButton['route']))
             onclick="window.location.href='{{ $addButton['route'] }}'"
             @endif
-            class="inline-flex items-center gap-2 px-5 py-2.5 {{ $buttonClass }} text-white rounded-lg text-sm font-semibold transition shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-800">
+            class="inline-flex w-full items-center justify-center gap-2 px-5 py-2.5 {{ $buttonClass }} text-white rounded-lg text-sm font-semibold transition shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-800 sm:w-auto">
             <i class="bi bi-plus-lg"></i>
             <span>{{ $addButton['label'] }}</span>
         </button>
         @endif
     </div>
 </div>
+

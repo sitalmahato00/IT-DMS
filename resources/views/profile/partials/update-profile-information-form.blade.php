@@ -52,11 +52,11 @@
             <div class="flex flex-col items-center">
                 <label class="block text-xs font-medium text-gray-900 mb-2">Current Photo</label>
                 @php
-                    $photoPath = $user->profile_photo_path;
-                    $hasFile = !empty($photoPath) && \Illuminate\Support\Facades\Storage::disk('public')->exists($photoPath);
+                    $photoPath = $user->profile_photo_url;
+                    $hasFile = !empty($photoPath);
                 @endphp
                 @if($hasFile)
-                    <img id="profilePhotoPreview" src="{{ asset('storage/' . $photoPath) }}" alt="Profile photo" class="w-24 h-24 rounded-lg object-cover border" />
+                    <img id="profilePhotoPreview" src="{{ $photoPath }}" alt="Profile photo" class="w-24 h-24 rounded-lg object-cover border" />
                 @else
                     <div class="w-24 h-24 rounded-lg object-cover border bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500 text-3xl font-bold">
                         {{ substr($user->name ?? 'U', 0, 1) }}
@@ -129,3 +129,4 @@
         });
     </script>
 </section>
+

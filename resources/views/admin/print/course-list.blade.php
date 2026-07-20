@@ -48,12 +48,12 @@
         <div class="header-section">
             <div class="school-logo">
                 @if($college && $college->logo_path)
-                    <img src="{{ asset('storage/'.$college->logo_path) }}" alt="School Logo">
+                    <img src="{{ \App\Support\Media::publicUrl($college->logo_path) }}" alt="School Logo">
                 @else
                     <div class="logo-placeholder">🏫</div>
                 @endif
             </div>
-            <div class="school-name">{{ $college->name ?? 'IT-DMS COLLEGE' }}</div>
+            <div class="school-name">{{ $college->name ?? 'Manmohan Memorial Polytechnic' }}</div>
             <div class="report-title">COURSES LIST</div>
             <div class="meta-info">
                 <div class="meta-item"><span class="meta-label">Academic Year:</span><span>{{ date('Y') }}</span></div>
@@ -99,3 +99,4 @@
     </div>
 </body>
 </html>
+

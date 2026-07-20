@@ -112,7 +112,7 @@
     <div class="container">
         <div class="header">
             <h1>🔐 Password Reset</h1>
-            <p>IT Department Management System</p>
+            <p>Manmohan Memorial Polytechnic</p>
         </div>
 
         <div class="content">
@@ -149,7 +149,7 @@
         </div>
 
         <div class="footer">
-            <p style="margin: 0 0 10px 0;">© 2026 IT Department Management System (IT-DMS)</p>
+            <p style="margin: 0 0 10px 0;">© 2026 Manmohan Memorial Polytechnic</p>
             <p style="margin: 0;">All Rights Reserved | Streamlining Academic Operations</p>
             <p style="margin: 10px 0 0 0; color: #9ca3af;">
                 Do not share this email or the reset link with anyone else.
@@ -158,3 +158,4 @@
     </div>
 </body>
 </html>
+

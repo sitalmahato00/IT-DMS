@@ -21,14 +21,14 @@
     $activeExamCategory = in_array($exam->exam_category ?? '', ['assessment', 'ctevt']) ? $exam->exam_category : 'assessment';
 @endphp
 
-<div class="space-y-4">
+<div class="teacher-smooth-page teacher-exams-page space-y-4">
     <!-- Back Button & Header -->
-    <div class="flex items-center justify-between">
+    <div class="teacher-page-header flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <a href="{{ route('teacher.exams') }}" class="text-gray-600 hover:text-gray-900">
+            <a href="{{ route('teacher.exams') }}" class="teacher-page-secondary-btn text-gray-600 hover:text-gray-900">
                 <i class="bi bi-arrow-left text-lg"></i>
             </a>
-            <h2 class="text-lg font-semibold text-gray-900">{{ $exam->localized_name }}</h2>
+            <h2 class="teacher-page-header-title text-lg font-semibold text-gray-900">{{ $exam->localized_name }}</h2>
         </div>
         <!-- View moved into filter row for alignment with other actions -->
     </div>
@@ -63,7 +63,7 @@
     </div>
 
     <!-- Marks Table with Filters -->
-    <div class="bg-white rounded shadow-sm border border-gray-200">
+    <div class="teacher-smooth-table-card bg-white rounded shadow-sm border border-gray-200">
         <div class="p-3 border-b border-gray-200 flex items-center justify-between flex-wrap gap-3">
             <div class="flex items-center gap-2">
                 <h3 class="text-sm font-semibold text-gray-900">Student Marks</h3>
@@ -78,23 +78,23 @@
         
         <!-- Advanced Filters + Actions: filters on the left, actions aligned on the right -->
         <div class="px-3 py-2 bg-gray-50 border-b border-gray-200">
-            <div class="flex items-center justify-between gap-4">
-                <form id="marksFilterForm" class="flex items-center gap-2 flex-nowrap overflow-x-auto">
-                    <div class="flex items-center gap-1">
-                        <input type="text" id="searchStudent" placeholder="Search student..." class="w-40 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <form id="marksFilterForm" class="flex w-full flex-wrap items-stretch gap-2 lg:w-auto lg:flex-nowrap lg:items-center lg:overflow-x-auto">
+                    <div class="flex flex-1 min-w-[10rem] items-center gap-1 lg:flex-none">
+                        <input type="text" id="searchStudent" placeholder="Search student..." class="w-full lg:w-40 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <!-- Academic year filter removed per request; column remains in table -->
-                    <div class="flex items-center gap-1">
+                    <div class="flex flex-1 min-w-[10rem] items-center gap-1 lg:flex-none">
                         <div class="relative">
                             <label class="sr-only">Semester</label>
                             @php $semesters = ['first'=>'First','second'=>'Second','third'=>'Third','fourth'=>'Fourth','fifth'=>'Fifth','sixth'=>'Sixth']; @endphp
                             @if($exam->semester && $exam->semester !== 'all')
-                                <div class="w-36 px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-100 text-gray-700 font-medium">
+                                <div class="w-full lg:w-36 px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-100 text-gray-700 font-medium">
                                     {{ $semesters[$exam->semester] ?? ucfirst($exam->semester) }}
                                 </div>
                                 <input type="hidden" id="filterSemester" name="semester" value="{{ $exam->semester }}">
                             @else
-                                <select id="filterSemester" name="semester" class="js-filter-semester w-36 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="loadSubjectsForMarkUploadAndTable()">
+                                <select id="filterSemester" name="semester" class="js-filter-semester w-full lg:w-36 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="loadSubjectsForMarkUploadAndTable()">
                                     <option value="">Semester</option>
                                     @foreach($semesters as $key => $label)
                                         <option value="{{ $key }}">{{ $label }}</option>
@@ -103,35 +103,35 @@
                             @endif
                         </div>
                     </div>
-                    <div class="flex items-center gap-1">
+                    <div class="flex flex-1 min-w-[10rem] items-center gap-1 lg:flex-none">
                         <div class="relative">
                             <label class="sr-only">Subject</label>
                             @if($exam->subject_id && $exam->subject_id !== 'all')
-                                <div class="w-48 px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-100 text-gray-700 font-medium">
+                                <div class="w-full lg:w-48 px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-100 text-gray-700 font-medium">
                                     {{ $exam->subject ? $exam->subject->subject_name : 'Not assigned' }}
                                 </div>
                                 <input type="hidden" id="filterSubject" name="subject_id" value="{{ $exam->subject_id }}">
                             @else
-                                <select id="filterSubject" name="subject_id" class="js-filter-subject w-48 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="applyMarksFilters()">
+                                <select id="filterSubject" name="subject_id" class="js-filter-subject w-full lg:w-48 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="applyMarksFilters()">
                                     <option value="all">Subject</option>
                                 </select>
                             @endif
                         </div>
                     </div>
-                    <button type="button" onclick="applyMarksFilters()" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 font-medium transition shadow-sm">
+                    <button type="button" onclick="applyMarksFilters()" class="teacher-page-primary-btn w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 font-medium transition shadow-sm">
                         <i class="bi bi-funnel mr-1"></i>Filter
                     </button>
-                    <button type="button" onclick="resetMarksFilters()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50 font-medium transition">
+                    <button type="button" onclick="resetMarksFilters()" class="teacher-page-secondary-btn w-full sm:w-auto px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50 font-medium transition">
                         <i class="bi bi-arrow-clockwise mr-1"></i>Reset
                     </button>
                 </form>
 
-                <div class="flex items-center gap-2">
-                    <button onclick="openMarkUploadModal()" class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-sm transition-colors">
+                <div class="flex w-full flex-wrap items-stretch gap-2 lg:w-auto lg:items-center">
+                    <button onclick="openMarkUploadModal()" class="teacher-page-primary-btn w-full sm:w-auto px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-sm transition-colors">
                         <i class="bi bi-cloud-upload mr-1"></i>Upload Marks
                     </button>
                     
-                    <button onclick="openViewMarksModal()" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 font-medium transition-colors">
+                    <button onclick="openViewMarksModal()" class="teacher-page-secondary-btn w-full sm:w-auto px-4 py-2 text-sm bg-gray-100 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-200 font-medium transition-colors">
                         <i class="bi bi-eye mr-1"></i>View Details
                     </button>
 
@@ -1829,3 +1829,4 @@ document.addEventListener('input', function(e) {
 });
 </script>
 @endsection
+

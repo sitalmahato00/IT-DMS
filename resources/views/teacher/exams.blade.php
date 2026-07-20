@@ -3,60 +3,60 @@
 @section('title', __('Exams'))
 
 @section('content')
-<div class="space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif">
+<div class="teacher-smooth-page teacher-exams-page space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif">
     <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{ __('Exams') }}</h1>
+    <div class="teacher-page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="min-w-0">
+            <h1 class="teacher-page-header-title text-2xl font-bold text-gray-800 dark:text-white">{{ __('Exams') }}</h1>
             <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">{{ __('View and manage exams for your subjects.') }}</p>
         </div>
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+    <div class="teacher-stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="teacher-stat-card bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Total Exams') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $stats['total'] ?? ($exams->total() ?? $exams->count() ?? 0) }}</p>
                 </div>
-                <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <div class="teacher-smooth-icon w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
                     <i class="bi bi-file-earmark-text text-xl"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+        <div class="teacher-stat-card bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Upcoming') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $upcomingCount ?? 0 }}</p>
                 </div>
-                <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400">
+                <div class="teacher-smooth-icon w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center text-red-600 dark:text-red-400">
                     <i class="bi bi-calendar-event text-xl"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+        <div class="teacher-stat-card bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Completed') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $completedCount ?? 0 }}</p>
                 </div>
-                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center text-purple-600 dark:text-purple-400">
+                <div class="teacher-smooth-icon w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center text-purple-600 dark:text-purple-400">
                     <i class="bi bi-check-circle text-xl"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+        <div class="teacher-stat-card bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Subjects') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ $subjects->count() ?? 0 }}</p>
                 </div>
-                <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center text-orange-600 dark:text-orange-400">
+                <div class="teacher-smooth-icon w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center text-orange-600 dark:text-orange-400">
                     <i class="bi bi-book text-xl"></i>
                 </div>
             </div>
@@ -64,7 +64,7 @@
     </div>
 
     <!-- Filters Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+    <div class="teacher-filter-panel bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <form method="GET" action="{{ route('teacher.exams') }}" class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="flex flex-col">
@@ -124,10 +124,10 @@
 
             <div class="flex items-center gap-2 justify-between flex-wrap pt-2">
                 <div class="flex gap-2 flex-wrap">
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors font-medium shadow-sm">
+                    <button type="submit" class="teacher-page-primary-btn inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors font-medium shadow-sm">
                         <i class="bi bi-funnel"></i> {{ __('Filter') }}
                     </button>
-                    <a href="{{ route('teacher.exams') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium">
+                    <a href="{{ route('teacher.exams') }}" class="teacher-page-secondary-btn inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 rounded-md text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium">
                         <i class="bi bi-arrow-clockwise"></i> {{ __('Reset') }}
                     </a>
                 </div>
@@ -136,7 +136,7 @@
     </div>
 
     <!-- Exams Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="teacher-smooth-table-card bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         @if($exams->isNotEmpty())
             <div class="overflow-x-auto">
                 <table class="min-w-full text-left divide-y divide-gray-200 dark:divide-gray-700">
@@ -159,7 +159,7 @@
                                     $assessmentPrefix = $exam->formatted_assessment ? $exam->formatted_assessment . ' - ' : '';
                                 @endphp
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                    <div class="teacher-smooth-icon w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
                                         <i class="bi bi-file-earmark-text"></i>
                                     </div>
                                     <div>
@@ -197,10 +197,10 @@
                                 </span>
                             </td>
                             <td class="px-4 py-4 text-center">
-                                <a href="{{ route('teacher.exams.show', $exam->id) }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 rounded transition" title="Upload Marks">
+                                <a href="{{ route('teacher.exams.show', $exam->id) }}" class="teacher-action-pill inline-flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 rounded transition" title="Upload Marks">
                                     <i class="bi bi-cloud-upload"></i> {{ __('Upload Marks') }}
                                 </a>
-                                <a href="{{ route('teacher.marks', ['subject_id' => $exam->subject_id ?? '', 'category' => $exam->exam_category ?? 'assessment', 'assessment_id' => $exam->id]) }}" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 rounded transition mt-1 block">
+                                <a href="{{ route('teacher.marks', ['subject_id' => $exam->subject_id ?? '', 'category' => $exam->exam_category ?? 'assessment', 'assessment_id' => $exam->id]) }}" class="teacher-action-pill inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 rounded transition mt-1 block">
                                     <i class="bi bi-eye"></i> {{ __('View Marks') }}
                                 </a>
                             </td>
@@ -214,7 +214,7 @@
                 {{ $exams->links() }}
             </div>
         @else
-            <div class="p-8 text-center">
+            <div class="teacher-smooth-empty p-8 text-center">
                 <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="bi bi-file-earmark-text text-2xl text-gray-400 dark:text-gray-500"></i>
                 </div>
@@ -225,3 +225,4 @@
     </div>
 </div>
 @endsection
+

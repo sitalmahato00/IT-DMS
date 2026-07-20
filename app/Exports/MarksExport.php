@@ -101,3 +101,4 @@ class MarksExport implements FromCollection, WithHeadings, WithMapping
         return $row;
     }
 }
+

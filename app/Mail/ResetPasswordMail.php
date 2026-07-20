@@ -31,7 +31,7 @@ class ResetPasswordMail extends Mailable
     {
         return new Envelope(
             to: $this->notifiable->email,
-            subject: 'Password Reset Request - IT-DMS',
+            subject: 'Password Reset Request - Manmohan Memorial Polytechnic',
             from: config('mail.from.address'),
         );
     }
@@ -58,3 +58,4 @@ class ResetPasswordMail extends Mailable
         return [];
     }
 }
+

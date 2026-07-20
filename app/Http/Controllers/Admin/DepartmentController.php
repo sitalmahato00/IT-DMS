@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class DepartmentController extends Controller
@@ -97,11 +98,19 @@ class DepartmentController extends Controller
 
         $department->fill($validated)->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Department details updated successfully',
-            'department' => $department,
-        ]);
+        // Clear caches
+        Cache::tags(['department'])->flush();
+        Cache::forget('department:shared-current:v1');
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Department details updated successfully',
+                'department' => $department->fresh(),
+            ]);
+        }
+
+        return redirect()->route('admin.settings')->with('status', 'Department details updated successfully');
     }
 
     public function deleteLogo()
@@ -111,6 +120,7 @@ class DepartmentController extends Controller
         if ($department && $department->logo_path && Storage::disk('public')->exists($department->logo_path)) {
             Storage::disk('public')->delete($department->logo_path);
             $department->update(['logo_path' => null]);
+            Cache::tags(['department'])->flush();
 
             return response()->json([
                 'success' => true,
@@ -165,3 +175,4 @@ class DepartmentController extends Controller
         ]);
     }
 }
+

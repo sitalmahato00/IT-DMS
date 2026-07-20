@@ -1027,7 +1027,7 @@ class AttendanceController extends Controller
         $user = auth()->user();
 
         // Get today's date
-        $todayAd = Carbon::now()->format('Y-m-d');
+        $todayAd = Carbon::now('Asia/Kathmandu')->toDateString();
         $todayBs = NepaliContentHelper::convertAdToBs($todayAd);
 
         // Get stats for today
@@ -1039,7 +1039,10 @@ class AttendanceController extends Controller
         ];
 
             $todayAttendance = DB::table('attendance')
-                ->where('date', $todayAd);
+                ->where(function ($query) use ($todayAd, $todayBs) {
+                    $query->whereDate('date', $todayAd)
+                        ->orWhere('date_bs', $todayBs);
+                });
             $this->applyAttendanceTypeFilter($todayAttendance, $attendanceType, 'attendance_type');
             $todayAttendance = $todayAttendance->get();
 
@@ -1060,14 +1063,17 @@ class AttendanceController extends Controller
     {
         try {
             $attendanceType = $this->resolveAttendanceType($request);
-            $todayAd = Carbon::now()->format('Y-m-d');
+            $todayAd = Carbon::now('Asia/Kathmandu')->toDateString();
             $todayBs = NepaliContentHelper::convertAdToBs($todayAd);
 
             // Get attendance records for today grouped by subject
             $attendanceRecords = $this->applyAttendanceTypeFilter(
                 DB::table('attendance')
                     ->leftJoin('subjects', 'attendance.subject_id', '=', 'subjects.id')
-                    ->where('attendance.date', $todayAd)
+                    ->where(function ($query) use ($todayAd, $todayBs) {
+                        $query->whereDate('attendance.date', $todayAd)
+                            ->orWhere('attendance.date_bs', $todayBs);
+                    })
                     ->select(
                         'attendance.subject_id',
                         'subjects.subject_name',
@@ -1129,15 +1135,18 @@ class AttendanceController extends Controller
         try {
             $attendanceType = $this->resolveAttendanceType($request);
             $subjectId = $request->get('subject_id');
-            $todayAd = Carbon::now()->format('Y-m-d');
+            $todayAd = Carbon::now('Asia/Kathmandu')->toDateString();
             $todayBs = NepaliContentHelper::convertAdToBs($todayAd);
 
             // Get only students who have attendance marked for today
             $query = DB::table('students')
                 ->join('users', 'students.user_id', '=', 'users.id')
-                ->join('attendance', function ($join) use ($todayAd, $subjectId, $attendanceType) {
+                ->join('attendance', function ($join) use ($todayAd, $todayBs, $subjectId, $attendanceType) {
                 $join->on('attendance.student_id', '=', 'students.id')
-                    ->where('attendance.date', '=', $todayAd);
+                    ->where(function ($query) use ($todayAd, $todayBs) {
+                        $query->whereDate('attendance.date', '=', $todayAd)
+                            ->orWhere('attendance.date_bs', '=', $todayBs);
+                    });
                 if ($attendanceType === self::ATTENDANCE_TYPE_LAB) {
                     $join->where('attendance.attendance_type', '=', self::ATTENDANCE_TYPE_LAB);
                 } else {
@@ -1418,3 +1427,4 @@ class AttendanceController extends Controller
         return view('admin.print.attendance-list', compact('attendance', 'college', 'date', 'semester', 'subject', 'semesterLabel', 'dateLabel', 'subjectLabel'));
     }
 }
+

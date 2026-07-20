@@ -132,12 +132,12 @@
         <div class="header-section">
             <div class="school-logo">
                 @if(!empty($college) && !empty($college->logo_path))
-                    <img src="{{ asset($college->logo_path) }}" alt="College Logo" style="max-height: 60px; max-width: 60px;">
+                    <img src="{{ \App\Support\Media::publicUrl($college->logo_path) }}" alt="College Logo" style="max-height: 60px; max-width: 60px;">
                 @else
                     <div class="logo-placeholder" style="font-size: 48px;">🎓</div>
                 @endif
             </div>
-            <div class="school-name">{{ !empty($college) ? $college->name : 'IT-DMS COLLEGE' }}</div>
+            <div class="school-name">{{ !empty($college) ? $college->name : 'Manmohan Memorial Polytechnic' }}</div>
             <div class="report-title">Admin Report - IT Department</div>
             <div class="meta-info">
                 <div class="meta-item">
@@ -598,3 +598,4 @@
     </script>
 </body>
 </html>
+

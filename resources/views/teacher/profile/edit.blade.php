@@ -3,9 +3,15 @@
 @section('title', 'Edit Profile')
 
 @section('content')
-<div class="space-y-6">
+<div class="teacher-smooth-page teacher-profile-page space-y-6">
+    <div class="teacher-page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="min-w-0">
+            <h1 class="teacher-page-header-title text-2xl font-bold text-gray-900 dark:text-white">{{ __('Edit Profile') }}</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('Manage your account information, profile photo, and password settings.') }}</p>
+        </div>
+    </div>
     <!-- Profile Info Card -->
-    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+    <div class="teacher-smooth-form-panel bg-white rounded-lg border border-gray-200 shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-gray-900 font-semibold text-base flex items-center gap-2">
                 <i class="bi bi-person-badge text-gray-500"></i>
@@ -19,21 +25,21 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Profile Photo -->
-                    <div class="flex flex-col items-center">
+                    <div class="teacher-smooth-photo-frame flex flex-col items-center p-6">
                         <label class="block text-sm font-medium text-gray-900 mb-3">Profile Photo</label>
                         @php
-                            $photoPath = $user->profile_photo_path;
-                            $hasFile = !empty($photoPath) && \Illuminate\Support\Facades\Storage::disk('public')->exists($photoPath);
+                            $photoPath = $user->profile_photo_url;
+                            $hasFile = !empty($photoPath);
                         @endphp
                         @if($hasFile)
-                            <img id="profilePhotoPreview" src="{{ asset('storage/' . $photoPath) }}" alt="Profile photo" class="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow-sm" />
+                            <img id="profilePhotoPreview" src="{{ $photoPath }}" alt="Profile photo" class="w-32 h-32 rounded-full object-cover border-4 border-gray-100 shadow-sm" />
                         @else
                             <div id="profilePhotoPreview" class="w-32 h-32 rounded-full bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white text-5xl font-bold border-4 border-gray-100 shadow-sm">
                                 {{ substr($user->name ?? 'A', 0, 1) }}
                             </div>
                         @endif
                         <div class="mt-3 flex flex-col items-center w-full">
-                            <label for="photo" class="inline-flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium cursor-pointer transition">
+                            <label for="photo" class="teacher-smooth-upload-trigger inline-flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm font-medium cursor-pointer transition">
                                 <i class="bi bi-cloud-upload mr-2"></i>
                                 <span id="photoButtonText">Choose Photo</span>
                             </label>
@@ -91,7 +97,7 @@
                         </div>
 
                         <div class="flex items-center gap-3 pt-2">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition">
+                            <button type="submit" class="teacher-page-primary-btn inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition">
                                 <i class="bi bi-check-lg mr-1"></i>
                                 Save Changes
                             </button>
@@ -109,7 +115,7 @@
     </div>
 
     <!-- Password Update Card -->
-    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+    <div class="teacher-smooth-form-panel bg-white rounded-lg border border-gray-200 shadow-sm">
         <div class="px-4 py-3 border-b border-gray-200">
             <h3 class="text-gray-900 font-semibold text-sm flex items-center gap-2">
                 <i class="bi bi-key text-gray-500"></i>
@@ -147,7 +153,7 @@
                 </div>
 
                 <div class="flex items-center gap-3 pt-2">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition">
+                    <button type="submit" class="teacher-page-primary-btn inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition">
                         <i class="bi bi-shield-check mr-1"></i>
                         Update Password
                     </button>
@@ -253,3 +259,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+

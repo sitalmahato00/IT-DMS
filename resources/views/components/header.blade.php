@@ -8,10 +8,10 @@
 
     $departmentName = $department
         ? (($locale === 'ne' && !empty($department->name_nepali)) ? $department->name_nepali : $department->name)
-        : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Information Technology Department');
+        : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Manmohan Memorial Polytechnic');
 
     $departmentShort = $department?->short_name ?: ($locale === 'ne' ? 'आईटी' : 'IT');
-    $departmentLogo = $departmentLogoUrl ?? ($department?->getLogoUrl() ?? asset('images/default-logo.svg'));
+    $departmentLogo = $departmentLogoUrl ?? ($department?->getLogoUrl() ?? '/images/default-logo.svg');
 
     $brandTitle = trim((string) Str::of($departmentName)->replace([' Department', ' विभाग'], ''));
     if (blank($brandTitle)) {
@@ -47,6 +47,7 @@
         ['href' => $onLanding ? $sectionLink('curriculum') : route('subjects.index'), 'label' => $locale === 'ne' ? 'पाठ्यक्रम' : 'Curriculum'],
         ['href' => $onLanding ? $sectionLink('faculty') : route('faculty.index'), 'label' => $locale === 'ne' ? 'शिक्षक' : 'Faculty'],
         ['href' => $onLanding ? $sectionLink('notices') : route('public.notices.index'), 'label' => $locale === 'ne' ? 'सूचना' : 'News & Events'],
+        ['href' => $onLanding ? $sectionLink('exam-result') : $sectionLink('exam-result'), 'label' => $locale === 'ne' ? 'परीक्षा परिणाम' : 'Exam Result'],
         ['href' => $onLanding ? $sectionLink('resources') : route('public.resources.index'), 'label' => $locale === 'ne' ? 'स्रोत' : 'Resources'],
         ['href' => $sectionLink('contact'), 'label' => $locale === 'ne' ? 'सम्पर्क' : 'Contact'],
     ];
@@ -111,7 +112,7 @@
     }
 @endphp
 
-<header x-data="{ mobileMenuOpen: false }" class="sticky top-0 z-[1100] border-b border-red-100/80 bg-white/95 shadow-[0_16px_38px_rgba(15,23,42,0.08)] backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
+<header x-data="{ mobileMenuOpen: false }" class="sticky top-0 isolate z-[9999] border-b border-red-100/80 bg-white shadow-[0_16px_38px_rgba(15,23,42,0.08)] dark:border-slate-800 dark:bg-slate-950">
     <div class="bg-red-600 text-white dark:bg-red-700">
         <div class="flex w-full items-center justify-between gap-4 px-4 py-2 text-[11px] font-semibold sm:px-6 lg:px-8">
             <div class="flex min-w-0 items-center gap-2">
@@ -147,7 +148,7 @@
 
             <span class="min-w-0 leading-tight">
                 <span class="block text-[10px] font-bold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
-                    {{ $locale === 'ne' ? 'आधिकारिक' : 'Official' }}
+                    {{ $departmentName }}
                 </span>
                 <span class="block truncate text-base font-bold text-slate-900 dark:text-white sm:text-lg">
                     {{ $brandTitle }}
@@ -176,20 +177,10 @@
                 <span>{{ $locale === 'ne' ? 'छिटो सम्पर्क' : 'Quick Contact' }}</span>
             </a>
 
-            <form method="POST" action="{{ route('language.switch') }}" class="hidden sm:block">
-                @csrf
-                <label class="sr-only" for="headerLocale">{{ $locale === 'ne' ? 'भाषा' : 'Language' }}</label>
-                <select id="headerLocale" name="locale" onchange="this.form.submit()" class="rounded-full border border-transparent bg-transparent px-2 py-2 text-sm font-semibold text-slate-700 focus:border-red-200 focus:outline-none focus:ring-2 focus:ring-red-100 dark:text-slate-200 dark:focus:border-slate-600 dark:focus:ring-slate-800">
-                    @foreach (config('locales.supported') as $code => $label)
-                        <option value="{{ $code }}" @selected($code === $locale)>{{ $label }}</option>
-                    @endforeach
-                </select>
-            </form>
-
             <button
                 id="darkModeToggle"
                 type="button"
-                class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white p-2 text-slate-700 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-900 dark:hover:text-white dark:focus:ring-slate-800"
+                class="hidden lg:inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white p-2 text-slate-700 shadow-sm transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-900/90 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-900 dark:hover:text-white dark:focus:ring-slate-800"
                 aria-label="{{ $locale === 'ne' ? 'डार्क मोड टगल' : 'Toggle dark mode' }}"
                 aria-pressed="false"
             >
@@ -252,16 +243,6 @@
                     <span>{{ $locale === 'ne' ? 'छिटो सम्पर्क' : 'Quick Contact' }}</span>
                 </a>
 
-                <form method="POST" action="{{ route('language.switch') }}" class="sm:hidden">
-                    @csrf
-                    <label class="sr-only" for="headerLocaleMobile">{{ $locale === 'ne' ? 'भाषा' : 'Language' }}</label>
-                    <select id="headerLocaleMobile" name="locale" onchange="this.form.submit()" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 focus:border-red-200 focus:outline-none focus:ring-2 focus:ring-red-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:border-slate-600 dark:focus:ring-slate-800">
-                        @foreach (config('locales.supported') as $code => $label)
-                            <option value="{{ $code }}" @selected($code === $locale)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </form>
-
                 @auth
                     <a href="{{ route('dashboard') }}" @click="mobileMenuOpen = false" class="flex items-center justify-center rounded-full bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700">
                         {{ $locale === 'ne' ? 'ड्यासबोर्ड' : 'Dashboard' }}
@@ -275,3 +256,4 @@
         </div>
     </div>
 </header>
+

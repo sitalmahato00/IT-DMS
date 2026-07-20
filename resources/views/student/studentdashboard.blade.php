@@ -40,8 +40,8 @@
     $attentionItems = $attentionItems->take(4);
 @endphp
 
-<div class="space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif" id="studentDashboardApp">
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF0037] via-[#D90033] to-[#B2002F] p-6 md:p-8 text-white shadow-xl border border-[#D90033]">
+<div class="student-smooth-page student-dashboard-page space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif" id="studentDashboardApp">
+    <div class="student-smooth-hero relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF0037] via-[#D90033] to-[#B2002F] p-6 md:p-8 text-white shadow-xl border border-[#D90033]">
         <div class="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-white/20 blur-2xl"></div>
         <div class="absolute -left-10 -bottom-16 w-56 h-56 rounded-full bg-black/10 blur-3xl"></div>
 
@@ -70,25 +70,25 @@
 
     <div class="space-y-6" data-student-search-root>
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <div class="rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5" data-student-search-item data-student-search-text="{{ __('Enrolled Subjects') }} {{ __('courses subjects enrolled') }}">
+            <div class="student-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5" data-student-search-item data-student-search-text="{{ __('Enrolled Subjects') }} {{ __('courses subjects enrolled') }}">
                 <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Enrolled Subjects') }}</p>
                 <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ $subjectCount }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('Active subjects in your profile') }}</p>
             </div>
 
-            <div class="rounded-xl border border-blue-200 dark:border-blue-900 bg-white dark:bg-gray-800 p-5" data-student-search-item data-student-search-text="{{ __('Attendance') }} {{ __('attendance percentage') }}">
+            <div class="student-smooth-card rounded-xl border border-blue-200 dark:border-blue-900 bg-white dark:bg-gray-800 p-5" data-student-search-item data-student-search-text="{{ __('Attendance') }} {{ __('attendance percentage') }}">
                 <p class="text-xs uppercase tracking-wide text-blue-700 dark:text-blue-300 font-semibold">{{ __('Attendance') }}</p>
                 <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ $overallAttendance }}%</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('Overall class attendance') }}</p>
             </div>
 
-            <div class="rounded-xl border border-purple-200 dark:border-purple-900 bg-white dark:bg-gray-800 p-5" data-student-search-item data-student-search-text="{{ __('Overall Score') }} {{ __('marks percentage') }}">
+            <div class="student-smooth-card rounded-xl border border-purple-200 dark:border-purple-900 bg-white dark:bg-gray-800 p-5" data-student-search-item data-student-search-text="{{ __('Overall Score') }} {{ __('marks percentage') }}">
                 <p class="text-xs uppercase tracking-wide text-purple-700 dark:text-purple-300 font-semibold">{{ __('Overall Score') }}</p>
                 <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ $overallPercentage }}%</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ $gradedSubjectCount }} {{ __('graded subjects') }}</p>
             </div>
 
-            <div class="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5" data-student-search-item data-student-search-text="{{ __('CGPA') }} {{ __('cgpa academic score') }}">
+            <div class="student-smooth-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5" data-student-search-item data-student-search-text="{{ __('CGPA') }} {{ __('cgpa academic score') }}">
                 <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">{{ __('CGPA') }}</p>
                 <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ number_format($cgpa, 2) }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('Calculated from published marks') }}</p>
@@ -96,7 +96,7 @@
         </div>
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-            <div class="xl:col-span-7 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+            <div class="student-smooth-panel xl:col-span-7 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Academic Status') }}</h2>
@@ -114,7 +114,7 @@
             </div>
 
             <div class="xl:col-span-5 space-y-6">
-                <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5" data-student-search-item data-student-search-text="{{ __('Academic alerts') }} {{ __('alerts warnings pending fail attendance') }}">
+                <div class="student-smooth-panel rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5" data-student-search-item data-student-search-text="{{ __('Academic alerts') }} {{ __('alerts warnings pending fail attendance') }}">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Academic Alerts') }}</h2>
                         <span class="text-xs text-gray-500 dark:text-gray-400">{{ $attentionItems->count() }} {{ __('items') }}</span>
@@ -144,14 +144,14 @@
                     @endif
                 </div>
 
-                <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+                <div class="student-smooth-panel rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Quick Actions') }}</h2>
                         <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('Jump to key pages') }}</span>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-    <a href="{{ route('student.courses') }}" class="rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4 hover:bg-red-100 dark:hover:bg-red-950/30 transition" data-student-search-item data-student-search-text="{{ __('Courses') }} {{ __('my courses subjects') }}">
+    <a href="{{ route('student.courses') }}" class="student-smooth-quicklink rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4 hover:bg-red-100 dark:hover:bg-red-950/30 transition" data-student-search-item data-student-search-text="{{ __('Courses') }} {{ __('my courses subjects') }}">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center">
                 <i class="bi bi-journal-bookmark"></i>
@@ -163,7 +163,7 @@
         </div>
     </a>
 
-    <a href="{{ route('student.attendance') }}" class="rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/20 p-4 hover:bg-blue-100 dark:hover:bg-blue-950/30 transition" data-student-search-item data-student-search-text="{{ __('Attendance') }} {{ __('attendance records') }}">
+    <a href="{{ route('student.attendance') }}" class="student-smooth-quicklink rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/20 p-4 hover:bg-blue-100 dark:hover:bg-blue-950/30 transition" data-student-search-item data-student-search-text="{{ __('Attendance') }} {{ __('attendance records') }}">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">
                 <i class="bi bi-calendar-check"></i>
@@ -175,7 +175,7 @@
         </div>
     </a>
 
-    <a href="{{ route('student.marks') }}" class="rounded-xl border border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-purple-950/20 p-4 hover:bg-purple-100 dark:hover:bg-purple-950/30 transition" data-student-search-item data-student-search-text="{{ __('Marks') }} {{ __('results examinations') }}">
+    <a href="{{ route('student.marks') }}" class="student-smooth-quicklink rounded-xl border border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-purple-950/20 p-4 hover:bg-purple-100 dark:hover:bg-purple-950/30 transition" data-student-search-item data-student-search-text="{{ __('Marks') }} {{ __('results examinations') }}">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center">
                 <i class="bi bi-clipboard-data"></i>
@@ -187,7 +187,7 @@
         </div>
     </a>
 
-    <a href="{{ route('student.timetable') }}" class="rounded-xl border border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/20 p-4 hover:bg-indigo-100 dark:hover:bg-indigo-950/30 transition" data-student-search-item data-student-search-text="{{ __('Timetable') }} {{ __('class schedule') }}">
+    <a href="{{ route('student.timetable') }}" class="student-smooth-quicklink rounded-xl border border-indigo-200 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/20 p-4 hover:bg-indigo-100 dark:hover:bg-indigo-950/30 transition" data-student-search-item data-student-search-text="{{ __('Timetable') }} {{ __('class schedule') }}">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
                 <i class="bi bi-calendar3"></i>
@@ -199,7 +199,7 @@
         </div>
     </a>
 
-    <a href="{{ route('student.profile.edit') }}" class="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 p-4 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 transition" data-student-search-item data-student-search-text="{{ __('Profile') }} {{ __('profile settings account') }}">
+    <a href="{{ route('student.profile.edit') }}" class="student-smooth-quicklink rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/20 p-4 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 transition" data-student-search-item data-student-search-text="{{ __('Profile') }} {{ __('profile settings account') }}">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
                 <i class="bi bi-person-gear"></i>
@@ -215,7 +215,7 @@
             </div>
         </div>
 
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4" data-student-search-item data-student-search-text="{{ __('Timetable routine classes') }}">
+        <div class="student-smooth-panel rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4" data-student-search-item data-student-search-text="{{ __('Timetable routine classes') }}">
             <div class="flex items-center justify-between gap-3 mb-3">
                 <div>
                     <h2 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Class Routine') }}</h2>
@@ -328,9 +328,47 @@
                         </div>
                     @endif
                 </div>
-            </div>
+        </div>
 
-            <div class="xl:col-span-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+        <div class="xl:col-span-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __("Today's Attendance") }}</h2>
+                    <span class="text-xs font-medium text-red-700 dark:text-red-400">
+                        {{ \Carbon\Carbon::now('Asia/Kathmandu')->format('M d, Y') }}
+                    </span>
+                </div>
+
+                @if($todayAttendance->isEmpty())
+                    <div class="rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-4 text-center">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No attendance has been marked for today yet.') }}</p>
+                    </div>
+                @else
+                    <div class="space-y-3 mb-6">
+                        @foreach($todayAttendance as $record)
+                            @php
+                                $statusTone = match ($record['status']) {
+                                    'present' => 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-300',
+                                    'absent' => 'bg-red-50 text-red-700 dark:bg-red-950/20 dark:text-red-300',
+                                    default => 'bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-300',
+                                };
+                            @endphp
+                            <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-4">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $record['subject_name'] }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            {{ $record['subject_code'] ?: '—' }} • {{ $record['date_label'] }}
+                                        </p>
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide {{ $statusTone }}">
+                                        {{ ucfirst($record['status']) }}
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Recent Attendance') }}</h2>
                     <a href="{{ route('student.attendance') }}" class="text-xs font-medium text-red-700 dark:text-red-400 hover:underline">{{ __('Open Attendance') }}</a>
@@ -438,3 +476,4 @@
     });
 </script>
 @endsection
+

@@ -11,7 +11,7 @@
     $sheetSection = $displaySection ?: ($selectedSection ?: __('All'));
     $logoUrl = $college && method_exists($college, 'getLogoUrl')
         ? $college->getLogoUrl()
-        : asset('images/default-logo.svg');
+        : '/images/default-logo.svg';
     $timeRowsCollection = collect($timeRows ?? []);
     $departmentLine = $student->department ?: ($college?->short_name ?: __('Department'));
 @endphp
@@ -19,10 +19,10 @@
 <section class="routine-paper {{ $paperClass ?? '' }}">
     <header class="routine-paper__header">
         <div class="routine-paper__logo">
-            <img src="{{ $logoUrl }}" alt="{{ $college?->name ?? __('Department Logo') }}">
+            <img src="{{ $logoUrl }}" alt="{{ $college?->name ?? __('College Logo') }}">
         </div>
         <div class="routine-paper__titles">
-            <p class="routine-paper__institution">{{ strtoupper($college?->name ?? 'IT-DMS') }}</p>
+            <p class="routine-paper__institution">{{ strtoupper($college?->name ?? 'Manmohan Memorial Polytechnic') }}</p>
             <p class="routine-paper__department">{{ strtoupper($departmentLine) }}</p>
             <h2>{{ __('Class Routine') }}</h2>
         </div>
@@ -158,3 +158,4 @@
         </div>
     </footer>
 </section>
+

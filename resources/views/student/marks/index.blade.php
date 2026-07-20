@@ -13,8 +13,8 @@
     $topSubjects = $gradedSubjects->sortByDesc('percentage')->take(4)->values();
 @endphp
 
-<div class="space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif" id="studentMarksApp">
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF0037] via-[#D90033] to-[#B2002F] p-6 md:p-8 text-white shadow-xl border border-[#D90033]">
+<div class="student-smooth-page space-y-6 @if(app()->getLocale() === 'ne') locale-ne @endif" id="studentMarksApp">
+    <div class="student-smooth-hero relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#FF0037] via-[#D90033] to-[#B2002F] p-6 md:p-8 text-white shadow-xl border border-[#D90033]">
         <div class="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-white/20 blur-2xl"></div>
         <div class="absolute -left-10 -bottom-16 w-56 h-56 rounded-full bg-black/10 blur-3xl"></div>
 
@@ -32,35 +32,44 @@
                     <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/15 border border-white/25">
                         <i class="bi bi-award"></i> {{ number_format($cgpa, 2) }} {{ __('CGPA') }}
                     </span>
+                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white/15 border border-white/25">
+                        <i class="bi bi-trophy"></i> {{ $marksheetGrade }} {{ __('grade') }}
+                    </span>
                 </div>
             </div>
 
-            <div class="hidden lg:flex items-center justify-center w-24 h-24 rounded-3xl bg-white/10 border border-white/15 shadow-lg">
-                <i class="bi bi-clipboard-data text-5xl text-white/90"></i>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('student.marksheet') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#B2002F] shadow-md hover:bg-[#fff1f3] transition">
+                    <i class="bi bi-journal-text"></i>
+                    <span>{{ __('Open Marksheet') }}</span>
+                </a>
+                <div class="hidden lg:flex items-center justify-center w-24 h-24 rounded-3xl bg-white/10 border border-white/15 shadow-lg">
+                    <i class="bi bi-clipboard-data text-5xl text-white/90"></i>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <div class="rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
+        <div class="student-smooth-card rounded-xl border border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 p-5">
             <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold">{{ __('Recorded Subjects') }}</p>
             <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ $subjectCount }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('Subjects with published marks') }}</p>
         </div>
 
-        <div class="rounded-xl border border-blue-200 dark:border-blue-900 bg-white dark:bg-gray-800 p-5">
+        <div class="student-smooth-card rounded-xl border border-blue-200 dark:border-blue-900 bg-white dark:bg-gray-800 p-5">
             <p class="text-xs uppercase tracking-wide text-blue-700 dark:text-blue-300 font-semibold">{{ __('Overall Percentage') }}</p>
             <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ $overallPercentage }}%</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('Weighted performance score') }}</p>
         </div>
 
-        <div class="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
+        <div class="student-smooth-card rounded-xl border border-emerald-200 dark:border-emerald-900 bg-white dark:bg-gray-800 p-5">
             <p class="text-xs uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold">{{ __('Pass Rate') }}</p>
             <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ is_null($passRate) ? '—' : $passRate . '%' }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('Across graded subjects') }}</p>
         </div>
 
-        <div class="rounded-xl border border-purple-200 dark:border-purple-900 bg-white dark:bg-gray-800 p-5">
+        <div class="student-smooth-card rounded-xl border border-purple-200 dark:border-purple-900 bg-white dark:bg-gray-800 p-5">
             <p class="text-xs uppercase tracking-wide text-purple-700 dark:text-purple-300 font-semibold">{{ __('CGPA') }}</p>
             <p class="text-3xl font-bold text-gray-900 dark:text-white mt-2">{{ number_format($cgpa, 2) }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('Calculated from current marks') }}</p>
@@ -68,7 +77,7 @@
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        <div class="xl:col-span-7 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+        <div class="student-smooth-panel xl:col-span-7 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Subject Performance') }}</h2>
@@ -85,10 +94,14 @@
             </div>
         </div>
 
-        <div class="xl:col-span-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
+        <div class="student-smooth-panel xl:col-span-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Status Overview') }}</h2>
                 <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('Live breakdown') }}</span>
+            </div>
+
+            <div class="h-56">
+                <canvas id="studentMarksStatusChart"></canvas>
             </div>
 
             <div class="grid grid-cols-3 gap-3">
@@ -126,7 +139,7 @@
                 @else
                     <div class="space-y-3">
                         @foreach($topSubjects as $subject)
-                            <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-3">
+                            <div class="student-smooth-list-card rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 p-3">
                                 <div class="flex items-center justify-between gap-3">
                                     <div>
                                         <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $subject['name'] }}</p>
@@ -143,13 +156,13 @@
     </div>
 
     @if($subjects->isEmpty())
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-10 text-center">
+        <div class="student-smooth-empty rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-10 text-center">
             <i class="bi bi-clipboard-x text-4xl text-gray-300 dark:text-gray-600"></i>
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mt-4">{{ __('No Results Available') }}</h3>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ __('Your marks have not been published yet.') }}</p>
         </div>
     @else
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div class="student-smooth-table-card rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Subject-wise Results') }}</h2>
@@ -219,7 +232,7 @@
                     </table>
                 </div>
 
-                <div data-student-search-empty class="hidden rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-8 text-center">
+                <div data-student-search-empty class="student-smooth-empty hidden rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40 p-8 text-center">
                     <i class="bi bi-search text-3xl text-gray-300 dark:text-gray-600"></i>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">{{ __('No results matched your search.') }}</p>
                 </div>
@@ -233,12 +246,14 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const chartCanvas = document.getElementById('studentMarksChart');
+        const statusCanvas = document.getElementById('studentMarksStatusChart');
         const chartEmpty = document.getElementById('studentMarksChartEmpty');
 
         if (!chartCanvas || !window.Chart) {
             return;
         }
 
+        const statusData = @json($marksStatusChart);
         const subjectData = @json(
             $gradedSubjects->map(fn ($subject) => [
                 'label' => $subject['code'],
@@ -253,6 +268,39 @@
         }
 
         const isDark = document.documentElement.classList.contains('dark');
+
+        if (statusCanvas) {
+            new window.Chart(statusCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: statusData.labels,
+                    datasets: [{
+                        data: statusData.values,
+                        backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+                        borderColor: ['#ffffff', '#ffffff', '#ffffff'],
+                        borderWidth: 3,
+                        hoverOffset: 8,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: isDark ? '#d1d5db' : '#4b5563',
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                boxWidth: 10,
+                                padding: 14,
+                            },
+                        },
+                    },
+                },
+            });
+        }
 
         new window.Chart(chartCanvas, {
             type: 'bar',
@@ -299,3 +347,4 @@
     });
 </script>
 @endsection
+

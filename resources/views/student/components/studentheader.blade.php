@@ -2,23 +2,19 @@
     $resolvedTitle = trim($__env->yieldContent('title', $studentHeaderTitle ?? __('Dashboard')));
     $resolvedSubtitle = trim($__env->yieldContent('subtitle', __('Student Portal')));
     $user = auth()->user();
-    $photoPath = $user?->profile_photo_path ?: $user?->student?->profile_photo_path;
-    $hasProfilePhoto = !empty($photoPath) && \Illuminate\Support\Facades\Storage::disk('public')->exists($photoPath);
+    $photoPath = $user?->profile_photo_url ?: $user?->student?->profile_photo_url;
+    $hasProfilePhoto = !empty($photoPath);
 
     $__notifList = $user ? $user->notifications()->latest()->take(6)->get() : collect();
     $__unreadCount = $user ? $user->unreadNotifications()->count() : 0;
 @endphp
 
-<header class="bg-[#FF0037] dark:bg-[#FF0037] shadow-sm border-b border-red-500 text-white">
+<header class="bg-[#FF0037] dark:bg-[#FF0037] shadow-sm border-b border-red-500 text-white" data-mobile-app-header>
     <div class="px-6 py-0 h-16">
         <div class="flex items-center justify-between gap-4 h-full">
             <div class="flex min-w-0 flex-1 items-center gap-3">
                 <button id="sidebarToggle" class="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-white text-[#FF0037] border border-white/80 shadow-sm hover:bg-gray-100 transition flex-shrink-0" title="{{ __('Toggle Sidebar') }}">
                     <i class="bi bi-list text-lg"></i>
-                </button>
-
-                <button id="desktopSidebarToggle" class="hidden lg:flex items-center justify-center w-9 h-9 rounded-lg hover:bg-red-500 transition flex-shrink-0" title="{{ __('Toggle Sidebar') }}">
-                    <i class="bi bi-layout-sidebar text-white/80 text-lg"></i>
                 </button>
 
                 <div class="min-w-0">
@@ -27,31 +23,12 @@
                 </div>
             </div>
 
+
             <div class="hidden md:flex flex-1 justify-center">
-                <form id="studentHeaderSearchForm" class="relative w-full max-w-xl" role="search">
-                    <label for="studentHeaderSearchInput" class="sr-only">{{ __('Search this page') }}</label>
-                    <input
-                        id="studentHeaderSearchInput"
-                        type="search"
-                        placeholder="{{ __('Search this page...') }}"
-                        class="w-full px-4 py-2 pl-10 pr-4 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#FF0037] focus:border-transparent bg-white text-slate-900 placeholder:text-rose-400 shadow-sm transition dark:bg-slate-900/80 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400"
-                    >
-                    <button type="submit" class="absolute left-2.5 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-100 transition" aria-label="{{ __('Search') }}">
-                        <i class="bi bi-search text-[#FF0037] text-sm"></i>
-                    </button>
-                </form>
             </div>
 
-            <div class="flex items-center gap-2 flex-shrink-0 h-full">
-                <div class="hidden md:block">
-                    <label for="locale-select" class="sr-only">{{ __('Language') }}</label>
-                    <select id="locale-select" class="px-3 py-1.5 border border-gray-200 rounded-full text-sm text-gray-900 bg-white cursor-pointer focus:ring-2 focus:ring-[#FF0037] focus:border-transparent shadow-sm transition dark:bg-slate-900 dark:text-white dark:border-slate-700">
-                        @foreach (config('locales.supported') as $code => $label)
-                            <option value="{{ $code }}" {{ app()->getLocale() === $code ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
 
+            <div class="flex items-center gap-2 flex-shrink-0 h-full">
                 <button id="darkModeToggle" class="p-2 border border-gray-200 bg-white text-gray-900 rounded-lg shadow-sm hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white dark:hover:bg-slate-800 transition" title="{{ __('Toggle Dark Mode') }}">
                     <i class="bi bi-moon-fill text-gray-900 dark:text-yellow-400 text-sm" id="darkModeIcon"></i>
                 </button>
@@ -64,39 +41,39 @@
                         @endif
                     </button>
 
-                    <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-red-200 dark:border-slate-700 py-0 z-50 overflow-hidden">
-                        <div class="px-4 py-3 border-b border-red-100 dark:border-slate-700 bg-red-50 dark:bg-slate-900/80 flex items-center justify-between">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                <i class="bi bi-bell text-red-700 dark:text-red-400"></i>
+                    <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white dark:bg-[#191919] rounded-xl shadow-xl border border-red-200 dark:border-red-900/50 py-0 z-50 overflow-hidden">
+                        <div class="px-4 py-3 border-b border-gray-700 bg-[#191919] flex items-center justify-between">
+                            <p class="text-sm font-semibold text-white flex items-center gap-2">
+                                <i class="bi bi-bell text-red-400"></i>
                                 {{ __('Notifications') }}
                             </p>
-                            <span class="text-xs text-gray-500 dark:text-slate-400">{{ __('Latest 6') }}</span>
+                            <span class="text-xs text-gray-400">{{ __('Latest 6') }}</span>
                         </div>
 
-                        <div class="max-h-72 overflow-y-auto divide-y divide-gray-50 dark:divide-slate-700">
+                        <div class="max-h-72 overflow-y-auto divide-y divide-gray-700/50 bg-[#191919]">
                             @forelse($__notifList as $notification)
                                 @php
                                     $data = is_array($notification->data) ? $notification->data : (array) ($notification->data ?? []);
                                     $title = $data['title'] ?? ($data['heading'] ?? __('Notification'));
                                     $message = $data['message'] ?? ($data['body'] ?? '');
                                 @endphp
-                                <div class="px-4 py-3 hover:bg-red-50 dark:hover:bg-slate-700/60 flex items-start gap-3 transition {{ empty($notification->read_at) ? 'bg-red-50/50 dark:bg-red-950/20' : '' }}">
-                                    <div class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <i class="bi bi-bell text-red-600 dark:text-red-300 text-xs"></i>
+                                <div class="px-4 py-3 hover:bg-gray-800 flex items-start gap-3 transition bg-[#191919] {{ empty($notification->read_at) ? 'bg-gray-900' : '' }}">
+                                    <div class="w-8 h-8 rounded-full bg-red-900/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <i class="bi bi-bell text-red-400 text-xs"></i>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $title }}</p>
-                                        <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5 line-clamp-2">{{ \Illuminate\Support\Str::limit($message, 100) }}</p>
-                                        <p class="text-xs text-gray-400 dark:text-slate-500 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
+                                        <p class="text-sm font-medium text-white truncate">{{ $title }}</p>
+                                        <p class="text-xs text-gray-300 mt-0.5 line-clamp-2">{{ \Illuminate\Support\Str::limit($message, 100) }}</p>
+                                        <p class="text-xs text-gray-400 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
                                     </div>
                                     @if(empty($notification->read_at))
                                         <div class="w-2 h-2 rounded-full bg-red-600 flex-shrink-0 mt-2"></div>
                                     @endif
                                 </div>
                             @empty
-                                <div class="p-8 text-center">
-                                    <i class="bi bi-bell-slash text-2xl text-gray-300 dark:text-slate-600 block mb-2"></i>
-                                    <p class="text-sm text-gray-500 dark:text-slate-400">{{ __('No notifications') }}</p>
+                                <div class="p-8 text-center bg-[#191919]">
+                                    <i class="bi bi-bell-slash text-2xl text-gray-600 block mb-2"></i>
+                                    <p class="text-sm text-gray-300">{{ __('No notifications') }}</p>
                                 </div>
                             @endforelse
                         </div>
@@ -106,7 +83,7 @@
                 <div class="relative">
                     <button id="profileToggle" class="flex items-center gap-2 p-1.5 border border-gray-200 bg-white text-gray-900 rounded-lg transition shadow-sm hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white dark:hover:bg-slate-800">
                         @if($hasProfilePhoto)
-                            <img src="{{ asset('storage/' . $photoPath) }}" alt="{{ $user->name }}" class="w-8 h-8 rounded-full object-cover border border-white/60">
+                            <img src="{{ $photoPath }}" alt="{{ $user->name }}" class="w-8 h-8 rounded-full object-cover border border-white/60">
                         @else
                             <div class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-bold">
                                 {{ strtoupper(substr($user->name ?? 'S', 0, 1)) }}
@@ -144,42 +121,14 @@
     </div>
 </header>
 
-<script>
+<script data-mobile-static-script>
     document.addEventListener('DOMContentLoaded', function () {
-        const localeSelect = document.getElementById('locale-select');
         const notifToggle = document.getElementById('notifToggle');
         const notifDropdown = document.getElementById('notifDropdown');
         const profileToggle = document.getElementById('profileToggle');
         const profileDropdown = document.getElementById('profileDropdown');
         const headerSearchForm = document.getElementById('studentHeaderSearchForm');
         const headerSearchInput = document.getElementById('studentHeaderSearchInput');
-
-        if (localeSelect) {
-            localeSelect.addEventListener('change', function () {
-                const form = document.createElement('form');
-                const csrfToken = document.querySelector('meta[name="csrf-token"]');
-
-                form.method = 'POST';
-                form.action = '{{ route('language.switch') }}';
-
-                if (csrfToken) {
-                    const csrfField = document.createElement('input');
-                    csrfField.type = 'hidden';
-                    csrfField.name = '_token';
-                    csrfField.value = csrfToken.getAttribute('content');
-                    form.appendChild(csrfField);
-                }
-
-                const localeField = document.createElement('input');
-                localeField.type = 'hidden';
-                localeField.name = 'locale';
-                localeField.value = this.value;
-                form.appendChild(localeField);
-
-                document.body.appendChild(form);
-                form.submit();
-            });
-        }
 
         if (profileToggle && profileDropdown) {
             profileToggle.addEventListener('click', function (event) {
@@ -290,3 +239,4 @@
         }
     });
 </script>
+

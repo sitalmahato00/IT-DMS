@@ -134,3 +134,4 @@ class Semester extends Model
             ->count();
     }
 }
+

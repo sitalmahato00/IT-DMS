@@ -308,3 +308,4 @@ class NepaliContentHelper
         return trim($monthName . ' ' . $d . ', ' . $y);
     }
 }
+

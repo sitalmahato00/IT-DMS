@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Support\ResilientVite;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Foundation\Vite;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(Vite::class, ResilientVite::class);
     }
 
     /**
@@ -159,3 +161,4 @@ class AppServiceProvider extends ServiceProvider
         }
     }
 }
+

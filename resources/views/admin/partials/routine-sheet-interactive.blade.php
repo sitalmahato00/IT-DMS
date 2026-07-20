@@ -10,7 +10,7 @@
     $timeRowsCollection = collect($timeRows ?? []);
     $logoUrl = !empty($college) && method_exists($college, 'getLogoUrl')
         ? $college->getLogoUrl()
-        : asset('images/default-logo.svg');
+        : '/images/default-logo.svg';
     $summaryItems = collect($summaryItems ?? [])
         ->filter(fn ($item) => filled(data_get($item, 'label')))
         ->values();
@@ -19,11 +19,12 @@
         ->values();
     $sheetTitle = $sheetTitle ?? __('Class Routine');
     $sheetHeading = $sheetHeading ?? __('Routine Schedule');
-    $institutionName = $institutionName ?? strtoupper($college?->name ?? 'IT-DMS');
+    $institutionName = $institutionName ?? strtoupper($college?->name ?? 'Manmohan Memorial Polytechnic');
     $departmentLine = $departmentLine ?? strtoupper($college?->short_name ?? __('Department'));
     $footerLeft = $footerLeft ?? null;
     $footerRight = $footerRight ?? now()->format('Y-m-d H:i');
     $summaryColumns = max($summaryItems->count(), 1);
+    $showSlotSection = $showSlotSection ?? false;
     $conflictSlotIds = collect($conflicts ?? [])
         ->flatMap(fn ($conflict) => [$conflict['slot1_id'] ?? null, $conflict['slot2_id'] ?? null])
         ->filter()
@@ -84,6 +85,12 @@
                                 $rowSlots = collect(data_get($slotMatrix ?? [], $dayName . '.' . $timeRow['key'], []));
                                 $rowCardId = 'row-slot-' . $dayName . '-' . str_replace(':', '', $timeRow['start']) . '-' . str_replace(':', '', $timeRow['end']);
                                 $isGapOverride = (bool) data_get($gapOverrideMatrix ?? [], $dayName . '.' . $timeRow['key'], false);
+                                $rowSections = $rowSlots->pluck('section')
+                                    ->map(fn ($value) => trim((string) $value))
+                                    ->filter()
+                                    ->unique()
+                                    ->values();
+                                $showRowSections = $showSlotSection || $rowSections->count() > 1;
                             @endphp
                             <tr class="{{ $timeRow['is_break'] && !$isGapOverride ? 'is-break' : '' }}">
                                 @if($rowIndex === 0)
@@ -198,6 +205,9 @@
                                                         <span>{{ $slot->subject->subject_code }}</span>
                                                     @endif
                                                     <span>{{ ucfirst($slot->slot_type ?? __('Class')) }}</span>
+                                                    @if($showRowSections && filled($slot->section))
+                                                        <span>{{ __('Section') }} {{ $slot->section }}</span>
+                                                    @endif
                                                     @if($slot->lab_group)
                                                         <span>{{ __('Lab') }} {{ $slot->lab_group }}</span>
                                                     @endif
@@ -217,14 +227,38 @@
                                     <td class="routine-table__stack-cell">
                                         @foreach($rowSlots as $slot)
                                             <div class="routine-stack-item">
-                                                {{ $slot->teacher->user->name ?? __('TBA') }}
+                                                <div class="routine-stack-item__name">
+                                                    {{ $slot->teacher->user->name ?? __('TBA') }}
+                                                </div>
+                                                @if(($showRowSections && filled($slot->section)) || filled($slot->lab_group))
+                                                    <div class="routine-stack-item__meta">
+                                                        @if($showRowSections && filled($slot->section))
+                                                            <span>{{ __('Section') }} {{ $slot->section }}</span>
+                                                        @endif
+                                                        @if(filled($slot->lab_group))
+                                                            <span>{{ __('Lab') }} {{ $slot->lab_group }}</span>
+                                                        @endif
+                                                    </div>
+                                                @endif
                                             </div>
                                         @endforeach
                                     </td>
                                     <td class="routine-table__stack-cell">
                                         @foreach($rowSlots as $slot)
                                             <div class="routine-stack-item">
-                                                {{ $slot->room ?: __('Not Assigned') }}
+                                                <div class="routine-stack-item__name">
+                                                    {{ $slot->room ?: __('Not Assigned') }}
+                                                </div>
+                                                @if(($showRowSections && filled($slot->section)) || filled($slot->lab_group))
+                                                    <div class="routine-stack-item__meta">
+                                                        @if($showRowSections && filled($slot->section))
+                                                            <span>{{ __('Section') }} {{ $slot->section }}</span>
+                                                        @endif
+                                                        @if(filled($slot->lab_group))
+                                                            <span>{{ __('Lab') }} {{ $slot->lab_group }}</span>
+                                                        @endif
+                                                    </div>
+                                                @endif
                                             </div>
                                         @endforeach
                                     </td>
@@ -248,3 +282,4 @@
         </div>
     </footer>
 </section>
+

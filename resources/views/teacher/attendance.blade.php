@@ -3,7 +3,7 @@
 @section('title', __($attendanceLabel ?? 'Attendance'))
 
 @section('content')
-<div class="space-y-4">
+<div class="teacher-smooth-page teacher-attendance-page space-y-4">
     <!-- Toast Notification -->
     <div id="toast" class="hidden fixed top-4 right-4 z-50"></div>
 
@@ -45,7 +45,7 @@
     ])
 
         <!-- Attendance Table -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+    <div class="teacher-smooth-table-card bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
         {{-- Table Header --}}
         <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -59,12 +59,12 @@
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <a href="{{ ($attendanceRoutes['export'] ?? route('teacher.attendance.export')) }}?{{ http_build_query(request()->query()) }}"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-md text-xs font-medium hover:bg-green-700 transition-colors shadow-sm">
+                        class="teacher-action-pill inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white rounded-md text-xs font-medium hover:bg-green-700 transition-colors shadow-sm">
                         <i class="bi bi-download"></i> {{ __('Export CSV') }}
                     </a>
                     <a href="{{ ($attendanceRoutes['print'] ?? route('teacher.attendance.print')) }}?{{ http_build_query(request()->query()) }}"
                         target="_blank"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-medium hover:bg-blue-700 transition-colors shadow-sm">
+                        class="teacher-action-pill inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-medium hover:bg-blue-700 transition-colors shadow-sm">
                         <i class="bi bi-printer"></i> {{ __('Print') }}
                     </a>
                 </div>
@@ -146,7 +146,7 @@
 
 <!-- Mark Attendance Modal -->
 <div id="markAttendanceModal" class="fixed hidden inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
+    <div class="teacher-smooth-modal-shell bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-4 rounded-t-lg shadow-md flex-shrink-0">
             <div class="flex items-center justify-between">
                 <div class="flex items-start gap-3">
@@ -193,22 +193,22 @@
             </div>
             
             <div>
-                <button type="button" id="loadStudentsBtn" onclick="loadAttendanceStudents()" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors font-medium shadow-md">
+                <button type="button" id="loadStudentsBtn" onclick="loadAttendanceStudents()" class="teacher-page-primary-btn w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors font-medium shadow-md">
                     <i class="bi bi-search"></i>
                     <span>{{ __('Load Students') }}</span>
                 </button>
             </div>    
 
             <div id="attendanceSummary" class="grid grid-cols-3 gap-3 hidden">
-                <div class="p-3 bg-gradient-to-br from-blue-50 dark:from-blue-900/20 to-blue-100 dark:to-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-900/40 shadow-sm text-center">
+                <div class="teacher-smooth-summary-box p-3 bg-gradient-to-br from-blue-50 dark:from-blue-900/20 to-blue-100 dark:to-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-900/40 shadow-sm text-center">
                     <div class="text-2xl font-bold text-blue-700 dark:text-blue-400" id="summary_total">0</div>
                     <div class="text-xs text-blue-600 dark:text-blue-400 font-medium mt-0.5">{{ __('Total') }}</div>
                 </div>
-                <div class="p-3 bg-gradient-to-br from-green-50 dark:from-green-900/20 to-green-100 dark:to-green-900/30 rounded-lg border border-green-200 dark:border-green-900/40 shadow-sm text-center">
+                <div class="teacher-smooth-summary-box p-3 bg-gradient-to-br from-green-50 dark:from-green-900/20 to-green-100 dark:to-green-900/30 rounded-lg border border-green-200 dark:border-green-900/40 shadow-sm text-center">
                     <div class="text-2xl font-bold text-green-700 dark:text-green-400" id="summary_present">0</div>
                     <div class="text-xs text-green-600 dark:text-green-400 font-medium mt-0.5">{{ __('Present') }}</div>
                 </div>
-                <div class="p-3 bg-gradient-to-br from-red-50 dark:from-red-900/20 to-red-100 dark:to-red-900/30 rounded-lg border border-red-200 dark:border-red-900/40 shadow-sm text-center">
+                <div class="teacher-smooth-summary-box p-3 bg-gradient-to-br from-red-50 dark:from-red-900/20 to-red-100 dark:to-red-900/30 rounded-lg border border-red-200 dark:border-red-900/40 shadow-sm text-center">
                     <div class="text-2xl font-bold text-red-700 dark:text-red-400" id="summary_absent">0</div>
                     <div class="text-xs text-red-600 dark:text-red-400 font-medium mt-0.5">{{ __('Absent') }}</div>
                 </div>
@@ -232,10 +232,10 @@
         </div>
 
         <div class="p-4 bg-gray-50 dark:bg-slate-700/50 border-t border-gray-200 dark:border-slate-700 flex justify-end gap-2 rounded-b-lg flex-shrink-0">
-            <button type="button" onclick="closeMarkAttendanceModal()" class="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-white dark:hover:bg-slate-600 transition-colors font-medium">
+            <button type="button" onclick="closeMarkAttendanceModal()" class="teacher-page-secondary-btn px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-white dark:hover:bg-slate-600 transition-colors font-medium">
                 <i class="bi bi-x-circle mr-1.5"></i> {{ __('Cancel') }}
             </button>
-            <button type="button" id="saveAllBtn" onclick="saveAllAttendance()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-md" disabled>
+            <button type="button" id="saveAllBtn" onclick="saveAllAttendance()" class="teacher-page-primary-btn inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium shadow-md" disabled>
                 <i class="bi bi-check-circle"></i>
                 <span>{{ __('Save') }}</span>
             </button>
@@ -246,7 +246,7 @@
 <!-- Edit Subject Attendance Modal -->
 <div id="editSubjectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="fixed inset-0 bg-black bg-opacity-40" onclick="closeEditSubjectModal()"></div>
-    <div class="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div class="teacher-smooth-modal-shell relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <div class="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-red-600 dark:from-red-700 to-red-700 dark:to-red-800">
             <div>
                 <h3 class="text-lg font-semibold text-white">{{ __('Edit Attendance') }}</h3>
@@ -301,8 +301,8 @@
                 <span id="editSubjectStudentsCount">0</span> {{ __('students') }}
             </div>
             <div class="flex gap-2">
-                <button type="button" onclick="closeEditSubjectModal()" class="px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition">{{ __('Cancel') }}</button>
-                <button type="button" onclick="saveSubjectAttendance()" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition shadow-sm">
+                <button type="button" onclick="closeEditSubjectModal()" class="teacher-page-secondary-btn px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition">{{ __('Cancel') }}</button>
+                <button type="button" onclick="saveSubjectAttendance()" class="teacher-page-primary-btn px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition shadow-sm">
                     <i class="bi bi-check mr-1.5"></i> {{ __('Save Changes') }}
                 </button>
             </div>
@@ -313,7 +313,7 @@
 <!-- View Subject Attendance Modal -->
 <div id="viewSubjectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="fixed inset-0 bg-black bg-opacity-40" onclick="closeViewSubjectModal()"></div>
-    <div class="relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div class="teacher-smooth-modal-shell relative bg-white dark:bg-slate-800 rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <div class="flex justify-between items-center px-5 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-blue-600 dark:from-blue-700 to-blue-700 dark:to-blue-800">
             <div>
                 <h3 class="text-lg font-semibold text-white">{{ __('Student Attendance') }}</h3>
@@ -346,7 +346,7 @@
                     <i class="bi bi-printer"></i> Print
                 </button>
             </div>
-            <button type="button" onclick="closeViewSubjectModal()" class="px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition">{{ __('Close') }}</button>
+            <button type="button" onclick="closeViewSubjectModal()" class="teacher-page-secondary-btn px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition">{{ __('Close') }}</button>
         </div>
     </div>
 </div>
@@ -1068,3 +1068,4 @@ async function openEditSubjectAttendance(date, date_bs, subjectId, subjectName) 
     });
 </script>
 @endsection
+

@@ -1,5 +1,5 @@
 <!-- Teacher Header -->
-<header class="bg-[#FF0037] dark:bg-[#FF0037] shadow-sm border-b border-red-500 text-white">
+<header class="bg-[#FF0037] dark:bg-[#FF0037] shadow-sm border-b border-red-500 text-white" data-mobile-app-header>
     <div class="px-6 py-0 h-16">
         <div class="flex items-center justify-between gap-4 h-full">
             <div class="flex-1 min-w-0 flex items-center h-full gap-3">
@@ -7,28 +7,14 @@
                 <button id="sidebarToggle" class="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-white text-[#FF0037] border border-white/80 shadow-sm hover:bg-gray-100 transition flex-shrink-0" title="Toggle Sidebar">
                     <i class="bi bi-list text-[#FF0037] text-lg"></i>
                 </button>
-                <!-- Desktop sidebar collapse toggle -->
-                <button id="desktopSidebarToggle" class="hidden lg:flex items-center justify-center w-9 h-9 rounded-lg hover:bg-red-500 transition flex-shrink-0" title="Toggle Sidebar">
-                    <i class="bi bi-layout-sidebar text-white/80 text-lg"></i>
-                </button>
                 <div class="space-y-0 flex flex-col justify-center h-full">
                     <h2 class="text-lg font-bold text-white truncate leading-tight">{{ trim($__env->yieldContent('title', 'Dashboard')) }}</h2>
-                    <p class="text-xs text-white/70 line-clamp-1 leading-tight">{{ __('Department of Information Technology') }}</p>
+                    <p class="text-xs text-white/70 line-clamp-1 leading-tight">{{ __('Manmohan Memorial Polytechnic') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-3 flex-shrink-0 h-full">
-                <!-- Language switcher -->
-                <div class="hidden md:block">
-                    <label for="locale-select" class="sr-only">{{ __('Language') }}</label>
-                    <select id="locale-select" class="px-3 py-1.5 border border-gray-200 rounded-full text-sm text-gray-900 bg-white cursor-pointer focus:ring-2 focus:ring-[#FF0037] focus:border-transparent shadow-sm transition">
-                        @foreach (config('locales.supported') as $code => $label)
-                            <option value="{{ $code }}" {{ app()->getLocale() === $code ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
                 <!-- Dark Mode Toggle -->
-                <button id="darkModeToggle" class="p-2 border border-gray-200 bg-white text-gray-900 rounded-lg shadow-sm hover:bg-gray-100 transition" title="{{ __('Toggle Dark Mode') }}">
+                   <button id="darkModeToggle" class="hidden lg:inline-flex p-2 border border-gray-200 bg-white text-gray-900 rounded-lg shadow-sm hover:bg-gray-100 transition" title="{{ __('Toggle Dark Mode') }}">
                     <i class="bi bi-moon-fill text-gray-900 dark:text-yellow-400 text-sm" id="darkModeIcon"></i>
                 </button>
 
@@ -45,26 +31,26 @@
                         @endif
                     </button>
 
-                    <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-xl border border-red-200 py-0 z-50 overflow-hidden">
-                        <div class="px-4 py-3 border-b border-red-100 bg-red-50 flex items-center justify-between">
-                            <p class="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                                <i class="bi bi-bell text-red-700"></i> {{ __('Notifications') }}
+                    <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white dark:bg-[#191919] rounded-xl shadow-xl border border-red-200 dark:border-red-900/50 py-0 z-50 overflow-hidden">
+                        <div class="px-4 py-3 border-b border-gray-700 bg-[#191919] flex items-center justify-between">
+                            <p class="text-sm font-semibold text-white flex items-center gap-2">
+                                <i class="bi bi-bell text-red-400"></i> {{ __('Notifications') }}
                             </p>
                         </div>
-                        <div class="max-h-72 overflow-y-auto divide-y divide-gray-50">
+                        <div class="max-h-72 overflow-y-auto divide-y divide-gray-700/50 bg-[#191919]">
                             @forelse($__notifList as $n)
                                 @php
                                     $data = is_array($n->data) ? $n->data : (array) ($n->data ?? []);
                                     $title = $data['title'] ?? ($data['heading'] ?? __('Notification'));
                                     $message = $data['message'] ?? ($data['body'] ?? '');
                                 @endphp
-                                <div class="px-4 py-3 hover:bg-red-50 flex items-start gap-3 cursor-pointer transition {{ isset($n->read_at) && $n->read_at ? '' : 'bg-red-50/50' }}">
-                                    <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <i class="bi bi-bell text-red-600 text-xs"></i>
+                                <div class="px-4 py-3 hover:bg-gray-800 flex items-start gap-3 cursor-pointer transition bg-[#191919] {{ isset($n->read_at) && $n->read_at ? '' : 'bg-gray-900' }}">
+                                    <div class="w-8 h-8 rounded-full bg-red-900/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <i class="bi bi-bell text-red-400 text-xs"></i>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 truncate">{{ $title }}</p>
-                                        <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">{{ Str::limit($message, 100) }}</p>
+                                        <p class="text-sm font-medium text-white truncate">{{ $title }}</p>
+                                        <p class="text-xs text-gray-300 mt-0.5 line-clamp-2">{{ Str::limit($message, 100) }}</p>
                                         <p class="text-xs text-gray-400 mt-1">{{ $n->created_at->diffForHumans() }}</p>
                                     </div>
                                     @if(empty($n->read_at))
@@ -72,14 +58,14 @@
                                     @endif
                                 </div>
                             @empty
-                                <div class="p-8 text-center">
-                                    <i class="bi bi-bell-slash text-2xl text-gray-300 block mb-2"></i>
-                                    <p class="text-sm text-gray-500">{{ __('No notifications') }}</p>
+                                <div class="p-8 text-center bg-[#191919]">
+                                    <i class="bi bi-bell-slash text-2xl text-gray-600 block mb-2"></i>
+                                    <p class="text-sm text-gray-300">{{ __('No notifications') }}</p>
                                 </div>
                             @endforelse
                         </div>
-                        <div class="px-4 py-3 border-t border-red-100 bg-red-50 text-center">
-                            <a href="{{ route('teacher.notifications') }}" class="text-sm text-red-600 hover:text-red-700 font-medium">{{ __('View all notifications') }} →</a>
+                        <div class="px-4 py-3 border-t border-gray-700 bg-[#191919] text-center">
+                            <a href="{{ route('teacher.notifications') }}" class="text-sm text-red-400 hover:text-red-300 font-medium">{{ __('View all notifications') }} →</a>
                         </div>
                     </div>
                 </div>
@@ -89,11 +75,11 @@
                     <button id="profileToggle" class="flex items-center gap-2 p-1.5 border border-gray-200 bg-white text-gray-900 rounded-lg transition shadow-sm hover:bg-gray-50">
                         @php
                             $user = Auth::user();
-                            $photoPath = $user->profile_photo_path;
-                            $hasFile = !empty($photoPath) && \Illuminate\Support\Facades\Storage::disk('public')->exists($photoPath);
+                            $photoPath = $user->profile_photo_url;
+                            $hasFile = !empty($photoPath);
                         @endphp
                         @if($hasFile)
-                            <img src="{{ asset('storage/' . $photoPath) }}" alt="{{ $user->name }}" class="w-8 h-8 rounded-full object-cover border border-gray-300">
+                            <img src="{{ $photoPath }}" alt="{{ $user->name }}" class="w-8 h-8 rounded-full object-cover border border-gray-300">
                         @else
                             <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center border border-gray-300">
                                 <span class="text-sm font-medium text-red-700">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
@@ -126,7 +112,7 @@
     </div>
 </header>
 
-<script>
+<script data-mobile-static-script>
     // Profile dropdown toggle
     document.getElementById('profileToggle').addEventListener('click', function(e) {
         e.stopPropagation();
@@ -150,9 +136,5 @@
             document.getElementById('notifDropdown').classList.add('hidden');
         }
     });
-
-    // Language switcher
-    document.getElementById('locale-select').addEventListener('change', function() {
-        window.location.href = '{{ route("language.switch") }}?lang=' + this.value;
-    });
 </script>
+

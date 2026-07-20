@@ -2,6 +2,103 @@
 
 @section('title', $attendanceLabel ?? 'Attendance')
 
+@section('styles')
+<script>
+    document.documentElement.classList.add('attendance-ui-enhanced');
+</script>
+<style>
+    html.attendance-ui-enhanced:not(.dark) .attendance-page {
+        color: #0f172a;
+    }
+
+    html.attendance-ui-enhanced:not(.dark) .attendance-stats > * > div {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        border-color: #f2d7de;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 247, 248, 0.96));
+        box-shadow: 0 22px 46px -34px rgba(190, 24, 93, 0.42);
+    }
+
+    html.attendance-ui-enhanced:not(.dark) .attendance-filter-panel > *,
+    html.attendance-ui-enhanced:not(.dark) .attendance-table-panel {
+        border-radius: 28px;
+        border-color: rgba(241, 213, 219, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 250, 250, 0.97));
+        box-shadow: 0 26px 54px -38px rgba(148, 19, 52, 0.36);
+    }
+
+    html.attendance-ui-enhanced:not(.dark) .attendance-table-header {
+        background: linear-gradient(180deg, #fff6f7, #fffdfd);
+    }
+
+    html.attendance-ui-enhanced:not(.dark) .attendance-toolbar-btn {
+        border-radius: 999px;
+        font-weight: 700;
+        box-shadow: 0 16px 28px -20px rgba(15, 23, 42, 0.42);
+    }
+
+    html.attendance-ui-enhanced:not(.dark) .attendance-table thead {
+        background: linear-gradient(180deg, #fff5f7, #fffafb);
+    }
+
+    html.attendance-ui-enhanced:not(.dark) .attendance-row:hover {
+        background: linear-gradient(90deg, rgba(255, 241, 242, 0.72), rgba(255, 255, 255, 0.96));
+    }
+
+    html.attendance-ui-enhanced:not(.dark) .attendance-subject-chip,
+    html.attendance-ui-enhanced:not(.dark) .attendance-count-badge,
+    html.attendance-ui-enhanced:not(.dark) .attendance-action-btn {
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    html.attendance-ui-enhanced:not(.dark) .attendance-action-btn {
+        box-shadow: 0 14px 24px -18px rgba(15, 23, 42, 0.34);
+    }
+
+    html.attendance-ui-enhanced:not(.dark) #editStudentModal > div:last-child,
+    html.attendance-ui-enhanced:not(.dark) #markAttendanceModal > div:last-child,
+    html.attendance-ui-enhanced:not(.dark) #editSubjectModal > div:last-child,
+    html.attendance-ui-enhanced:not(.dark) #viewSubjectModal > div:last-child {
+        border-radius: 30px;
+        border: 1px solid rgba(241, 213, 219, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 250, 250, 0.98));
+        box-shadow: 0 34px 70px -38px rgba(15, 23, 42, 0.45);
+        overflow: hidden;
+    }
+
+    html.attendance-ui-enhanced:not(.dark) #editStudentModal > div:last-child > div:first-child,
+    html.attendance-ui-enhanced:not(.dark) #markAttendanceModal > div:last-child > div:first-child,
+    html.attendance-ui-enhanced:not(.dark) #editSubjectModal > div:last-child > div:first-child,
+    html.attendance-ui-enhanced:not(.dark) #viewSubjectModal > div:last-child > div:first-child {
+        border-bottom: none;
+    }
+
+    html.attendance-ui-enhanced:not(.dark) #editStudentModal textarea,
+    html.attendance-ui-enhanced:not(.dark) #markAttendanceModal input,
+    html.attendance-ui-enhanced:not(.dark) #markAttendanceModal select,
+    html.attendance-ui-enhanced:not(.dark) #editSubjectModal table,
+    html.attendance-ui-enhanced:not(.dark) #viewSubjectModal table {
+        border-radius: 16px;
+    }
+
+    html.attendance-ui-enhanced:not(.dark) #markAttendanceModal input,
+    html.attendance-ui-enhanced:not(.dark) #markAttendanceModal select,
+    html.attendance-ui-enhanced:not(.dark) #editStudentModal textarea {
+        border-color: #e5d4d9;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    html.attendance-ui-enhanced:not(.dark) #markAttendanceModal input:focus,
+    html.attendance-ui-enhanced:not(.dark) #markAttendanceModal select:focus,
+    html.attendance-ui-enhanced:not(.dark) #editStudentModal textarea:focus {
+        border-color: #f43f5e;
+        box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.12);
+    }
+</style>
+@endsection
+
 @section('content')
     @php
         $attendanceType = $attendanceType ?? 'class';
@@ -9,7 +106,7 @@
         $attendanceBaseRoute = $attendanceType === 'lab' ? route('admin.attendance.lab') : route('admin.attendance');
         $attendanceQuery = array_merge(request()->query(), ['attendance_type' => $attendanceType]);
     @endphp
-    <div class="space-y-4">
+    <div class="attendance-page space-y-6">
         
         <!-- Global Loader Overlay -->
         <div id="globalLoader" class="fixed inset-0 z-[9999] bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center">
@@ -34,6 +131,7 @@
         ])
 
         <!-- Stats Cards -->
+        <div class="attendance-stats">
         @include('admin.components.admin-stats-cards', [
             'cards' => [
                 ['title' => 'Total Records', 'value' => $stats['total'], 'icon' => 'bi-list-check', 'color' => 'red'],
@@ -42,19 +140,22 @@
                 ['title' => 'Leave', 'value' => $stats['leave'], 'icon' => 'bi-calendar-event', 'color' => 'purple'],
             ]
         ])
+        </div>
 
         {{-- Filter Card - Using standardized component --}}
-@include('admin.components.admin-filter-card', [
-    'formAction' => $attendanceBaseRoute,
-    'filters' => [
-        ['name' => 'date', 'type' => 'date', 'value' => $date ?? '', 'label' => 'Date (AD)'],
-        ['name' => 'date_bs', 'type' => 'text', 'value' => $date_bs ?? '', 'placeholder' => 'YYYY-MM-DD', 'label' => 'Date (BS)', 'class' => 'bs-date', 'icon' => 'bi-calendar3', 'autocomplete' => 'off'],
-        ['name' => 'semester', 'type' => 'select', 'options' => array_merge(['' => 'All Semesters'], array_combine($semesters, $semesters)), 'value' => request('semester'), 'label' => 'Semester'],
-        ['name' => 'course', 'type' => 'select', 'options' => array_merge(['' => 'All Courses'], $courses->mapWithKeys(function($c) { return [$c->id => $c->subject_code . ' - ' . $c->subject_name]; })->toArray()), 'value' => $course, 'label' => 'Course']
-    ],
-    'showReset' => true,
-    'resetRoute' => $attendanceBaseRoute
-])
+        <div class="attendance-filter-panel">
+        @include('admin.components.admin-filter-card', [
+            'formAction' => $attendanceBaseRoute,
+            'filters' => [
+                ['name' => 'date', 'type' => 'date', 'value' => $date ?? '', 'label' => 'Date (AD)'],
+                ['name' => 'date_bs', 'type' => 'text', 'value' => $date_bs ?? '', 'placeholder' => 'YYYY-MM-DD', 'label' => 'Date (BS)', 'class' => 'bs-date', 'icon' => 'bi-calendar3', 'autocomplete' => 'off'],
+                ['name' => 'semester', 'type' => 'select', 'options' => array_merge(['' => 'All Semesters'], array_combine($semesters, $semesters)), 'value' => request('semester'), 'label' => 'Semester'],
+                ['name' => 'course', 'type' => 'select', 'options' => array_merge(['' => 'All Courses'], $courses->mapWithKeys(function($c) { return [$c->id => $c->subject_code . ' - ' . $c->subject_name]; })->toArray()), 'value' => $course, 'label' => 'Course']
+            ],
+            'showReset' => true,
+            'resetRoute' => $attendanceBaseRoute
+        ])
+        </div>
 
         <!-- Attendance by Subject - Grouped View -->
         @php
@@ -66,19 +167,19 @@
                         ? count($subjectAttendance)
                         : 0);
         @endphp
-        <div class="bg-white rounded shadow-sm border border-gray-200">
-            <div class="p-3 border-b border-gray-200 flex items-center justify-between">
+        <div class="attendance-table-panel bg-white rounded shadow-sm border border-gray-200">
+            <div class="attendance-table-header p-3 border-b border-gray-200 flex items-center justify-between">
                 <h3 class="text-sm font-semibold text-gray-900">
                     <i class="bi bi-collection mr-1"></i> {{ $attendanceLabel }} by Subject
                 </h3>
                 <div class="flex gap-2 mb-4">
                     <a href="{{ route('admin.attendance.export', $attendanceQuery) }}"
-                        class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700">
+                        class="attendance-toolbar-btn px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700">
                         <i class="bi bi-download mr-1"></i> Export CSV
                     </a>
                     <a href="{{ route('admin.attendance.print-list', $attendanceQuery) }}"
                         onclick="adminOpenPrintPreview('{{ route('admin.attendance.print-list', $attendanceQuery) }}', { title: 'Print Attendance' }); return false;"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
+                        class="attendance-toolbar-btn px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
                         <i class="bi bi-printer mr-1"></i> Print
                     </a>
                 </div>
@@ -87,7 +188,7 @@
 
             <div class="overflow-x-auto">
                 @if ($subjectAttendance->count() > 0)
-                    <table class="min-w-full text-xs">
+                    <table class="attendance-table min-w-full text-xs">
                         <thead class="bg-gray-50 dark:bg-slate-700">
                             <tr>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200 text-sm">Subject</th>
@@ -101,17 +202,17 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
                             @foreach ($subjectAttendance as $item)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition border-b border-gray-100 dark:border-slate-700">
+                                <tr class="attendance-row hover:bg-gray-50 dark:hover:bg-slate-700/50 transition border-b border-gray-100 dark:border-slate-700">
                                     <td class="px-4 py-4 text-sm dark:text-gray-200">
                                         @if ($item['subject_name'] && $item['subject_name'] !== 'General')
                                             <span
-                                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                                                class="attendance-subject-chip inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
                                                 <i class="bi bi-book mr-1"></i>
                                                 {{ $item['subject_code'] ?? '' }} {{ $item['subject_name'] }}
                                             </span>
                                         @else
                                             <span
-                                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
+                                                class="attendance-subject-chip inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
                                                 <i class="bi bi-people mr-1"></i>General
                                             </span>
                                         @endif
@@ -126,33 +227,33 @@
                                         {{ $item['total'] }}</td>
                                     <td class="px-4 py-4 text-center text-sm">
                                         <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">{{ $item['present'] }}</span>
+                                            class="attendance-count-badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">{{ $item['present'] }}</span>
                                     </td>
                                     <td class="px-4 py-4 text-center text-sm">
                                         <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">{{ $item['absent'] }}</span>
+                                            class="attendance-count-badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">{{ $item['absent'] }}</span>
                                     </td>
                                     <td class="px-4 py-4 text-center text-sm">
                                         <span
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">{{ $item['leave'] }}</span>
+                                            class="attendance-count-badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">{{ $item['leave'] }}</span>
                                     </td>
                                     <td class="px-4 py-4 text-center text-sm dark:text-gray-300">
                                         <div class="flex items-center justify-center gap-1">
                                             <button
                                                 onclick="viewSubjectAttendance('{{ $item['date'] ?? '' }}', '{{ $item['subject_id'] ?? '' }}', '{{ $item['subject_name'] ?? 'General' }}')"
-                                                class="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 rounded transition"
+                                                class="attendance-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 rounded transition"
                                                 title="View">
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                             <button
                                                 onclick="openEditSubjectAttendance('{{ $item['date'] ?? '' }}', '{{ $item['date_bs'] ?? '' }}', '{{ $item['subject_id'] ?? '' }}', '{{ $item['subject_name'] ?? 'General' }}')"
-                                                class="inline-flex items-center gap-1 px-2 py-1 text-xs text-yellow-700 bg-yellow-100 hover:bg-yellow-200 rounded transition"
+                                                class="attendance-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-yellow-700 bg-yellow-100 hover:bg-yellow-200 rounded transition"
                                                 title="Edit">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <button
                                                 onclick="deleteSubjectAttendance('{{ $item['date'] ?? '' }}', '{{ $item['subject_id'] ?? '' }}', '{{ $item['subject_name'] ?? 'General' }}')"
-                                                class="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-red-100 hover:bg-red-200 rounded transition"
+                                                class="attendance-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-red-100 hover:bg-red-200 rounded transition"
                                                 title="Delete">
                                                 <i class="bi bi-trash"></i>
                                             </button>
@@ -1896,3 +1997,4 @@
             });
         </script>
     @endsection
+

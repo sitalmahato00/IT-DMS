@@ -27,19 +27,22 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        // Total students count (active, non-alumni)
+        // FIX #9: Combine multiple user role counts into single query
+        $userCounts = DB::table('users')
+            ->selectRaw('
+                SUM(CASE WHEN role = "student" THEN 1 ELSE 0 END) as total_students_all,
+                SUM(CASE WHEN role = "teacher" THEN 1 ELSE 0 END) as teachers,
+                SUM(CASE WHEN role = "parent" THEN 1 ELSE 0 END) as parents
+            ')
+            ->first();
+        
+        // Count active students (with whereHas condition) - must be separate query due to complex join
         $totalStudents = User::where('role', 'student')
             ->whereHas('student', function($q) {
                 $q->where('status', 'active')
                   ->where('is_alumni', 0);
             })
             ->count();
-
-        // Teachers count
-        $teachers = User::where('role', 'teacher')->count();
-
-        // Parents count
-        $parents = User::where('role', 'parent')->count();
         
         // Alumni count (students marked as alumni)
         $alumni = User::where('role', 'student')
@@ -47,14 +50,23 @@ class DashboardController extends Controller
                 $q->where('is_alumni', 1);
             })
             ->count();
-        
-        // Active semesters count
-        $activeSemesters = Semester::where('is_active', 1)->count();
+
+        // Teachers count (from combined query)
+        $teachers = $userCounts->teachers ?? 0;
+
+        // Parents count (from combined query)
+        $parents = $userCounts->parents ?? 0;
         
         // Elective students count (students with approved elective enrollments)
         $electiveStudents = ElectiveEnrollment::where('status', 'approved')->distinct('student_id')->count('student_id');
         
-        // Courses count
+        // FIX #10: Combine semester and courses counts
+        $counts = DB::table('semesters')
+            ->selectRaw('COUNT(*) as active_semesters')
+            ->where('is_active', 1)
+            ->first();
+        $activeSemesters = $counts->active_semesters ?? 0;
+        
         $courses = Course::count();
 
         // Calculate average attendance this semester
@@ -183,6 +195,19 @@ class DashboardController extends Controller
         // Get the authenticated user
         $user = auth()->user();
 
+        $dashboardOverview = [
+            'total_users' => $totalStudents + $teachers + $parents + $alumni,
+            'student_teacher_ratio' => $teachers > 0 ? round($totalStudents / $teachers, 1) : null,
+            'upcoming_exam_count' => $upcomingExams->count(),
+            'today_class_count' => $todayClasses->count(),
+            'low_attendance_classes' => $todayClasses->where('attendance_rate', '<', 75)->count(),
+            'healthy_attendance_classes' => $todayClasses->where('attendance_rate', '>=', 75)->count(),
+            'unread_notifications' => $user ? $user->unreadNotifications()->count() : 0,
+            'pending_elective_approvals' => ElectiveEnrollment::where('status', 'pending')->count(),
+            'today_notice_count' => Notice::whereDate('created_at', Carbon::now('Asia/Kathmandu')->toDateString())->count(),
+            'recent_activity_count' => $recentActivities->count(),
+        ];
+
         return view('admin.dashboard', compact(
             'user',
             'totalStudents',
@@ -201,7 +226,8 @@ class DashboardController extends Controller
             'newStudents',
             'recentAttendance',
             'upcomingExams',
-            'todayClasses'
+            'todayClasses',
+            'dashboardOverview'
         ));
     }
 
@@ -363,18 +389,22 @@ class DashboardController extends Controller
     private function getRecentAttendance($perPage = 5)
     {
         // Only show attendance for the exact current date (both AD and BS)
-        $todayAd = Carbon::now()->format('Y-m-d');
+        $todayAd = Carbon::now('Asia/Kathmandu')->toDateString();
         $todayBs = NepaliContentHelper::convertAdToBs($todayAd);
 
         // Get distinct attendance records by subject for today - one record per subject
-        $attendanceQuery = Attendance::with(['user', 'subject.teacherAssignments.teacher.user'])
-            ->where('date', $todayAd)
-            ->where('date_bs', $todayBs)
-            ->select('subject_id', 'date', 'date_bs')
-            ->selectRaw('COUNT(CASE WHEN status = "present" THEN 1 END) as present_count')
-            ->selectRaw('COUNT(*) as total_count')
-            ->groupBy('subject_id', 'date', 'date_bs')
-            ->orderBy('created_at', 'desc');
+
+            $attendanceQuery = Attendance::with(['user', 'subject.teacherAssignments.teacher.user'])
+                ->where(function ($query) use ($todayAd, $todayBs) {
+                    $query->whereDate('date', $todayAd)
+                        ->orWhere('date_bs', $todayBs);
+                })
+                ->select('subject_id', 'date', 'date_bs')
+                ->selectRaw('COUNT(CASE WHEN status = "present" THEN 1 END) as present_count')
+                ->selectRaw('COUNT(*) as total_count')
+                ->groupBy('subject_id', 'date', 'date_bs')
+                ->orderByRaw('MAX(created_at) DESC');
+
         if (Schema::hasColumn('attendance', 'attendance_type')) {
             $attendanceQuery->where(function ($q) {
                 $q->where('attendance_type', 'class')
@@ -384,7 +414,8 @@ class DashboardController extends Controller
 
         $attendanceRecords = $attendanceQuery->paginate($perPage)->withQueryString();
 
-        $attendanceRecords->getCollection()->transform(function ($att) use ($todayBs) {
+
+        $attendanceRecords->getCollection()->transform(function ($att) use ($todayAd, $todayBs) {
             // Get teacher name from loaded relationships
             $teacherName = 'Not Assigned';
             if ($att->subject && $att->subject->teacherAssignments->isNotEmpty()) {
@@ -395,8 +426,9 @@ class DashboardController extends Controller
             }
             
             return [
-                'date_ad' => $att->date?->format('Y-m-d') ?? Carbon::now()->format('Y-m-d'),
+                'date_ad' => $att->date?->format('Y-m-d') ?? $todayAd,
                 'date_bs' => $att->date_bs ?? $todayBs,
+
                 'course_name' => $att->subject?->subject_name ?? $att->subject?->name ?? 'General',
                 'teacher_name' => $teacherName,
                 'semester' => $att->subject?->semester ?? 'N/A',
@@ -593,21 +625,29 @@ class DashboardController extends Controller
     /**
      * Get today's classes for admin dashboard
      */
+
     private function getTodayClasses()
     {
-        $today = Carbon::now()->format('Y-m-d');
-        
+        // Define today variables FIRST to avoid scope issues
+        $today = Carbon::now('Asia/Kathmandu')->toDateString();
+        $todayBs = NepaliContentHelper::convertAdToBs($today);
+         
         // Get all subjects that have attendance marked today
-        $todayAttendanceQuery = Attendance::whereDate('date', $today);
+        $todayAttendanceQuery = Attendance::where(function ($query) use ($today, $todayBs) {
+            $query->whereDate('date', $today)
+                ->orWhere('date_bs', $todayBs);
+        });
         if (Schema::hasColumn('attendance', 'attendance_type')) {
             $todayAttendanceQuery->where(function ($q) {
                 $q->where('attendance_type', 'class')
                   ->orWhereNull('attendance_type');
             });
         }
+
+
         $todayAttendance = $todayAttendanceQuery->get()
             ->groupBy('subject_id')
-            ->map(function ($records, $subjectId) {
+            ->map(function ($records, $subjectId) use ($today, $todayBs) {
                 $subject = Subject::find($subjectId);
                 
                 $totalStudents = DB::table('subject_students')
@@ -638,10 +678,15 @@ class DashboardController extends Controller
                     'present_count' => $presentCount,
                     'absent_count' => $absentCount,
                     'attendance_rate' => $totalStudents > 0 ? round(($presentCount / $totalStudents) * 100, 1) : 0,
+                    'date' => $today,
+                    'date_bs' => $todayBs,
+                    'date_label' => Carbon::parse($today)->format('M d, Y'),
                 ];
             })
             ->values();
 
+
         return $todayAttendance;
     }
 }
+

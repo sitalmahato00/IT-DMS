@@ -4,12 +4,18 @@
     $isTimetable = request()->routeIs('student.timetable*');
     $isAttendance = request()->routeIs('student.attendance*');
     $isMarks = request()->routeIs('student.marks*');
+    $isMarksheet = request()->routeIs('student.marksheet*');
+    $isExams = request()->routeIs('student.exams*');
+    $isResources = request()->routeIs('student.study-materials*');
+    $isNotices = request()->routeIs('student.notices*');
     $isProfile = request()->routeIs('student.profile*');
 
     $activeGroup = match (true) {
         $isCourses => 'academics',
         $isAttendance => 'attendance',
-        $isMarks => 'exam',
+        $isMarks || $isMarksheet => 'exam',
+        $isResources => 'resources',
+        $isNotices => 'announcement',
         $isProfile => 'system',
         default => null,
     };
@@ -23,18 +29,19 @@
             this.activeGroup = this.activeGroup === group ? null : group;
         }
     }"
-    class="hidden lg:flex lg:w-60 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex-col fixed lg:static w-64 left-0 top-0 z-30 overflow-y-auto transition-all duration-300 shadow-xl border-r border-red-500/40"
+    data-mobile-sidebar
+    class="hidden lg:flex lg:w-60 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex-col fixed lg:static w-64 left-0 top-0 z-30 overflow-y-auto shadow-xl border-r border-red-500/40"
 >
     <div class="hidden lg:flex flex-col items-center justify-center px-4 py-2 min-h-[88px] bg-[#FF0037] text-white border-b border-red-500">
-        @if($department && $department->logo_path)
-            <img src="{{ $departmentLogoUrl }}" alt="{{ $department->name ?? 'Department Logo' }}" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg">
+        @if($department && $department->logo_url)
+            <img src="{{ $departmentLogoUrl }}" alt="{{ $department->name ?? 'College Logo' }}" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg">
         @else
-            <img src="{{ asset('images/default-logo.svg') }}" alt="Default Logo" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg">
+            <img src="/images/default-logo.svg" alt="Default Logo" class="h-16 w-16 sm:h-20 sm:w-20 object-contain rounded-full shadow-lg">
         @endif
 
         <div class="sidebar-brand-text mt-3 text-center">
             <h1 class="font-semibold text-xl sm:text-2xl leading-7 text-white block tracking-tight">
-                {{ $department?->short_name ?? ($department?->name ?? __('IT-DMS')) }}
+                {{ $department?->short_name ?? ($department?->name ?? __('Manmohan Memorial Polytechnic')) }}
             </h1>
             <p class="text-sm sm:text-[13px] leading-5 text-white/80">{{ __('Student Portal') }}</p>
         </div>
@@ -90,13 +97,12 @@
                 <i :class="activeGroup === 'resources' ? 'bi-chevron-down' : 'bi-chevron-right'" class="bi text-base"></i>
             </button>
             <div class="collapsible-section space-y-0.5 overflow-hidden transition-all duration-300" x-show="activeGroup === 'resources'" x-transition.opacity>
-                <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/60">
+                <a href="{{ route('student.study-materials') }}" class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-150 {{ $isResources ? 'bg-red-600 text-white' : 'text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 hover:text-[#FF0037] hover:bg-red-500/10' }}">
                     <span class="sidebar-label flex items-center gap-2">
                         <i class="bi bi-journal-richtext text-base flex-shrink-0"></i>
                         <span>{{ __('Study Materials') }}</span>
                     </span>
-                    <span class="sidebar-label inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ __('Soon') }}</span>
-                </div>
+                </a>
             </div>
 
             <button type="button" @click="toggleGroup('announcement')" :class="activeGroup === 'announcement' ? 'text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900 shadow-sm' : 'text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900'" class="w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-150">
@@ -107,13 +113,12 @@
                 <i :class="activeGroup === 'announcement' ? 'bi-chevron-down' : 'bi-chevron-right'" class="bi text-base"></i>
             </button>
             <div class="collapsible-section space-y-0.5 overflow-hidden transition-all duration-300" x-show="activeGroup === 'announcement'" x-transition.opacity>
-                <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800/60">
+                <a href="{{ route('student.notices') }}" class="flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-150 {{ $isNotices ? 'bg-red-600 text-white' : 'text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 hover:text-[#FF0037] hover:bg-red-500/10' }}">
                     <span class="sidebar-label flex items-center gap-2">
                         <i class="bi bi-bell text-base flex-shrink-0"></i>
                         <span>{{ __('Notices') }}</span>
                     </span>
-                    <span class="sidebar-label inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">{{ __('Soon') }}</span>
-                </div>
+                </a>
             </div>
 
             <button type="button" @click="toggleGroup('exam')" :class="activeGroup === 'exam' ? 'text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900 shadow-sm' : 'text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900'" class="w-full flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-150">
@@ -127,6 +132,10 @@
                 <a href="{{ route('student.marks') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isMarks ? 'bg-red-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:text-[#FF0037] hover:bg-red-500/10' }}">
                     <i class="bi bi-clipboard-data text-base flex-shrink-0"></i>
                     <span class="sidebar-label">{{ __('Marks / Results') }}</span>
+                </a>
+                <a href="{{ route('student.exams') }}" class="nav-link flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 {{ $isExams ? 'bg-red-600 text-white' : 'text-slate-600 dark:text-slate-300 hover:text-[#FF0037] hover:bg-red-500/10' }}">
+                    <i class="bi bi-journal-text text-base flex-shrink-0"></i>
+                    <span class="sidebar-label">{{ __('Published Exams') }}</span>
                 </a>
             </div>
 
@@ -158,63 +167,13 @@
 </aside>
 
 <style>
-    #sidebar.sidebar-collapsed {
-        width: 5rem !important;
-        min-width: 5rem !important;
-    }
-
-    #sidebar.sidebar-collapsed .sidebar-label,
-    #sidebar.sidebar-collapsed .sidebar-brand-text,
-    #sidebar.sidebar-collapsed .sidebar-section-label span {
-        display: none !important;
-    }
-
-    #sidebar.sidebar-collapsed .nav-link,
-    #sidebar.sidebar-collapsed .collapsible-section > div {
-        position: relative;
-        padding: 0.35rem 0.5rem;
-        border-radius: 999px;
-        gap: 0 !important;
-        width: 100%;
-        justify-content: center;
-    }
-
-    #sidebar.sidebar-collapsed .nav-link i,
-    #sidebar.sidebar-collapsed .collapsible-section > div i {
-        display: flex !important;
-        margin: 0 auto;
-        color: #FF0037 !important;
-        font-size: 1.4rem;
-        width: 2.25rem;
-        height: 2.25rem;
-        align-items: center;
-        justify-content: center;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-
-    #sidebar.sidebar-collapsed .collapsible-section {
-        max-height: none;
-        opacity: 1;
-        padding-top: 0;
-    }
-
-    #sidebar.sidebar-collapsed .bi {
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-
-    #sidebar.sidebar-collapsed .nav-link.bg-red-600,
-    #sidebar.sidebar-collapsed .nav-link.text-white {
-        background-color: transparent !important;
-        color: #FF0037 !important;
-    }
-
     @media (min-width: 1024px) {
         #sidebar {
             position: static;
             height: 100vh;
             max-height: 100vh;
+            transform: none !important;
         }
     }
 </style>
+

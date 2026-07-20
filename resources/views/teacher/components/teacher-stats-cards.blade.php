@@ -20,7 +20,7 @@
 @endphp
 
 @if(!empty($cards))
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div class="teacher-stats-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     @foreach($cards as $index => $card)
         @php
             $color = $card['color'] ?? 'red';
@@ -49,7 +49,7 @@
             };
         @endphp
         
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-5 hover:shadow-md transition-shadow duration-200">
+        <div class="teacher-stat-card bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-5 hover:shadow-md transition-shadow duration-200">
             <div class="flex items-start justify-between">
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-semibold uppercase tracking-wider {{ $colorClasses }} mb-1">
@@ -93,3 +93,4 @@
     @endforeach
 </div>
 @endif
+

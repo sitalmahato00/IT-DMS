@@ -10,7 +10,7 @@
     $timeRowsCollection = collect($timeRows ?? []);
     $logoUrl = !empty($college) && method_exists($college, 'getLogoUrl')
         ? $college->getLogoUrl()
-        : asset('images/default-logo.svg');
+        : '/images/default-logo.svg';
     $summaryItems = collect($summaryItems ?? [])
         ->filter(fn ($item) => filled(data_get($item, 'label')))
         ->values();
@@ -19,11 +19,23 @@
         ->values();
     $sheetTitle = $sheetTitle ?? __('Class Routine');
     $sheetHeading = $sheetHeading ?? __('Routine Schedule');
-    $institutionName = $institutionName ?? strtoupper($college?->name ?? 'IT-DMS');
+    $institutionName = $institutionName ?? strtoupper($college?->name ?? 'Manmohan Memorial Polytechnic');
     $departmentLine = $departmentLine ?? strtoupper($college?->short_name ?? __('Department'));
     $footerLeft = $footerLeft ?? null;
     $footerRight = $footerRight ?? now()->format('Y-m-d H:i');
     $summaryColumns = max($summaryItems->count(), 1);
+    $showSlotSection = $showSlotSection ?? false;
+    $fallbackTeacherName = $fallbackTeacherName ?? null;
+    $highlightSubjectIds = collect($highlightSubjectIds ?? [])
+        ->map(fn ($id) => (int) $id)
+        ->filter()
+        ->unique()
+        ->values()
+        ->all();
+    $highlightTeacherId = (int) ($highlightTeacherId ?? 0);
+    $teacherFallbackMap = collect($teacherFallbackMap ?? [])
+        ->mapWithKeys(fn ($name, $id) => [(int) $id => $name])
+        ->all();
 @endphp
 
 <section class="routine-paper {{ $paperClass ?? '' }}">
@@ -77,6 +89,12 @@
                             @php
                                 $slots = collect(data_get($slotMatrix ?? [], $day . '.' . $timeRow['key'], []));
                                 $isGapOverride = (bool) data_get($gapOverrideMatrix ?? [], $day . '.' . $timeRow['key'], false);
+                                $rowSections = $slots->pluck('section')
+                                    ->map(fn ($value) => trim((string) $value))
+                                    ->filter()
+                                    ->unique()
+                                    ->values();
+                                $showRowSections = $showSlotSection || $rowSections->count() > 1;
                             @endphp
                             <tr class="{{ $timeRow['is_break'] && !$isGapOverride ? 'is-break' : '' }}">
                                 @if($rowIndex === 0)
@@ -106,7 +124,12 @@
                                 @else
                                     <td class="routine-table__subject-cell">
                                         @foreach($slots as $slot)
-                                            <div class="routine-slot routine-slot--{{ strtolower($slot->slot_type ?? 'theory') }}">
+                                            @php
+                                                $subjectId = (int) ($slot->subject_id ?? $slot->subject?->id ?? 0);
+                                                $isHighlightedSubject = ((int) ($slot->teacher_id ?? 0) === $highlightTeacherId)
+                                                    || (empty($slot->teacher_id) && in_array($subjectId, $highlightSubjectIds, true));
+                                            @endphp
+                                            <div class="routine-slot routine-slot--{{ strtolower($slot->slot_type ?? 'theory') }} {{ $isHighlightedSubject ? 'routine-slot--teacher-focus' : '' }}">
                                                 <div class="routine-slot__title">
                                                     {{ $slot->subject->subject_name ?? __('Class') }}
                                                 </div>
@@ -115,6 +138,12 @@
                                                         <span>{{ $slot->subject->subject_code }}</span>
                                                     @endif
                                                     <span>{{ ucfirst($slot->slot_type ?? __('Class')) }}</span>
+                                                    @if($isHighlightedSubject)
+                                                        <span>{{ __('My Subject') }}</span>
+                                                    @endif
+                                                    @if($showRowSections && filled($slot->section))
+                                                        <span>{{ __('Section') }} {{ $slot->section }}</span>
+                                                    @endif
                                                     @if($slot->lab_group)
                                                         <span>{{ __('Lab') }} {{ $slot->lab_group }}</span>
                                                     @endif
@@ -127,15 +156,49 @@
                                     </td>
                                     <td class="routine-table__stack-cell">
                                         @foreach($slots as $slot)
-                                            <div class="routine-stack-item">
-                                                {{ $slot->teacher->user->name ?? __('TBA') }}
+                                            @php
+                                                $subjectId = (int) ($slot->subject_id ?? $slot->subject?->id ?? 0);
+                                                $isHighlightedSubject = ((int) ($slot->teacher_id ?? 0) === $highlightTeacherId)
+                                                    || (empty($slot->teacher_id) && in_array($subjectId, $highlightSubjectIds, true));
+                                            @endphp
+                                            <div class="routine-stack-item {{ $isHighlightedSubject ? 'routine-stack-item--teacher-focus' : '' }}">
+                                                <div class="routine-stack-item__name">
+                                                    {{ $slot->teacher->user->name ?? ($teacherFallbackMap[$subjectId] ?? $fallbackTeacherName ?? __('TBA')) }}
+                                                </div>
+                                                @if(($showRowSections && filled($slot->section)) || filled($slot->lab_group))
+                                                    <div class="routine-stack-item__meta">
+                                                        @if($showRowSections && filled($slot->section))
+                                                            <span>{{ __('Section') }} {{ $slot->section }}</span>
+                                                        @endif
+                                                        @if(filled($slot->lab_group))
+                                                            <span>{{ __('Lab') }} {{ $slot->lab_group }}</span>
+                                                        @endif
+                                                    </div>
+                                                @endif
                                             </div>
                                         @endforeach
                                     </td>
                                     <td class="routine-table__stack-cell">
                                         @foreach($slots as $slot)
-                                            <div class="routine-stack-item">
-                                                {{ $slot->room ?: __('Not Assigned') }}
+                                            @php
+                                                $subjectId = (int) ($slot->subject_id ?? $slot->subject?->id ?? 0);
+                                                $isHighlightedSubject = ((int) ($slot->teacher_id ?? 0) === $highlightTeacherId)
+                                                    || (empty($slot->teacher_id) && in_array($subjectId, $highlightSubjectIds, true));
+                                            @endphp
+                                            <div class="routine-stack-item {{ $isHighlightedSubject ? 'routine-stack-item--teacher-focus' : '' }}">
+                                                <div class="routine-stack-item__name">
+                                                    {{ $slot->room ?: __('Not Assigned') }}
+                                                </div>
+                                                @if(($showRowSections && filled($slot->section)) || filled($slot->lab_group))
+                                                    <div class="routine-stack-item__meta">
+                                                        @if($showRowSections && filled($slot->section))
+                                                            <span>{{ __('Section') }} {{ $slot->section }}</span>
+                                                        @endif
+                                                        @if(filled($slot->lab_group))
+                                                            <span>{{ __('Lab') }} {{ $slot->lab_group }}</span>
+                                                        @endif
+                                                    </div>
+                                                @endif
                                             </div>
                                         @endforeach
                                     </td>
@@ -159,3 +222,4 @@
         </div>
     </footer>
 </section>
+

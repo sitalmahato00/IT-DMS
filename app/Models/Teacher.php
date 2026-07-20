@@ -6,6 +6,8 @@ use App\Models\Subject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use App\Support\Media;
 
 class Teacher extends Model
 {
@@ -15,12 +17,53 @@ class Teacher extends Model
         'teacher_code',
         'qualification',
         'phone',
+        'alternate_email',
+        'secondary_phone',
+        'national_id_number',
+        'date_of_birth',
+        'joining_date',
+        'years_of_experience',
+        'specialization',
+        'employment_type',
+        'previous_institution',
+        'certifications',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'emergency_relationship',
         'address',
+        'staff_room_location',
+        'employee_type',
+        'work_shift',
+        'timetable_assignment',
+        'salary',
+        'bank_name',
+        'bank_account_number',
+        'tax_identification_number',
+        'blood_group',
+        'medical_conditions',
+        'emergency_notes',
+        'resume_path',
+        'certificate_paths',
+        'id_proof_path',
+        'access_level',
+        'profile_visibility',
+        'social_links',
+        'notes',
         'profile_photo_path',
         'department',
         'bio',
         'status',
         'gender',
+    ];
+
+    protected $casts = [
+        'date_of_birth' => 'date',
+        'joining_date' => 'date',
+        'years_of_experience' => 'integer',
+        'salary' => 'decimal:2',
+        'certifications' => 'array',
+        'certificate_paths' => 'array',
+        'social_links' => 'array',
     ];
 
     /**
@@ -91,4 +134,44 @@ class Teacher extends Model
             ->sort()
             ->values();
     }
+
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        if (!empty($this->profile_photo_path) && Storage::disk('public')->exists($this->profile_photo_path)) {
+            return Storage::url($this->profile_photo_path);
+        }
+        return asset('images/default-logo.svg');
+    }
+
+    public function getResumeUrlAttribute(): ?string
+    {
+        if (!empty($this->resume_path) && Storage::disk('public')->exists($this->resume_path)) {
+            return Storage::url($this->resume_path);
+        }
+        return null;
+    }
+
+    public function getIdProofUrlAttribute(): ?string
+    {
+        if (!empty($this->id_proof_path) && Storage::disk('public')->exists($this->id_proof_path)) {
+            return Storage::url($this->id_proof_path);
+        }
+        return null;
+    }
+
+    public function getCertificateUrlsAttribute(): array
+    {
+        return collect($this->certificate_paths ?? [])
+            ->filter()
+            ->map(function ($path) {
+                if (Storage::disk('public')->exists($path)) {
+                    return Storage::url($path);
+                }
+                return null;
+            })
+            ->filter()
+            ->values()
+            ->all();
+    }
 }
+

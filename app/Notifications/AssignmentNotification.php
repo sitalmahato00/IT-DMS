@@ -2,10 +2,13 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\UsesNotificationEmailSettings;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class AssignmentNotification extends Notification
 {
+    use UsesNotificationEmailSettings;
 
     protected $assignment;
     protected $action;
@@ -18,7 +21,20 @@ class AssignmentNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->notificationEmailEnabled('notification_email_assignment')
+            ? ['database', 'mail']
+            : ['database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $data = $this->toArray($notifiable);
+
+        return (new MailMessage)
+            ->subject('Notice / Assignment Update')
+            ->greeting(ucfirst(str_replace('_', ' ', $this->action)))
+            ->line($data['message'])
+            ->action('Open Details', url($data['url'] ?? '/'));
     }
 
     public function toArray(object $notifiable): array
@@ -55,3 +71,4 @@ class AssignmentNotification extends Notification
         return \Carbon\Carbon::parse($date)->format('M d, Y');
     }
 }
+

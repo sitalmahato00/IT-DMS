@@ -8,7 +8,7 @@
         ? (($locale === 'ne' && !empty($department->name_nepali)) ? $department->name_nepali : $department->name)
         : ($locale === 'ne' ? 'सूचना प्रविधि विभाग' : 'Information Technology');
     $departmentShort = $department?->short_name ?: ($locale === 'ne' ? 'आईटी' : 'IT');
-    $departmentLogoUrl = $department?->getLogoUrl() ?? asset('images/default-logo.svg');
+    $departmentLogoUrl = $department?->getLogoUrl() ?? '/images/default-logo.svg';
     $addressText = $department
         ? (($locale === 'ne' && !empty($department->address_nepali)) ? $department->address_nepali : $department->address)
         : null;
@@ -96,7 +96,7 @@
                             </div>
                             <div class="auth-panel-copy">
                                 <h2 class="auth-panel-title">{{ $departmentName }}</h2>
-                                <p class="auth-panel-subtitle">{{ $locale === 'ne' ? 'IT विभाग व्यवस्थापन प्रणाली' : 'IT Department Management System' }}</p>
+                                <p class="auth-panel-subtitle">{{ $locale === 'ne' ? 'IT विभाग व्यवस्थापन प्रणाली' : 'Manmohan Memorial Polytechnic' }}</p>
                                 <p class="auth-panel-meta">{{ $addressInfo }}</p>
                             </div>
                         </div>
@@ -245,3 +245,4 @@
         </div>
     </div>
 @endsection
+

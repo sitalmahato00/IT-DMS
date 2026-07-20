@@ -2,6 +2,96 @@
 
 @section('title', 'Exam')
 
+@section('styles')
+<script>
+    document.documentElement.classList.add('exam-ui-enhanced');
+</script>
+<style>
+    html.exam-ui-enhanced:not(.dark) .exam-page {
+        color: #0f172a;
+    }
+
+    html.exam-ui-enhanced:not(.dark) #exams-stats > * > div {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        border-color: #f2d7de;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 247, 248, 0.96));
+        box-shadow: 0 24px 48px -34px rgba(190, 24, 93, 0.4);
+    }
+
+    html.exam-ui-enhanced:not(.dark) .exam-filter-panel > *,
+    html.exam-ui-enhanced:not(.dark) .exam-semesters-panel,
+    html.exam-ui-enhanced:not(.dark) .exam-subjects-panel,
+    html.exam-ui-enhanced:not(.dark) .exam-table-panel {
+        border-radius: 28px;
+        border-color: rgba(241, 213, 219, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 250, 250, 0.97));
+        box-shadow: 0 28px 56px -40px rgba(148, 19, 52, 0.34);
+    }
+
+    html.exam-ui-enhanced:not(.dark) .exam-panel-header,
+    html.exam-ui-enhanced:not(.dark) .exam-table-head {
+        background: linear-gradient(180deg, #fff5f7, #fffafb);
+    }
+
+    html.exam-ui-enhanced:not(.dark) .exam-table-row:hover {
+        background: linear-gradient(90deg, rgba(255, 241, 242, 0.74), rgba(255, 255, 255, 0.97));
+    }
+
+    html.exam-ui-enhanced:not(.dark) .exam-chip,
+    html.exam-ui-enhanced:not(.dark) .exam-action-btn,
+    html.exam-ui-enhanced:not(.dark) .exam-toolbar-btn {
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    html.exam-ui-enhanced:not(.dark) .exam-action-btn,
+    html.exam-ui-enhanced:not(.dark) .exam-toolbar-btn {
+        box-shadow: 0 16px 28px -20px rgba(15, 23, 42, 0.4);
+    }
+
+    html.exam-ui-enhanced:not(.dark) #confirmModal > div,
+    html.exam-ui-enhanced:not(.dark) #addAssessmentModal > div,
+    html.exam-ui-enhanced:not(.dark) #viewAssessmentModal > div,
+    html.exam-ui-enhanced:not(.dark) #editExamModal .relative.z-10 > div {
+        border-radius: 30px;
+        border: 1px solid rgba(241, 213, 219, 0.95);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(255, 250, 250, 0.98));
+        box-shadow: 0 34px 70px -38px rgba(15, 23, 42, 0.42);
+        overflow: hidden;
+    }
+
+    html.exam-ui-enhanced:not(.dark) #confirmHeader,
+    html.exam-ui-enhanced:not(.dark) #addAssessmentModal .bg-gradient-to-r,
+    html.exam-ui-enhanced:not(.dark) #viewAssessmentModal .bg-gradient-to-r,
+    html.exam-ui-enhanced:not(.dark) #editExamModal .bg-gradient-to-r {
+        border-bottom: none;
+    }
+
+    html.exam-ui-enhanced:not(.dark) #addAssessmentModal input,
+    html.exam-ui-enhanced:not(.dark) #addAssessmentModal select,
+    html.exam-ui-enhanced:not(.dark) #addAssessmentModal textarea,
+    html.exam-ui-enhanced:not(.dark) #editExamModal input,
+    html.exam-ui-enhanced:not(.dark) #editExamModal select,
+    html.exam-ui-enhanced:not(.dark) #editExamModal textarea {
+        border-radius: 16px;
+        border-color: #e5d4d9;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    html.exam-ui-enhanced:not(.dark) #addAssessmentModal input:focus,
+    html.exam-ui-enhanced:not(.dark) #addAssessmentModal select:focus,
+    html.exam-ui-enhanced:not(.dark) #addAssessmentModal textarea:focus,
+    html.exam-ui-enhanced:not(.dark) #editExamModal input:focus,
+    html.exam-ui-enhanced:not(.dark) #editExamModal select:focus,
+    html.exam-ui-enhanced:not(.dark) #editExamModal textarea:focus {
+        border-color: #f43f5e;
+        box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.12);
+    }
+</style>
+@endsection
+
 @section('content')
 {{-- Page Header - Using standardized component --}}
 @include('admin.components.admin-page-header', [
@@ -12,7 +102,7 @@
     ],
     'addButton' => [
         'label' => 'Add Exam',
-        'onclick' => 'openAddAssessmentModal()',
+        'route' => route('admin.exam.create'),
         'color' => 'green'
     ]
 ])
@@ -42,7 +132,7 @@
     ];
 @endphp
 
-<div class="space-y-4">
+<div class="exam-page space-y-6">
     
 
     <!-- Toast Notification - Uses global toast system from layout -->
@@ -88,6 +178,7 @@
 </div>
 
 {{-- Filter Card - Using standardized component --}}
+<div class="exam-filter-panel">
 @include('admin.components.admin-filter-card', [
     'formAction' => route('admin.exam'),
     'filters' => [
@@ -100,11 +191,12 @@
     'showReset' => true,
     'resetRoute' => route('admin.exam')
 ])
+</div>
 
     {{-- Semester Cards (click to view exams + subjects) --}}
     @if(!empty($semesterCards))
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
-            <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50 flex items-center justify-between gap-3">
+        <div class="exam-semesters-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+            <div class="exam-panel-header px-5 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50 flex items-center justify-between gap-3">
                 <div>
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Semesters</h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Click a semester card to view its exams and subjects</p>
@@ -127,8 +219,8 @@
         </div>
 
         {{-- Selected semester subjects list --}}
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
-            <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50 flex items-center justify-between gap-3">
+        <div class="exam-subjects-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+            <div class="exam-panel-header px-5 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50 flex items-center justify-between gap-3">
                 <div>
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Subjects @if(!empty($selectedSemesterLabel)) — {{ $selectedSemesterLabel }} @endif</h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -145,7 +237,7 @@
                 @if(!empty($selectedSemesterLabel) && isset($selectedSemesterSubjects) && $selectedSemesterSubjects->count() > 0)
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         @foreach($selectedSemesterSubjects as $subject)
-                            <div class="p-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                            <div class="exam-chip p-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                                 <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $subject->subject_name }}</div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                     @if(!empty($subject->subject_code))
@@ -167,16 +259,16 @@
     @endif
 
     <!-- Exam List Table Card with Print and Export -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+    <div class="exam-table-panel bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
         <!-- Table Header with Title and Actions -->
-        <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="exam-panel-header px-5 py-4 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Exam List</h3>
             <div class="flex items-center gap-2">
-                <button onclick="exportTable('csv')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition shadow-sm" title="Export CSV">
+                <button onclick="exportTable('csv')" class="exam-toolbar-btn inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition shadow-sm" title="Export CSV">
                     <i class="bi bi-file-earmark-spreadsheet"></i>
                     <span class="hidden sm:inline">CSV</span>
                 </button>
-                <button onclick="exportTable('excel')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition shadow-sm" title="Export Excel">
+                <button onclick="exportTable('excel')" class="exam-toolbar-btn inline-flex items-center gap-1.5 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition shadow-sm" title="Export Excel">
                     <i class="bi bi-file-earmark-excel"></i>
                     <span class="hidden sm:inline">Excel</span>
                 </button>
@@ -184,8 +276,8 @@
         </div>
 
     <div class="overflow-x-auto">
-        <table class="min-w-full text-left divide-y divide-gray-200 dark:divide-slate-700">
-            <thead class="bg-gray-50 dark:bg-slate-700/50 text-sm font-semibold text-gray-700 dark:text-gray-200">
+        <table class="exam-table min-w-full text-left divide-y divide-gray-200 dark:divide-slate-700">
+            <thead class="exam-table-head bg-gray-50 dark:bg-slate-700/50 text-sm font-semibold text-gray-700 dark:text-gray-200">
                 <tr>
                     <th class="px-4 py-3 text-left">Exam Name</th>
                     <th class="px-4 py-3 text-left">Semester</th>
@@ -199,7 +291,7 @@
             </thead>
             <tbody id="exams-table-body" class="divide-y divide-gray-200 dark:divide-slate-700">
                 @forelse($exams as $exam)
-                <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
+                <tr class="exam-table-row hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors">
                     <td class="px-4 py-4 font-medium text-gray-900 dark:text-gray-100 text-sm">
 {{ $exam->formatted_assessment }} - {{ $exam->exam_name }}
 </td>
@@ -226,7 +318,7 @@
                         <span class="text-gray-600 dark:text-gray-400">{{ $exam->formatted_date_bs }}</span>
                     </td>
                     <td class="px-4 py-4 text-sm">
-                        <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium
+                        <span class="exam-chip inline-block px-2.5 py-0.5 rounded-full text-xs font-medium
                             @if($exam->status=='published') bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
                             @elseif($exam->status=='draft') bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400
                             @else bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300
@@ -236,30 +328,19 @@
                     </td>
                     <td class="px-4 py-4 text-center text-sm">
                         <div class="flex gap-1 justify-center">
-                            <button onclick="openViewAssessmentModal({{ $exam->id }});" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 rounded transition" title="View">
+                            <a href="{{ route('admin.exam.show', $exam->id) }}" class="exam-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-blue-700 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 rounded transition" title="View">
                                 <i class="bi bi-eye"></i>
-                            </button>
-<button onclick="openEditExamModal({{ $exam->id }})" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-yellow-700 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50 rounded transition" title="Edit" id="edit-btn-{{ $exam->id }}">
+                            </a>
+                            <a href="{{ route('admin.exam.edit', $exam->id) }}" class="exam-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-yellow-700 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50 rounded transition" title="Edit">
                                 <i class="bi bi-pencil"></i>
-                            </button>
-                            <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                const btn = document.getElementById('edit-btn-{{ $exam->id }}');
-                                if (btn) {
-                                    btn.addEventListener('click', function(e) {
-                                        e.preventDefault();
-                                        openEditExamModal({{ $exam->id }});
-                                    });
-                                }
-                            });
-                            </script>
-                            <button onclick="toggleExamStatusConfirm({{ $exam->id }}, '{{ $exam->status }}')" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-purple-700 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:hover:bg-purple-900/50 rounded transition" title="Toggle Status">
+                            </a>
+                            <button onclick="toggleExamStatusConfirm({{ $exam->id }}, '{{ $exam->status }}')" class="exam-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-purple-700 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:hover:bg-purple-900/50 rounded transition" title="Toggle Status">
                                 <i class="bi bi-toggle-{{ $exam->status === 'published' ? 'on' : 'off' }}"></i>
                             </button>
-                            <a href="{{ route('admin.exam.show', $exam) }}" onclick="try{ if(typeof showLoading==='function') showLoading(); }catch(e){}" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-green-700 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 rounded transition" title="Upload Marks">
+                            <a href="{{ route('admin.exam.show', $exam) }}" onclick="try{ if(typeof showLoading==='function') showLoading(); }catch(e){}" class="exam-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-green-700 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 dark:hover:bg-green-900/50 rounded transition" title="Upload Marks">
                                 <i class="bi bi-upload"></i>
                             </a>
-                            <button onclick="deleteExam({{ $exam->id }})" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 rounded transition" title="Delete">
+                            <button onclick="deleteExam({{ $exam->id }})" class="exam-action-btn inline-flex items-center gap-1 px-2 py-1 text-xs text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 rounded transition" title="Delete">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -1799,7 +1880,6 @@ function updateCreateExamPracticalFieldsVisibility() {
         registerCreateExamComponentListeners();
     });
 </script>
-<!-- Include shared edit exam modal -->
-@include('admin.partials.edit-exam-modal', ['academicYears' => $academicYears, 'semesters' => $semesters, 'activeSemesters' => ($activeSemesters ?? $semesters)])
 
 @endsection
+

@@ -99,3 +99,4 @@ class NotificationService
         $user->notify(new $notificationClass(...$parameters));
     }
 }
+
