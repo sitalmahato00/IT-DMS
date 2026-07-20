@@ -1,0 +1,29 @@
+{
+  "node_modules/nepali-date-picker/dist/nepaliDatePicker.min.js": {
+    "file": "assets/nepaliDatePicker.min-C_KnCLfZ.js",
+    "name": "nepaliDatePicker.min",
+    "src": "node_modules/nepali-date-picker/dist/nepaliDatePicker.min.js",
+    "isDynamicEntry": true
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-BwNWhDxy.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-DZkZABrK.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "dynamicImports": [
+      "node_modules/nepali-date-picker/dist/nepaliDatePicker.min.js"
+    ],
+    "css": [
+      "assets/app-DP81AQzm.css"
+    ]
+  }
+}
