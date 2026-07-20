@@ -99,8 +99,9 @@ class DepartmentController extends Controller
         $department->fill($validated)->save();
 
         // Clear caches
-        Cache::tags(['department'])->flush();
         Cache::forget('department:shared-current:v1');
+        // Clear all department-related caches
+        Cache::flush();
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -120,7 +121,8 @@ class DepartmentController extends Controller
         if ($department && $department->logo_path && Storage::disk('public')->exists($department->logo_path)) {
             Storage::disk('public')->delete($department->logo_path);
             $department->update(['logo_path' => null]);
-            Cache::tags(['department'])->flush();
+            // Clear all department-related caches
+            Cache::flush();
 
             return response()->json([
                 'success' => true,
