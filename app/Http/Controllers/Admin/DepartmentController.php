@@ -104,14 +104,16 @@ class DepartmentController extends Controller
         Cache::flush();
 
         if ($request->wantsJson() || $request->ajax()) {
+            $department->refresh(); // Reload from database
             return response()->json([
                 'success' => true,
                 'message' => 'Department details updated successfully',
-                'department' => $department->fresh(),
+                'department' => $department,
+                'logo_url' => $department->logo_url,
             ]);
         }
 
-        return redirect()->route('admin.settings')->with('status', 'Department details updated successfully');
+        return redirect()->route('admin.settings')->with('status', 'Department details updated successfully')->with('tab', 'department');
     }
 
     public function deleteLogo()
