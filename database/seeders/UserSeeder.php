@@ -34,7 +34,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Admin User',
                 'email' => 'sitalmahato077@gmail.com',
-            'password' => Hash::make($getPassword('admin')),
+            'password' => Hash::make($getPassword('password')),
                 'role' => 'admin',
                 'phone' => '9841234567',
                 'department' => 'IT',
@@ -49,7 +49,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Dr. Ramesh Poudel',
                 'email' => 'hellogoog94@gmail.com',
-            'password' => Hash::make($getPassword('teacher')),
+            'password' => Hash::make($getPassword('password')),
                 'role' => 'teacher',
                 'phone' => '9847654321',
                 'department' => 'IT',
@@ -72,7 +72,7 @@ class UserSeeder extends Seeder
                 [
                     'name' => $teacher['name'],
                     'email' => $teacher['email'],
-                    'password' => Hash::make($getPassword('teacher')),
+                    'password' => Hash::make($getPassword('password')),
                     'role' => 'teacher',
                     'phone' => $teacher['phone'],
                     'department' => 'IT',
@@ -88,7 +88,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Sital Mahato',
                 'email' => 'itstudentsital@gmail.com',
-            'password' => Hash::make($getPassword('student')),
+            'password' => Hash::make($getPassword('password')),
                 'role' => 'student',
                 'phone' => '9845556789',
                 'department' => 'IT',
@@ -111,7 +111,7 @@ class UserSeeder extends Seeder
                 [
                     'name' => $student['name'],
                     'email' => $student['email'],
-                    'password' => Hash::make($getPassword('student')),
+                    'password' => Hash::make($getPassword('password')),
                     'role' => 'student',
                     'phone' => $student['phone'],
                     'department' => 'IT',
@@ -127,7 +127,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Parent User',
                 'email' => 'sitalmahato00@gmail.com',
-            'password' => Hash::make($getPassword('parent')),
+            'password' => Hash::make($getPassword('password')),
                 'role' => 'parent',
                 'phone' => '9843334444',
                 'department' => 'IT',
@@ -150,7 +150,7 @@ class UserSeeder extends Seeder
                 [
                     'name' => $parent['name'],
                     'email' => $parent['email'],
-                    'password' => Hash::make($getPassword('parent')),
+                    'password' => Hash::make($getPassword('password')),
                     'role' => 'parent',
                     'phone' => $parent['phone'],
                     'department' => 'IT',
