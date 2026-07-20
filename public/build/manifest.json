@@ -6,7 +6,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-BwNWhDxy.css",
+    "file": "assets/app-D34z591k.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -15,15 +15,22 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DZkZABrK.js",
+    "file": "assets/app-CUNXMOpA.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "dynamicImports": [
+      "resources/js/mobile-app.js",
       "node_modules/nepali-date-picker/dist/nepaliDatePicker.min.js"
     ],
     "css": [
       "assets/app-DP81AQzm.css"
     ]
+  },
+  "resources/js/mobile-app.js": {
+    "file": "assets/mobile-app-BS7yl0Dp.js",
+    "name": "mobile-app",
+    "src": "resources/js/mobile-app.js",
+    "isDynamicEntry": true
   }
 }
